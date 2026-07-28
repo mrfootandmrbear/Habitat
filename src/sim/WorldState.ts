@@ -1,6 +1,7 @@
 import { config } from "../config";
 import { Grid2D } from "./Grid2D";
 import { FieldRegistry } from "./registry/FieldRegistry";
+import type { ScalarBox } from "./registry/types";
 import { SimScheduler } from "./process/scheduler";
 import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
@@ -10,6 +11,7 @@ import {
   computeD8Accumulation,
   computeD8FlowDirection,
   computeWatershedLabels,
+  priorityFloodFill,
   type FlowDirection,
 } from "./hydrology/flowRouting";
 import type { HydrologyModel } from "./hydrology/HydrologyModel";
@@ -17,7 +19,7 @@ import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
 
 /**
  * Owns authoritative world fields and the field registry.
- * Structural flow (3), soil (4), vegetation cover (5) live here.
+ * Structural flow (3), soil (4), vegetation (5–6), hygiene (ledgers / bounds).
  */
 export class WorldState {
   readonly width: number;
@@ -36,23 +38,30 @@ export class WorldState {
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
-  /** Derived structural layers (SIMULATION_MODEL §3.9) — authoritative for watershed identity. */
+  /** Derived structural layers (SIMULATION_MODEL §3.9). */
   flowDirection: FlowDirection | null = null;
   flowAccumulation: Uint32Array | null = null;
   watershedLabel: Uint16Array | null = null;
+  /** Filled routing surface (Slice 4b). */
+  filledElevation: Float32Array | null = null;
+  /** Pit depth on routing surface — registered derived field. */
+  readonly depressionDepth: Grid2D;
 
-  /** Cumulative ledgers (SIMULATION_MODEL §3.2, H-004). */
-  precipitationLedger = 0;
-  boundaryOutflowLedger = 0;
-  infiltrationLedger = 0;
-  /** Evapotranspiration sink (SIMULATION_MODEL §8.2 / ledger.et). */
-  etLedger = 0;
+  /** Single-source ledgers (registry ScalarBox). */
+  private readonly precipBox: ScalarBox = { value: 0 };
+  private readonly outflowBox: ScalarBox = { value: 0 };
+  private readonly infilBox: ScalarBox = { value: 0 };
+  private readonly etBox: ScalarBox = { value: 0 };
+  /** Band phase — event steps since last daily (§12). */
+  private readonly bandPhaseBox: ScalarBox = { value: 0 };
+  /** Integer sim-minute clock (SIMULATION_MODEL §6.1). */
+  private readonly simMinutesBox: ScalarBox = { value: 0 };
 
   private readonly delta: Float32Array;
   private readonly hydrology: HeightfieldHydrology;
   private readonly flowRate: number;
   private readonly maxOutflowFraction: number;
-  private eventStepsSinceDaily = 0;
+  private structureDirty = false;
 
   constructor(
     terrain: Grid2D,
@@ -75,6 +84,7 @@ export class WorldState {
       config.infiltrationRate,
     );
     this.vegInfiltrationContribution = new Grid2D(this.width, this.height);
+    this.depressionDepth = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -97,23 +107,84 @@ export class WorldState {
     return this.hydrology;
   }
 
-  stepEvent(dt: number): void {
-    this.scheduler.runBand("event", this, dt);
+  get precipitationLedger(): number {
+    return this.precipBox.value;
+  }
+  set precipitationLedger(v: number) {
+    this.precipBox.value = v;
+  }
 
-    this.eventStepsSinceDaily += 1;
+  get boundaryOutflowLedger(): number {
+    return this.outflowBox.value;
+  }
+  set boundaryOutflowLedger(v: number) {
+    this.outflowBox.value = v;
+  }
+
+  get infiltrationLedger(): number {
+    return this.infilBox.value;
+  }
+  set infiltrationLedger(v: number) {
+    this.infilBox.value = v;
+  }
+
+  get etLedger(): number {
+    return this.etBox.value;
+  }
+  set etLedger(v: number) {
+    this.etBox.value = v;
+  }
+
+  get eventStepsSinceDaily(): number {
+    return this.bandPhaseBox.value;
+  }
+  private set eventStepsSinceDaily(v: number) {
+    this.bandPhaseBox.value = v;
+  }
+
+  get simMinutes(): number {
+    return this.simMinutesBox.value;
+  }
+  private set simMinutes(v: number) {
+    this.simMinutesBox.value = v;
+  }
+
+  /**
+   * Advance one event band tick (config.eventDtMinutes sim-minutes).
+   * `dt` is the flux integrator step within the event (defaults to eventFluxDt).
+   */
+  stepEvent(dt: number = config.eventFluxDt): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
+    this.scheduler.runBand("event", this, dt);
+    this.simMinutes = this.simMinutes + config.eventDtMinutes;
+    this.registry.assertBounds("event");
+
+    this.eventStepsSinceDaily = this.eventStepsSinceDaily + 1;
     if (this.eventStepsSinceDaily >= config.dailyEventSteps) {
       this.eventStepsSinceDaily = 0;
-      this.scheduler.runBand("daily", this, config.dailyEventSteps * dt);
+      this.scheduler.runBand("daily", this, config.minutesPerDay);
+      this.registry.assertBounds("daily");
     }
   }
 
   recomputeFlowStructure(): void {
     const elev = this.terrain.data;
-    this.flowDirection = computeD8FlowDirection(this.width, this.height, elev);
-    this.flowAccumulation = computeD8Accumulation(
+    const { filled, depressionDepth } = priorityFloodFill(
       this.width,
       this.height,
       elev,
+    );
+    this.filledElevation = filled;
+    this.depressionDepth.data.set(depressionDepth);
+    // Route on filled surface so pits spill honestly (H-003).
+    this.flowDirection = computeD8FlowDirection(this.width, this.height, filled);
+    this.flowAccumulation = computeD8Accumulation(
+      this.width,
+      this.height,
+      filled,
       this.flowDirection,
     );
     this.watershedLabel = computeWatershedLabels(
@@ -121,6 +192,18 @@ export class WorldState {
       this.height,
       this.flowDirection,
     );
+  }
+
+  /** Mark structure dirty; recompute at next event step or ensureStructureFresh (§7.2). */
+  markStructureDirty(): void {
+    this.structureDirty = true;
+  }
+
+  ensureStructureFresh(): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
   }
 
   runSurfaceWaterStep(dt: number): void {
@@ -138,7 +221,6 @@ export class WorldState {
       config.baseRoughness,
     );
     this.boundaryOutflowLedger += result.boundaryOutflow;
-    this.syncLedgers();
   }
 
   runSoilWaterStep(_dt: number): void {
@@ -149,7 +231,6 @@ export class WorldState {
     const porosity = config.soilPorosity;
     const et = config.etRate;
 
-    // Owner integrates vegetation contribution (lagged vs this band's veg step).
     for (let i = 0; i < cap.length; i++) {
       cap[i] = config.infiltrationRate + contrib[i]!;
     }
@@ -169,13 +250,8 @@ export class WorldState {
         this.etLedger += evap;
       }
     }
-    this.syncLedgers();
   }
 
-  /**
-   * Grow / decay cover from soil moisture; write roughness + infil contribution.
-   * Does not write water.surfaceDepth. No fixed carrying capacity K (ES-006).
-   */
   runVegetationStep(_dt: number): void {
     const m = this.soilMoisture.data;
     const c = this.vegCover.data;
@@ -209,7 +285,6 @@ export class WorldState {
       added += amountPerCell;
     }
     this.precipitationLedger += added;
-    this.syncLedgers();
   }
 
   resetWater(): void {
@@ -220,14 +295,15 @@ export class WorldState {
     this.infiltrationLedger = 0;
     this.etLedger = 0;
     this.eventStepsSinceDaily = 0;
-    this.syncLedgers();
+    this.simMinutes = 0;
   }
 
-  /**
-   * Closed-basin mass check in current depth units (H-004 / §8.2 simplified).
-   * From empty start: precip = surface + soil + et + boundaryOutflow.
-   * (No Δx² / soil.depth until the metric pass; same relative accounting.)
-   */
+  /** Cell area in m² (Δx²). */
+  cellAreaMeters2(): number {
+    const dx = config.cellSizeMeters;
+    return dx * dx;
+  }
+
   waterBalanceResidual(): number {
     let surface = 0;
     let soil = 0;
@@ -250,24 +326,17 @@ export class WorldState {
     return this.vegCover.get(x, z);
   }
 
-  /**
-   * Raise a berm at a cell (A-005). Edits terrain.elevation owned by WorldState,
-   * then invalidates / recomputes flow structure. Not a wetland stamp.
-   */
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
     this.applyTerrainBrush(cx, cz, amount);
   }
 
-  /**
-   * Dig a channel at a cell (A-005). Lowers terrain.elevation — a cause that
-   * redirects flow; does not place a finished water feature.
-   */
   digChannel(cx: number, cz: number, amount: number = config.digLower): void {
     this.applyTerrainBrush(cx, cz, -amount);
   }
 
   private applyTerrainBrush(cx: number, cz: number, delta: number): void {
     const r = config.sitingBrushRadius;
+    const zFloor = config.elevationFloor;
     for (let z = cz - r; z <= cz + r; z++) {
       for (let x = cx - r; x <= cx + r; x++) {
         if (!this.terrain.inBounds(x, z)) continue;
@@ -275,10 +344,10 @@ export class WorldState {
         if (dist > r + 0.01) continue;
         const falloff = 1 - dist / (r + 1);
         const next = this.terrain.get(x, z) + delta * falloff;
-        this.terrain.set(x, z, Math.max(0, next));
+        this.terrain.set(x, z, Math.max(zFloor, next));
       }
     }
-    this.recomputeFlowStructure();
+    this.markStructureDirty();
   }
 
   stateHash(): string {
@@ -295,6 +364,7 @@ export class WorldState {
         band: "decadal" as const,
         legacy: true,
         data: this.terrain.data,
+        range: [-500, 9000] as const,
       },
       {
         id: "water.surfaceDepth",
@@ -304,6 +374,7 @@ export class WorldState {
         band: "event" as const,
         legacy: false,
         data: this.water.data,
+        range: [0, 50] as const,
       },
       {
         id: "soil.moisture",
@@ -313,6 +384,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.soilMoisture.data,
+        range: [0, config.soilPorosity] as const,
       },
       {
         id: "veg.cover",
@@ -322,6 +394,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.vegCover.data,
+        range: [0, 1] as const,
       },
       {
         id: "surface.roughness",
@@ -331,6 +404,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.surfaceRoughness.data,
+        range: [0.01, 0.3] as const,
       },
       {
         id: "veg.infiltrationContribution",
@@ -340,6 +414,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.vegInfiltrationContribution.data,
+        range: [0, 1] as const,
       },
       {
         id: "soil.infiltrationCapacity",
@@ -349,6 +424,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: true,
         data: this.infiltrationCapacity.data,
+        range: [0, 1] as const,
       },
       {
         id: "ledger.precipitation",
@@ -357,7 +433,8 @@ export class WorldState {
         owner: "climate",
         band: "event" as const,
         legacy: true,
-        data: 0,
+        data: this.precipBox,
+        range: [0, 1e12] as const,
       },
       {
         id: "ledger.boundaryOutflow",
@@ -366,7 +443,8 @@ export class WorldState {
         owner: "surfaceWater",
         band: "event" as const,
         legacy: true,
-        data: 0,
+        data: this.outflowBox,
+        range: [0, 1e12] as const,
       },
       {
         id: "ledger.infiltration",
@@ -375,7 +453,8 @@ export class WorldState {
         owner: "soilWater",
         band: "daily" as const,
         legacy: true,
-        data: 0,
+        data: this.infilBox,
+        range: [0, 1e12] as const,
       },
       {
         id: "ledger.et",
@@ -384,19 +463,40 @@ export class WorldState {
         owner: "soilWater",
         band: "daily" as const,
         legacy: true,
-        data: 0,
+        data: this.etBox,
+        range: [0, 1e12] as const,
+      },
+      {
+        id: "depression.depth",
+        units: "m",
+        shape: "cell" as const,
+        owner: "flowStructure",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.depressionDepth.data,
+        range: [0, 500] as const,
+      },
+      {
+        id: "clock.eventStepsSinceDaily",
+        units: "steps",
+        shape: "scalar" as const,
+        owner: "world",
+        band: "event" as const,
+        legacy: true,
+        data: this.bandPhaseBox,
+        range: [0, config.dailyEventSteps] as const,
+      },
+      {
+        id: "clock.simMinutes",
+        units: "sim-minutes",
+        shape: "scalar" as const,
+        owner: "world",
+        band: "event" as const,
+        legacy: false,
+        data: this.simMinutesBox,
+        range: [0, 1e15] as const,
       },
     ];
     for (const f of fields) this.registry.register(f);
-  }
-
-  private syncLedgers(): void {
-    (this.registry.get("ledger.precipitation") as { data: number }).data =
-      this.precipitationLedger;
-    (this.registry.get("ledger.boundaryOutflow") as { data: number }).data =
-      this.boundaryOutflowLedger;
-    (this.registry.get("ledger.infiltration") as { data: number }).data =
-      this.infiltrationLedger;
-    (this.registry.get("ledger.et") as { data: number }).data = this.etLedger;
   }
 }

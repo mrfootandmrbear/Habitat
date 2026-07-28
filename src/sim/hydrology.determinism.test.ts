@@ -7,7 +7,7 @@ import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
 
 /** Golden depth hash for default rain schedule (T-001). Update when physics intentionally changes. */
-const GOLDEN_DEPTH_HASH = "95d388bb";
+const GOLDEN_DEPTH_HASH = "d3a7164d";
 
 function makeWorld(
   terrain: Grid2D,
@@ -25,8 +25,8 @@ function runSchedule(seed: number): string {
   );
   const world = makeWorld(terrain);
   for (let i = 0; i < config.determinismSteps; i++) {
-    world.addRain(config.rainPerSecond * config.simDt);
-    world.stepEvent(config.simDt);
+    world.addRain(config.rainDepthPerEvent);
+    world.stepEvent();
   }
   return hashFloat32Buffer(world.water.data);
 }
@@ -79,8 +79,8 @@ describe("heightfield hydrology (T-001)", () => {
     }
 
     for (let i = 0; i < 180; i++) {
-      world.addRain(0.03 * config.simDt);
-      world.stepEvent(config.simDt);
+      world.addRain(config.rainDepthPerEvent * 0.4);
+      world.stepEvent();
     }
 
     const basinDepth = model.getWaterDepth(basinX, basinZ);
@@ -92,7 +92,7 @@ describe("heightfield hydrology (T-001)", () => {
   it("runs headlessly without a renderer", () => {
     const world = makeWorld(generateMountain(32, 32, 8, 1));
     world.addRain(0.1);
-    world.stepEvent(config.simDt);
+    world.stepEvent();
     expect(world.water.data.length).toBe(32 * 32);
   });
 });

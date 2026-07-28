@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { config } from "../config";
 import { totalWaterVolume } from "./hydrology/fluxStep";
 import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
@@ -27,6 +26,7 @@ describe("terrain siting (Slice 5b, A-005)", () => {
     const world = new WorldState(generateMountain(24, 24, 6, 5));
     const before = world.flowAccumulation!.slice();
     world.raiseBerm(8, 8, 2);
+    world.ensureStructureFresh();
     const after = world.flowAccumulation!;
     let changed = false;
     for (let i = 0; i < before.length; i++) {
@@ -43,7 +43,7 @@ describe("terrain siting (Slice 5b, A-005)", () => {
     world.water.fill(0.2);
     const initial = totalWaterVolume(world.water.data);
     world.digChannel(8, 8);
-    for (let i = 0; i < 20; i++) world.stepEvent(config.simDt);
+    for (let i = 0; i < 20; i++) world.stepEvent();
     expect(totalWaterVolume(world.water.data)).toBeLessThanOrEqual(
       initial + 1e-3,
     );

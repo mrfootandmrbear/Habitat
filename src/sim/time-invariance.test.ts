@@ -28,8 +28,8 @@ function runWithTimeScale(
   while (steps < targetSteps) {
     const { stepsRun } = clock.tick(config.simDt);
     for (let i = 0; i < stepsRun; i++) {
-      world.addRain(config.rainPerSecond * config.simDt);
-      world.stepEvent(config.simDt);
+      world.addRain(config.rainDepthPerEvent);
+      world.stepEvent();
       steps += 1;
       if (steps >= targetSteps) break;
     }
@@ -81,6 +81,9 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
     const world = new WorldState(generateMountain(16, 16, 8, 2));
     const ids = world.registry.list().map((f) => f.id);
     expect(ids).toEqual([
+      "clock.eventStepsSinceDaily",
+      "clock.simMinutes",
+      "depression.depth",
       "ledger.boundaryOutflow",
       "ledger.et",
       "ledger.infiltration",

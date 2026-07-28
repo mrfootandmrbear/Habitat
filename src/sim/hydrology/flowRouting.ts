@@ -1,6 +1,6 @@
 /**
- * D8 flow direction and contributing area (SIMULATION_MODEL §3.9, H-002).
- * Routing surface is terrain elevation; structure.obstructionHeight deferred.
+ * D8 flow direction, contributing area, and Priority-Flood fill
+ * (SIMULATION_MODEL §3.9, H-002, H-003 / Slice 4b).
  */
 
 const D8_DX = [-1, 0, 1, -1, 1, -1, 0, 1] as const;
@@ -9,6 +9,101 @@ const D8_DZ = [-1, -1, -1, 0, 0, 1, 1, 1] as const;
 /** -1 = no downslope neighbor (sink). Otherwise D8 direction index. */
 export type FlowDirection = Int8Array;
 
+/**
+ * Priority-flood depression fill (ε-style spill). Returns filled elevation;
+ * depression depth is filled − original (clamped ≥ 0).
+ */
+export function priorityFloodFill(
+  width: number,
+  height: number,
+  elevation: Float32Array,
+): { filled: Float32Array; depressionDepth: Float32Array } {
+  const n = width * height;
+  const filled = new Float32Array(n);
+  filled.set(elevation);
+  const depressionDepth = new Float32Array(n);
+  const visited = new Uint8Array(n);
+
+  type Node = { i: number; h: number };
+  const heap: Node[] = [];
+  const less = (a: Node, b: Node): boolean =>
+    a.h !== b.h ? a.h < b.h : a.i < b.i;
+
+  const siftUp = (idx: number): void => {
+    while (idx > 0) {
+      const p = (idx - 1) >> 1;
+      if (!less(heap[idx]!, heap[p]!)) break;
+      const tmp = heap[idx]!;
+      heap[idx] = heap[p]!;
+      heap[p] = tmp;
+      idx = p;
+    }
+  };
+  const siftDown = (idx: number): void => {
+    for (;;) {
+      let m = idx;
+      const l = idx * 2 + 1;
+      const r = l + 1;
+      if (l < heap.length && less(heap[l]!, heap[m]!)) m = l;
+      if (r < heap.length && less(heap[r]!, heap[m]!)) m = r;
+      if (m === idx) break;
+      const tmp = heap[idx]!;
+      heap[idx] = heap[m]!;
+      heap[m] = tmp;
+      idx = m;
+    }
+  };
+  const push = (node: Node): void => {
+    heap.push(node);
+    siftUp(heap.length - 1);
+  };
+  const pop = (): Node => {
+    const top = heap[0]!;
+    const last = heap.pop()!;
+    if (heap.length > 0) {
+      heap[0] = last;
+      siftDown(0);
+    }
+    return top;
+  };
+
+  // Seed open boundary (edge cells drain off-map / spill).
+  for (let z = 0; z < height; z++) {
+    for (let x = 0; x < width; x++) {
+      if (x === 0 || z === 0 || x === width - 1 || z === height - 1) {
+        const i = z * width + x;
+        visited[i] = 1;
+        push({ i, h: elevation[i]! });
+      }
+    }
+  }
+
+  while (heap.length > 0) {
+    const { i, h } = pop();
+    const x = i % width;
+    const z = (i / width) | 0;
+    for (let d = 0; d < 8; d++) {
+      const nx = x + D8_DX[d]!;
+      const nz = z + D8_DZ[d]!;
+      if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+      const ni = nz * width + nx;
+      if (visited[ni]) continue;
+      visited[ni] = 1;
+      const raw = elevation[ni]!;
+      const nextH = raw < h ? h : raw;
+      filled[ni] = nextH;
+      depressionDepth[ni] = nextH - raw;
+      push({ i: ni, h: nextH });
+    }
+  }
+
+  return { filled, depressionDepth };
+}
+
+/**
+ * D8 on a routing surface. Flat resolution: among non-uphill neighbors,
+ * pick steepest drop; ties broken by neighbor index (deterministic).
+ */
 export function computeD8FlowDirection(
   width: number,
   height: number,
@@ -22,16 +117,21 @@ export function computeD8FlowDirection(
     for (let x = 0; x < width; x++) {
       const i = z * width + x;
       const h = elevation[i]!;
-      let bestDrop = 0;
+      let bestScore = -Infinity;
       let bestDir = -1;
 
       for (let d = 0; d < 8; d++) {
         const nx = x + D8_DX[d]!;
         const nz = z + D8_DZ[d]!;
         if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
-        const drop = h - elevation[nz * width + nx]!;
-        if (drop > bestDrop) {
-          bestDrop = drop;
+        const ni = nz * width + nx;
+        const nh = elevation[ni]!;
+        if (nh > h) continue; // uphill only forbidden
+        const drop = h - nh;
+        // Tiny index bias resolves flats without inventing cliffs.
+        const score = drop * 1e6 - ni;
+        if (score > bestScore) {
+          bestScore = score;
           bestDir = d;
         }
       }
@@ -50,7 +150,6 @@ export function computeD8Accumulation(
 ): Uint32Array {
   const n = width * height;
   const order = Array.from({ length: n }, (_, i) => i);
-  // Descending elevation; index tie-break for determinism (§7.2).
   order.sort((a, b) => {
     const dh = elevation[b]! - elevation[a]!;
     return dh !== 0 ? dh : a - b;

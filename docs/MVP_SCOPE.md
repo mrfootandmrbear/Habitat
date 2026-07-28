@@ -138,6 +138,7 @@ Before investing in Slice 5 vegetation, run [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4
 | **This file (MVP_SCOPE)** | Which loops are in/out of first playable; joint slice map |
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | How sim interdependencies are represented |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | How we know a register entry is earned |
+| [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim — agent vs. owner — and the gate before any playtest request |
 | [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) | External tools to study, not ship |
 | [BUILD_GUIDE.md](BUILD_GUIDE.md) | Per-slice execution checklists |
 | PLAYER_INTERACTION_SPEC.md | Detailed verbs and prediction UX (not yet written) |

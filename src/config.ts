@@ -1,38 +1,80 @@
 /** Tunable settings for the Habitat reference prototype (T-007). */
 export const config = {
   gridSize: 96,
+  /**
+   * Visual scene half-extent in Three.js units (camera / mesh scale).
+   * Independent of Δx — do not tune physical rates against this.
+   */
   worldSize: 48,
+  /** Δx — cell edge length in metres (SIMULATION_MODEL §2). */
+  cellSizeMeters: 10,
+  /** Metric world extent (gridSize × Δx). */
+  worldExtentMeters: 960,
   mountainPeak: 14,
+  /** Preserve elevation floor — not a drainage law (§2). Digs clamp here. */
+  elevationFloor: 0,
+
+  /**
+   * Integer sim-minute clock (SIMULATION_MODEL §6.1 / §6.5 option 1).
+   * Event Δt = 15 sim-minutes → 96 event steps / day.
+   */
+  eventDtMinutes: 15,
+  minutesPerDay: 1440,
+  dailyEventSteps: 96,
+
+  /**
+   * Wall-clock seconds per event step at 1× (presentation only; S-009).
+   * Alias kept as `simDt` for SimClock.
+   */
+  wallSecondsPerEventStep: 1 / 60,
+  /** @deprecated Use wallSecondsPerEventStep — presentation cadence only. */
   simDt: 1 / 60,
+
   maxStepsPerFrame: 5,
-  flowRate: 2.5,
+
+  /**
+   * Flux integrator Δt within one event step (normalized).
+   * With event Δt = 15 min, rates below are retuned so one event ≈ prior
+   * daily hydrograph slice (was 360×(1/60) frame-ish steps).
+   */
+  eventFluxDt: 1,
+  fluxSubsteps: 1,
+
+  /**
+   * Retuned for 15-min events (Phase D metric pass).
+   * Prior: flowRate 2.5 × dt 1/60 per event; ~360 events/day.
+   * Now: ~0.156 × dt 1 per event; 96 events/day (similar daily transport).
+   */
+  flowRate: 0.156,
   maxOutflowFraction: 0.5,
   dryEpsilon: 1e-4,
-  rainPerSecond: 0.02,
+  /** Depth (m) added per cell per rainy event step. */
+  rainDepthPerEvent: 0.00125,
+  /** @deprecated Prefer rainDepthPerEvent. */
+  rainPerSecond: 0.075,
+
   terrainSeed: 42,
+  /**
+   * Determinism schedule length — must exceed dailyEventSteps so T-001
+   * crosses a daily band (soil / ET / veg).
+   */
   determinismSteps: 120,
-  /** Event steps between daily soil-water updates (Slice 4). */
-  dailyEventSteps: 360,
+
   soilPorosity: 0.45,
-  /** Base infiltration when bare (also soil.infiltrationCapacity init). */
+  /** Per daily band (absolute; soil step ignores integrator dt). */
   infiltrationRate: 0.08,
   etRate: 0.012,
-  /** Slice 5 — cover growth from soil moisture (no fixed K). */
   vegGrowthRate: 0.12,
   vegDecayRate: 0.03,
   vegMoistureThreshold: 0.04,
-  /** Slice 6 — Manning-like roughness; bare matches prior flow feel. */
   baseRoughness: 0.03,
   vegRoughnessBonus: 0.12,
-  /** Extra infiltration capacity at full cover (soil owner integrates). */
   vegInfiltrationBonus: 0.1,
-  /** Slice 5b siting brush (A-005 — cause, not outcome). */
   sitingBrushRadius: 1,
   bermRaise: 0.85,
   digLower: 0.65,
-  /** Slice 5a prediction (P-006) — wet if depth exceeds this. */
   predictionWetThreshold: 0.01,
-  /** Steps after commit before auto-compare. */
+  /** Horizon in event steps (~45 sim-hours at 15 min/event). */
   predictionHorizonSteps: 180,
 } as const;
 
@@ -42,7 +84,8 @@ export type InspectorLayer =
   | "accumulation"
   | "watershed"
   | "soilMoisture"
-  | "vegetation";
+  | "vegetation"
+  | "depression";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict";

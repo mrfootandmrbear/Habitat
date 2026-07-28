@@ -9,7 +9,7 @@ export const surfaceWaterProcess: Process = {
   band: "event",
   reads: ["terrain.elevation", "surface.roughness"],
   lagged: ["surface.roughness"],
-  writes: ["water.surfaceDepth"],
+  writes: ["water.surfaceDepth", "ledger.boundaryOutflow"],
   step(world, dt) {
     world.runSurfaceWaterStep(dt);
   },

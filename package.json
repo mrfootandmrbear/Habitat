@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "probe": "tsx scripts/probe.ts",
     "conformance": "tsx scripts/generate-conformance-ledger.ts",
     "conformance:check": "tsx scripts/generate-conformance-ledger.ts --check"
   },

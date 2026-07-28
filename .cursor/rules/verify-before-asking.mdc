@@ -1,0 +1,41 @@
+---
+description: Verify empirically yourself; ask the owner to playtest only for attention, legibility, and taste
+alwaysApply: true
+---
+
+# Verify it yourself before asking the owner to play
+
+Full policy: `docs/VERIFICATION_POLICY.md`. This rule is the operative summary.
+
+**The test:** if the answer is a number, or a comparison of numbers, **you** settle it. If the answer is a preference, a feeling, or a judgment about what a human notices, the **owner** settles it.
+
+T-006 says the simulation runs headlessly. That is your license: any claim about authoritative state is yours to prove, and asking the owner to confirm one is a process defect.
+
+## You verify (never ask)
+
+Conservation and mass balance · determinism and golden hashes · `dt` / time-rate invariance (S-009) · write isolation for observers (P-006, T-006) · bounds and NaN · monotonicity and causal direction · paired-scenario deltas (bare vs. vegetated, before vs. after a berm) · routing and accumulation changes · spill elevation and basin residual · step timing.
+
+Write a test or a probe. Report the numbers.
+
+## You measure first, then maybe ask
+
+"Is the difference big enough to notice?" is not a question for the owner until you have shown the signal exists — in the data *and* in the visual encoding. If it is too subtle, retune and re-measure. Do not spend an owner session to collect a `Hold` you could have predicted.
+
+## The owner answers only these
+
+Did your eye want to follow it (D-006) · did you form an expectation and care whether it was right (P-006) · would a stranger call this a cause or an outcome (A-005, N-001) · does it feel like a place worth tending (D-005) · do you want to keep playing, and what would raise it a point (MVP_SCOPE §6).
+
+## Ask gate — all four, or keep working
+
+1. `npm test`, `npm run build`, `npm run conformance:check` green.
+2. Every machine-verifiable claim for the slice is covered by a committed test/probe and you can state the numbers.
+3. Every "is it noticeable" claim has a green proxy measurement.
+4. You can write the owner-only question in **one sentence containing no number**.
+
+Fails 4 → it was your job. Slices with no owner-only question (infrastructure, hygiene, perf, refactor) get **no** playtest request; they batch until the next slice that changes what the world looks like or what the player can do.
+
+## Request format
+
+Write `docs/playtests/<slice>.md` using the template in `docs/VERIFICATION_POLICY.md` §5. Mandatory: one question · a hard time box · numbered unambiguous steps with exact control names, no options or open choices · an **"Already proven — do not check these"** block with the numbers · a binary verdict phrased about what the owner noticed, not about whether the sim works · a `Hold` branch that names what you will change.
+
+**Never** ask the owner to read a value off the HUD, reload to A/B two configurations, confirm a passing test, or "play around and see what you think".

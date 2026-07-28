@@ -1,4 +1,4 @@
-/** Timescale band (SIMULATION_MODEL §6). Slice 2 registers the event band only. */
+/** Timescale band (SIMULATION_MODEL §6). */
 export type TimescaleBand =
   | "event"
   | "daily"
@@ -8,6 +8,9 @@ export type TimescaleBand =
 
 export type FieldShape = "cell" | "scalar";
 
+/** Mutable scalar box — registry and WorldState share one source of truth. */
+export type ScalarBox = { value: number };
+
 export type FieldDef = {
   id: string;
   units: string;
@@ -15,11 +18,13 @@ export type FieldDef = {
   owner: string;
   band: TimescaleBand;
   legacy: boolean;
+  /** Inclusive [min, max] for §8.1 bounds checks. */
+  range?: readonly [number, number];
 };
 
 export type ScalarField = FieldDef & {
   shape: "scalar";
-  data: number;
+  data: ScalarBox;
 };
 
 export type CellField = FieldDef & {

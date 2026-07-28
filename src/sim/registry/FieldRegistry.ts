@@ -1,7 +1,7 @@
 import { hashFloat32Buffer } from "../hash";
 import type { RegisteredField } from "./types";
 
-/** Registry-driven state hashing (SIMULATION_MODEL §9, T-001). */
+/** Registry-driven state hashing and bounds (SIMULATION_MODEL §8.1, §9). */
 export class FieldRegistry {
   private readonly fields = new Map<string, RegisteredField>();
 
@@ -24,6 +24,35 @@ export class FieldRegistry {
     );
   }
 
+  /**
+   * Fail hard on NaN or out-of-range cell values (§8.1).
+   * Scalars with range are also checked.
+   */
+  assertBounds(context = "band commit"): void {
+    for (const field of this.list()) {
+      if (!field.range) continue;
+      const [lo, hi] = field.range;
+      if (field.shape === "scalar") {
+        const v = field.data.value;
+        if (!Number.isFinite(v) || v < lo || v > hi) {
+          throw new Error(
+            `Bounds/NaN (${context}): ${field.id}=${v} not in [${lo}, ${hi}]`,
+          );
+        }
+        continue;
+      }
+      const data = field.data;
+      for (let i = 0; i < data.length; i++) {
+        const v = data[i]!;
+        if (!Number.isFinite(v) || v < lo || v > hi) {
+          throw new Error(
+            `Bounds/NaN (${context}): ${field.id}[${i}]=${v} not in [${lo}, ${hi}]`,
+          );
+        }
+      }
+    }
+  }
+
   /** FNV-1a over every registered field in id order. */
   hashState(): string {
     let hash = 0x811c9dc5;
@@ -32,7 +61,7 @@ export class FieldRegistry {
       if (field.shape === "cell") {
         hash = mixString(hash, hashFloat32Buffer(field.data));
       } else {
-        hash = mixString(hash, field.data.toString());
+        hash = mixString(hash, field.data.value.toString());
       }
     }
     return (hash >>> 0).toString(16).padStart(8, "0");

@@ -154,6 +154,12 @@ export class TerrainMesh {
         col.copy(BASE).lerp(VEG, t);
         break;
       }
+      case "depression": {
+        const depth = world.depressionDepth.data[idx] ?? 0;
+        const t = Math.min(1, depth / 4);
+        col.setRGB(0.15 + 0.2 * t, 0.35 + 0.25 * t, 0.55 + 0.35 * t);
+        break;
+      }
       default:
         col.copy(BASE);
     }

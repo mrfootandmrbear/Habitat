@@ -10,7 +10,7 @@ describe("soil water storage (Slice 4, H-001, H-003)", () => {
     world.water.fill(0.2);
 
     for (let i = 0; i < config.dailyEventSteps; i++) {
-      world.stepEvent(config.simDt);
+      world.stepEvent();
     }
 
     let soilSum = 0;
@@ -27,10 +27,10 @@ describe("soil water storage (Slice 4, H-001, H-003)", () => {
     for (let cycle = 0; cycle < 2; cycle++) {
       for (let i = 0; i < 40; i++) {
         world.addRain(0.04);
-        world.stepEvent(config.simDt);
+        world.stepEvent();
       }
       for (let i = 0; i < config.dailyEventSteps; i++) {
-        world.stepEvent(config.simDt);
+        world.stepEvent();
       }
     }
 
@@ -53,8 +53,8 @@ describe("mass conservation with ET (H-004, §8.2)", () => {
     const steps = config.dailyEventSteps * 3; // three daily boundaries
 
     for (let i = 0; i < steps; i++) {
-      world.addRain(config.rainPerSecond * config.simDt);
-      world.stepEvent(config.simDt);
+      world.addRain(config.rainDepthPerEvent);
+      world.stepEvent();
     }
 
     expect(world.etLedger).toBeGreaterThan(0);

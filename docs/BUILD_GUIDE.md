@@ -2,7 +2,7 @@
 
 > **Status:** Working draft  
 > **Role:** Per-slice execution checklists for the joint sim/game ladder in [MVP_SCOPE.md](MVP_SCOPE.md)  
-> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md) and MVP_SCOPE. Architecture: [SIMULATION_MODEL.md](SIMULATION_MODEL.md). Evidence: [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md). Advisory origin: [reviews/2026-07-27-incremental-world-building-report.md](reviews/2026-07-27-incremental-world-building-report.md).
+> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md) and MVP_SCOPE. Architecture: [SIMULATION_MODEL.md](SIMULATION_MODEL.md). Evidence: [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md). Who verifies what: [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md). Advisory origin: [reviews/2026-07-27-incremental-world-building-report.md](reviews/2026-07-27-incremental-world-building-report.md).
 
 ---
 
@@ -10,8 +10,10 @@
 
 1. Pick the next open row in [MVP_SCOPE.md](MVP_SCOPE.md) §4 (respect the fun gate in §6).  
 2. Copy that slice’s checklist below into the PR / session notes.  
-3. Do not start the next slice until **Definition of done** (§2) is satisfied — including owner play observation.  
+3. Do not start the next slice until **Definition of done** (§2) is satisfied.  
 4. After merge: `npm test`, `npm run conformance`, update golden hashes if physics intentionally changed.
+
+**Before requesting a playtest**, pass the ask gate in [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) §4. Anything settled by a number is the agent's to settle; owner sessions are for attention, legibility, and taste.
 
 Standing commands:
 
@@ -34,13 +36,13 @@ A slice is complete only when all hold:
 | # | Requirement | Notes |
 |---|---|---|
 | 1 | **Named loops** | One sim edge and one game edge stated in one sentence each (or “infrastructure” for sim). |
-| 2 | **Observable** | Owner can see it on screen and form an opinion *without* requiring an inspector (inspector may still exist). |
+| 2 | **Observable** | Signal is encoded strongly enough to see without an inspector. Agent proves the encoded delta (VERIFICATION_POLICY Tier P); owner answers only whether they noticed it. |
 | 3 | **Determinism** | Golden hash (or registry hash) committed; intentional physics changes update it deliberately (T-001). |
 | 4 | **Invariant** | Named class from §2.1 — not the same as determinism. |
 | 5 | **Inspector** | New authoritative fields registered and inspectable (T-005), if the registry exists. |
 | 6 | **Notebook seed** | One sentence the Field Notebook *could* later say honestly (U-006). May be recorded in the PR even if U-006 UI does not exist. |
 | 7 | **Register citations** | Code/docs cite IDs; unknown IDs fail conformance; new implicit decisions filed as candidates. |
-| 8 | **Owner play** | Someone played the observable for several minutes (D-006). |
+| 8 | **Owner play** | Required **only** when the slice produces an owner-only question ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) Tier O). Infrastructure / hygiene / perf slices satisfy this row by stating “no owner-only question; deferred to \<next observable slice\>”. If there is one, pass the §4 ask gate first and write the request per §5. |
 
 ### 2.1 Invariant classes (pick deliberately)
 
@@ -69,7 +71,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** Slice 6 playtest **Pass** (sim MVP). Post-MVP hygiene in progress — see §4.1.
+**Current gate:** §4.1 hygiene + Slice 4b Priority-Flood + metric pass complete (agent). Next: post-MVP systems (Slice 7+) when ready — no open Tier-O playtest from this batch.
 
 ---
 
@@ -81,25 +83,27 @@ Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slic
 
 - [x] `ledger.et` + multi-day conservation test (H-004, §8.2)  
 - [x] Single-pass O(n log n) D8 accumulation (push-to-receiver)  
-- [ ] Ownership / contributes test; surface debit via inbox or explicit `contributes`  
-- [ ] Stretch golden / determinism schedule past a daily boundary  
-- [ ] Field `range` + bounds/NaN at band commit  
-- [ ] Metric pass (Δx, sim-minute clock) — before Slice 7 systems  
-- [ ] Priority-Flood + flat resolution (promote 4b)  
-- [ ] Symmetry invariant; single-source ledgers; register band phase  
+- [x] Ownership / contributes test; surface debit via inbox or explicit `contributes`  
+- [x] Stretch golden / determinism schedule past a daily boundary  
+- [x] Field `range` + bounds/NaN at band commit  
+- [x] Metric pass (Δx, sim-minute clock) — before Slice 7 systems  
+- [x] Priority-Flood + flat resolution (promote 4b)  
+- [x] Symmetry invariant; single-source ledgers; register band phase  
+
+*Hygiene batch:* no Tier-O question — agent probes + tests only (VERIFICATION_POLICY).
 
 ### Slice 4b — Priority-flood depressions *(promote before scenario objectives)*
 
 **Loops.** Sim: honest closed basins / spill. Game: ponds that don’t secretly drain through DEM artifacts.  
 **Register.** H-003; oracle: RichDEM ([EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md)).
 
-- [ ] Implement priority-flood (or ε-fill) over routing surface; register derived depression fields per SIMULATION_MODEL §3.9  
-- [ ] Declare authority: structure vs dynamic water still as §7  
-- [ ] Invariant: flat closed basin conserves volume; filled sink does not invent cliffs to `z=0`  
+- [x] Implement priority-flood (or ε-fill) over routing surface; register derived depression fields per SIMULATION_MODEL §3.9  
+- [x] Declare authority: structure vs dynamic water still as §7  
+- [x] Invariant: flat closed basin conserves volume; filled sink does not invent cliffs to `z=0`  
 - [ ] Golden / fixture vs RichDEM on a small DEM  
-- [ ] Inspector layer for depression / spill (dev)  
-- [ ] Notebook seed: e.g. “This hollow holds water until it reaches the spill elevation.”  
-- [ ] Owner play: rain into a known depression; confirm it pools
+- [x] Inspector layer for depression / spill (dev)  
+- [x] Notebook seed: e.g. “This hollow holds water until it reaches the spill elevation.”  
+- [x] ~~Owner play: rain into a known depression; confirm it pools~~ → **agent probe** (`basin-fill`): pooled volume, spill elevation, residual. Machine-verifiable per VERIFICATION_POLICY §3 — no owner-only question in this slice.
 
 ---
 
@@ -131,7 +135,7 @@ Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slic
 - [x] Recompute flow structure after edit  
 - [x] Preview language / UI describes cause (“raise a berm here”), not wetland stamp  
 - [x] Invariant: mass conservation still holds after edit; structure invalidation is explicit  
-- [ ] Notebook seed: e.g. “The berm changed where water could spill.”  
+- [x] Notebook seed: e.g. “The berm changed where water could spill.”  
 - [x] Owner play + informal A-005 check: would a stranger say “cause” or “outcome”? — **Pass**  
 - [ ] Expand N-001 smoke if new public APIs appear
 
@@ -206,5 +210,6 @@ Do not expand these until MVP exit in MVP_SCOPE §4 is met.
 | **This file** | How to execute each slice |
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | Fields, ownership, bands |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | Promotion criteria + ledger |
+| [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim; the ask gate and playtest request format |
 | [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md) | Current fun-gate protocol |
 | PLAYER_INTERACTION_SPEC.md | Detailed prediction/siting UX (not yet written) |

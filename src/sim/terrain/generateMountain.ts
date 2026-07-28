@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { Grid2D } from "../Grid2D";
 
 function mulberry32(seed: number): () => number {
@@ -45,7 +46,7 @@ export function generateMountain(
       let h = peakHeight * (radial * radial * (3 - 2 * radial));
       const gullyMask = Math.exp(-((dx * 8) ** 2)) * Math.max(0, dz);
       h -= peakHeight * 0.12 * gullyMask;
-      terrain.set(x, z, Math.max(0, h));
+      terrain.set(x, z, Math.max(config.elevationFloor, h));
     }
   }
 
@@ -76,7 +77,10 @@ export function generateMountain(
         terrain.set(
           x,
           z,
-          Math.max(0, terrain.get(x, z) + gaussian(x, z, b.cx, b.cz, b.sigma, b.amp)),
+          Math.max(
+            config.elevationFloor,
+            terrain.get(x, z) + gaussian(x, z, b.cx, b.cz, b.sigma, b.amp),
+          ),
         );
       }
     }
@@ -92,7 +96,10 @@ export function generateMountain(
         terrain.set(
           x,
           z,
-          Math.max(0, terrain.get(x, z) + gaussian(x, z, bx, bz, sigma, amp)),
+          Math.max(
+            config.elevationFloor,
+            terrain.get(x, z) + gaussian(x, z, bx, bz, sigma, amp),
+          ),
         );
       }
     }

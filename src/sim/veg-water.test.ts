@@ -63,8 +63,8 @@ describe("vegetation → water (Slice 6, E-005)", () => {
     }
 
     for (let i = 0; i < 40; i++) {
-      bare.runSurfaceWaterStep(config.simDt);
-      vegetated.runSurfaceWaterStep(config.simDt);
+      bare.runSurfaceWaterStep(config.eventFluxDt);
+      vegetated.runSurfaceWaterStep(config.eventFluxDt);
     }
 
     const bareDownslope = bare.water.get(15, 4);
@@ -78,7 +78,7 @@ describe("vegetation → water (Slice 6, E-005)", () => {
     setCover(world, 0.8);
     world.water.fill(0.25);
     const initial = totalWaterVolume(world.water.data);
-    for (let i = 0; i < 30; i++) world.runSurfaceWaterStep(config.simDt);
+    for (let i = 0; i < 30; i++) world.runSurfaceWaterStep(config.eventFluxDt);
     expect(totalWaterVolume(world.water.data)).toBeCloseTo(initial, 5);
   });
 

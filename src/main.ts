@@ -158,6 +158,7 @@ canvas.addEventListener("pointerup", (e) => {
 let lastFrame = performance.now();
 
 function syncMeshes(): void {
+  world.ensureStructureFresh();
   terrainMesh.updateFrom(model, world, inspector, prediction.overlayClassify());
   waterMesh.updateFrom(model);
 }
@@ -185,9 +186,9 @@ function frame(now: number): void {
   const { stepsRun } = clock.tick(wallDt);
   for (let i = 0; i < stepsRun; i++) {
     if (raining) {
-      model.addRain(config.rainPerSecond * config.simDt);
+      model.addRain(config.rainDepthPerEvent);
     }
-    world.stepEvent(config.simDt);
+    world.stepEvent();
     steps += 1;
   }
 
