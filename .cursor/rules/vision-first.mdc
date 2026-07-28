@@ -24,6 +24,17 @@ build the form → choose the forces → run time → look → change the forces
 - **Running time is the instrument**, not a convenience. Fast-forward is the tide coming in.
 - **Then run it again differently.** Same castle, more rain (C-005).
 
+## The contract: the player's real-world intuition is the instrument
+
+**The thing being tested is what the player already knows about how the world works.** Water runs downhill and pools; sand drains, clay holds; a bare steep slope goes first; plants take where it stays damp. Habitat must be honest enough that you can **bet on what you already know and find out if you were right**.
+
+That is why the simulation is realistic — not fidelity for its own sake. Realism is what makes everyday intuition a *valid instrument*. Consequences (**C-011**, THESIS §2.2):
+
+- **No invented materials or forces.** Every substrate and dial needs a real-world referent (N-004).
+- **No physics tutorial.** If the world has to teach how water moves, either the encoding is failing or the model is doing something unreal.
+- **Surprise must resolve into "oh — the ground was already saturated,"** never into "that's just how this game works" (S-004).
+- **This is the opposite of falling-sand games.** They are learned from the inside — mastering *their* invented rules is the pleasure. Habitat rewards the rules you already have. Sand is not the point; *shapable, real substrates, adjustable forces* is the point.
+
 ## The two payoffs
 
 1. **Nature takes what you built** — berms slump, channels incise, pools silt. Already implemented (Slice 8) and still invisible to a player.

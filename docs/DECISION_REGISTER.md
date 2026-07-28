@@ -1343,6 +1343,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Leading direction.** Yes, but not before **C-009** — substance and substrate are one design, and a material table that cannot carry a mobile quantity would have to be rebuilt. Deliberately deferred until scenarios are near; recorded now so the substrate work does not foreclose it.
 
+### C-011 — Real-world intuition is the instrument
+**Status:** Open
+
+**Question.** Is it a binding constraint that **every substrate, force, and mechanic have a real-world referent a person can reason about without instruction** — so that the player's existing understanding of how water, soil, slope, and plants behave is the tool they play with, rather than a rule set learned from inside the game? ([THESIS.md](THESIS.md) §2.2.)
+
+**Why it is not already covered.** N-004 bans *arbitrary hidden* rules and S-004 requires explainability, but both are stated from the world's side — the rule must be inspectable and non-capricious. This entry states the same requirement from the **player's** side: a rule can be perfectly inspectable and still be something nobody could have anticipated, which breaks the contract just as thoroughly. U-002 permits simplifying presentation but not ecological truth; this explains *why* that line sits where it does.
+
+**Constraints.** Applies to mechanics, not to presentation — stylisation is free (ART-001, U-002). It does not require quantitative accuracy: intuition is directional (*water goes there*, *that slope goes first*), so the obligation is that the **direction** of every outcome be reasonable from ordinary experience, not that the numbers match a field measurement. It must not become an argument for higher fidelity everywhere (GEO-002 earn-its-cost) — a simpler model that preserves direction serves this entry better than a complex one that obscures it.
+
+**Leading direction.** Yes, binding. The strongest single consequence: **no invented materials or forces**, and no mechanic whose behavior must be taught before it can be predicted. Not Locked until an unfamiliar viewer demonstrates it — see DECISION_CONFORMANCE §3, which reuses P-006's behavioral apparatus.
+
+**Relationship to P-006.** Prediction is how this entry is *measured*. If C-011 holds, commit-and-compare is a test of the player's knowledge of the world; if it fails, prediction degrades into guessing at game rules, and P-006's behavioral half will never pass either.
+
 ---
 
 ## 17. Document Authority

@@ -40,6 +40,26 @@ Today the model has **one undifferentiated soil** — depth and moisture, with b
 
 A consequence worth naming: if sand is substrate, then **digging moves material**. A dig should displace mass, not just lower a number — which turns the open BUILD_GUIDE §4.1 item on berm/dig ↔ `soil.depth` from hygiene into a thesis requirement.
 
+**The analogy is about shapability, not about sand.** Do not chase 3D falling-sand games. What carries over is *something shapable, made of different substrates, under adjustable natural forces* — not granular material simulation, and not a lattice of elements with invented behavior. See §2.2, which is the reason why.
+
+### 2.2 The contract: real-world intuition is the instrument
+
+**The player's own knowledge of how the world works is the thing being tested.**
+
+You already know that water runs downhill and pools in hollows; that sand drains and slumps while clay holds; that a steep bare slope goes first; that plants take hold where it stays damp; that roots hold a bank together. Habitat's job is to be honest enough that **you can bet on what you already know and find out whether you were right.**
+
+That is the actual reason the simulation is realistic. Not fidelity for its own sake, and not education — realism is what makes everyday intuition a **valid instrument** inside the game. The moment the world behaves in a way that has no real-world referent, the instrument stops working and the player is reduced to learning arbitrary rules.
+
+This is the sharp line against the falling-sand family. Those games are learned from the inside: you discover that *their* powder does *this* when it touches *that*, and the pleasure is mastering an invented rule set. Habitat inverts it — **nothing should need to be learned that a person doesn't already know**, and the reward is finding your existing understanding confirmed, or productively wrong.
+
+Consequences worth holding:
+
+- **No invented materials or forces.** Every substrate and every dial must have a real-world referent a person can reason about (**C-011**, N-004).
+- **No physics tutorial.** If the world needs to teach how water moves, either the encoding is failing or the model is doing something unreal. The instruction belongs to the interface, never to the ecology.
+- **Being wrong must be informative, not arbitrary.** A surprise should resolve into "oh — the ground was already saturated," never into "that's just how this game works" (S-004, N-004).
+- **This is what P-006 is measuring.** Commit-and-compare is not a study aid bolted onto a simulator; it is the mechanism by which the contract is tested, one prediction at a time (§6).
+- **It is also the honest ceiling on simplification.** U-002 permits simplifying presentation, not ecological truth — because the truth is precisely what the intuition is being tested against.
+
 ---
 
 ## 3. What "restoration" means here
@@ -156,6 +176,7 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-008** | Intervention → visible response budget (the RCT3 immediacy constraint) |
 | **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
 | **C-010** | Legacy substances (contaminant load) — the toxic-site scenario premise, and the missing substrate for S-007 / S-008 |
+| **C-011** | Real-world intuition is the instrument — no invented materials or forces; nothing to learn that a person does not already know |
 
 ---
 
