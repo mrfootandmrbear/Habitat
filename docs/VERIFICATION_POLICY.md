@@ -48,6 +48,9 @@ Preference, attention, meaning, and whether a stranger would read the world corr
 | Vegetated slope blunts the hydrograph | **M** | Paired-storm probe: peak, time-to-peak, infiltration ledger, Σw at t |
 | Berm changes routing | **M** | Flow-accumulation delta across the edit |
 | Basin fills to spill elevation, doesn't leak | **M** | Priority-flood fixture vs. RichDEM oracle |
+| GW compartment closes mass balance with surface + soil | **M** | Ledger residual including groundwater store (C-001 / Slice 8b) |
+| Baseflow persists after dry days vs no-GW baseline | **M** | Probe `baseflow-persist`: channel wetness after N dry days with GW ≫ without |
+| Research steal cites register or candidate ID | **M** | Docs/conformance — not a playtest (EXTERNAL_REFERENCES ↔ C-001…C-003) |
 | Performance is acceptable | **M** | Step timing at target grid size |
 | "Difference is visible without the inspector" | **P** | Encoded-signal check: run the mapping from field → color, assert the two states the owner is meant to distinguish differ by more than a stated perceptual floor, across the actual value range reached in play |
 | "Growth is fast enough to see" | **P** | Time-to-threshold in sim-minutes at each time rate; compare against a stated attention budget |
@@ -148,7 +151,7 @@ Tier M and Tier P need a home for scenario-scale measurement that is coarser tha
 - Scenarios are declared in `src/sim/probes/` and each emits a flat record of named scalars — peak Σw, time-to-peak, infiltration ledger total, ET total, mass residual, time-to-threshold, step ms.
 - Output writes `docs/evidence/<scenario>.md`: a table of this run vs. the committed baseline, with deltas.
 - Baselines are committed. A changed baseline is a deliberate act with a reason in the commit body, exactly like `GOLDEN_*` hashes (T-001).
-- First three scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual).
+- First scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual), and (Slice 8b) `baseflow-persist` (wet channel after dry days with vs without GW).
 - The *Already proven* block of any playtest request is pasted from the probe output, not hand-written.
 
 The encoded-signal proxy (§3) needs a sibling: a pure function extracted from `TerrainMesh` mapping field value → color, so a test can assert perceptual delta without a GPU. That extraction is a prerequisite for treating "Observable" as Tier P rather than Tier O.

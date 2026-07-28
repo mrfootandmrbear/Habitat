@@ -66,6 +66,9 @@ flowchart TB
   terrain --> surface
   surface --> soil[soil.moisture]
   soil --> surface
+  soilDepth[soil.depth] --> soil
+  soil --> gw[groundwater C-001]
+  gw --> surface
   soil --> veg[vegetation]
   veg --> roughness[surface.roughness / infiltration]
   roughness --> surface
@@ -81,8 +84,10 @@ flowchart TB
 | Surface → soil storage | H-003 | **Yes** | Slice 4 landed |
 | Soil → vegetation (one-way) | ES-001 | **MVP stretch** | Slice 5 — first green |
 | Vegetation → water (return) | D-003, E-005 partial | **MVP core** | Slice 6 — first true two-way ecology |
-| Priority-flood / depressions | H-003 | **Soon** | Before ponds lie; RichDEM as oracle |
-| Fire / succession / populations | ES-*, E-* | **No** | Post-MVP |
+| Priority-flood / depressions | H-003 | **Yes** | Slice 4b Done (agent) |
+| Soil depth / geomorphology | S-006, S-007, GEO-002, C-002 | **Post-MVP** | Slice 8 Tier-M |
+| Groundwater / baseflow | H-001, H-004, **C-001** | **Post-MVP next** | Slice 8b — not Locked |
+| Fire / succession / populations | ES-*, E-* | **No** | After limiting-factor spine (Slice 9+) |
 | Full beaver write-back | E-005, F-001 | **Architecture yes, breadth no** | Path must exist; one later engineer |
 
 ---
@@ -102,11 +107,13 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **Done — playtest Pass** |
 | 5 | Soil → vegetation (one-way) | Green follows wet ground | **Done — playtest Pass** |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
-| 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
 | **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
-| **8** | Soil depth legacy + save schema + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
+| **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
+| **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Next** — BUILD_GUIDE §4.3 |
+| **9** | Limiting factors / HSI spine | Inspect why a patch is limited | Post-MVP after 8b |
+| **10+** | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 9 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. Post-MVP: BUILD_GUIDE §4.1 hygiene (done) + §4.2 presentation track (volume without voxels) in parallel with systems.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts → Slice 8b GW/baseflow → Slice 9 Liebig/HSI → Fire; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.
 
 ---
 
@@ -122,14 +129,14 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 
 ---
 
-## 6. Fun gate (before more sim)
+## 6. Fun gate (before more post-MVP systems)
 
-Before investing in Slice 5 vegetation, run [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md).
+The Slice 4 fun gate already **Passed** ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md)). Before opening a new **owner** playtest for post-MVP work, pass [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) ask gate. Agent-only slices (closeouts, 8b Tier-M, hygiene) do not spend a fun-gate session.
 
 | Verdict | Action |
 |---|---|
-| Pass (≥3, want to intervene/predict) | Continue joint ladder; prefer 5a/5b then 5→6 |
-| Hold | Spike P-006 + one siting verb on water — do **not** add vegetation first |
+| Pass (historical) | Continue joint ladder; post-MVP order in BUILD_GUIDE §4 |
+| Hold (future asks) | Agent retunes encoding / proxy — do not add Fire or roles first |
 | Fail | Revisit framing / ART-001 / core loop thesis before more systems |
 
 ---

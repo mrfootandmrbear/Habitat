@@ -15,7 +15,7 @@ Survey date: 2026-07-28 (multi-state water pass added).
 | Reference | URL | Use for Habitat |
 |---|---|---|
 | **OpenFloodLab** | https://github.com/taeyeons/OpenFloodLab | Closest architecture peer: browser TypeScript shallow-water, pause/speed, mass-balance documentation, CPU reference vs WebGL path. Study structure and audit patterns — not a library to import. Low stars; treat as a peer prototype. |
-| **GWSWEX** | https://github.com/veethahavya-CU-cz/GWSWEX | Clearest **multi-store** API: surface ponding (SW) · unsaturated layers (UZ) · groundwater head/volume (GW) with per-step mass-balance history. Study compartment list + ledger shape for a future baseflow store — do not ship Richards/Celia solvers. |
+| **GWSWEX** | https://github.com/veethahavya-CU-cz/GWSWEX | Clearest **multi-store** API: surface ponding (SW) · unsaturated layers (UZ) · groundwater head/volume (GW) with per-step mass-balance history. Study compartment list + ledger shape for Slice 8b under **C-001** — do not ship Richards/Celia solvers. |
 | **pysheds** | https://github.com/pysheds/pysheds | Offline oracle for watershed delineation and accumulation. Generate known-good labels on a DEM; compare to Slice 3 `flowRouting.ts` tests. |
 | **RichDEM** | https://github.com/r-barnes/richdem | Priority-flood / depression filling (Barnes 2014). Gold standard before Habitat implements NATURAL_PROCESS_MATH §1.3. Offline validation only. |
 | **SimpleHydrology** | https://github.com/weigert/SimpleHydrology | Play-feel reference for “water that looks alive on terrain.” C++/OpenGL — algorithms and presentation, not a drop-in. Watch for particle/erosion aesthetics that fight S-004 / N-004 (causal, inspectable). |
@@ -54,7 +54,7 @@ Survey date: 2026-07-28 (multi-state water pass added).
 
 **Steal:** compartment list + per-step Δstore ledgers (GWSWEX, H2MV, OpenFloodLab); lake area↔storage (VIC); Duffy-style two-state naming (SHUD).  
 **Ban as authority:** Richards/MODFLOW in-browser; ML water-cycle cores; surface-only spectacle without soil/GW stores.  
-**Next ROI for Habitat:** cheap GW/baseflow store (NATURAL_PROCESS_MATH §4 Darcy / Boussinesq) so dry-out between storms is a storage story, not an ET leak.
+**Next ROI for Habitat:** cheap GW/baseflow store under Open candidate **C-001** (NATURAL_PROCESS_MATH §4 Darcy / Boussinesq *lite*; BUILD_GUIDE §4.3) so dry-out between storms is a storage story, not an ET leak. Richards/MODFLOW remain study-only.
 
 ---
 
@@ -106,4 +106,7 @@ Survey date: 2026-07-28 (multi-state water pass added).
 
 - Process *equations* and register fit → [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md)  
 - Field ownership, bands, structural vs dynamic water → [SIMULATION_MODEL.md](SIMULATION_MODEL.md)  
-- What the build must prove → [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)
+- What the build must prove → [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)  
+- Execution order + autonomous protocol → [BUILD_GUIDE.md](BUILD_GUIDE.md)  
+
+**Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**, **C-002**, **C-003**). Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.

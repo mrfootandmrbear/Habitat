@@ -2,16 +2,17 @@
 
 > **Status:** Working draft  
 > **Role:** Per-slice execution checklists for the joint sim/game ladder in [MVP_SCOPE.md](MVP_SCOPE.md)  
-> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md) and MVP_SCOPE. Architecture: [SIMULATION_MODEL.md](SIMULATION_MODEL.md). Evidence: [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md). Who verifies what: [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md). Advisory origin: [reviews/2026-07-27-incremental-world-building-report.md](reviews/2026-07-27-incremental-world-building-report.md).
+> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md) and MVP_SCOPE. Architecture: [SIMULATION_MODEL.md](SIMULATION_MODEL.md). Evidence: [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md). Who verifies what: [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md). Study-not-ship: [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). Advisory origin: [reviews/2026-07-27-incremental-world-building-report.md](reviews/2026-07-27-incremental-world-building-report.md).
 
 ---
 
 ## 1. How to use this guide
 
-1. Pick the next open row in [MVP_SCOPE.md](MVP_SCOPE.md) §4 (respect the fun gate in §6).  
-2. Copy that slice’s checklist below into the PR / session notes.  
+1. Read **§4.0 Autonomous session protocol** before starting work.  
+2. Pick the next open checklist in §4 (respect MVP_SCOPE fun gate for owner asks).  
 3. Do not start the next slice until **Definition of done** (§2) is satisfied.  
-4. After merge: `npm test`, `npm run conformance`, update golden hashes if physics intentionally changed.
+4. After merge: `npm test`, `npm run conformance`, update golden hashes if physics intentionally changed.  
+5. Every steal from [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) must cite a register ID or candidate (**C-001**…); bans cite the fight (T-001, T-006, T-007, GEO-002).
 
 **Before requesting a playtest**, pass the ask gate in [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) §4. Anything settled by a number is the agent's to settle; owner sessions are for attention, legibility, and taste.
 
@@ -22,10 +23,9 @@ npm test
 npm run build
 npm run conformance          # regenerate ledger
 npm run conformance:check    # CI
-npm run dev                  # playtest
+npm run probe -- <scenario>  # Tier-M scenario evidence
+npm run dev                  # playtest (owner only after ask gate)
 ```
-
-Study-not-ship references: [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md).
 
 ---
 
@@ -58,212 +58,133 @@ A slice is complete only when all hold:
 
 ---
 
-## 3. Completed slices (0–4)
+## 3. Completed slices (MVP + post-MVP Tier-M)
 
 Summary only — do not reopen unless fixing regressions.
 
-| Slice | Sim | Game | Key artifacts | Invariants covered |
+| Slice | Sim | Game | Key artifacts | Invariants / gate |
 |---|---|---|---|---|
-| 0–1 | Heightfield hydrology scaffold | Observe rain / pool | `fluxStep`, WaterMesh | Determinism (later fixed flux clamp) |
-| 2 | WorldState, registry, no-flow, SimClock | Pause / 1× / 4× / 16× | `WorldState`, `SimClock`, CI | Conservation, S-009 time-rate |
-| 3 | Terrain → watershed / accumulation | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
-| 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | **Pass** — infiltration + darkening |
-| 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
-| 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
+| 0–1 | Heightfield hydrology scaffold | Observe rain / pool | `fluxStep`, WaterMesh | Determinism |
+| 2 | WorldState, registry, no-flow, SimClock | Pause / 1× / 4× / 16× | `WorldState`, `SimClock`, CI | Conservation, S-009 |
+| 3 | Terrain → watershed / accumulation | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1 |
+| 4 | Surface → soil moisture | Ground darkens | `soilWaterProcess` | **Pass** |
+| 4b | Priority-Flood depressions | Honest ponds | `pitDem.ts`, `basin-fill` probe | Agent Tier-M |
+| 5a | — (observer) | Predict water (P-006) | `PredictionSession` | Write isolation **Pass** |
+| 5b | Terrain edit (berm/dig) | Site a cause (A-005) | siting tools | **Pass** (open: one-tool park — §4.1) |
+| 5 | Soil → vegetation | Green follows wet | `vegetationProcess` | **Pass** |
+| 6 | Veg → roughness / infil → water | Cover blunts storm | paired-storm probe | **Pass** (sim MVP) |
+| §4.1 hygiene | Ledgers, D8, metric clock, bounds, symmetry | — | probes | Agent-only |
+| P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
+| 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Slice 8 geomorphology + depth·depth storage shipped (Tier-M). Optional Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) — erosion legibility deferred until depth change is visible without inspector.
+**Current gate:** Autonomous closeouts (§4.1), then **Slice 8b groundwater / baseflow** (C-001). Batched Tier-O asks: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) + erosion legibility — do not request until ask gate.
+
+**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
 ---
 
-## 4. Next slices (checklists)
+## 4. Next work
 
-### 4.1 Post-MVP hygiene *(from Slice 2–6 implementation review)*
+### 4.0 Autonomous session protocol
 
-Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slice-2-6-implementation-review.md](reviews/2026-07-27-slice-2-6-implementation-review.md)).
+Every agent session that advances the sim or build plan:
 
-- [x] `ledger.et` + multi-day conservation test (H-004, §8.2)  
-- [x] Single-pass O(n log n) D8 accumulation (push-to-receiver)  
-- [x] Ownership / contributes test; surface debit via inbox or explicit `contributes`  
-- [x] Stretch golden / determinism schedule past a daily boundary  
-- [x] Field `range` + bounds/NaN at band commit  
-- [x] Metric pass (Δx, sim-minute clock) — before Slice 7 systems  
-- [x] Priority-Flood + flat resolution (promote 4b)  
-- [x] Symmetry invariant; single-source ledgers; register band phase  
+1. **Classify claims** for the slice as Tier **M** / **P** / **O** ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)).  
+2. **Implement** behind tests/probes — Prefer `npm run probe -- <scenario>` for scenario-scale Tier-M.  
+3. **Green bar before “done”:** `npm test`, `npm run build`, `npm run conformance:check`.  
+4. **Name Tier-M artifacts** in the commit body when physics change (golden hash, probe baseline, test file).  
+5. **No owner ask** unless VERIFICATION_POLICY §4 ask gate passes (one sentence, no numbers). Hygiene / infrastructure / Closeouts: **never** open a playtest.  
+6. **Batch Tier-O** — Presentation + erosion legibility share one future ask; do not drip-feed.  
+7. **Research discipline** — If acting on an EXTERNAL_REFERENCES steal, cite the register/candidate ID in code or BUILD_GUIDE checklist; if inventing policy, file a candidate first.
 
-*Hygiene batch:* no Tier-O question — agent probes + tests only (VERIFICATION_POLICY).
+---
+
+### 4.1 Autonomous closeouts *(agent-only; before Slice 8b)*
+
+No Tier-O. Order:
+
+- [ ] **5b one-tool** — Park as won’t-do for now (berm + dig both shipped; “one tool only” was a spike constraint). Document park reason here when closing the checkbox, or finish by removing dig from default UI.  
+- [ ] **Berm/dig ↔ `soil.depth` mass** — snowflow steal (EXTERNAL_REFERENCES): raise/lower depth with elev so edits read as displaced mass (C-002 / GEO-002; T-006). Tier-M: depth+elev delta conservation on brush.  
+- [ ] **Deferred grains** — leave deferred (flow cues sufficient).  
+
+---
 
 ### 4.2 Presentation track — volume without voxels *(parallel; T-006 / T-007 / A-005)*
 
-Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-Falling-Sand), [ccrock4t/3DCellularWorld](https://github.com/ccrock4t/3DCellularWorld), and [Noniv/snowflow](https://github.com/Noniv/snowflow_demo) — voxel toys and a WebGPU snow deformation demo that sell “stuff moves through / carves the surface.” Catalogued in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Steal presentation patterns; do not adopt voxel CA or GPU deform buffers as authority.**
+Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Steal presentation patterns; do not adopt voxel CA or GPU deform buffers as authority.**
 
-**Loops.** Sim: none new (observers + FX only). Game: volume and agency read as column-stack × time and cause verbs, not as painted voxels.
+**Loops.** Sim: none new (observers + FX only). Game: volume and agency read as column-stack × time and cause verbs.
 
-**Standing bans (do not schedule as work):**
-- Full 3D voxel CA / Margolus / paint-element-as-world-state (fights T-007, A-005)
-- Physics coupled to RAF / display rate (fights S-009, T-006)
-- Opaque cube water as the primary depth language (prefer continuous depth tint / sheet)
-- Duplicate GPU + CPU rule engines for hydrology
-- Treating “need vertical structure” as “need voxels” — vertical = stacked 2D rasters per column (SIMULATION_MODEL §2)
-- WebGPU-only stack, 90 FPS / heavy post as Definition of Done, or screenshot gate without Tier-P numbers (snowflow-class demos)
-- GPU terrain-state / deform buffer as hydrology or terrain authority — map *ideas* onto owned rasters only
+**Standing bans:** voxel CA as world authority; RAF-coupled physics; opaque cube water as primary depth language; dual GPU+CPU hydrology engines; WebGPU-only / 90 FPS as DoD; GPU deform as hydrology authority.
 
-**Steal from snowflow (API shape, not stack):**
-- **Shared surface write path** — one `applySurfaceEdit`-style inbox into owned terrain/water fields (feet, berm, dig, future sediment) rather than per-effect decals
-- **Berm = displaced mass** — trails/edits read as raised edges because mass moved, not because albedo darkened
-- **Beauty ≡ observer sampling** — flow cues / grains sample the same authoritative height/depth law so they do not float
-- **Particles decorate** — spray/grains are presentation; WorldState rasters remain authority (T-006); aligns with deferred grains checkbox below
+**Steal from snowflow (API shape):** shared surface write; berm = displaced mass; beauty ≡ observer sampling; particles decorate.
 
-**Checklist (can interleave with Slice 7+; prefer before heavy visual retunes):**
+**Checklist:**
 
-- [x] **Extent cage** — `ExtentCage` wireframe around preserve bounds (U-005)
-- [x] **Snapped intervention cursor** — `SitingCursor` cell gizmo for berm/dig/predict; orbit stays for look
-- [x] **Motion-in-time** — `FlowCueMesh` D8 segments on wet cells (reads depth + flowDirection only)
-- [x] **Dual readouts** — inspector overlays + cutaway strip (soil / water / veg at cursor cell)
-- [x] **Conservation beat** — status HUD: precip · surface · soil · ET · residual (full U-006 later)
-- [x] **Property bundles** — documented below; no CA neighborhoods
-- [ ] **Presentation-only grains** — deferred (flow cues sufficient; Tier-P green without particles)
-- [x] Tier-P proxies in `presentation.proxy.test.ts` — owner play only via batched ask ([PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md))
-
-**Property bundles (material feel = parameter packs, not CA):**
-
-| Pack | Fields | Owner |
-|---|---|---|
-| Surface flow | `baseRoughness`, `vegRoughnessBonus` → `surface.roughness` | vegetation |
-| Infiltration | `infiltrationRate`, `vegInfiltrationBonus` → capacity | soilWater (+ veg contribute) |
-| Storage | `soilPorosity` | soilWater / legacy later |
-
-**Notebook seed (track):** “Water moved through the hollow over time — the ground held it until it spilled.”
-
-**Also shipped with this batch:** RichDEM-class pit DEM fixture; `timeDebt` on HUD; paired-storm probe shows bare > vegetated downslope.
+- [x] Extent cage, snapped cursor, flow cues, dual readouts, conservation HUD, property bundles, Tier-P proxies  
+- [ ] Presentation-only grains — deferred  
+- [ ] Batched Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) — only after ask gate  
 
 ---
 
-### Slice 4b — Priority-flood depressions *(promote before scenario objectives)*
+### 4.3 Slice 8b — Groundwater / baseflow store *(next systems)*
 
-**Loops.** Sim: honest closed basins / spill. Game: ponds that don’t secretly drain through DEM artifacts.  
-**Register.** H-003; oracle: RichDEM ([EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md)).
+**Loops.** Sim: soil ↔ cheap GW store ↔ baseflow to surface so channels persist between storms (H-001, H-004, **C-001**). Game: dry spell does not instantly empty the hollow — storage, not a silent leak.  
+**Register / candidates.** H-001, H-004, T-001, T-006; **C-001** (not Locked — implement as hypothesis under that candidate).  
+**Study.** GWSWEX SW/UZ/GW compartment + mass-balance history ([EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md)); NATURAL_PROCESS_MATH §4 Darcy/Boussinesq *lite*.  
+**Bans.** Richards / Celia / MODFLOW in-browser; ML water-cycle cores as authority.
 
-- [x] Implement priority-flood (or ε-fill) over routing surface; register derived depression fields per SIMULATION_MODEL §3.9  
-- [x] Declare authority: structure vs dynamic water still as §7  
-- [x] Invariant: flat closed basin conserves volume; filled sink does not invent cliffs to `z=0`  
-- [x] Golden / fixture vs RichDEM-class on a small DEM (`src/sim/fixtures/pitDem.ts`)  
-- [x] Inspector layer for depression / spill (dev)  
-- [x] Notebook seed: e.g. “This hollow holds water until it reaches the spill elevation.”  
-- [x] ~~Owner play: rain into a known depression; confirm it pools~~ → **agent probe** (`basin-fill`): pooled volume, spill elevation, residual. Machine-verifiable per VERIFICATION_POLICY §3 — no owner-only question in this slice.
-
----
-
-### Slice 5a — Prediction on water *(next game priority)*
-
-**Loops.** Sim: none new (read-only observer). Game: expect → commit → compare (P-006).  
-**Register.** P-006 mechanical first; behavioral viewer study deferred.
-
-- [x] Prediction module with `reads` only — **no** writes to WorldState / water buffers  
-- [x] Player marks expected wet cells or flow corridor before advancing time  
-- [x] After N steps, overlay expected vs actual (clear mismatch)  
-- [x] Invariant class: **Write isolation** — automated test that prediction API cannot mutate sim  
-- [x] Determinism: replay with same mark + schedule → same compare result  
-- [x] Notebook seed: e.g. “You expected water here; it went there because of the slope.”  
-- [x] Owner play: 10 minutes forming and checking predictions (score attention, not accuracy) — **Pass**  
-- [x] Conformance: cite P-006 in sim observer + tests; criterion artifact named in DECISION_CONFORMANCE
-
-**Do not** fake prediction with a second hydrology that writes the real buffers.
+- [ ] Register `groundwater` (or equivalent) storage field + owner/band; schema bump if legacy  
+- [ ] Recharge from soil moisture; baseflow contribution onto surface (or channel cells)  
+- [ ] Extend water balance residual to include GW compartment  
+- [ ] Tier-M: conservation across multi-day wet→dry; probe `baseflow-persist` — wet channel after N dry days **with** GW ≫ without  
+- [ ] Inspector overlay for GW / water table proxy  
+- [ ] Notebook seed: e.g. “The hollow kept seeping after the rain stopped.”  
+- [ ] Owner play: Tier-O deferred until persistence is visible without inspector  
 
 ---
 
-### Slice 5b — One siting verb *(pair with 5a on fun-hold)*
+### 4.4 Slice 9 — Limiting factors / HSI spine
 
-**Loops.** Sim: player edits routing surface / terrain owned by WorldState. Game: commit a **cause** (berm / channel), not an outcome (A-005, N-001).  
-**Register.** A-005 spike; N-001 smoke test must still pass.
+**Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2). Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.  
+**Register.** ES-006 path, E-009, S-008; no fixed `K`.
 
-- [ ] One tool only (prefer berm or dig channel)  
-- [x] Edit `terrain.elevation` or `structure.obstructionHeight` via WorldState — **never** a hydrology-private copy  
-- [x] Recompute flow structure after edit  
-- [x] Preview language / UI describes cause (“raise a berm here”), not wetland stamp  
-- [x] Invariant: mass conservation still holds after edit; structure invalidation is explicit  
-- [x] Notebook seed: e.g. “The berm changed where water could spill.”  
-- [x] Owner play + informal A-005 check: would a stranger say “cause” or “outcome”? — **Pass**  
-- [ ] Expand N-001 smoke if new public APIs appear
+- [ ] Derived or owned limiting-factor field(s) from moisture / depth / (later GW)  
+- [ ] Inspector layer; monotonicity tests where applicable  
+- [ ] Notebook seed: e.g. “Water — not light — is limiting here.”  
+- [ ] No owner ask unless a Tier-O legibility question appears  
 
 ---
 
-### Slice 5 — Soil → vegetation (one-way)
+### 4.5 Slice 10 — Fire / fuel *(stub)*
 
-**Loops.** Sim: moisture drives biomass/cover. Game: green follows wet ground.  
-**Register.** ES-001; capacity must emerge later (no fixed `K` — ES-006).  
-**Gate.** Only after Slice 4 playtest Pass (or after 5a/5b if Hold).
-
-- [x] Register vegetation field(s) with owner `vegetation`, band seasonal/daily as appropriate  
-- [x] Process reads `soil.moisture` (and optionally TWI); writes veg only  
-- [x] Visible green without requiring inspector  
-- [x] Invariant: **Monotonicity** — higher sustained moisture → ≥ biomass/cover (within bounds)  
-- [x] No constant carrying capacity `K`  
-- [x] Inspector: veg biomass or cover  
-- [x] Notebook seed: e.g. “Plants established where the ground stayed wet.”  
-- [x] Owner play: rain pattern → visible green gradient — **Pass** (with Slice 6)
-
-**Do not** close vegetation → water in this slice (corollary: one direction at a time).
+**Loops.** Sim: fuel + fire disturbance (ES-002). Game: pulse intervention with real semantics (A-002, A-006).  
+**Register.** ES-002, A-002, A-006.  
+**Gate.** After Slice 9 spine so readiness/limiting factors exist to disturb.
 
 ---
 
-### Slice 6 — Vegetation → water *(sim MVP milestone)*
-
-**Loops.** Sim: veg → roughness / infiltration → runoff. Game: vegetated slope blunts the hydrograph.  
-**Register.** D-003, E-005 partial.
-
-- [x] `vegetation` owns or contributes to `surface.roughness` and/or `soil.infiltrationCapacity` (SIMULATION_MODEL §11)  
-- [x] Hydrology / soil reads those fields; declare `lagged` if needed to break the schedule cycle  
-- [x] Paired-storm test: same rain, bare vs vegetated → measurably different surface response  
-- [x] Invariant: paired-storm difference + conservation  
-- [x] Observable without inspector (hydrograph feel or peak wetness)  
-- [x] Notebook seed: e.g. “Cover slowed the runoff on this slope.”  
-- [x] Owner play: grow cover, storm again, see the difference — **Pass**  
-- [x] Mark MVP sim milestone in MVP_SCOPE status table when done
-
----
-
-### Slice 8 — Soil legacy / erosion memory *(process + storage)*
-
-**Loops.** Sim: soil depth as persistent memory (production vs cover-blunted channel erosion); thin soil holds less water. Game: inspect legacy depth; save invalid without it (T-003).  
-**Register.** S-006, S-007, GEO-002, T-003.  
-**Gate.** Schema versioning before first legacy *process* — scaffold landed version + field first.
-
-- [x] Schema version ≥ 2 + save serialize/apply stub (`src/sim/save.ts`)  
-- [x] Register `soil.depth` (m, [0, 5], owner `geomorphology`, band `decadal`, **legacy: true**)  
-- [x] Derive bedrock as `terrain.elevation − soil.depth` (not stored)  
-- [x] Invariant: omit legacy field → save load fails; round-trip preserves depth + hash  
-- [x] Inspector: soil depth overlay  
-- [x] Notebook seed: e.g. “Thin soil here will take a long time to grow back.”  
-- [x] Geomorphology process: soil production / erosion couple elev + depth (decadal; GEO-002 channel gate)  
-- [x] Wire moisture storage to `moisture · depth` in mass balance  
-- [ ] Owner play: only when depth becomes visible consequence of erosion — Tier-O later (inspector proves encoding; no ask yet)  
-
----
-
-### Post-MVP (stubs only)
-
-Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentation track (§4.2) may run in parallel — it does not add sim systems.
+### Later stubs
 
 | Slice | Focus | Register |
 |---|---|---|
-| P (§4.2) | Volume-without-voxels presentation | T-005, T-006, T-007, A-005, U-005 |
-| 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 | **Process** — production + channel erosion; moisture·depth |
-| 9 | Fire / fuel | ES-002, A-002, A-006 |
-| 10 | Light / succession | ES-001 |
-| 11 | Roles / introductions → informs RC-003 | E-*, ES-006 |
-| 12 | Biology → physics integration test | E-005, F-001 |
+| 11 | Light / succession | ES-001 |
+| 12 | Roles / introductions → informs RC-003 | E-*, ES-006 |
+| 13 | Biology → physics integration test | E-005, F-001 |
 | — | Field Notebook UI | U-006 |
 | — | Scenarios | G-002, G-007 |
+
+Do not expand these until Slice 8b–9 DoD holds. Presentation (§4.2) may run in parallel — it does not add sim systems.
 
 ---
 
 ## 5. PR / commit hygiene
 
-- Cite register IDs in new sim modules and tests.  
-- Update `GOLDEN_*` hashes only when physics change is intentional; note why in the commit body.  
+- Cite register IDs (or C-00x candidates) in new sim modules and tests.  
+- Update `GOLDEN_*` / probe baselines only when physics change is intentional; note why + Tier-M artifact in the commit body.  
 - Run `npm run conformance` before claiming a slice done.  
-- Prefer small PRs: sim edge vs game edge can split if WorldState coupling allows (see split-to-PRs practice).  
-- No remote required for local commits; create GitHub remote when ready to review.
+- Prefer small PRs: sim edge vs game edge can split if WorldState coupling allows.  
+- If a commit acts on an EXTERNAL_REFERENCES steal, refresh the Research↔Decision note in §3 Current gate or the slice checklist.
 
 ---
 
@@ -272,10 +193,11 @@ Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentatio
 | Document | Owns |
 |---|---|
 | [MVP_SCOPE.md](MVP_SCOPE.md) | Which loops are in MVP; joint map; fun gate |
-| **This file** | How to execute each slice |
+| **This file** | How to execute each slice; autonomous protocol |
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | Fields, ownership, bands |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | Promotion criteria + ledger |
-| [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim; the ask gate and playtest request format |
-| [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) | Study-not-ship refs (incl. falling-sand presentation peers for §4.2) |
-| [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md) | Current fun-gate protocol |
+| [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim; ask gate |
+| [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) | Study-not-ship refs; multi-state water survey |
+| [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) | Math candidates; Tier sequence |
+| [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md) | Fun-gate protocol (historical MVP) |
 | PLAYER_INTERACTION_SPEC.md | Detailed prediction/siting UX (not yet written) |

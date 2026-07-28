@@ -32,10 +32,11 @@ npm run conformance
 
 ## Current slice
 
-**Slice 8** — legacy `soil.depth`, schema v2 save, geomorphology (production + cover-blunted channel erosion), moisture·depth storage.
+**Post-MVP:** autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1), then **Slice 8b** groundwater / baseflow (**C-001**).
 
-- Optional owner ask still open: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md)
-- Erosion Tier-O deferred until depth change reads without inspector
+- Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
+- Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — ask gate only
+- Agents: follow BUILD_GUIDE §4.0 (test → probe → conformance → maybe ask)
 
 ```bash
 npm run dev

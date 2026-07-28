@@ -247,6 +247,8 @@ Not a decision — a reading of what the register's dependency structure already
 5. **§3.1 Klausmeier** as a *standalone prototype* before deciding where it belongs in the preserve. It is the highest-value and highest-risk item here.
 6. **§3.7 beaver**, which by then requires no new math and serves as the integration test for whether the spine is actually coupled.
 
+**Pull-forward (build plan).** When closed-loop dryness between storms is the product bug, [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.3 may pull **Tier 3 groundwater / baseflow** (*lite*, not Richards) ahead of fire as Slice 8b under Open candidate **C-001**. That does not reorder the rest of this list into Locked policy — see DECISION_REGISTER §16.5.
+
 ---
 
 ## 9. What this raises for the register
@@ -257,7 +259,9 @@ Flagged, not decided. Each of these is a question the survey exposes that curren
 2. **Does the ecological state vector have a defined membership?** §3.3 and §7's region clustering both need to know what "ecological state" is composed of. T-004 says content is data-driven; it does not say whether the state schema itself is fixed by the engine.
 3. **RC-003 has a candidate answer in §3.4.** The Allee effect makes a failed introduction cost *the founding population and the ecological time spent*, with the mechanism inspectable and no bookkeeping counter — which is precisely RC-003's stated leading direction, and it survives that entry's noted weakness (that ecological consequence approaches zero in a degraded preserve), because the consequence is borne by the introduced population rather than by the resident community. Worth evaluating as the resolution rather than as a data point.
 4. **Critical slowing down as a player-facing indicator** would be a new capability under S-008 — an early-warning signal that is honest, non-prescriptive, and computed from state. It is not currently contemplated by any entry, and it sits close enough to E-003's "inform without prescribing" line to deserve an explicit decision.
-5. **GEO-002's cost test needs a spatial answer.** §3.8 suggests per-cell soil processes everywhere and geomorphic processes only near channels. That is a defensible reading of GEO-002 but it is a reading, not a decision.
+5. **GEO-002's cost test needs a spatial answer.** §3.8 suggests per-cell soil processes everywhere and geomorphic processes only near channels. That is a defensible reading of GEO-002 but it is a reading, not a decision. Filed as Open candidate **C-002**.
+
+6. **(Also filed.)** Cheap GW/baseflow store → **C-001**. Stochastic vs authored climate → **C-003**.
 
 ---
 

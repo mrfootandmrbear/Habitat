@@ -1216,13 +1216,49 @@ Ordered by how many other decisions depend on them.
 
 1. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
 2. **RC-003** — the consequence of failed biological introduction beyond the elapsed ecological time established by RC-004.
-3. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001.
-4. **E-008 and E-009** — role-resolution and inferred-readiness prototypes, including uncertainty and whether multiple candidates ever exist.
-5. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
-6. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
-7. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
+3. **C-001** — cheap GW/baseflow store (blocks treating Slice 8b as Locked policy).
+4. **C-003** — stochastic vs authored climate (blocks seeded storm generators).
+5. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
+6. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001.
+7. **E-008 and E-009** — role-resolution and inferred-readiness prototypes, including uncertainty and whether multiple candidates ever exist.
+8. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
+9. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
+10. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
 
 Until resolved, these are Open or hypothesis-Current and must not be treated as locked implementation requirements. Situation-Current entries (**T-007**, **W-001**) are not on this queue; they carry review triggers in DECISION_CONFORMANCE.md.
+
+---
+
+## 16.5 Research candidates (not decided)
+
+Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9 and the multi-state water survey in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Open — do not treat as Locked.** Implementation of Slice 8b may proceed only as a hypothesis under **C-001**, not as settled policy.
+
+### C-001 — Cheap groundwater / baseflow store
+**Status:** Open
+
+**Question.** May Habitat add a cheap per-cell or watershed-scale groundwater / baseflow store so inter-storm channel persistence is a storage loop (H-001, H-004 spine), studying GWSWEX-style compartments without shipping Richards or MODFLOW?
+
+**Constraints.** T-001 determinism; T-006 headless authority; GEO-002 earn-its-cost; EXTERNAL_REFERENCES ban on in-browser Richards/Celia/MODFLOW and ML water-cycle cores as authority.
+
+**Leading direction.** Yes as a post-MVP Slice 8b hypothesis with Tier-M conservation + `baseflow-persist` probe — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.3. Not Locked until promotion criteria exist in DECISION_CONFORMANCE.
+
+### C-002 — GEO-002 spatial cost test
+**Status:** Open
+
+**Question.** Does dynamic geomorphology run only where contributing area / intervention justifies cost, while soil pools run everywhere? (NATURAL_PROCESS_MATH §9.5.)
+
+**Constraints.** GEO-002 Locked requires a spatial answer; Slice 8 already *implemented* channel-gated erosion + everywhere production as a reading.
+
+**Leading direction.** Promote the Slice 8 reading to an explicit decision after a short review, or supersede with a different spatial rule. Until then agents must not invent a second erosion law.
+
+### C-003 — Stochastic vs authored climate forcing
+**Status:** Open
+
+**Question.** Is weather stochastic-but-reproducible under a stored seed, or authored per scenario? (NATURAL_PROCESS_MATH §9.1.)
+
+**Constraints.** T-001 allows seeded RNGs; P-006 prediction fairness and G-005/G-006 completion evaluation both care.
+
+**Leading direction.** None — **no implementation** of stochastic storm arrivals until this entry closes.
 
 ---
 
