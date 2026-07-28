@@ -64,10 +64,12 @@ Summary only — do not reopen unless fixing regressions.
 |---|---|---|---|---|
 | 0–1 | Heightfield hydrology scaffold | Observe rain / pool | `fluxStep`, WaterMesh | Determinism (later fixed flux clamp) |
 | 2 | WorldState, registry, no-flow, SimClock | Pause / 1× / 4× / 16× | `WorldState`, `SimClock`, CI | Conservation, S-009 time-rate |
-| 3 | D8 accumulation + watershed | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
-| 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | Infiltration ledger; soil accumulates |
+| 3 | Terrain → watershed / accumulation | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
+| 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | **Pass** — infiltration + darkening |
+| 5a | — | Predict wet cells | `PredictionSession` | **Pass** |
+| 5b | Player edits terrain | Berm / dig | `raiseBerm` / `digChannel` | **Pass** |
 
-**Current gate:** Slice 5a playtest **Pass**. Next: Slice 5 vegetation (soil → green).
+**Current gate:** Slice 5 vegetation ready — [PLAYTEST_SLICE5.md](PLAYTEST_SLICE5.md). Slice 4 remains **Pass** (soil / flow).
 
 ---
 
@@ -128,12 +130,12 @@ Summary only — do not reopen unless fixing regressions.
 **Register.** ES-001; capacity must emerge later (no fixed `K` — ES-006).  
 **Gate.** Only after Slice 4 playtest Pass (or after 5a/5b if Hold).
 
-- [ ] Register vegetation field(s) with owner `vegetation`, band seasonal/daily as appropriate  
-- [ ] Process reads `soil.moisture` (and optionally TWI); writes veg only  
-- [ ] Visible green without requiring inspector  
-- [ ] Invariant: **Monotonicity** — higher sustained moisture → ≥ biomass/cover (within bounds)  
-- [ ] No constant carrying capacity `K`  
-- [ ] Inspector: veg biomass or cover  
+- [x] Register vegetation field(s) with owner `vegetation`, band seasonal/daily as appropriate  
+- [x] Process reads `soil.moisture` (and optionally TWI); writes veg only  
+- [x] Visible green without requiring inspector  
+- [x] Invariant: **Monotonicity** — higher sustained moisture → ≥ biomass/cover (within bounds)  
+- [x] No constant carrying capacity `K`  
+- [x] Inspector: veg biomass or cover  
 - [ ] Notebook seed: e.g. “Plants established where the ground stayed wet.”  
 - [ ] Owner play: rain pattern → visible green gradient
 

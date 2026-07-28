@@ -15,6 +15,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "accumulation", label: "Inspect: flow accumulation" },
   { id: "watershed", label: "Inspect: watershed" },
   { id: "soilMoisture", label: "Inspect: soil moisture" },
+  { id: "vegetation", label: "Inspect: vegetation cover" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */
@@ -148,7 +149,7 @@ export function mountControls(
 
   const status = document.createElement("div");
   status.id = "status";
-  status.textContent = "Habitat · Slice 5a";
+  status.textContent = "Habitat · Slice 5";
 
   bar.append(
     rainBtn,

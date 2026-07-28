@@ -32,18 +32,17 @@ npm run conformance
 
 ## Current slice
 
-**Slice 5a — Predict wet cells** (P-006) — **playtest Pass**
+**Slice 5 — Soil → vegetation** (ES-001, ES-006) — ready to play
 
-- Mark expected wet cells → Commit → rain → Compare (auto after horizon)
-- Overlay: teal pending · green hit · red miss · amber unexpected wet
-- Observer never writes sim state (write-isolation tests)
-- Next: Slice 5 vegetation (soil → green)
-- Playtest: [docs/PLAYTEST_SLICE5A.md](docs/PLAYTEST_SLICE5A.md)
+- `veg.cover` grows from soil moisture (one-way; no veg→water yet)
+- Terrain greens where wet without needing the inspector
+- Inspect: vegetation cover; Slice 4 soil/flow still Pass
+- Playtest: [docs/PLAYTEST_SLICE5.md](docs/PLAYTEST_SLICE5.md)
 
 ```bash
 npm run dev
 ```
 
-Also available: berm / dig (5b), inspectors (4).
+Rain on (try 4×). Wet basins should green; dry ridges stay browner.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

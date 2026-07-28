@@ -16,6 +16,10 @@ export const config = {
   soilPorosity: 0.45,
   infiltrationRate: 0.08,
   etRate: 0.012,
+  /** Slice 5 — cover growth from soil moisture (no fixed K). */
+  vegGrowthRate: 0.12,
+  vegDecayRate: 0.03,
+  vegMoistureThreshold: 0.04,
   /** Slice 5b siting brush (A-005 — cause, not outcome). */
   sitingBrushRadius: 1,
   bermRaise: 0.85,
@@ -31,7 +35,8 @@ export type InspectorLayer =
   | "water"
   | "accumulation"
   | "watershed"
-  | "soilMoisture";
+  | "soilMoisture"
+  | "vegetation";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict";

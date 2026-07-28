@@ -6,6 +6,7 @@ import { compareClassName } from "../sim/prediction/PredictionSession";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET = new THREE.Color(0x4a5c3a);
+const VEG = new THREE.Color(0x3a7a3a);
 const PREDICT_PENDING = new THREE.Color(0x2ec4b6);
 const PREDICT_HIT = new THREE.Color(0x3dcc6f);
 const PREDICT_MISS = new THREE.Color(0xe85d4c);
@@ -78,11 +79,12 @@ export class TerrainMesh {
         if (world && overlay !== "none") {
           this.applyOverlay(col, world, x, z, overlay, maxAcc);
         } else if (world) {
-          const t = Math.min(
+          const soilT = Math.min(
             1,
             world.getSoilMoisture(x, z) / config.soilPorosity,
           );
-          col.copy(BASE).lerp(WET, t);
+          const cover = world.getVegCover(x, z);
+          col.copy(BASE).lerp(WET, soilT).lerp(VEG, cover);
         } else {
           col.copy(BASE);
         }
@@ -145,6 +147,11 @@ export class TerrainMesh {
       case "soilMoisture": {
         const t = Math.min(1, world.getSoilMoisture(x, z) / config.soilPorosity);
         col.copy(BASE).lerp(WET, t);
+        break;
+      }
+      case "vegetation": {
+        const t = world.getVegCover(x, z);
+        col.copy(BASE).lerp(VEG, t);
         break;
       }
       default:

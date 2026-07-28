@@ -4,6 +4,7 @@ import { FieldRegistry } from "./registry/FieldRegistry";
 import { SimScheduler } from "./process/scheduler";
 import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
+import { vegetationProcess } from "./process/vegetationProcess";
 import { fluxStep } from "./hydrology/fluxStep";
 import {
   computeD8Accumulation,
@@ -16,7 +17,7 @@ import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
 
 /**
  * Owns authoritative world fields and the field registry.
- * Structural flow layers (Slice 3) and soil moisture (Slice 4) live here.
+ * Structural flow (3), soil (4), vegetation cover (5) live here.
  */
 export class WorldState {
   readonly width: number;
@@ -24,6 +25,8 @@ export class WorldState {
   readonly terrain: Grid2D;
   readonly water: Grid2D;
   readonly soilMoisture: Grid2D;
+  /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
+  readonly vegCover: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -52,6 +55,7 @@ export class WorldState {
     this.terrain = terrain;
     this.water = new Grid2D(this.width, this.height);
     this.soilMoisture = new Grid2D(this.width, this.height);
+    this.vegCover = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -61,7 +65,11 @@ export class WorldState {
     this.registerFields();
 
     this.hydrology = new HeightfieldHydrology(this);
-    this.scheduler = new SimScheduler([surfaceWaterProcess, soilWaterProcess]);
+    this.scheduler = new SimScheduler([
+      surfaceWaterProcess,
+      soilWaterProcess,
+      vegetationProcess,
+    ]);
 
     this.recomputeFlowStructure();
   }
@@ -135,6 +143,30 @@ export class WorldState {
     this.syncLedgers();
   }
 
+  /**
+   * Grow / decay cover from soil moisture only (Slice 5).
+   * Does not write water or soil. No fixed carrying capacity K (ES-006).
+   */
+  runVegetationStep(_dt: number): void {
+    const m = this.soilMoisture.data;
+    const c = this.vegCover.data;
+    const growth = config.vegGrowthRate;
+    const decay = config.vegDecayRate;
+    const thresh = config.vegMoistureThreshold;
+
+    for (let i = 0; i < c.length; i++) {
+      const moisture = m[i]!;
+      let cover = c[i]!;
+      if (moisture > thresh) {
+        // Wetter → faster approach toward full cover; ceiling is unit bound [0,1].
+        cover += growth * moisture * (1 - cover);
+      } else {
+        cover -= decay * (1 - moisture / Math.max(thresh, 1e-6));
+      }
+      c[i] = Math.min(1, Math.max(0, cover));
+    }
+  }
+
   addRain(amountPerCell: number): void {
     if (amountPerCell === 0) return;
     const data = this.water.data;
@@ -160,6 +192,11 @@ export class WorldState {
   getSoilMoisture(x: number, z: number): number {
     if (!this.soilMoisture.inBounds(x, z)) return 0;
     return this.soilMoisture.get(x, z);
+  }
+
+  getVegCover(x: number, z: number): number {
+    if (!this.vegCover.inBounds(x, z)) return 0;
+    return this.vegCover.get(x, z);
   }
 
   /**
@@ -225,6 +262,15 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.soilMoisture.data,
+      },
+      {
+        id: "veg.cover",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.vegCover.data,
       },
       {
         id: "ledger.precipitation",

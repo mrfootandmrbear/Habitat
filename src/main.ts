@@ -207,7 +207,7 @@ function frame(now: number): void {
           ? "dig channel"
           : "predict";
   ui.setStatus(
-    `Slice 5a · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
+    `Slice 5 · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (dropped > 0 ? ` · dropped ${dropped}` : "") +
       (raining ? " · raining" : ""),
   );

@@ -86,6 +86,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "ledger.precipitation",
       "soil.moisture",
       "terrain.elevation",
+      "veg.cover",
       "water.surfaceDepth",
     ]);
 

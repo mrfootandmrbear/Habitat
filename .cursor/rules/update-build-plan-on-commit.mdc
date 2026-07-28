@@ -1,0 +1,20 @@
+---
+description: Keep BUILD_GUIDE / MVP_SCOPE current whenever committing slice work
+alwaysApply: true
+---
+
+# Update the build plan with every commit
+
+When creating a git commit that advances Habitat (sim, UI, playtest, or slice status):
+
+1. **Update `docs/BUILD_GUIDE.md` in the same commit** (or as part of the staged set before `git commit`):
+   - Check off completed DoD items for the slice you touched
+   - Refresh **Current gate** (Pass / In progress / Next)
+   - Keep the summary table for finished slices accurate
+2. **Update `docs/MVP_SCOPE.md` joint slice table** status cells when a slice moves (e.g. Done — playtest Pass, In progress / play, Next)
+3. **Update `README.md` Current slice** when the playable slice or gate changes
+4. Do **not** leave BUILD_GUIDE stale across a feature commit and a later “docs only” cleanup unless the user asked to split commits
+
+Docs-only commits that *are* the plan update are fine. Pure chore commits with no slice progress (typos, lockfile-only) may skip plan edits.
+
+Build plan = `docs/BUILD_GUIDE.md` primarily; `docs/MVP_SCOPE.md` + `README.md` when status/gate changes.
