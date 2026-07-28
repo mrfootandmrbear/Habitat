@@ -29,6 +29,7 @@ describe("PredictionSession write isolation", () => {
     const soilBefore = world.soilMoisture.data.slice();
     const precip = world.precipitationLedger;
     const infil = world.infiltrationLedger;
+    const et = world.etLedger;
 
     const reader = snapshotWaterReader(16, 16, world.water.data);
     session.compare(reader);
@@ -39,6 +40,7 @@ describe("PredictionSession write isolation", () => {
     expect([...world.soilMoisture.data]).toEqual([...soilBefore]);
     expect(world.precipitationLedger).toBe(precip);
     expect(world.infiltrationLedger).toBe(infil);
+    expect(world.etLedger).toBe(et);
   });
 
   it("toggleMark / commit never touch WorldState buffers", () => {

@@ -104,7 +104,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
 | 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; optionally see vegetation blunt runoff. Sandbox only. No win condition (G-001).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. Post-MVP hygiene queue: BUILD_GUIDE §4.1.
 
 ---
 

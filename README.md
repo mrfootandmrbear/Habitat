@@ -32,16 +32,18 @@ npm run conformance
 
 ## Current slice
 
-**Slice 6 — Cover blunts the storm** (E-005) — **playtest Pass** (sim MVP)
+**Current slice**
 
-- Vegetation grows from wet soil, then raises roughness / infiltration so cover retains more water
-- Status `Σw` / `infil`; paired-storm tests green
-- Playtest: [docs/PLAYTEST_SLICE6.md](docs/PLAYTEST_SLICE6.md)
+**Post-MVP hygiene** (after Slice 6 Pass)
+
+- `ledger.et` closes the water balance across daily bands (H-004)
+- D8 accumulation is O(n log n) push-to-receiver (faster berm/dig recompute)
+- Next: ownership test, metric pass, Slice 4b depressions — see BUILD_GUIDE §4.1
 
 ```bash
 npm run dev
 ```
 
-Rain → green → reset water / storm again, or bare reload for A/B.
+Sim MVP (Slices 2–6) remains playable: rain, predict, berm/dig, green cover that retains water.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

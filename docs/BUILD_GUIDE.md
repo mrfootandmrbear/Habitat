@@ -69,13 +69,26 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** Slice 6 playtest **Pass** (sim MVP). Vegetation grows and retains more water. Next: post-MVP or polish.
+**Current gate:** Slice 6 playtest **Pass** (sim MVP). Post-MVP hygiene in progress — see §4.1.
 
 ---
 
 ## 4. Next slices (checklists)
 
-### Slice 4b — Priority-flood depressions *(optional sim hygiene)*
+### 4.1 Post-MVP hygiene *(from Slice 2–6 implementation review)*
+
+Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slice-2-6-implementation-review.md](reviews/2026-07-27-slice-2-6-implementation-review.md)).
+
+- [x] `ledger.et` + multi-day conservation test (H-004, §8.2)  
+- [x] Single-pass O(n log n) D8 accumulation (push-to-receiver)  
+- [ ] Ownership / contributes test; surface debit via inbox or explicit `contributes`  
+- [ ] Stretch golden / determinism schedule past a daily boundary  
+- [ ] Field `range` + bounds/NaN at band commit  
+- [ ] Metric pass (Δx, sim-minute clock) — before Slice 7 systems  
+- [ ] Priority-Flood + flat resolution (promote 4b)  
+- [ ] Symmetry invariant; single-source ledgers; register band phase  
+
+### Slice 4b — Priority-flood depressions *(promote before scenario objectives)*
 
 **Loops.** Sim: honest closed basins / spill. Game: ponds that don’t secretly drain through DEM artifacts.  
 **Register.** H-003; oracle: RichDEM ([EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md)).

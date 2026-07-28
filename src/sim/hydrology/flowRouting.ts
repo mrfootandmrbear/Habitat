@@ -41,7 +41,7 @@ export function computeD8FlowDirection(
   return direction;
 }
 
-/** Cell count contributing to each cell (includes self). */
+/** Cell count contributing to each cell (includes self). O(n log n). */
 export function computeD8Accumulation(
   width: number,
   height: number,
@@ -50,22 +50,25 @@ export function computeD8Accumulation(
 ): Uint32Array {
   const n = width * height;
   const order = Array.from({ length: n }, (_, i) => i);
-  order.sort((a, b) => elevation[b]! - elevation[a]!);
+  // Descending elevation; index tie-break for determinism (§7.2).
+  order.sort((a, b) => {
+    const dh = elevation[b]! - elevation[a]!;
+    return dh !== 0 ? dh : a - b;
+  });
 
   const accumulation = new Uint32Array(n);
+  accumulation.fill(1);
+
   for (const i of order) {
-    accumulation[i] = 1;
-    for (let j = 0; j < n; j++) {
-      const dir = direction[j]!;
-      if (dir < 0) continue;
-      const x = j % width;
-      const z = (j / width) | 0;
-      const nx = x + D8_DX[dir]!;
-      const nz = z + D8_DZ[dir]!;
-      if (nz * width + nx === i) {
-        accumulation[i]! += accumulation[j]!;
-      }
-    }
+    const dir = direction[i]!;
+    if (dir < 0) continue;
+    const x = i % width;
+    const z = (i / width) | 0;
+    const nx = x + D8_DX[dir]!;
+    const nz = z + D8_DZ[dir]!;
+    if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+    const j = nz * width + nx;
+    accumulation[j]! += accumulation[i]!;
   }
   return accumulation;
 }

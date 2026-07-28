@@ -45,6 +45,8 @@ export class WorldState {
   precipitationLedger = 0;
   boundaryOutflowLedger = 0;
   infiltrationLedger = 0;
+  /** Evapotranspiration sink (SIMULATION_MODEL §8.2 / ledger.et). */
+  etLedger = 0;
 
   private readonly delta: Float32Array;
   private readonly hydrology: HeightfieldHydrology;
@@ -164,6 +166,7 @@ export class WorldState {
       if (m[i]! > 0) {
         const evap = Math.min(m[i]!, et);
         m[i]! -= evap;
+        this.etLedger += evap;
       }
     }
     this.syncLedgers();
@@ -215,8 +218,26 @@ export class WorldState {
     this.precipitationLedger = 0;
     this.boundaryOutflowLedger = 0;
     this.infiltrationLedger = 0;
+    this.etLedger = 0;
     this.eventStepsSinceDaily = 0;
     this.syncLedgers();
+  }
+
+  /**
+   * Closed-basin mass check in current depth units (H-004 / §8.2 simplified).
+   * From empty start: precip = surface + soil + et + boundaryOutflow.
+   * (No Δx² / soil.depth until the metric pass; same relative accounting.)
+   */
+  waterBalanceResidual(): number {
+    let surface = 0;
+    let soil = 0;
+    for (let i = 0; i < this.water.data.length; i++) {
+      surface += this.water.data[i]!;
+      soil += this.soilMoisture.data[i]!;
+    }
+    const accounted =
+      surface + soil + this.etLedger + this.boundaryOutflowLedger;
+    return this.precipitationLedger - accounted;
   }
 
   getSoilMoisture(x: number, z: number): number {
@@ -356,6 +377,15 @@ export class WorldState {
         legacy: true,
         data: 0,
       },
+      {
+        id: "ledger.et",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: true,
+        data: 0,
+      },
     ];
     for (const f of fields) this.registry.register(f);
   }
@@ -367,5 +397,6 @@ export class WorldState {
       this.boundaryOutflowLedger;
     (this.registry.get("ledger.infiltration") as { data: number }).data =
       this.infiltrationLedger;
+    (this.registry.get("ledger.et") as { data: number }).data = this.etLedger;
   }
 }

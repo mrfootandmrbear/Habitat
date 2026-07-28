@@ -11,7 +11,7 @@ export const soilWaterProcess: Process = {
   ],
   /** Capacity integrated from prior vegetation contribution (cycle break). */
   lagged: ["soil.infiltrationCapacity"],
-  writes: ["soil.moisture", "soil.infiltrationCapacity"],
+  writes: ["soil.moisture", "soil.infiltrationCapacity", "ledger.et"],
   step(world, dt) {
     world.runSoilWaterStep(dt);
   },
