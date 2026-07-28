@@ -55,8 +55,10 @@ export function fluxStep(
 
     if (totalPositive <= 0) continue;
 
-    const available = Math.min(w, w * maxOutflowFraction);
-    const scale = available / totalPositive;
+    // Cap outflow for stability, but do not rescale above 1 — otherwise
+    // flowRate and dt cancel and every wet cell sheds a fixed fraction.
+    const available = w * Math.min(1, maxOutflowFraction);
+    const scale = Math.min(1, available / totalPositive);
     const outs = [d0 * scale, d1 * scale, d2 * scale, d3 * scale];
 
     let outSum = 0;
