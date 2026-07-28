@@ -26,6 +26,20 @@ When you build a sand castle you are already thinking about how tides and gravit
 
 The idea is scale-invariant: it reads the same at continental scale and at the scale of a tide pool. Scale changes quantity, not rules (DESIGN_WIKI). The current engine is terrestrial — heightfield hydrology — so reefs are a property of the thesis, not a roadmap item.
 
+### 2.1 A *living* sand castle — and what the sand is
+
+Two refinements that carry weight (owner, 2026-07-28):
+
+**The castle becomes alive.** The good end state is not "it survived the tide." It is that the thing you built stopped being inert. Plants take the berm, roots hold what water was pulling apart, and the structure now meets the next storm as something living rather than as a pile. Thriving *is* the castle coming alive.
+
+This is not aspirational — **it already runs**. Slice 6 gives vegetation → roughness and infiltration → water, and Slice 8 gates erosion on cover, which together mean a vegetated berm and a bare one already face the same rain differently. The mechanism has existed since the sim MVP and has never been *shown* to anyone. That is the whole argument for Slice 8c.
+
+**The sand is every substrate nature has to work with.** Not literal sand: soil, clay, gravel, rock, organic matter — the materials a landscape is made of, each behaving differently under the same forces. Sand drains and slumps; clay holds water and holds its shape; rock resists and outlasts; organic matter accumulates and feeds. A castle built of one is not a castle built of another, and that difference is a large part of what makes rebuilding interesting.
+
+Today the model has **one undifferentiated soil** — depth and moisture, with bedrock derived as `elevation − soil.depth` (SIMULATION_MODEL §3.1). The concept is already sanctioned by the register: S-006 says geological history establishes the substrate ecology inherits, and the tools entry already lists substrate among the things a player influences. What is missing is that the substrates differ. Filed as **C-009**.
+
+A consequence worth naming: if sand is substrate, then **digging moves material**. A dig should displace mass, not just lower a number — which turns the open BUILD_GUIDE §4.1 item on berm/dig ↔ `soil.depth` from hygiene into a thesis requirement.
+
 ---
 
 ## 3. What "restoration" means here
@@ -117,6 +131,7 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-006** | Sculpting is abundant; scarcity lives in ecological time |
 | **C-007** | Arrival / colonization as the primary biological verb |
 | **C-008** | Intervention → visible response budget (the RCT3 immediacy constraint) |
+| **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
 
 ---
 

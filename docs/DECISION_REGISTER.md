@@ -1228,6 +1228,7 @@ Ordered by how many other decisions depend on them.
 6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
 7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
 8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
+8b. **C-009** — substrate differentiation (the "sand" of the thesis); gated behind the displaced-mass closeout.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee), priority contingent on C-007.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1318,6 +1319,17 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** S-009 keeps duration in simulation time and T-002 fixes the offered rates, so the budget must be expressed as *sim-time to visible delta at a stated rate*, not as wall-clock. Tier-P measurable (VERIFICATION_POLICY §3) — this is a proxy question, not a taste question, until the proxy is green.
 
 **Leading direction.** State a budget per interaction class (sculpt, force change) and make it a Tier-P check on observable slices. No value proposed yet; measure first.
+
+### C-009 — Substrate differentiation
+**Status:** Open
+
+**Question.** Should the single undifferentiated soil (depth + moisture, bedrock derived — SIMULATION_MODEL §3.1) gain a **material class** — sand, clay, loam, gravel, rock, organic — so that the same rain, the same slope, and the same berm behave differently depending on what they are made of? [THESIS.md](THESIS.md) §2.1: "sand" in the thesis means every substrate nature has to work with.
+
+**Constraints.** GEO-002 earn-its-cost: one added per-cell field is cheap, but each process that reads it (infiltration, erosion resistance, slope stability, soil production, rooting) must justify the coupling rather than sprinkle multipliers. S-006 already establishes that geological history sets the substrate ecology inherits, and the tools entries already list substrate among player-influenceable levers — so the concept is sanctioned; only the differentiation is new. T-004 wants the material table data-driven, not hard-coded. Must not become a paint-a-material tool (N-001) — substrate is inherited from geology and redistributed by processes.
+
+**Leading direction.** Yes, minimally: one owned per-cell material class plus a small data-driven property table (infiltration rate, erodibility, cohesion, water retention), consumed first by the processes that already exist rather than by new ones. Not Locked until a slice shows two substrates producing visibly different outcomes from the same intervention.
+
+**Coupled work.** Berm/dig ↔ `soil.depth` displaced mass (BUILD_GUIDE §4.1) is a prerequisite in spirit: if substrates are the material, an edit must move material.
 
 ---
 
