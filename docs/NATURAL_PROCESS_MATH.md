@@ -26,6 +26,8 @@ Five tests, all derived from decided policy. A process that fails 1–3 should n
 
 A sixth, softer test: **does it teach something transferable?** (P-004). Several models below are worth including largely because the lesson they produce survives the move to a new preserve.
 
+Open-source *implementations* evaluated as study references (not dependencies) live in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md).
+
 ---
 
 ## 2. Tier 1 — the causal spine
