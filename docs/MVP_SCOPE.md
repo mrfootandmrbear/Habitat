@@ -2,7 +2,7 @@
 
 > **Status:** Working draft  
 > **Role:** Defines what the first playable Habitat proves — as a **joint** map of simulation interdependencies and game interdependencies  
-> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md). Slice order may change; the dual-graph rule does not. Detailed execution lives in [BUILD_GUIDE.md](BUILD_GUIDE.md) when authored. Architecture detail lives in [SIMULATION_MODEL.md](SIMULATION_MODEL.md).
+> **Authority:** Subordinate to the [Decision Register](DECISION_REGISTER.md). Slice order may change; the dual-graph rule does not. Detailed execution lives in [BUILD_GUIDE.md](BUILD_GUIDE.md). Architecture detail lives in [SIMULATION_MODEL.md](SIMULATION_MODEL.md).
 
 ---
 
@@ -139,7 +139,7 @@ Before investing in Slice 5 vegetation, run [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | How sim interdependencies are represented |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | How we know a register entry is earned |
 | [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) | External tools to study, not ship |
-| BUILD_GUIDE.md | Per-slice execution checklist (not yet written) |
+| [BUILD_GUIDE.md](BUILD_GUIDE.md) | Per-slice execution checklists |
 | PLAYER_INTERACTION_SPEC.md | Detailed verbs and prediction UX (not yet written) |
 
 When this document conflicts with the register, correct this document or supersede the register explicitly.
