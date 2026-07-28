@@ -94,7 +94,7 @@ Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slic
 
 ### 4.2 Presentation track — volume without voxels *(parallel; T-006 / T-007 / A-005)*
 
-Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-Falling-Sand) and [ccrock4t/3DCellularWorld](https://github.com/ccrock4t/3DCellularWorld) — falling-sand voxel toys that sell “stuff moves through volume.” Catalogued in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Steal presentation patterns; do not adopt voxel CA as authority.**
+Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-Falling-Sand), [ccrock4t/3DCellularWorld](https://github.com/ccrock4t/3DCellularWorld), and [Noniv/snowflow](https://github.com/Noniv/snowflow_demo) — voxel toys and a WebGPU snow deformation demo that sell “stuff moves through / carves the surface.” Catalogued in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Steal presentation patterns; do not adopt voxel CA or GPU deform buffers as authority.**
 
 **Loops.** Sim: none new (observers + FX only). Game: volume and agency read as column-stack × time and cause verbs, not as painted voxels.
 
@@ -104,6 +104,14 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 - Opaque cube water as the primary depth language (prefer continuous depth tint / sheet)
 - Duplicate GPU + CPU rule engines for hydrology
 - Treating “need vertical structure” as “need voxels” — vertical = stacked 2D rasters per column (SIMULATION_MODEL §2)
+- WebGPU-only stack, 90 FPS / heavy post as Definition of Done, or screenshot gate without Tier-P numbers (snowflow-class demos)
+- GPU terrain-state / deform buffer as hydrology or terrain authority — map *ideas* onto owned rasters only
+
+**Steal from snowflow (API shape, not stack):**
+- **Shared surface write path** — one `applySurfaceEdit`-style inbox into owned terrain/water fields (feet, berm, dig, future sediment) rather than per-effect decals
+- **Berm = displaced mass** — trails/edits read as raised edges because mass moved, not because albedo darkened
+- **Beauty ≡ observer sampling** — flow cues / grains sample the same authoritative height/depth law so they do not float
+- **Particles decorate** — spray/grains are presentation; WorldState rasters remain authority (T-006); aligns with deferred grains checkbox below
 
 **Checklist (can interleave with Slice 7+; prefer before heavy visual retunes):**
 

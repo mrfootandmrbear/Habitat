@@ -20,6 +20,7 @@ Survey date: 2026-07-27.
 | **SimpleHydrology** | https://github.com/weigert/SimpleHydrology | Play-feel reference for “water that looks alive on terrain.” C++/OpenGL — algorithms and presentation, not a drop-in. Watch for particle/erosion aesthetics that fight S-004 / N-004 (causal, inspectable). |
 | **3D-Falling-Sand** | https://github.com/NicksterSand/3D-Falling-Sand | Presentation patterns only: lattice cursor, extent cage, lit solid clumps. 20³ voxel CA — **not** Habitat’s authoritative model (T-007). See BUILD_GUIDE §4.2. |
 | **3DCellularWorld** | https://github.com/ccrock4t/3DCellularWorld | Dual readout (mesh vs ray-march), motion-through-volume demoability, property-composed motility → map to parameter bundles. Paint-element UX is a counterexample for A-005. See BUILD_GUIDE §4.2. |
+| **snowflow** | https://github.com/Noniv/snowflow_demo | Shared `brush()` into RGBA surface state (depression + **berm mass** + compression), beauty/shadow-coherent displacement, presentation spray vs swept-mesh wake. WebGPU/Babylon spectacle — **not** Habitat stack or authority (T-006, T-007). Live: https://snowflow-lilac.vercel.app/ . See BUILD_GUIDE §4.2. |
 
 ---
 
@@ -44,6 +45,7 @@ Survey date: 2026-07-27.
 | WebGPU mega-erosion demos | Hyperpoly, TerrainX-class projects | Conflict with T-001, T-006, and “earn its cost.” |
 | Tiny one-off DSM toys | crest, ad-hoc flood-fill demos | Mild reading value at most; not load-bearing. |
 | Falling-sand **as world authority** | Noita clones, Margolus voxel sandboxes shipped as sim | Steal UX cues (BUILD_GUIDE §4.2); never replace heightfield + stacked rasters (T-007, SIMULATION_MODEL §2). |
+| AAA WebGPU spectacle as DoD | snowflow-class demos taken as product bar | Study shared-write / berm-mass presentation; do not import WebGPU-only, 90 FPS post mandate, screenshot-as-gate without Tier-P, or GPU deform as hydrology authority. |
 
 ---
 
@@ -54,8 +56,9 @@ Survey date: 2026-07-27.
 3. **pysheds / RichDEM** — D8, sinks, watersheds for Slice 3+ oracle tests  
 4. **Landlab ecohydrology notebooks** — vegetation ↔ moisture (Slice 5–6)  
 5. **3D-Falling-Sand / 3DCellularWorld** — presentation-only: cage, cursor, dual readout, motion-in-time (BUILD_GUIDE §4.2); do not study as hydrology backends  
-6. **tessapower/hydraulic-erosion** — when terrain evolution lands  
-7. **river-runner** — raindrop / prediction UX for P-006  
+6. **snowflow** — shared surface-write + berm-as-mass presentation; map API shape onto WorldState rasters, not GPU deform authority  
+7. **tessapower/hydraulic-erosion** — when terrain evolution lands  
+8. **river-runner** — raindrop / prediction UX for P-006  
 
 ---
 
