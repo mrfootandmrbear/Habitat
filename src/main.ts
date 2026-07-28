@@ -1,5 +1,5 @@
 import "./style.css";
-import { config } from "./config";
+import { config, type InspectorLayer } from "./config";
 import { SimClock } from "./sim/SimClock";
 import { WorldState } from "./sim/WorldState";
 import { generateMountain } from "./sim/terrain/generateMountain";
@@ -33,11 +33,12 @@ const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
-terrainMesh.updateFrom(model);
+terrainMesh.updateFrom(model, world, "none");
 waterMesh.updateFrom(model);
 
 let raining = false;
 let timeRate: TimeRate = "1x";
+let inspector: InspectorLayer = "none";
 let steps = 0;
 
 const clock = new SimClock({
@@ -48,7 +49,7 @@ const clock = new SimClock({
 
 const ui = mountControls(
   app,
-  { raining, timeRate },
+  { raining, timeRate, inspector },
   {
     onToggleRain: () => {
       raining = !raining;
@@ -58,12 +59,17 @@ const ui = mountControls(
       model.resetWater();
       steps = 0;
       clock.resetDroppedSteps();
-      waterMesh.updateFrom(model);
+      syncMeshes();
     },
     onTimeRate: (rate) => {
       timeRate = rate;
       clock.setTimeScale(TIME_SCALE[rate]);
       ui.setTimeRate(rate);
+    },
+    onInspector: (layer) => {
+      inspector = layer;
+      ui.setInspector(layer);
+      syncMeshes();
     },
   },
 );
@@ -71,6 +77,7 @@ const ui = mountControls(
 let lastFrame = performance.now();
 
 function syncMeshes(): void {
+  terrainMesh.updateFrom(model, world, inspector);
   waterMesh.updateFrom(model);
 }
 
@@ -92,9 +99,10 @@ function frame(now: number): void {
   const dropped = clock.getDroppedSteps();
   const rateLabel = timeRate === "pause" ? "paused" : timeRate;
   ui.setStatus(
-    `Slice 2 · ${rateLabel} · step ${steps}` +
+    `Slice 4 · ${rateLabel} · step ${steps}` +
       (dropped > 0 ? ` · dropped ${dropped}` : "") +
-      (raining ? " · raining" : ""),
+      (raining ? " · raining" : "") +
+      ` · soil ${(world.infiltrationLedger > 0 ? "wet" : "dry")}`,
   );
 
   controls.update();

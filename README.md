@@ -32,13 +32,16 @@ npm run conformance
 
 ## Current slice
 
-**Slice 2 — Simulation infrastructure** (H-002, S-009, T-001, T-006, T-007)
+**Slice 4 — Flow structure, soil storage, inspector overlays** (H-002, H-001, H-003, T-005, W-002)
 
-- Vite / TypeScript / Three.js with sim/render separation
-- `WorldState` owns terrain and water; field registry for Slice 2 fields
-- Event-band process scheduler with `surfaceWaterProcess`
-- No-flow map edges; cumulative precipitation and boundary-outflow ledgers
-- Pause / 1× / 4× / 16× time rates (wall clock only; `simDt` fixed)
-- Automated determinism, time-invariance, and conservation tests (`npm test`)
+- Everything in Slice 2, plus:
+- D8 flow accumulation and watershed labels from terrain (Slice 3)
+- Soil moisture infiltration; ground darkens as soil wets (Slice 4)
+- T-005 inspector dropdown: water, accumulation, watershed, soil moisture
+- Playtest guide: [docs/PLAYTEST_SLICE4.md](docs/PLAYTEST_SLICE4.md)
+
+```bash
+npm run dev   # then follow PLAYTEST_SLICE4.md
+```
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

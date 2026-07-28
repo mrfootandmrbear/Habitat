@@ -82,7 +82,9 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
     const ids = world.registry.list().map((f) => f.id);
     expect(ids).toEqual([
       "ledger.boundaryOutflow",
+      "ledger.infiltration",
       "ledger.precipitation",
+      "soil.moisture",
       "terrain.elevation",
       "water.surfaceDepth",
     ]);

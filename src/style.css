@@ -51,6 +51,16 @@ body,
   border-color: #6fa888;
 }
 
+#inspector {
+  border: 1px solid #3d5c4c;
+  background: #1c3328;
+  color: #d7e6dc;
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  max-width: 12rem;
+}
+
 #status {
   margin-left: 0.35rem;
   font-size: 0.85rem;
