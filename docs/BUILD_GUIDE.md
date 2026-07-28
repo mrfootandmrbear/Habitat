@@ -94,16 +94,18 @@ Summary only — do not reopen unless fixing regressions.
 
 ### 4.0 Autonomous session protocol
 
+Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
+
 Every agent session that advances the sim or build plan:
 
 1. **Classify claims** for the slice as Tier **M** / **P** / **O** ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)).  
 2. **Implement** behind tests/probes — Prefer `npm run probe -- <scenario>` for scenario-scale Tier-M.  
-3. **Green bar before “done”:** `npm test`, `npm run build`, `npm run conformance:check`, `npm run probe -- --all --check`.  
+3. **Green bar before “done”:** `npm test`, `npm run build`, `npm run conformance:check`, `npm run probe -- --all --check` (skill: `/run-gate`).  
 4. **Name Tier-M artifacts** in the commit body when physics change (golden hash, probe baseline, test file). A probe baseline may only move in a commit that says why.  
-5. **No owner ask** unless VERIFICATION_POLICY §4 ask gate passes (one sentence, no numbers). Hygiene / infrastructure / Closeouts: **never** open a playtest.  
+5. **No owner ask** unless VERIFICATION_POLICY §4 ask gate passes (one sentence, no numbers). Hygiene / infrastructure / Closeouts: **never** open a playtest. When the gate passes, write the request with `/write-playtest`.  
 6. **Batch Tier-O** — Presentation + erosion legibility share one future ask; do not drip-feed. The batch **fires** when a third question joins it, or when the next slice cannot start without an answer, whichever comes first (VERIFICATION_POLICY §4).  
-7. **Research discipline** — If acting on an EXTERNAL_REFERENCES steal, cite the register/candidate ID in code or BUILD_GUIDE checklist; if inventing policy, file a candidate first.  
-8. **Close what you proved** — When a candidate's **Judge** in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3 names only CI or agent probes, the agent promotes it itself once the criterion is met, in the same commit as the evidence (DECISION_CONFORMANCE §3.0). When the Judge names the owner, the agent writes the promotion dossier instead and leaves the entry Open. Never leave a question the machine already answered sitting in the owner's queue.  
+7. **Research discipline** — If acting on an EXTERNAL_REFERENCES steal, cite the register/candidate ID in code or BUILD_GUIDE checklist; if inventing policy, file a candidate first (skill: `/study-steal`).  
+8. **Close what you proved** — When a candidate's **Judge** in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3 names only CI or agent probes, the agent promotes it itself once the criterion is met, in the same commit as the evidence (DECISION_CONFORMANCE §3.0; skill: `/promote-candidate`). When the Judge names the owner, the agent writes the promotion dossier instead and leaves the entry Open. Never leave a question the machine already answered sitting in the owner's queue.  
 9. **Refill the queue** — DoD row 10: leave the next-but-one slice specified to §4.3 depth before closing the current one.
 
 ### 4.0.1 Stop conditions — what to do when blocked
@@ -118,7 +120,7 @@ Autonomy needs a defined failure exit, or the two failure modes are idling and i
 | Golden hash or probe baseline changes **unintentionally** | Treat as a defect, not a baseline update. Find the cause before re-committing; an unexplained baseline move is never “done”. |
 | Candidate blocks the slice and its Judge is the owner (e.g. **C-003**) | Write the dossier, park the slice, take the next queue item. Do not implement under an owner-judged Open candidate. |
 
-A blocked note is a normal session outcome. An idle session is not.
+A blocked note is a normal session outcome. An idle session is not. Skill: `/blocked-note` → `docs/blocked/<date>-<slice>.md`, then take the named next item.
 
 ---
 
