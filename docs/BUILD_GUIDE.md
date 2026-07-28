@@ -133,6 +133,12 @@ No Tier-O. Order:
   - [ ] `npm run gate` = `test` + `build` + `conformance:check` + `probe -- --all --check`; CI runs `gate`  
   - [ ] Baselines for the three live scenarios (`paired-storm`, `berm-reroute`, `basin-fill`) committed from the current tree, with the numbers stated in the commit body  
   - Tier-M: a deliberately perturbed constant fails `--check`; an unperturbed run passes. No Tier-O.
+- [ ] **`deep-time` probe** *(do second — it is the cheapest de-risking available)*. The longest run in the entire suite is **180 steps** (`hydrology.determinism.test.ts`). Every payoff the thesis names — erosion, succession, remediation, "come back and see what became of it" — is **decadal**, and nobody has ever run this world that long. SIMULATION_MODEL §7 documents the failure mode precisely: `f32` accumulation over long horizons "loses the increment entirely once the running total is large enough, which reads in play as a slow variable that simply stops moving." Documented, plausible, unmeasured.
+  - [ ] Headless run over a decadal horizon at fixed seed; record what actually moved — elevation, soil depth, cover, ledgers — at intervals, not just at the end  
+  - [ ] Assert slow accumulators are **still changing** late in the run, which is the specific f32-stall failure  
+  - [ ] Report mass residual and step ms across the horizon (feeds **C-008** and **C-012**)  
+  - [ ] P-005's criterion — advance 100 sim-years, reload, advance again, identical hash — is currently unimplemented; this probe is where it lands  
+  - Tier-M only. No Tier-O. If nothing visibly moves over decades, that is the most important finding this project could surface right now, and it changes the ladder rather than the probe.
 - [ ] **Slice manifest validation** — `docs/slices/<slice>.json` per DoD row 9, plus a `conformance:check` pass that fails when a manifest names a test, probe, or field that does not exist. Backfill manifests for Slices 8 and P; earlier slices are grandfathered.  
 - [ ] **5b one-tool — parked, won’t-do.** Berm and dig both shipped and both read as causes (A-005); “one tool only” was a spike constraint on the original prototype, not a register decision, and removing dig would cost a verb to satisfy a constraint nothing cites. Closed by decision, not by work.  
 - [ ] **Berm/dig ↔ `soil.depth` mass** — *thesis-critical, not hygiene.* [THESIS.md](THESIS.md) §2.1: if the "sand" is the substrate, then digging **moves material** rather than lowering a number. Snowflow steal (EXTERNAL_REFERENCES): raise/lower depth with elev so edits read as displaced mass (C-002 / GEO-002; T-006), and **C-009** substrate class has nothing to attach to until this exists. Tier-M: depth+elev delta conservation on brush.  
@@ -185,6 +191,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Register / candidates.** **C-004** (force regime as the post-build verb), **C-008** (response budget), A-005/N-001 boundary — regimes and pulses, never targeting; T-002/S-009 time rates; GEO-002 erosion already implemented.  
 **Bans.** No new authoritative fields. No targeting a force at a location (THESIS §9). No scripted "your berm collapses now" event — the erosion must be the sim's (N-004).
 
+- [ ] **Save / load in the UI** — `save.ts` exists and T-003 is tested, but nothing in `src/ui/` or `main.ts` can save. Today the return visit dies when the tab closes, which makes the thesis loop unavailable across sessions and the shareable seed (THESIS §7) impossible. A return visit that cannot survive a night is not one.  
+- [ ] **Undo** for sculpting (**C-013**) — edits only; once time has advanced the route back is a restore point, never a rewind (S-007). Shares machinery with save/load, which is why they land together.  
 - [ ] Erosion / deposition legible **without** the inspector on player-made terrain — the berm you built visibly changes  
 - [ ] One force dial the player sets before running time (rainfall regime is the cheapest: intensity × duration, authored by the player, seeded per **C-003**)  
 - [ ] Before/after readable across a fast-forward — the return visit needs a *then* and a *now*, not just a now  
@@ -240,6 +248,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 | Slice | Focus | Register |
 |---|---|---|
+| **A** | **Audio — the only Locked entries never planned.** AUD-001/002/003 are all Locked and have never appeared in a slice or a line of code. Silence is a *signal* (AUD-002), not an absence of assets, and THESIS §8's clip test cannot pass in silence. Open sub-question: **C-014** | AUD-001, AUD-002, AUD-003, T-006 |
 | 11 | Light / succession | ES-001 |
 | 12 | Roles / introductions → informs RC-003 | E-*, ES-006 |
 | 13 | Biology → physics integration test | E-005, F-001 |

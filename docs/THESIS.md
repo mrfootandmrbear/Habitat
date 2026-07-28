@@ -26,6 +26,10 @@ When you build a sand castle you are already thinking about how tides and gravit
 
 The idea is scale-invariant: it reads the same at continental scale and at the scale of a tide pool. Scale changes quantity, not rules (DESIGN_WIKI). The current engine is terrestrial — heightfield hydrology — so reefs are a property of the thesis, not a roadmap item.
 
+**What the preserve's own scale is for (owner, 2026-07-28):** *relative* scale — **different habitats available in the same player window.** The preserve should be large enough that distinct habitats emerge and coexist — wet hollow beside dry slope beside channel margin — and small enough that all of them are readable at once. That is W-002's "one continuous landscape with emergent regions" turned into a sizing rule, and it is the standard the extent must be chosen against.
+
+The build does not meet it today: `gridSize: 96` at `worldSize: 48` is a **48-metre plot at half-metre cells** — one patch, not a mosaic. Filed as **C-012**, because the extent and the cell size are both consequences of this criterion rather than free parameters.
+
 ### 2.1 A *living* sand castle — and what the sand is
 
 Two refinements that carry weight (owner, 2026-07-28):
@@ -177,6 +181,9 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
 | **C-010** | Legacy substances (contaminant load) — the toxic-site scenario premise, and the missing substrate for S-007 / S-008 |
 | **C-011** | Real-world intuition is the instrument — no invented materials or forces; nothing to learn that a person does not already know |
+| **C-012** | Preserve extent and resolution follow the habitat-mosaic criterion — several habitats readable in one window |
+| **C-013** | Undo as an affordance of abundant sculpting — edits yes, elapsed ecological time no |
+| **C-014** | How audio derives from simulation state — three Locked entries with no plan |
 
 ---
 

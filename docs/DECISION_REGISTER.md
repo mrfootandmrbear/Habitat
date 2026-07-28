@@ -1230,6 +1230,9 @@ Ordered by how many other decisions depend on them.
 8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
 8b. **C-009** — substrate differentiation (the "sand" of the thesis); gated behind the displaced-mass closeout.
 8c. **C-010** — legacy substances / contaminant load; gated behind C-009, but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise, so C-009's material table must not foreclose it.
+8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
+8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
+8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee), priority contingent on C-007.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1355,6 +1358,39 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** Yes, binding. The strongest single consequence: **no invented materials or forces**, and no mechanic whose behavior must be taught before it can be predicted. Not Locked until an unfamiliar viewer demonstrates it — see DECISION_CONFORMANCE §3, which reuses P-006's behavioral apparatus.
 
 **Relationship to P-006.** Prediction is how this entry is *measured*. If C-011 holds, commit-and-compare is a test of the player's knowledge of the world; if it fails, prediction degrades into guessing at game rules, and P-006's behavioral half will never pass either.
+
+### C-012 — Preserve extent and resolution follow habitat mosaic
+**Status:** Open
+
+**Question.** Are preserve extent and cell size **derived** from one criterion — *several distinct habitats coexist and are simultaneously readable in the player's window* ([THESIS.md](THESIS.md) §2) — rather than chosen as engine parameters?
+
+**Why now.** The build ships `gridSize: 96`, `worldSize: 48` — a 48 m plot at 0.5 m cells. That is a single patch. No wet hollow *beside* a dry slope *beside* a channel margin can emerge at that extent, which means W-002's "one continuous landscape with emergent regions" has nothing to emerge into and U-005's whole-preserve-versus-local-inspection tension does not yet exist.
+
+**Constraints.** W-002 (emergent regions), U-005 (readable whole, inspectable local), **C-011** — scale must be real, since intuition about how far water travels and how big a wetland is comes from the world. **C-008** response budget and the unmeasured Tier-M performance claim both bound it from the other side: extent × resolution sets step cost, and a preserve that cannot answer a sculpt promptly fails a different requirement. GEO-002 earn-its-cost.
+
+**Leading direction.** Set extent from the mosaic criterion first, then derive cell size from the **smallest feature that must read** — likely channel width or wetland margin — and accept whatever grid that implies, subject to a measured step-time budget rather than a guessed one. Both current values are almost certainly too small; neither should be changed without the probe that shows the new size still steps fast enough.
+
+### C-013 — Undo as an affordance of abundant sculpting
+**Status:** Open
+
+**Question.** Does abundant sculpting (**C-006**) require an undo, and what exactly may be undone?
+
+**Why now.** There is no undo anywhere in the build. RCT3's freedom to keep shaping — the origin experience — rests on being able to take an edit back without ceremony, and the register does not mention undo at all.
+
+**Constraints and the hard part.** Undo of an **edit** is uncontroversial. Undo of **elapsed ecological time** is not: S-007 makes hysteresis fundamental and RC-004 makes time the real constraint, so a world where the tide can be un-run contradicts the thesis directly — the sand castle whose collapse you can rewind is not the same object. T-001 determinism and the P-005 save machinery supply the natural mechanism, since a restore point is the same construct as a branch (**C-005**).
+
+**Leading direction.** Undo applies to **edits before time advances**; once the world has run, the way "back" is restoring a branch point, not rewinding history. That keeps sculpting frictionless and keeps consequence real. Not Locked until the boundary is built and does not read as a punishment.
+
+### C-014 — How audio derives from simulation state
+**Status:** Open
+
+**Question.** Is ecological sound **procedurally derived** from registry fields (moisture, cover, flow, fauna presence) or **authored samples triggered** by state thresholds — and how does that stay deterministic (T-001)?
+
+**Why now.** **AUD-001** (sound reflects ecological state), **AUD-002** (silence has ecological meaning) and **AUD-003** (recovery is audible) are all **Locked**, and none of them has ever appeared in a slice, a build plan, or a line of code. This is the only place in the register where locked decisions have never touched the roadmap. It also bears on THESIS §8: twenty seconds of silent water reads dead however good the erosion is, so the clip test cannot pass without an answer.
+
+**Constraints.** T-006 — audio is an observer and must never write authoritative state; T-001 — anything stochastic in the audio layer must not touch sim streams. AUD-002 means quiet is a *signal*, so an ambient bed that never drops out breaches it. U-002 permits stylisation.
+
+**Leading direction.** Sampled sources selected and mixed **from field values**, with silence as a first-class state rather than an absence of assets. Audio remains a pure observer of the registry. Not Locked until one field audibly drives one source and dropping that field produces meaningful silence.
 
 ---
 
