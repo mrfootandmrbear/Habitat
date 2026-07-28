@@ -9,9 +9,9 @@ import type { WaterStateView } from "../sim/types";
 export function worldToGrid(
   worldX: number,
   worldZ: number,
-  width = config.gridSize,
-  height = config.gridSize,
-  worldSize = config.worldSize,
+  width: number = config.gridSize,
+  height: number = config.gridSize,
+  worldSize: number = config.worldSize,
 ): { x: number; z: number } | null {
   const cellW = worldSize / (width - 1);
   const cellH = worldSize / (height - 1);

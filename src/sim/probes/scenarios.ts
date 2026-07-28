@@ -1,7 +1,6 @@
 import { config } from "../../config";
 import { Grid2D } from "../Grid2D";
 import { WorldState } from "../WorldState";
-import { generateMountain } from "../terrain/generateMountain";
 import { totalWaterVolume } from "../hydrology/fluxStep";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
@@ -36,9 +35,17 @@ function writeEvidence(scenario: string, rows: ProbeRecord[]): void {
 }
 
 export function probePairedStorm(): ProbeResult {
-  const terrain = generateMountain(32, 32, 8, 11);
-  const bare = new WorldState(terrain.clone());
-  const veg = new WorldState(terrain.clone());
+  // Match veg-water paired flux: roughness blunts downslope delivery.
+  const w = 16;
+  const h = 8;
+  const ramp = new Grid2D(w, h);
+  for (let z = 0; z < h; z++) {
+    for (let x = 0; x < w; x++) {
+      ramp.set(x, z, (w - 1 - x) * 0.4);
+    }
+  }
+  const bare = new WorldState(ramp.clone());
+  const veg = new WorldState(ramp.clone());
   bare.vegCover.fill(0);
   veg.vegCover.fill(1);
   bare.runVegetationStep(1);
@@ -46,34 +53,65 @@ export function probePairedStorm(): ProbeResult {
   bare.runSoilWaterStep(1);
   veg.runSoilWaterStep(1);
 
-  const run = (world: WorldState): ProbeRecord => {
-    let peak = 0;
-    let timeToPeak = 0;
-    for (let i = 0; i < 120; i++) {
-      world.addRain(config.rainDepthPerEvent);
-      world.runSurfaceWaterStep(config.eventFluxDt);
-      if (i % 5 === 4) world.runSoilWaterStep(1);
-      const vol = totalWaterVolume(world.water.data);
-      if (vol > peak) {
-        peak = vol;
-        timeToPeak = i;
-      }
+  const runFlux = (world: WorldState): ProbeRecord => {
+    world.water.fill(0);
+    for (let z = 0; z < h; z++) {
+      world.water.set(0, z, 0.5);
     }
-    world.runSoilWaterStep(1);
+    for (let i = 0; i < 40; i++) {
+      world.runSurfaceWaterStep(config.eventFluxDt);
+    }
+    const downslope = world.water.get(w - 1, (h / 2) | 0);
     return {
       cover: world.vegCover.get(0, 0),
-      peakSurface: peak,
-      timeToPeak,
-      finalSurface: totalWaterVolume(world.water.data),
-      infiltrated: world.infiltrationLedger,
-      et: world.etLedger,
-      massResidual: world.waterBalanceResidual(),
+      downslope,
+      roughness: world.surfaceRoughness.get(0, 0),
     };
   };
 
-  const records = [
-    { label: "bare", ...run(bare) },
-    { label: "vegetated", ...run(veg) },
+  const bareFlux = runFlux(bare);
+  const vegFlux = runFlux(veg);
+
+  // Separate infil soak on flat (cover raises infiltration capacity).
+  const flat = new Grid2D(12, 12, 1);
+  const bareSoil = new WorldState(flat.clone());
+  const vegSoil = new WorldState(flat.clone());
+  bareSoil.vegCover.fill(0);
+  vegSoil.vegCover.fill(1);
+  bareSoil.runVegetationStep(1);
+  vegSoil.runVegetationStep(1);
+  bareSoil.runSoilWaterStep(1);
+  vegSoil.runSoilWaterStep(1);
+  bareSoil.water.fill(0.4);
+  vegSoil.water.fill(0.4);
+  bareSoil.infiltrationLedger = 0;
+  vegSoil.infiltrationLedger = 0;
+  bareSoil.runSoilWaterStep(1);
+  vegSoil.runSoilWaterStep(1);
+
+  const bareDown = Number(bareFlux.downslope);
+  const vegDown = Number(vegFlux.downslope);
+  if (!(bareDown > vegDown)) {
+    throw new Error(
+      `paired-storm: expected bare downslope (${bareDown}) > vegetated (${vegDown})`,
+    );
+  }
+  const bareInfil = bareSoil.infiltrationLedger;
+  const vegInfil = vegSoil.infiltrationLedger;
+  if (!(vegInfil > bareInfil)) {
+    throw new Error("paired-storm: expected vegetated infil > bare");
+  }
+  const records: ProbeRecord[] = [
+    {
+      label: "bare",
+      ...bareFlux,
+      infiltrated: bareInfil,
+    },
+    {
+      label: "vegetated",
+      ...vegFlux,
+      infiltrated: vegInfil,
+    },
   ];
   writeEvidence("paired-storm", records);
   return { scenario: "paired-storm", records };

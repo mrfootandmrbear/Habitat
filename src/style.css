@@ -20,11 +20,13 @@ body,
   left: 1rem;
   bottom: 1rem;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
   padding: 0.5rem 0.65rem;
   border-radius: 6px;
   background: rgba(8, 14, 11, 0.78);
+  max-width: calc(100vw - 2rem);
 }
 
 #controls button {
@@ -77,6 +79,13 @@ body,
   max-width: 18rem;
 }
 
+#cutaway {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  max-width: 28rem;
+  color: #b8d4c4;
+}
+
 #predict-actions {
   display: flex;
   gap: 0.25rem;
@@ -85,7 +94,9 @@ body,
 
 #status {
   margin-left: 0.35rem;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
   opacity: 0.9;
+  max-width: 42rem;
+  line-height: 1.35;
 }

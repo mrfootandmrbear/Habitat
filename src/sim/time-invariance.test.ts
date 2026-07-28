@@ -50,7 +50,7 @@ describe("time-rate invariance (S-009)", () => {
     expect(at1x.hash).toMatch(/^[0-9a-f]{8}$/);
   });
 
-  it("records dropped steps when maxStepsPerFrame is exceeded", () => {
+  it("records timeDebt when maxStepsPerFrame is exceeded", () => {
     const result = runWithTimeScale(64, 30, 1);
     expect(result.dropped).toBeGreaterThan(0);
   });

@@ -38,6 +38,11 @@ export class SimClock {
     return this.droppedSteps;
   }
 
+  /** Alias for SIMULATION_MODEL §6.4 — dropped sim steps awaiting catch-up. */
+  getTimeDebt(): number {
+    return this.droppedSteps;
+  }
+
   resetDroppedSteps(): void {
     this.droppedSteps = 0;
   }

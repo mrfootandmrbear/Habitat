@@ -32,10 +32,10 @@ npm run conformance
 
 ## Current slice
 
-**Hygiene done** (§4.1). **Next:** presentation track ([BUILD_GUIDE §4.2](docs/BUILD_GUIDE.md)) and/or post-MVP systems.
+**§4.2 presentation substrate done** (cage, snapped cursor, flow cues, cutaway, conservation HUD). Tier-P proxies green.
 
-- Extent cage, snapped siting cursor, motion-in-time, dual readouts — volume as column-stack × time, not voxels
-- Study refs: 3D-Falling-Sand / 3DCellularWorld (presentation only)
+- Optional owner ask: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md)
+- Next systems: Slice 8 (soil legacy) when ready
 
 ```bash
 npm run dev

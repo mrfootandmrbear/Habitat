@@ -97,13 +97,13 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 2 | Infrastructure: WorldState, registry, no-flow, clock | Time rate as attention scale | Done |
 | 3 | Terrain → watershed / accumulation | Read structure via inspector | Done |
 | 4 | Surface → soil moisture | Read soil memory (darkening) | **Done — playtest Pass** |
-| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | Optional |
+| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | **Done** (agent; RichDEM-class fixture) |
 | **5a** | — | **Predict water path / pool** (P-006 mechanical) | **Done — playtest Pass** |
 | **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **Done — playtest Pass** |
 | 5 | Soil → vegetation (one-way) | Green follows wet ground | **Done — playtest Pass** |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
 | 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
-| **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | Next — BUILD_GUIDE §4.2 |
+| **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
 
 **MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. Post-MVP: BUILD_GUIDE §4.1 hygiene (done) + §4.2 presentation track (volume without voxels) in parallel with systems.
 

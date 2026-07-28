@@ -52,6 +52,7 @@ export function mountControls(
   setSitingTool: (tool: SitingTool) => void;
   setStatus: (text: string) => void;
   setHint: (text: string) => void;
+  setCutaway: (text: string) => void;
 } {
   const bar = document.createElement("div");
   bar.id = "controls";
@@ -148,9 +149,13 @@ export function mountControls(
   hint.textContent =
     "Predict: mark wet cells → Commit → rain → Compare (teal/green/red/amber)";
 
+  const cutaway = document.createElement("div");
+  cutaway.id = "cutaway";
+  cutaway.textContent = "Cutaway: hover a cell with a tool";
+
   const status = document.createElement("div");
   status.id = "status";
-  status.textContent = "Habitat · Slice 6";
+  status.textContent = "Habitat";
 
   bar.append(
     rainBtn,
@@ -160,6 +165,7 @@ export function mountControls(
     predictGroup,
     inspectorSelect,
     hint,
+    cutaway,
     status,
   );
   parent.appendChild(bar);
@@ -178,6 +184,9 @@ export function mountControls(
     },
     setHint: (text: string) => {
       hint.textContent = text;
+    },
+    setCutaway: (text: string) => {
+      cutaway.textContent = text;
     },
   };
 }

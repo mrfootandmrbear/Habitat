@@ -10,8 +10,12 @@ import {
 import { createScene } from "./render/Scene";
 import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
+import { createExtentCage } from "./render/ExtentCage";
+import { SitingCursor } from "./render/SitingCursor";
+import { FlowCueMesh } from "./render/FlowCueMesh";
 import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
+import { formatCutaway, type CutawaySample } from "./ui/cutaway";
 import { totalWaterVolume } from "./sim/hydrology/fluxStep";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -38,8 +42,14 @@ const prediction = new PredictionSession(n, n);
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
+const extentCage = createExtentCage(config.worldSize, config.mountainPeak);
+const sitingCursor = new SitingCursor(n, n, config.worldSize);
+const flowCue = new FlowCueMesh(n, n, config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
+scene.add(extentCage);
+scene.add(sitingCursor.group);
+scene.add(flowCue.object);
 terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.updateFrom(model);
 
@@ -49,6 +59,7 @@ let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
+let cutawayCell: { x: number; z: number } | null = null;
 
 const clock = new SimClock({
   simDt: config.simDt,
@@ -94,16 +105,19 @@ const ui = mountControls(
       sitingTool = tool;
       ui.setSitingTool(tool);
       controls.enabled = true;
-      if (tool === "predict") {
+      if (tool === "none") {
+        sitingCursor.setVisible(false);
         ui.setHint(
-          "Click to mark expected wet cells · Commit · rain · Compare",
+          "Look mode · pick a tool for yellow cell cursor + cutaway",
         );
-      } else if (tool === "berm" || tool === "dig") {
-        ui.setHint("Click terrain to site · no drag (orbit still works on look)");
+      } else if (tool === "predict") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Yellow cell = mark · Commit → rain → Compare",
+        );
       } else {
-        ui.setHint(
-          "Predict: mark wet cells → Commit → rain → Compare (teal/green/red/amber)",
-        );
+        sitingCursor.setVisible(true);
+        ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
       }
     },
     onCommitPrediction: () => {
@@ -123,6 +137,25 @@ const ui = mountControls(
 
 const canvas = renderer.domElement;
 
+canvas.addEventListener("pointermove", (e) => {
+  if (sitingTool === "none") return;
+  const cell = pickTerrainCell(e, canvas, camera, terrainMesh.mesh);
+  if (!cell) {
+    sitingCursor.setVisible(false);
+    return;
+  }
+  const y = model.getTerrainHeight(cell.x, cell.z);
+  const cellW = config.worldSize / (n - 1);
+  const ox = -config.worldSize / 2;
+  sitingCursor.setFromWorld(
+    ox + cell.x * cellW,
+    ox + cell.z * cellW,
+    y,
+  );
+  cutawayCell = cell;
+  ui.setCutaway(formatCutaway(sampleCutaway(cell)));
+});
+
 canvas.addEventListener("pointerdown", (e) => {
   if (sitingTool === "none" || e.button !== 0) return;
   pointerDown = { x: e.clientX, y: e.clientY };
@@ -140,6 +173,8 @@ canvas.addEventListener("pointerup", (e) => {
 
   const cell = pickTerrainCell(e, canvas, camera, terrainMesh.mesh);
   if (!cell) return;
+  cutawayCell = cell;
+  ui.setCutaway(formatCutaway(sampleCutaway(cell)));
 
   if (sitingTool === "predict") {
     prediction.toggleMark(cell.x, cell.z);
@@ -157,10 +192,22 @@ canvas.addEventListener("pointerup", (e) => {
 
 let lastFrame = performance.now();
 
+function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
+  return {
+    x: cell.x,
+    z: cell.z,
+    soil: world.getSoilMoisture(cell.x, cell.z),
+    water: model.getWaterDepth(cell.x, cell.z),
+    veg: world.getVegCover(cell.x, cell.z),
+    elev: model.getTerrainHeight(cell.x, cell.z),
+  };
+}
+
 function syncMeshes(): void {
   world.ensureStructureFresh();
   terrainMesh.updateFrom(model, world, inspector, prediction.overlayClassify());
   waterMesh.updateFrom(model);
+  flowCue.updateFrom(model, world);
 }
 
 function predictionStatus(): string {
@@ -177,6 +224,20 @@ function predictionStatus(): string {
     return `pred marking ${nMarks}`;
   }
   return "pred idle";
+}
+
+function conservationLine(): string {
+  let soil = 0;
+  for (let i = 0; i < world.soilMoisture.data.length; i++) {
+    soil += world.soilMoisture.data[i]!;
+  }
+  const surface = totalWaterVolume(world.water.data);
+  const residual = world.waterBalanceResidual();
+  return (
+    `H₂O precip ${world.precipitationLedger.toFixed(1)} · ` +
+    `surf ${surface.toFixed(1)} · soil ${soil.toFixed(1)} · ` +
+    `ET ${world.etLedger.toFixed(1)} · residual ${residual.toFixed(3)}`
+  );
 }
 
 function frame(now: number): void {
@@ -196,9 +257,14 @@ function frame(now: number): void {
     runCompare();
   }
 
-  if (stepsRun > 0) syncMeshes();
+  if (stepsRun > 0) {
+    syncMeshes();
+    if (cutawayCell) {
+      ui.setCutaway(formatCutaway(sampleCutaway(cutawayCell)));
+    }
+  }
 
-  const dropped = clock.getDroppedSteps();
+  const timeDebt = clock.getTimeDebt();
   const rateLabel = timeRate === "pause" ? "paused" : timeRate;
   const toolLabel =
     sitingTool === "none"
@@ -209,11 +275,10 @@ function frame(now: number): void {
           ? "dig channel"
           : "predict";
   ui.setStatus(
-    `Slice 6 · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
-      (dropped > 0 ? ` · dropped ${dropped}` : "") +
+    `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
+      (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
       (raining ? " · raining" : "") +
-      ` · Σw ${totalWaterVolume(world.water.data).toFixed(1)}` +
-      ` · infil ${world.infiltrationLedger.toFixed(1)}`,
+      ` · ${conservationLine()}`,
   );
 
   controls.update();

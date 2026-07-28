@@ -71,7 +71,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** §4.1 hygiene complete. Parallel next work: **§4.2 presentation track** (volume without voxels) and post-MVP systems (Slice 7+) when ready. No open Tier-O playtest from hygiene.
+**Current gate:** §4.2 presentation substrate shipped (Tier-P proxies green). Optional batched Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md). Next systems: Slice 8 when ready.
 
 ---
 
@@ -107,16 +107,26 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 
 **Checklist (can interleave with Slice 7+; prefer before heavy visual retunes):**
 
-- [ ] **Extent cage** — readable preserve / active-wet bounds so surface water isn’t floating in abstract space (U-005 diorama cue)
-- [ ] **Snapped intervention cursor** — cell-lattice siting gizmo for berm/dig/predict; free orbit remains for look, not for “I put the cause *here*”
-- [ ] **Motion-in-time** — animate transfers on the heightfield (sheet flow direction cue, pond stage rise, soil-moisture pulse down a column); volume = stack × time, not a 3D lattice
-- [ ] **Dual readouts** — living diorama mesh + optional inspector / cutaway strip over the same authoritative rasters (T-005); no second sim backend
-- [ ] **Conservation beat** — notebook seed + probe numbers for ledger-closed water (rain → surface → soil → ET / outlet); already partly proven by probes — surface it in play UI when U-006 starts
-- [ ] **Property bundles** — keep material feel as parameter packs (roughness, infil, porosity), not CA neighborhoods; document any new pack as register-cited
-- [ ] **Presentation-only grains** — optional short-lived particles / streaks driven by flux or depth *deltas*; die after a few frames; never own state (T-006)
-- [ ] Owner play only if a Tier-O question appears (e.g. “does the cage / cursor make siting feel like a cause?”); otherwise Tier-P proxy first
+- [x] **Extent cage** — `ExtentCage` wireframe around preserve bounds (U-005)
+- [x] **Snapped intervention cursor** — `SitingCursor` cell gizmo for berm/dig/predict; orbit stays for look
+- [x] **Motion-in-time** — `FlowCueMesh` D8 segments on wet cells (reads depth + flowDirection only)
+- [x] **Dual readouts** — inspector overlays + cutaway strip (soil / water / veg at cursor cell)
+- [x] **Conservation beat** — status HUD: precip · surface · soil · ET · residual (full U-006 later)
+- [x] **Property bundles** — documented below; no CA neighborhoods
+- [ ] **Presentation-only grains** — deferred (flow cues sufficient; Tier-P green without particles)
+- [x] Tier-P proxies in `presentation.proxy.test.ts` — owner play only via batched ask ([PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md))
+
+**Property bundles (material feel = parameter packs, not CA):**
+
+| Pack | Fields | Owner |
+|---|---|---|
+| Surface flow | `baseRoughness`, `vegRoughnessBonus` → `surface.roughness` | vegetation |
+| Infiltration | `infiltrationRate`, `vegInfiltrationBonus` → capacity | soilWater (+ veg contribute) |
+| Storage | `soilPorosity` | soilWater / legacy later |
 
 **Notebook seed (track):** “Water moved through the hollow over time — the ground held it until it spilled.”
+
+**Also shipped with this batch:** RichDEM-class pit DEM fixture; `timeDebt` on HUD; paired-storm probe shows bare > vegetated downslope.
 
 ---
 
@@ -128,7 +138,7 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 - [x] Implement priority-flood (or ε-fill) over routing surface; register derived depression fields per SIMULATION_MODEL §3.9  
 - [x] Declare authority: structure vs dynamic water still as §7  
 - [x] Invariant: flat closed basin conserves volume; filled sink does not invent cliffs to `z=0`  
-- [ ] Golden / fixture vs RichDEM on a small DEM  
+- [x] Golden / fixture vs RichDEM-class on a small DEM (`src/sim/fixtures/pitDem.ts`)  
 - [x] Inspector layer for depression / spill (dev)  
 - [x] Notebook seed: e.g. “This hollow holds water until it reaches the spill elevation.”  
 - [x] ~~Owner play: rain into a known depression; confirm it pools~~ → **agent probe** (`basin-fill`): pooled volume, spill elevation, residual. Machine-verifiable per VERIFICATION_POLICY §3 — no owner-only question in this slice.

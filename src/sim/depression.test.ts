@@ -7,20 +7,38 @@ import {
 import { WorldState } from "./WorldState";
 import { totalWaterVolume } from "./hydrology/fluxStep";
 import { config } from "../config";
+import {
+  FIXTURE_DEPRESSION,
+  FIXTURE_ELEVATION,
+  FIXTURE_FILLED,
+  FIXTURE_H,
+  FIXTURE_W,
+} from "./fixtures/pitDem";
 
 describe("priority flood / depressions (Slice 4b, H-003)", () => {
+  it("matches RichDEM-class fixture fill on the pit DEM", () => {
+    const { filled, depressionDepth } = priorityFloodFill(
+      FIXTURE_W,
+      FIXTURE_H,
+      FIXTURE_ELEVATION,
+    );
+    for (let i = 0; i < filled.length; i++) {
+      expect(filled[i]).toBeCloseTo(FIXTURE_FILLED[i]!, 5);
+      expect(depressionDepth[i]).toBeCloseTo(FIXTURE_DEPRESSION[i]!, 5);
+    }
+  });
+
   it("fills an interior pit to the spill elevation", () => {
     const w = 7;
     const h = 7;
     const elev = new Float32Array(w * h);
-    // High rim, deep center
     for (let z = 0; z < h; z++) {
       for (let x = 0; x < w; x++) {
         const edge = x === 0 || z === 0 || x === w - 1 || z === h - 1;
         elev[z * w + x] = edge ? 5 : 1;
       }
     }
-    elev[3 * w + 3] = 0; // pit
+    elev[3 * w + 3] = 0;
     const { filled, depressionDepth } = priorityFloodFill(w, h, elev);
     expect(filled[3 * w + 3]).toBe(5);
     expect(depressionDepth[3 * w + 3]).toBe(5);
@@ -28,7 +46,6 @@ describe("priority flood / depressions (Slice 4b, H-003)", () => {
 
   it("flat closed basin conserves volume under flux (no z=0 drain)", () => {
     const terrain = new Grid2D(12, 12, 2);
-    // Bowl: lower center, higher rim — floor above elevationFloor
     for (let z = 2; z < 10; z++) {
       for (let x = 2; x < 10; x++) {
         terrain.set(x, z, 1);
@@ -65,7 +82,6 @@ describe("priority flood / depressions (Slice 4b, H-003)", () => {
     }
     let singletons = 0;
     for (const c of counts.values()) if (c === 1) singletons++;
-    // With fill + flat resolution, should not be majority speckles.
     expect(singletons / labels.length).toBeLessThan(0.5);
   });
 
@@ -74,7 +90,6 @@ describe("priority flood / depressions (Slice 4b, H-003)", () => {
     elev.fill(3);
     elev[4] = 3;
     const dir = computeD8FlowDirection(3, 3, elev);
-    // Center should point somewhere (not left as universal sink solely from flats)
     expect(dir[4]).toBeGreaterThanOrEqual(-1);
   });
 });
