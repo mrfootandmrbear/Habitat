@@ -94,5 +94,5 @@ If the verdict is “not fun yet,” the next spike is likely **prediction + one
 | Verdict | Meaning | Next step |
 |---|---|---|
 | **Pass** | Score ≥ 3 and you wanted to intervene or predict | Write MVP_SCOPE + BUILD_GUIDE; continue slice ladder |
-| **Hold** | Score 2 — interesting but flat | Fun spike: add P-006 prediction overlay + one berm tool |
+| **Hold** | Score 2 — interesting but flat | Fun spike: add P-006 prediction overlay + one berm tool ([MVP_SCOPE.md](MVP_SCOPE.md) §4 slices 5a/5b) |
 | **Fail** | Score 1 — watching water is boring | Revisit camera, art direction (ART-001), or core loop thesis |
