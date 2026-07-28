@@ -67,7 +67,9 @@ Most ecological recovery comes from enabling natural processes rather than conti
 Large ecological changes emerge from interactions among many small systems. Wildlife, vegetation, hydrology, disturbance, and succession should interact naturally instead of relying on scripted events whenever practical.
 
 **Knowledge is progression.**  
-Player progression represents growing ecological understanding rather than increasing power. New interventions become available because the player understands when they are appropriate. The player becomes more capable by becoming more knowledgeable.
+Player progression represents growing ecological understanding rather than increasing power. The player becomes more capable by becoming more knowledgeable.
+
+*Scoped 2026-07-28:* this pillar previously read "new interventions become available because the player understands when they are appropriate," which describes a gate. **Sandbox has no gate** — every tool is available from the first minute (G-001, THESIS §4). A scenario *campaign* may introduce methods as situations call for them, which is teaching order, not withheld power. Elsewhere this wiki already states the correct version: readiness is "inferred from current and historical simulation state — not an authored unlock flag" (§2), and the player grows "by recognizing more relationships, not by unlocking shortcuts" (§6).
 
 **Beauty matters.**  
 Habitat is intended to feel like a living work of art. Scientific fidelity supports this goal but does not override it. Visual composition, sound, pacing, and atmosphere should encourage appreciation of the natural world rather than merely communicating information.
@@ -77,6 +79,8 @@ Habitat is intended to feel like a living work of art. Scientific fidelity suppo
 The player is not a god, a city builder, or a resource manager. The player is an ecological steward.
 
 They study landscapes. They identify limiting factors. They make carefully chosen interventions. They watch ecosystems respond. Over time they become capable of recognizing increasingly subtle ecological relationships.
+
+*Read alongside [THESIS.md](THESIS.md) §2:* the felt version of this is closer to **a person building a sand castle** than to a professional steward. You shape ground freely, you think about how the tide and gravity will treat what you made, and you find out. "Steward" describes the player's relationship to outcomes — they do not command them. It does not mean the hand is cautious or the sculpting rationed (**C-006**). Humility here is structural, because the forces are larger than the player, not because the player is careful.
 
 ### What Habitat is
 

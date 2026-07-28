@@ -99,6 +99,13 @@ Bedrock elevation is **not stored**. It is `terrain.elevation − soil.depth`, d
 
 `structure.obstructionHeight` is the field a beaver dam, a check dam, a road berm, or a removed culvert writes. It is read by flow routing as an additive term on the routing surface and by the flux solver as a sill. It exists so that engineering does not require writing another process's terrain (§11).
 
+> **Two fields are expected here and are not yet designed.** [THESIS.md](THESIS.md) calls Habitat a living sand castle where the "sand" is every substrate nature works with, which this table currently represents as one undifferentiated soil.
+>
+> - **C-009 — material class.** A per-cell substrate identity (sand, clay, loam, gravel, rock, organic) plus a **data-driven** property table read by existing processes — infiltration rate, erodibility, cohesion, water retention — rather than a second erosion or infiltration law per material (GEO-002, T-004). Owned by `geomorphology`, decadal, legacy.
+> - **C-010 — legacy substances.** A mobile, transformable quantity (contaminant load is the motivating case) that travels on the *existing* water mass balance, is drawn down by a vegetation-mediated pathway over decades, and gates arrival. Legacy by §12's definition, therefore save-invalidating (T-003). It is the missing substrate for S-007 and S-008, which today have only `soil.porosity`'s compaction memory to stand on.
+>
+> Both are **Open candidates** — design under them as hypotheses, not as settled schema. The binding constraint on anyone touching this table meanwhile: **whatever material representation lands must be able to carry a mobile quantity per cell.** A material table that cannot would have to be rebuilt when C-010 arrives.
+
 Its owner is `structures`, not `engineers`. The same field carries obstruction of two origins — biological (E-005, annual band) and player-sited (A-005/A-006, committed whenever the player acts) — and neither may own it, because a field with two writers has no owner at all. `structures` owns it; `engineers` and `interventions` both contribute through the delta inbox (§11.2), summed in contributor-id order. It sits in the `daily` band so that a player earthwork takes effect at the next day boundary, which is the same boundary at which §7.2 recomputes the cached structural layer — the two would otherwise disagree for the remainder of a storm sequence.
 
 ### 3.2 Surface water

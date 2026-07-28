@@ -59,10 +59,15 @@ Preference, attention, meaning, and whether a stranger would read the world corr
 | **Did you form an expectation, and did you care whether it was right?** | **O** | Playtest (P-006, D-006) |
 | **Would a stranger call this a cause or an outcome?** | **O** | Playtest (A-005, N-001) |
 | **Does it feel like a place worth tending?** | **O** | Playtest (D-005, ART-001) |
-| **Is fast-forward "skipping work" or "choosing attention"?** | **O** | Playtest (T-002, S-009) |
+| **Did you want to run it again with different forces?** | **O** | Playtest (THESIS §4, C-004, C-005) — the thesis question; asked by [playtests/8c-return-visit.md](playtests/8c-return-visit.md) |
+| **Did the thing you built read as *taken* by nature rather than deleted by the game?** | **O** | Playtest (THESIS §5, GEO-002) |
+| **Did something arriving feel earned by the place you made, or like a spawn?** | **O** | Playtest (C-007, N-004) |
 | **Do you want to keep playing / what would raise it a point?** | **O** | Fun gate (MVP_SCOPE §6) |
+| ~~Is fast-forward "skipping work" or "choosing attention"?~~ | — | **Retired 2026-07-28.** Answered by [THESIS.md](THESIS.md) §4: it is neither — fast-forward is the tide, the mechanism by which the payoff arrives. It stops being an owner question and becomes a design commitment. What remains machine-side is S-009 invariance, already covered above. |
 
 When a new claim doesn't fit a row, apply §1 and add the row.
+
+**Before adding a Tier-O row, check it against [THESIS.md](THESIS.md).** A question the thesis already answers is a design commitment, not an owner session — and spending a session re-asking it is the same defect as asking the owner to confirm a passing test.
 
 ---
 
@@ -171,6 +176,7 @@ Tier M and Tier P need a home for scenario-scale measurement that is coarser tha
 
 | Document | Owns |
 |---|---|
+| [THESIS.md](THESIS.md) | Where Habitat came from and what it is trying to feel like — check Tier-O questions against it before spending a session |
 | [DECISION_REGISTER.md](DECISION_REGISTER.md) | What is true about the product |
 | [MVP_SCOPE.md](MVP_SCOPE.md) | Which loops the first playable proves; the fun gate |
 | [BUILD_GUIDE.md](BUILD_GUIDE.md) | How to execute a slice |

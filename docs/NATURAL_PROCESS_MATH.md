@@ -265,6 +265,24 @@ Flagged, not decided. Each of these is a question the survey exposes that curren
 
 ---
 
+### 9.1 Raised by the thesis, not by this survey (2026-07-28)
+
+[THESIS.md](THESIS.md) — the owner's statement of origin and loop — exposed a second set of unrecorded decisions. They are filed in register §16.5 as **C-004**…**C-010** and listed here because several of them land directly on math in this document:
+
+| Candidate | Math it touches |
+|---|---|
+| **C-004** force control as an intervention axis | Climate forcing (§9.1 above) becomes a *player-set regime* rather than a fixed schedule — intensity × duration, seeded and reproducible |
+| **C-005** branch-and-compare | No new math; requires the seeded generators of §14.7 to be branchable and restorable |
+| **C-006** abundant sculpting | No new math; bounds how often the terrain-edit path runs, which is a cost question for §3.8 geomorphology |
+| **C-007** arrival over introduction | Promotes §3.3 Liebig / §8.2 HSI from an inspector layer to the **arrival gate** — the composition rule now decides what establishes, so the min-vs-product choice becomes load-bearing rather than presentational |
+| **C-008** response budget | Time-to-visible-change per interaction class; interacts with the band schedule (§7) — a decadal-band effect cannot answer a sculpt |
+| **C-009** substrate differentiation | Material properties feeding infiltration (§1.4 Curve Number, Green–Ampt), erodibility (§3.8 stream power, RUSLE), and cohesion |
+| **C-010** legacy substances | Advection on the existing water balance, vegetation uptake, decadal decay — the math is transport plus a first-order sink; **do not** reach for a full reactive-transport model (U-002, GEO-002) |
+
+The point of §3.3's limiting-factor math changes most: under C-007 it is not "explain why a patch is poor" but "decide what can live here." Choose the composition rule with that job in mind.
+
+---
+
 ## 10. Source models referenced
 
 Standard, published, and non-proprietary. Listed so derived documents can cite the model rather than re-deriving it.
