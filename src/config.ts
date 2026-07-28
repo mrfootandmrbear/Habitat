@@ -61,8 +61,21 @@ export const config = {
   determinismSteps: 120,
 
   soilPorosity: 0.45,
-  /** Default mobile regolith depth (m) — Slice 8 scaffold; range [0, 5]. */
+  /** Default mobile regolith depth (m) — Slice 8; range [0, 5]. */
   defaultSoilDepthMeters: 0.8,
+  /**
+   * Days between decadal band commits (prototype compression).
+   * SIMULATION_MODEL §6 uses 3600 (10×360-day years); rates are per band call.
+   */
+  decadalDailySteps: 10,
+  /** Soil production P₀ (m / decadal band) at bare bedrock — Heimsath-style. */
+  soilProductionP0: 0.004,
+  /** Characteristic soil depth h₀ (m) for exp(−h/h₀). */
+  soilProductionH0: 0.55,
+  /** Hillslope / channel erosion scale (m / band) at unit forcing (GEO-002). */
+  soilErosionK: 0.003,
+  /** Min D8 accumulation (cells) before channel-style erosion applies. */
+  erosionMinAccumulation: 6,
   /** Per daily band (absolute; soil step ignores integrator dt). */
   infiltrationRate: 0.08,
   etRate: 0.012,

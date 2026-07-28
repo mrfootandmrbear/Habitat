@@ -71,7 +71,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** Slice 8 scaffold in progress (schema v2 + `soil.depth` legacy). Optional Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md).
+**Current gate:** Slice 8 geomorphology + depth·depth storage shipped (Tier-M). Optional Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) — erosion legibility deferred until depth change is visible without inspector.
 
 ---
 
@@ -222,11 +222,11 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 
 ---
 
-### Slice 8 — Soil legacy / erosion memory *(scaffold in progress)*
+### Slice 8 — Soil legacy / erosion memory *(process + storage)*
 
-**Loops.** Sim: soil depth as persistent memory (recovery slows on thin soil later). Game: inspect legacy depth; save invalid without it (T-003).  
+**Loops.** Sim: soil depth as persistent memory (production vs cover-blunted channel erosion); thin soil holds less water. Game: inspect legacy depth; save invalid without it (T-003).  
 **Register.** S-006, S-007, GEO-002, T-003.  
-**Gate.** Schema versioning before first legacy *process* — scaffold lands version + field first.
+**Gate.** Schema versioning before first legacy *process* — scaffold landed version + field first.
 
 - [x] Schema version ≥ 2 + save serialize/apply stub (`src/sim/save.ts`)  
 - [x] Register `soil.depth` (m, [0, 5], owner `geomorphology`, band `decadal`, **legacy: true**)  
@@ -234,9 +234,9 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 - [x] Invariant: omit legacy field → save load fails; round-trip preserves depth + hash  
 - [x] Inspector: soil depth overlay  
 - [x] Notebook seed: e.g. “Thin soil here will take a long time to grow back.”  
-- [ ] Geomorphology process: soil production / erosion couple elev + depth (decadal)  
-- [ ] Wire moisture storage to `moisture · depth · Δx²` in mass balance (when ready)  
-- [ ] Owner play: only when depth becomes visible consequence of erosion — Tier-O later  
+- [x] Geomorphology process: soil production / erosion couple elev + depth (decadal; GEO-002 channel gate)  
+- [x] Wire moisture storage to `moisture · depth` in mass balance  
+- [ ] Owner play: only when depth becomes visible consequence of erosion — Tier-O later (inspector proves encoding; no ask yet)  
 
 ---
 
@@ -247,7 +247,7 @@ Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentatio
 | Slice | Focus | Register |
 |---|---|---|
 | P (§4.2) | Volume-without-voxels presentation | T-005, T-006, T-007, A-005, U-005 |
-| 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 | **Scaffold** — schema + `soil.depth` |
+| 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 | **Process** — production + channel erosion; moisture·depth |
 | 9 | Fire / fuel | ES-002, A-002, A-006 |
 | 10 | Light / succession | ES-001 |
 | 11 | Roles / introductions → informs RC-003 | E-*, ES-006 |

@@ -230,7 +230,7 @@ function predictionStatus(): string {
 function conservationLine(): string {
   let soil = 0;
   for (let i = 0; i < world.soilMoisture.data.length; i++) {
-    soil += world.soilMoisture.data[i]!;
+    soil += world.soilStorageDepth(i);
   }
   const surface = totalWaterVolume(world.water.data);
   const residual = world.waterBalanceResidual();

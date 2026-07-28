@@ -6,6 +6,7 @@ import { SimScheduler } from "./process/scheduler";
 import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
 import { vegetationProcess } from "./process/vegetationProcess";
+import { geomorphologyProcess } from "./process/geomorphologyProcess";
 import { fluxStep } from "./hydrology/fluxStep";
 import {
   computeD8Accumulation,
@@ -19,7 +20,7 @@ import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
 
 /**
  * Owns authoritative world fields and the field registry.
- * Structural flow (3), soil (4), vegetation (5–6), hygiene (ledgers / bounds).
+ * Structural flow (3), soil (4), vegetation (5–6), geomorphology (8), hygiene.
  */
 export class WorldState {
   readonly width: number;
@@ -28,9 +29,9 @@ export class WorldState {
   readonly water: Grid2D;
   readonly soilMoisture: Grid2D;
   /**
-   * Mobile regolith depth (m) — Slice 8 scaffold (SIMULATION_MODEL §3).
+   * Mobile regolith depth (m) — Slice 8 (SIMULATION_MODEL §3).
    * Legacy: cannot be reconstructed from current forcing (T-003 / S-007).
-   * Owner geomorphology; no process writes yet.
+   * Owner geomorphology (production / erosion).
    */
   readonly soilDepth: Grid2D;
   /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
@@ -60,6 +61,8 @@ export class WorldState {
   private readonly etBox: ScalarBox = { value: 0 };
   /** Band phase — event steps since last daily (§12). */
   private readonly bandPhaseBox: ScalarBox = { value: 0 };
+  /** Days since last decadal band (prototype ladder). */
+  private readonly decadalPhaseBox: ScalarBox = { value: 0 };
   /** Integer sim-minute clock (SIMULATION_MODEL §6.1). */
   private readonly simMinutesBox: ScalarBox = { value: 0 };
 
@@ -109,6 +112,7 @@ export class WorldState {
       surfaceWaterProcess,
       soilWaterProcess,
       vegetationProcess,
+      geomorphologyProcess,
     ]);
 
     this.recomputeFlowStructure();
@@ -153,6 +157,13 @@ export class WorldState {
     this.bandPhaseBox.value = v;
   }
 
+  get daysSinceDecadal(): number {
+    return this.decadalPhaseBox.value;
+  }
+  private set daysSinceDecadal(v: number) {
+    this.decadalPhaseBox.value = v;
+  }
+
   get simMinutes(): number {
     return this.simMinutesBox.value;
   }
@@ -178,6 +189,13 @@ export class WorldState {
       this.eventStepsSinceDaily = 0;
       this.scheduler.runBand("daily", this, config.minutesPerDay);
       this.registry.assertBounds("daily");
+
+      this.daysSinceDecadal = this.daysSinceDecadal + 1;
+      if (this.daysSinceDecadal >= config.decadalDailySteps) {
+        this.daysSinceDecadal = 0;
+        this.scheduler.runBand("decadal", this, config.decadalDailySteps);
+        this.registry.assertBounds("decadal");
+      }
     }
   }
 
@@ -237,30 +255,98 @@ export class WorldState {
   runSoilWaterStep(_dt: number): void {
     const w = this.water.data;
     const m = this.soilMoisture.data;
+    const depth = this.soilDepth.data;
     const cap = this.infiltrationCapacity.data;
     const contrib = this.vegInfiltrationContribution.data;
     const porosity = config.soilPorosity;
     const et = config.etRate;
+    const minDepth = 1e-3;
 
     for (let i = 0; i < cap.length; i++) {
       cap[i] = config.infiltrationRate + contrib[i]!;
     }
 
     for (let i = 0; i < w.length; i++) {
+      const h = Math.max(depth[i]!, minDepth);
       const surface = w[i]!;
-      const room = Math.max(0, porosity - m[i]!);
+      // soil.moisture is volumetric fraction; storage depth = m · h (§8 / §8.2).
+      const room = Math.max(0, (porosity - m[i]!) * h);
       const infiltrate = Math.min(surface, cap[i]!, room);
       if (infiltrate > 0) {
         w[i]! -= infiltrate;
-        m[i]! += infiltrate;
+        m[i]! += infiltrate / h;
         this.infiltrationLedger += infiltrate;
       }
-      if (m[i]! > 0) {
-        const evap = Math.min(m[i]!, et);
-        m[i]! -= evap;
+      const storage = m[i]! * h;
+      if (storage > 0) {
+        const evap = Math.min(storage, et);
+        m[i]! = (storage - evap) / h;
         this.etLedger += evap;
       }
     }
+  }
+
+  /**
+   * Decadal soil production + GEO-002 erosion (NATURAL_PROCESS_MATH §3.8).
+   * Production everywhere; channel erosion where accumulation earns cost.
+   * Elev and depth move together so bedrock = elev − depth is invariant.
+   */
+  runGeomorphologyStep(_dt: number): void {
+    this.ensureStructureFresh();
+    const elev = this.terrain.data;
+    const depth = this.soilDepth.data;
+    const moisture = this.soilMoisture.data;
+    const cover = this.vegCover.data;
+    const acc = this.flowAccumulation;
+    const filled = this.filledElevation ?? elev;
+    const dx = config.cellSizeMeters;
+    const zFloor = config.elevationFloor;
+    const p0 = config.soilProductionP0;
+    const h0 = config.soilProductionH0;
+    const kE = config.soilErosionK;
+    const aMin = config.erosionMinAccumulation;
+    const minDepth = 1e-3;
+    let dirty = false;
+
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const h = depth[i]!;
+        const prod = p0 * Math.exp(-h / h0);
+
+        let erode = 0;
+        const a = acc ? acc[i]! : 0;
+        if (a >= aMin) {
+          const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
+          const aNorm = Math.min(1, a / (this.width * this.height));
+          const cFactor = 1 - cover[i]! * 0.85;
+          erode = kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
+        }
+
+        let dh = prod - erode;
+        let nextH = Math.min(5, Math.max(0, h + dh));
+        let actualDh = nextH - h;
+        const nextElev = elev[i]! + actualDh;
+        if (nextElev < zFloor) {
+          actualDh = zFloor - elev[i]!;
+          nextH = Math.min(5, Math.max(0, h + actualDh));
+          actualDh = nextH - h;
+        }
+
+        if (actualDh !== 0) {
+          const oldH = Math.max(h, minDepth);
+          const newH = Math.max(nextH, minDepth);
+          // Conserve column water when depth changes (new production is dry).
+          moisture[i]! = (moisture[i]! * oldH) / newH;
+          if (nextH <= 0) moisture[i]! = 0;
+          depth[i]! = nextH;
+          elev[i]! = elev[i]! + actualDh;
+          dirty = true;
+        }
+      }
+    }
+
+    if (dirty) this.markStructureDirty();
   }
 
   runVegetationStep(_dt: number): void {
@@ -306,6 +392,7 @@ export class WorldState {
     this.infiltrationLedger = 0;
     this.etLedger = 0;
     this.eventStepsSinceDaily = 0;
+    this.daysSinceDecadal = 0;
     this.simMinutes = 0;
   }
 
@@ -315,12 +402,17 @@ export class WorldState {
     return dx * dx;
   }
 
+  /** Soil water storage depth (m) = moisture · soil.depth. */
+  soilStorageDepth(i: number): number {
+    return this.soilMoisture.data[i]! * this.soilDepth.data[i]!;
+  }
+
   waterBalanceResidual(): number {
     let surface = 0;
     let soil = 0;
     for (let i = 0; i < this.water.data.length; i++) {
       surface += this.water.data[i]!;
-      soil += this.soilMoisture.data[i]!;
+      soil += this.soilStorageDepth(i);
     }
     const accounted =
       surface + soil + this.etLedger + this.boundaryOutflowLedger;
@@ -520,6 +612,16 @@ export class WorldState {
         range: [0, config.dailyEventSteps] as const,
       },
       {
+        id: "clock.daysSinceDecadal",
+        units: "days",
+        shape: "scalar" as const,
+        owner: "world",
+        band: "daily" as const,
+        legacy: true,
+        data: this.decadalPhaseBox,
+        range: [0, config.decadalDailySteps] as const,
+      },
+      {
         id: "clock.simMinutes",
         units: "sim-minutes",
         shape: "scalar" as const,
@@ -532,4 +634,23 @@ export class WorldState {
     ];
     for (const f of fields) this.registry.register(f);
   }
+}
+
+/** Max 4-neighbor slope (rise/run) on a heightfield. */
+function neighborSlope(
+  elev: Float32Array,
+  width: number,
+  height: number,
+  x: number,
+  z: number,
+  dx: number,
+): number {
+  const i = z * width + x;
+  const c = elev[i]!;
+  let maxS = 0;
+  if (x > 0) maxS = Math.max(maxS, Math.abs(c - elev[i - 1]!) / dx);
+  if (x + 1 < width) maxS = Math.max(maxS, Math.abs(c - elev[i + 1]!) / dx);
+  if (z > 0) maxS = Math.max(maxS, Math.abs(c - elev[i - width]!) / dx);
+  if (z + 1 < height) maxS = Math.max(maxS, Math.abs(c - elev[i + width]!) / dx);
+  return maxS;
 }

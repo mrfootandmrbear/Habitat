@@ -15,7 +15,7 @@ describe("soil water storage (Slice 4, H-001, H-003)", () => {
 
     let soilSum = 0;
     for (let i = 0; i < world.soilMoisture.data.length; i++) {
-      soilSum += world.soilMoisture.data[i]!;
+      soilSum += world.soilStorageDepth(i);
     }
     expect(soilSum).toBeGreaterThan(0);
     expect(world.infiltrationLedger).toBeGreaterThan(0);
@@ -36,7 +36,7 @@ describe("soil water storage (Slice 4, H-001, H-003)", () => {
 
     let soilSum = 0;
     for (let i = 0; i < world.soilMoisture.data.length; i++) {
-      soilSum += world.soilMoisture.data[i]!;
+      soilSum += world.soilStorageDepth(i);
     }
     expect(soilSum).toBeGreaterThan(0);
     // Infil transfers to soil; ET leaves soil — ledger tracks both.

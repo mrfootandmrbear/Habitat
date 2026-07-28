@@ -32,9 +32,10 @@ npm run conformance
 
 ## Current slice
 
-**Slice 8 scaffold** — schema v2 save stub + legacy `soil.depth` (inspectable). Erosion process not yet wired.
+**Slice 8** — legacy `soil.depth`, schema v2 save, geomorphology (production + cover-blunted channel erosion), moisture·depth storage.
 
 - Optional owner ask still open: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md)
+- Erosion Tier-O deferred until depth change reads without inspector
 
 ```bash
 npm run dev

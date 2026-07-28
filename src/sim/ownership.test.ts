@@ -4,12 +4,14 @@ import { WorldState } from "./WorldState";
 import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
 import { vegetationProcess } from "./process/vegetationProcess";
+import { geomorphologyProcess } from "./process/geomorphologyProcess";
 import type { Process } from "./process/Process";
 
 const PROCESSES: Process[] = [
   surfaceWaterProcess,
   soilWaterProcess,
   vegetationProcess,
+  geomorphologyProcess,
 ];
 
 describe("process ownership (§4 / §5)", () => {
