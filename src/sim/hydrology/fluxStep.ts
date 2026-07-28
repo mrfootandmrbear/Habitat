@@ -1,9 +1,14 @@
 /**
  * Conservative 4-neighbor outflow-flux step.
- * Fixed index order; off-map surface = 0 (edge drain).
+ * Off-map neighbors mirror the cell surface (no-flow, SIMULATION_MODEL §10.1).
  */
 const DX = [0, 1, 0, -1] as const;
 const DZ = [-1, 0, 1, 0] as const;
+
+export type FluxStepResult = {
+  /** Water removed through authored outlets (none in Slice 2). */
+  boundaryOutflow: number;
+};
 
 export function fluxStep(
   width: number,
@@ -14,9 +19,11 @@ export function fluxStep(
   dt: number,
   flowRate: number,
   maxOutflowFraction: number,
-): void {
+  outletCells?: ReadonlySet<number>,
+): FluxStepResult {
   delta.fill(0);
   const n = width * height;
+  let boundaryOutflow = 0;
 
   for (let i = 0; i < n; i++) {
     const w = water[i]!;
@@ -37,7 +44,7 @@ export function fluxStep(
       const nz = z + DZ[dir]!;
       let neighborSurface: number;
       if (nx < 0 || nz < 0 || nx >= width || nz >= height) {
-        neighborSurface = 0;
+        neighborSurface = s;
       } else {
         const ni = nz * width + nx;
         neighborSurface = terrain[ni]! + water[ni]!;
@@ -55,8 +62,6 @@ export function fluxStep(
 
     if (totalPositive <= 0) continue;
 
-    // Cap outflow for stability, but do not rescale above 1 — otherwise
-    // flowRate and dt cancel and every wet cell sheds a fixed fraction.
     const available = w * Math.min(1, maxOutflowFraction);
     const scale = Math.min(1, available / totalPositive);
     const outs = [d0 * scale, d1 * scale, d2 * scale, d3 * scale];
@@ -70,6 +75,8 @@ export function fluxStep(
       const nz = z + DZ[dir]!;
       if (nx >= 0 && nz >= 0 && nx < width && nz < height) {
         delta[nz * width + nx]! += out;
+      } else if (outletCells?.has(i)) {
+        boundaryOutflow += out;
       }
     }
     delta[i]! -= outSum;
@@ -79,4 +86,13 @@ export function fluxStep(
     const next = water[i]! + delta[i]!;
     water[i] = next > 0 ? next : 0;
   }
+
+  return { boundaryOutflow };
+}
+
+/** Sum of all cell depths (m³ proxy when cell area is uniform). */
+export function totalWaterVolume(water: Float32Array): number {
+  let sum = 0;
+  for (let i = 0; i < water.length; i++) sum += water[i]!;
+  return sum;
 }

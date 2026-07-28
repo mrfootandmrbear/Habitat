@@ -1,66 +1,35 @@
-import { config } from "../../config";
-import { Grid2D } from "../Grid2D";
+import type { WorldState } from "../WorldState";
 import type { HydrologyModel } from "./HydrologyModel";
-import { fluxStep } from "./fluxStep";
 
+/**
+ * HydrologyModel view over WorldState (T-007). Heightfield flux is the Slice 1–2
+ * implementation; a different backend can implement the same surface later.
+ */
 export class HeightfieldHydrology implements HydrologyModel {
   readonly width: number;
   readonly height: number;
 
-  private readonly terrain: Grid2D;
-  private readonly water: Grid2D;
-  private readonly delta: Float32Array;
-  private readonly flowRate: number;
-  private readonly maxOutflowFraction: number;
-
-  constructor(
-    terrain: Grid2D,
-    options?: {
-      flowRate?: number;
-      maxOutflowFraction?: number;
-      ownTerrain?: boolean;
-    },
-  ) {
-    this.width = terrain.width;
-    this.height = terrain.height;
-    this.terrain =
-      options?.ownTerrain === false ? terrain : terrain.clone();
-    this.water = new Grid2D(this.width, this.height);
-    this.delta = new Float32Array(this.width * this.height);
-    this.flowRate = options?.flowRate ?? config.flowRate;
-    this.maxOutflowFraction =
-      options?.maxOutflowFraction ?? config.maxOutflowFraction;
+  constructor(private readonly world: WorldState) {
+    this.width = world.width;
+    this.height = world.height;
   }
 
   step(dt: number): void {
-    fluxStep(
-      this.width,
-      this.height,
-      this.terrain.data,
-      this.water.data,
-      this.delta,
-      dt,
-      this.flowRate,
-      this.maxOutflowFraction,
-    );
+    this.world.runSurfaceWaterStep(dt);
   }
 
   addRain(amountPerCell: number): void {
-    if (amountPerCell === 0) return;
-    const data = this.water.data;
-    for (let i = 0; i < data.length; i++) {
-      data[i]! += amountPerCell;
-    }
+    this.world.addRain(amountPerCell);
   }
 
   getTerrainHeight(x: number, z: number): number {
-    if (!this.terrain.inBounds(x, z)) return 0;
-    return this.terrain.get(x, z);
+    if (!this.world.terrain.inBounds(x, z)) return 0;
+    return this.world.terrain.get(x, z);
   }
 
   getWaterDepth(x: number, z: number): number {
-    if (!this.water.inBounds(x, z)) return 0;
-    return this.water.get(x, z);
+    if (!this.world.water.inBounds(x, z)) return 0;
+    return this.world.water.get(x, z);
   }
 
   getSurfaceHeight(x: number, z: number): number {
@@ -68,19 +37,19 @@ export class HeightfieldHydrology implements HydrologyModel {
   }
 
   resetWater(): void {
-    this.water.fill(0);
+    this.world.resetWater();
   }
 
   snapshotWaterDepth(): Float32Array {
-    return new Float32Array(this.water.data);
+    return new Float32Array(this.world.water.data);
   }
 
   setWaterDepth(x: number, z: number, depth: number): void {
-    if (!this.water.inBounds(x, z)) return;
-    this.water.set(x, z, depth);
+    if (!this.world.water.inBounds(x, z)) return;
+    this.world.water.set(x, z, depth);
   }
 
   fillWater(depth: number): void {
-    this.water.fill(depth);
+    this.world.water.fill(depth);
   }
 }

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { config } from "../config";
 import { hashFloat32Buffer } from "./hash";
-import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
-import { SimClock } from "./SimClock";
 import { generateMountain } from "./terrain/generateMountain";
+import { SimClock } from "./SimClock";
+import { WorldState } from "./WorldState";
+import { Grid2D } from "./Grid2D";
 
 function runWithTimeScale(
   timeScale: number,
@@ -16,7 +17,7 @@ function runWithTimeScale(
     config.mountainPeak,
     config.terrainSeed,
   );
-  const model = new HeightfieldHydrology(terrain);
+  const world = new WorldState(terrain);
   const clock = new SimClock({
     simDt: config.simDt,
     maxStepsPerFrame,
@@ -27,15 +28,15 @@ function runWithTimeScale(
   while (steps < targetSteps) {
     const { stepsRun } = clock.tick(config.simDt);
     for (let i = 0; i < stepsRun; i++) {
-      model.addRain(config.rainPerSecond * config.simDt);
-      model.step(config.simDt);
+      world.addRain(config.rainPerSecond * config.simDt);
+      world.stepEvent(config.simDt);
       steps += 1;
       if (steps >= targetSteps) break;
     }
   }
 
   return {
-    hash: hashFloat32Buffer(model.snapshotWaterDepth()),
+    hash: hashFloat32Buffer(world.water.data),
     dropped: clock.getDroppedSteps(),
   };
 }
@@ -66,11 +67,36 @@ describe("time-rate invariance (S-009)", () => {
 });
 
 describe("WorldState terrain ownership", () => {
-  it("hydrology references terrain without cloning when ownTerrain is false", () => {
+  it("hydrology reads terrain owned by WorldState without cloning", () => {
     const terrain = generateMountain(8, 8, 4, 1);
+    const world = new WorldState(terrain);
     const before = terrain.get(2, 2);
-    const model = new HeightfieldHydrology(terrain, { ownTerrain: false });
     terrain.set(2, 2, before + 5);
-    expect(model.getTerrainHeight(2, 2)).toBe(terrain.get(2, 2));
+    expect(world.hydrologyModel.getTerrainHeight(2, 2)).toBe(terrain.get(2, 2));
+  });
+});
+
+describe("field registry (SIMULATION_MODEL §3)", () => {
+  it("registers Slice 2 fields and hashes deterministically", () => {
+    const world = new WorldState(generateMountain(16, 16, 8, 2));
+    const ids = world.registry.list().map((f) => f.id);
+    expect(ids).toEqual([
+      "ledger.boundaryOutflow",
+      "ledger.precipitation",
+      "terrain.elevation",
+      "water.surfaceDepth",
+    ]);
+
+    world.addRain(0.01);
+    const h1 = world.stateHash();
+    const h2 = world.stateHash();
+    expect(h1).toBe(h2);
+    expect(h1).toMatch(/^[0-9a-f]{8}$/);
+  });
+
+  it("updates precipitation ledger when rain is added", () => {
+    const world = new WorldState(new Grid2D(4, 4, 1));
+    world.addRain(0.05);
+    expect(world.precipitationLedger).toBeCloseTo(0.05 * 16, 6);
   });
 });

@@ -220,13 +220,13 @@ Watershed labels and region labels are derived every time they are needed and ne
 
 **Exactly one process is the authoritative writer of each registered field.** The registry records the owner; no other process may write it under any circumstance, including initialization, including "temporarily", including through an aliased buffer.
 
-Three corollaries, each of which the current scaffold fails:
+Three corollaries. Items 1–2 were scaffold defects; both are resolved on the `WorldState` path (Slice 2):
 
-1. **No process holds a copy of a field it does not own.** `HeightfieldHydrology` currently does `this.terrain = terrain.clone()` (`src/sim/hydrology/HeightfieldHydrology.ts:22`). Under this model that line cannot exist. A copy is worse than a second writer, because a second writer produces a visible conflict and a copy produces silent divergence: a player earthwork edits the world's terrain and hydrology keeps routing over the pre-edit surface, with no symptom except that water keeps going the old way (review §1.4). It also blocks E-005, which is **Locked**, and F-001, which requires the write-back path to survive the architecture even while breadth is deferred.
+1. **No process holds a copy of a field it does not own.** `HeightfieldHydrology` reads `terrain.elevation` from `WorldState` without cloning. Direct construction bypassing `WorldState` is test-only.
 
 2. **Non-owners contribute, they do not write.** A process that must change a field it does not own declares `contributes` and writes into that field's delta inbox; the owner integrates the inbox in its own band. §11 specifies the protocol.
 
-3. **The renderer holds read-only views.** `WaterStateView` currently documents T-006 correctly and then returns a writable `Float32Array` (`src/sim/types.ts:8`). The contract must be enforced by the type, not by the docstring — a renderer write to authoritative state is a determinism failure that reproduces only with rendering enabled, which is the worst available failure signature. Views expose element access and a copy-out, never the backing buffer.
+3. **The renderer holds read-only views.** `WaterStateView` exposes getters and `snapshotWaterDepth()` only; live buffers are not exported (T-006).
 
 Ownership is checkable rather than conventional: with `reads` and `writes` declared per process (§5), a build-time pass verifies that every write target is owned by the writing process and every contributed field has an inbox. That check is the whole reason the declarations exist.
 
@@ -472,7 +472,7 @@ Silence would be the violation. A declared, checked, visible boundary is not.
 
 The map edge and a watershed outlet are different things, and conflating them lets the terrain datum silently govern drainage (review §1.3, report §7.4).
 
-The scaffold currently assigns off-map neighbors `neighborSurface = 0` (`src/sim/hydrology/fluxStep.ts:40`). A preserve authored at 200 m therefore has its entire perimeter behaving like a cliff into the void; a test ramp lost roughly 75% of its water in 20 steps. The number 0 there is an array-bounds artifact that has become a physical law.
+The scaffold previously assigned off-map neighbors `neighborSurface = 0`. Slice 2 uses **no-flow mirroring** at map edges (`src/sim/hydrology/fluxStep.ts`). Authored outlets (§10.2) are not yet implemented.
 
 ### 10.1 The edge is closed
 

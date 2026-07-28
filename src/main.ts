@@ -26,7 +26,7 @@ const terrain = generateMountain(
 );
 
 const world = new WorldState(terrain);
-const model = world.hydrology;
+const model = world.hydrologyModel;
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
@@ -83,7 +83,7 @@ function frame(now: number): void {
     if (raining) {
       model.addRain(config.rainPerSecond * config.simDt);
     }
-    model.step(config.simDt);
+    world.stepEvent(config.simDt);
     steps += 1;
   }
 

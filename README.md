@@ -2,7 +2,7 @@
 
 Habitat is an ecological restoration game where the player creates conditions and natural systems do the meaningful work.
 
-Product decisions are governed by the [Decision Register](docs/DECISION_REGISTER.md). How those decisions shape play is explained in the [Design Wiki](docs/DESIGN_WIKI.md). When other documents conflict with the register, either the derived document is corrected or the register is explicitly superseded.
+Product decisions are governed by the [Decision Register](docs/DECISION_REGISTER.md). How those decisions shape play is explained in the [Design Wiki](docs/DESIGN_WIKI.md). Simulation architecture is specified in [SIMULATION_MODEL.md](docs/SIMULATION_MODEL.md). Promotion criteria and the build-to-register ledger live in [DECISION_CONFORMANCE.md](docs/DECISION_CONFORMANCE.md).
 
 ## Run the prototype
 
@@ -17,19 +17,28 @@ Build check:
 npm run build
 ```
 
-Tests:
+Tests and conformance:
 
 ```bash
 npm test
+npm run conformance:check
+```
+
+Regenerate the conformance ledger after doc or citation changes:
+
+```bash
+npm run conformance
 ```
 
 ## Current slice
 
-**Slice 1 — Readable deterministic water** (H-001, H-002, T-001, T-006, T-007)
+**Slice 2 — Simulation infrastructure** (H-002, S-009, T-001, T-006, T-007)
 
-- Vite / TypeScript / Three.js scaffold with sim/render separation
-- Heightfield surface hydrology behind a `HydrologyModel` interface
-- Rain toggle; water flows downhill and pools in basins
-- Automated determinism test (`npm test`)
+- Vite / TypeScript / Three.js with sim/render separation
+- `WorldState` owns terrain and water; field registry for Slice 2 fields
+- Event-band process scheduler with `surfaceWaterProcess`
+- No-flow map edges; cumulative precipitation and boundary-outflow ledgers
+- Pause / 1× / 4× / 16× time rates (wall clock only; `simDt` fixed)
+- Automated determinism, time-invariance, and conservation tests (`npm test`)
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

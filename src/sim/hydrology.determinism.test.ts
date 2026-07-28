@@ -2,11 +2,19 @@ import { describe, expect, it } from "vitest";
 import { config } from "../config";
 import { Grid2D } from "./Grid2D";
 import { hashFloat32Buffer } from "./hash";
-import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
+import { fluxStep, totalWaterVolume } from "./hydrology/fluxStep";
 import { generateMountain } from "./terrain/generateMountain";
+import { WorldState } from "./WorldState";
 
 /** Golden depth hash for default rain schedule (T-001). Update when physics intentionally changes. */
-const GOLDEN_DEPTH_HASH = "93d6ed95";
+const GOLDEN_DEPTH_HASH = "d20e7c4d";
+
+function makeWorld(
+  terrain: Grid2D,
+  options?: { flowRate?: number; maxOutflowFraction?: number },
+): WorldState {
+  return new WorldState(terrain, options);
+}
 
 function runSchedule(seed: number): string {
   const terrain = generateMountain(
@@ -15,12 +23,12 @@ function runSchedule(seed: number): string {
     config.mountainPeak,
     seed,
   );
-  const model = new HeightfieldHydrology(terrain);
+  const world = makeWorld(terrain);
   for (let i = 0; i < config.determinismSteps; i++) {
-    model.addRain(config.rainPerSecond * config.simDt);
-    model.step(config.simDt);
+    world.addRain(config.rainPerSecond * config.simDt);
+    world.stepEvent(config.simDt);
   }
-  return hashFloat32Buffer(model.snapshotWaterDepth());
+  return hashFloat32Buffer(world.water.data);
 }
 
 function rampTerrain(width: number, height: number, slope: number): Grid2D {
@@ -47,8 +55,8 @@ describe("heightfield hydrology (T-001)", () => {
   });
 
   it("moves water downhill into basins (readable pooling)", () => {
-    const terrain = generateMountain(48, 48, 12, 7);
-    const model = new HeightfieldHydrology(terrain);
+    const world = makeWorld(generateMountain(48, 48, 12, 7));
+    const model = world.hydrologyModel;
 
     let basinX = 0;
     let basinZ = 0;
@@ -71,8 +79,8 @@ describe("heightfield hydrology (T-001)", () => {
     }
 
     for (let i = 0; i < 180; i++) {
-      model.addRain(0.03 * config.simDt);
-      model.step(config.simDt);
+      world.addRain(0.03 * config.simDt);
+      world.stepEvent(config.simDt);
     }
 
     const basinDepth = model.getWaterDepth(basinX, basinZ);
@@ -82,24 +90,23 @@ describe("heightfield hydrology (T-001)", () => {
   });
 
   it("runs headlessly without a renderer", () => {
-    const terrain = generateMountain(32, 32, 8, 1);
-    const model = new HeightfieldHydrology(terrain);
-    model.addRain(0.1);
-    model.step(config.simDt);
-    expect(model.snapshotWaterDepth().length).toBe(32 * 32);
+    const world = makeWorld(generateMountain(32, 32, 8, 1));
+    world.addRain(0.1);
+    world.stepEvent(config.simDt);
+    expect(world.water.data.length).toBe(32 * 32);
   });
 });
 
 describe("flux scaling (dt and flowRate matter)", () => {
   it("drains faster with higher flowRate on the same ramp", () => {
     const make = (flowRate: number): number => {
-      const model = new HeightfieldHydrology(rampTerrain(8, 8, 1), {
+      const world = makeWorld(rampTerrain(8, 8, 1), {
         flowRate,
         maxOutflowFraction: 0.5,
       });
-      model.setWaterDepth(1, 4, 1);
-      model.step(1 / 60);
-      return model.getWaterDepth(1, 4);
+      world.water.set(1, 4, 1);
+      world.stepEvent(1 / 60);
+      return world.hydrologyModel.getWaterDepth(1, 4);
     };
 
     const slow = make(0.1);
@@ -111,13 +118,13 @@ describe("flux scaling (dt and flowRate matter)", () => {
 
   it("drains more in one large dt than one small dt", () => {
     const make = (dt: number): number => {
-      const model = new HeightfieldHydrology(rampTerrain(8, 8, 1), {
+      const world = makeWorld(rampTerrain(8, 8, 1), {
         flowRate: 2.5,
         maxOutflowFraction: 0.5,
       });
-      model.setWaterDepth(1, 4, 1);
-      model.step(dt);
-      return model.getWaterDepth(1, 4);
+      world.water.set(1, 4, 1);
+      world.stepEvent(dt);
+      return world.hydrologyModel.getWaterDepth(1, 4);
     };
 
     const fine = make(1 / 60);
@@ -126,18 +133,17 @@ describe("flux scaling (dt and flowRate matter)", () => {
   });
 
   it("does not ring on a near-flat pond after a tiny perturbation", () => {
-    const terrain = new Grid2D(5, 5, 1);
-    const model = new HeightfieldHydrology(terrain, {
+    const world = makeWorld(new Grid2D(5, 5, 1), {
       flowRate: 2.5,
       maxOutflowFraction: 0.5,
     });
-    model.fillWater(1);
-    model.setWaterDepth(2, 2, 1 + 1e-6);
+    world.water.fill(1);
+    world.water.set(2, 2, 1 + 1e-6);
 
     const depths: number[] = [];
     for (let i = 0; i < 8; i++) {
-      model.step(1 / 60);
-      depths.push(model.getWaterDepth(2, 2));
+      world.stepEvent(1 / 60);
+      depths.push(world.hydrologyModel.getWaterDepth(2, 2));
     }
 
     for (const d of depths) {
@@ -148,15 +154,15 @@ describe("flux scaling (dt and flowRate matter)", () => {
 
   it("refines toward similar state when dt is halved (S-009 guard)", () => {
     const run = (dt: number, steps: number): Float32Array => {
-      const model = new HeightfieldHydrology(rampTerrain(16, 16, 0.5), {
+      const world = makeWorld(rampTerrain(16, 16, 0.5), {
         flowRate: 2.5,
         maxOutflowFraction: 0.5,
       });
       for (let i = 0; i < steps; i++) {
-        model.addRain(0.02 * dt);
-        model.step(dt);
+        world.addRain(0.02 * dt);
+        world.stepEvent(dt);
       }
-      return model.snapshotWaterDepth();
+      return new Float32Array(world.water.data);
     };
 
     const coarse = run(1 / 30, 60);
@@ -178,17 +184,59 @@ describe("flux scaling (dt and flowRate matter)", () => {
 
 describe("T-006 readonly sim view", () => {
   it("WaterStateView has no mutable buffer accessors", () => {
-    const terrain = generateMountain(16, 16, 8, 3);
-    const model = new HeightfieldHydrology(terrain);
+    const world = makeWorld(generateMountain(16, 16, 8, 3));
+    const model = world.hydrologyModel;
     expect("getWaterDepthBuffer" in model).toBe(false);
     expect("getTerrainHeightBuffer" in model).toBe(false);
   });
 
   it("snapshotWaterDepth returns a copy", () => {
-    const model = new HeightfieldHydrology(new Grid2D(4, 4, 1));
-    model.setWaterDepth(1, 1, 0.5);
-    const snap = model.snapshotWaterDepth();
+    const world = makeWorld(new Grid2D(4, 4, 1));
+    world.water.set(1, 1, 0.5);
+    const snap = world.hydrologyModel.snapshotWaterDepth();
     snap[5] = 99;
-    expect(model.getWaterDepth(1, 1)).toBe(0.5);
+    expect(world.hydrologyModel.getWaterDepth(1, 1)).toBe(0.5);
+  });
+});
+
+describe("Slice 2 hydrology infrastructure", () => {
+  it("conserves water on a closed basin with no-flow edges", () => {
+    const world = makeWorld(new Grid2D(8, 8, 1));
+    world.water.fill(0.5);
+    const initial = totalWaterVolume(world.water.data);
+
+    for (let i = 0; i < 40; i++) {
+      world.stepEvent(1 / 60);
+    }
+
+    expect(totalWaterVolume(world.water.data)).toBeCloseTo(initial, 5);
+    expect(world.boundaryOutflowLedger).toBe(0);
+  });
+
+  it("drains faster on a steep ramp than a shallow ramp", () => {
+    const runTopCell = (slope: number): number => {
+      const world = makeWorld(rampTerrain(12, 12, slope), {
+        flowRate: 2.5,
+        maxOutflowFraction: 0.5,
+      });
+      world.water.set(2, 6, 1);
+      for (let i = 0; i < 30; i++) world.stepEvent(1 / 60);
+      return world.hydrologyModel.getWaterDepth(2, 6);
+    };
+
+    const steepRemaining = runTopCell(2);
+    const shallowRemaining = runTopCell(0.2);
+    expect(steepRemaining).toBeLessThan(shallowRemaining);
+  });
+
+  it("does not drain flat ponds through map edges (regression)", () => {
+    const terrain = new Grid2D(6, 6, 10);
+    const water = new Float32Array(36);
+    water.fill(1);
+    const delta = new Float32Array(36);
+
+    fluxStep(6, 6, terrain.data, water, delta, 1 / 60, 2.5, 0.5);
+
+    expect(totalWaterVolume(water)).toBeCloseTo(36, 4);
   });
 });
