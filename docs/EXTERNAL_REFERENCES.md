@@ -6,7 +6,7 @@
 
 **Policy.** Prefer **study clones and offline oracles** over vendoring. Integrating third-party simulation packages would fight T-001 (determinism), T-004 (data-driven content), T-006 (sim/render separation), and single-writer field ownership.
 
-Survey date: 2026-07-27.
+Survey date: 2026-07-28 (multi-state water pass added).
 
 ---
 
@@ -15,6 +15,7 @@ Survey date: 2026-07-27.
 | Reference | URL | Use for Habitat |
 |---|---|---|
 | **OpenFloodLab** | https://github.com/taeyeons/OpenFloodLab | Closest architecture peer: browser TypeScript shallow-water, pause/speed, mass-balance documentation, CPU reference vs WebGL path. Study structure and audit patterns — not a library to import. Low stars; treat as a peer prototype. |
+| **GWSWEX** | https://github.com/veethahavya-CU-cz/GWSWEX | Clearest **multi-store** API: surface ponding (SW) · unsaturated layers (UZ) · groundwater head/volume (GW) with per-step mass-balance history. Study compartment list + ledger shape for a future baseflow store — do not ship Richards/Celia solvers. |
 | **pysheds** | https://github.com/pysheds/pysheds | Offline oracle for watershed delineation and accumulation. Generate known-good labels on a DEM; compare to Slice 3 `flowRouting.ts` tests. |
 | **RichDEM** | https://github.com/r-barnes/richdem | Priority-flood / depression filling (Barnes 2014). Gold standard before Habitat implements NATURAL_PROCESS_MATH §1.3. Offline validation only. |
 | **SimpleHydrology** | https://github.com/weigert/SimpleHydrology | Play-feel reference for “water that looks alive on terrain.” C++/OpenGL — algorithms and presentation, not a drop-in. Watch for particle/erosion aesthetics that fight S-004 / N-004 (causal, inspectable). |
@@ -28,10 +29,32 @@ Survey date: 2026-07-27.
 
 | Reference | URL | When |
 |---|---|---|
-| **Landlab** | https://github.com/landlab/landlab | Slice 5–6+. Closest scientific analogue to Process + registry. Ecohydrology / vegetation CA notebooks for moisture↔plant loops. Python research toolkit — study coupling, don’t ship. |
+| **SHUD** | https://github.com/SHUD-System/SHUD | Fully coupled FVM: ponding · soil moisture · GW · river stage (Duffy two-state integral balance). Oracle for coupling / state naming after a Habitat GW store exists. |
+| **VIC** | https://github.com/UW-Hydro/VIC | Macroscale land surface; **lake/wetland storage** with dynamic area vs stage. Playbook for depression ponds as a named storage (ties to Priority-Flood spill). |
+| **CWatM** | https://github.com/iiasa/CWatM | Full cycle modules: snow · soil · GW · lakes/reservoirs · routing (+ human demand). Steal modular *store list*, not the global model. |
+| **GSFLOW** | https://github.com/rniswon/gsflow_v2 | USGS PRMS + MODFLOW integrated watershed. Offline validation only when GW/baseflow fidelity is in question. |
+| **H2MV** | https://github.com/EarthyScience/h2mv | Hybrid physics–ML water cycle with **mass balance enforced every step** (soil, GW, snow, runoff, TWS + veg). Steal constrained-ledger pattern; do not adopt NN cores as authority (T-001). |
+| **HMC** | https://github.com/c-hydro/hmc-dev | Distributed continuum: soil · GW · snow · routing. Concepts only (Fortran/HPC). |
+| **Landlab** | https://github.com/landlab/landlab | Closest scientific analogue to Process + registry. Ecohydrology / vegetation CA notebooks for moisture↔plant loops. Python research toolkit — study coupling, don’t ship. |
 | **hydraulic-erosion** (tessapower) | https://github.com/tessapower/hydraulic-erosion | Slice 8 / GEO-002. Same stack (Three.js, Vite, TypeScript) for comparing erosion algorithms. Terrain *authoring*, not Habitat’s water→habitat loop. |
 | **river-runner** | https://github.com/sdl60660/river-runner | P-006 / observation UX. Raindrop-to-outlet path as an attention mechanic. Data/UX idea only. |
 | **WhiteboxTools** | https://github.com/jblindsay/whitebox-tools | Occasional offline GIS check: “does our stream overlay match a DEM toolbox?” Overkill for day-to-day. |
+| **hydro-sim** (Aperocky) | https://github.com/Aperocky/hydro-sim | Browser TS basins / lakes / overflow. Mild peer for pond fill UX; weak closed-loop soil/GW. |
+| **HydroLang** | https://github.com/uihilab/HydroLang | Browser hydro toolbox (lumped rainfall–runoff, stats). Analysis framework — not a preserve WorldState. |
+
+---
+
+## Multi-state / closed-loop water (survey note)
+
+**Closed loop** here means one conserved mass among **named storages**, with auditable fluxes — not a single wetness scalar.
+
+| Habitat today | Common next stores (study above) |
+|---|---|
+| precip ledger → **surface depth** → **soil moisture · depth** → ET + boundary outflow | **Groundwater / baseflow** (streams persist between storms); **snow**; **channel/lake stage** as storage |
+
+**Steal:** compartment list + per-step Δstore ledgers (GWSWEX, H2MV, OpenFloodLab); lake area↔storage (VIC); Duffy-style two-state naming (SHUD).  
+**Ban as authority:** Richards/MODFLOW in-browser; ML water-cycle cores; surface-only spectacle without soil/GW stores.  
+**Next ROI for Habitat:** cheap GW/baseflow store (NATURAL_PROCESS_MATH §4 Darcy / Boussinesq) so dry-out between storms is a storage story, not an ET leak.
 
 ---
 
@@ -42,6 +65,8 @@ Survey date: 2026-07-27.
 | Ecosystem / evolution games | ecosim, evoli, similar | Wrong fantasy vs D-001, D-002, N-001. Pacing maybe; mechanics no. |
 | AI pathfinding “flow fields” | flow-field-ts, tower-defense flow fields | Unrelated to hydrologic D8 routing. |
 | Heavy SWE / stormwater | SWMM, ANUGA, coastal shallow-water suites | Fidelity Habitat does not need (U-002, GEO-002). |
+| Richards / MODFLOW **as browser authority** | GWSWEX implicit Celia solver, GSFLOW MODFLOW core shipped in-client | Study equations offline; Habitat stays heightfield + stacked rasters (T-007, GEO-002). |
+| ML water-cycle **as sim core** | H2MV neural parameterizations treated as WorldState | Constrained ledgers yes; nondeterministic / opaque nets no (T-001, S-004). |
 | WebGPU mega-erosion demos | Hyperpoly, TerrainX-class projects | Conflict with T-001, T-006, and “earn its cost.” |
 | Tiny one-off DSM toys | crest, ad-hoc flood-fill demos | Mild reading value at most; not load-bearing. |
 | Falling-sand **as world authority** | Noita clones, Margolus voxel sandboxes shipped as sim | Steal UX cues (BUILD_GUIDE §4.2); never replace heightfield + stacked rasters (T-007, SIMULATION_MODEL §2). |
@@ -52,13 +77,15 @@ Survey date: 2026-07-27.
 ## Recommended study order
 
 1. **OpenFloodLab** — solver/docs patterns vs `fluxStep` + ledgers  
-2. **SimpleHydrology** — fun bar for water playtests ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md))  
-3. **pysheds / RichDEM** — D8, sinks, watersheds for Slice 3+ oracle tests  
-4. **Landlab ecohydrology notebooks** — vegetation ↔ moisture (Slice 5–6)  
-5. **3D-Falling-Sand / 3DCellularWorld** — presentation-only: cage, cursor, dual readout, motion-in-time (BUILD_GUIDE §4.2); do not study as hydrology backends  
-6. **snowflow** — shared surface-write + berm-as-mass presentation; map API shape onto WorldState rasters, not GPU deform authority  
-7. **tessapower/hydraulic-erosion** — when terrain evolution lands  
-8. **river-runner** — raindrop / prediction UX for P-006  
+2. **GWSWEX** — SW / UZ / GW compartment + mass-balance history vs Habitat precip · surface · soil · ET residual  
+3. **SimpleHydrology** — fun bar for water playtests ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md))  
+4. **pysheds / RichDEM** — D8, sinks, watersheds for Slice 3+ oracle tests  
+5. **Landlab ecohydrology notebooks** — vegetation ↔ moisture (Slice 5–6)  
+6. **3D-Falling-Sand / 3DCellularWorld** — presentation-only: cage, cursor, dual readout, motion-in-time (BUILD_GUIDE §4.2); do not study as hydrology backends  
+7. **snowflow** — shared surface-write + berm-as-mass presentation; map API shape onto WorldState rasters, not GPU deform authority  
+8. **VIC lake/wetland + SHUD state naming** — when ponds / baseflow become named stores  
+9. **tessapower/hydraulic-erosion** — when terrain evolution lands  
+10. **river-runner** — raindrop / prediction UX for P-006  
 
 ---
 
@@ -67,9 +94,11 @@ Survey date: 2026-07-27.
 | Effort | Action |
 |---|---|
 | Hours | Read OpenFloodLab’s numerical/architecture docs beside Habitat’s flux + ledger code |
+| Hours | Skim GWSWEX `get_state` / `get_mass_balance` API; sketch Habitat field IDs for a future GW store without implementing Richards |
 | Hours | Play SimpleHydrology (or watch demos) before scoring Slice 4 playtest fun |
 | Half-day | Export a Habitat mountain DEM; run pysheds (and later RichDEM fill) as CI-adjacent golden fixtures |
 | Later slice | Port *ideas* from RichDEM priority-flood into Habitat’s own TS, with register-cited invariants — do not link the C++ library into the browser bundle |
+| Later slice | Add a cheap baseflow / GW store (NATURAL_PROCESS_MATH §4) so inter-storm stream persistence is a storage loop |
 
 ---
 
