@@ -13,10 +13,15 @@ import {
   FIXTURE_FILLED,
   FIXTURE_H,
   FIXTURE_W,
+  NESTED_DEPRESSION,
+  NESTED_ELEVATION,
+  NESTED_FILLED,
+  NESTED_H,
+  NESTED_W,
 } from "./fixtures/pitDem";
 
 describe("priority flood / depressions (Slice 4b, H-003)", () => {
-  it("matches RichDEM-class fixture fill on the pit DEM", () => {
+  it("matches the hand-derived fill on the single-pit DEM", () => {
     const { filled, depressionDepth } = priorityFloodFill(
       FIXTURE_W,
       FIXTURE_H,
@@ -26,6 +31,34 @@ describe("priority flood / depressions (Slice 4b, H-003)", () => {
       expect(filled[i]).toBeCloseTo(FIXTURE_FILLED[i]!, 5);
       expect(depressionDepth[i]).toBeCloseTo(FIXTURE_DEPRESSION[i]!, 5);
     }
+  });
+
+  it("resolves a nested basin to two different spill levels", () => {
+    const { filled, depressionDepth } = priorityFloodFill(
+      NESTED_W,
+      NESTED_H,
+      NESTED_ELEVATION,
+    );
+    for (let i = 0; i < filled.length; i++) {
+      expect(filled[i]).toBeCloseTo(NESTED_FILLED[i]!, 5);
+      expect(depressionDepth[i]).toBeCloseTo(NESTED_DEPRESSION[i]!, 5);
+    }
+  });
+
+  it("nested pit fills above the outer basin, not to the global spill", () => {
+    // The discriminating assertion, stated on its own so a regression names
+    // itself: the pit escapes over its 7-ridge, the outer basin over the
+    // 5-notch. An implementation that fills everything to one spill elevation
+    // passes the single-pit fixture and fails here.
+    const { filled } = priorityFloodFill(
+      NESTED_W,
+      NESTED_H,
+      NESTED_ELEVATION,
+    );
+    const at = (x: number, z: number): number => filled[z * NESTED_W + x]!;
+    expect(at(3, 3)).toBe(7); // inner pit → inner ridge
+    expect(at(3, 1)).toBe(5); // outer basin → rim notch
+    expect(at(3, 3)).toBeGreaterThan(at(3, 1));
   });
 
   it("fills an interior pit to the spill elevation", () => {

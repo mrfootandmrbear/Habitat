@@ -10,6 +10,26 @@ Survey date: 2026-07-28 (multi-state water pass added).
 
 ---
 
+## Study log
+
+The tables below are a **reading list** — what might be worth studying. This section is the **record** — what was actually studied, what came back, and where it landed. A reference is only as useful as the note it leaves behind, and on a solo project with long gaps and cold-start agent sessions, nobody remembers the July reading in October.
+
+**Rule.** When a commit acts on a reference, add or update its row here in the same commit — steal *and* rejection. "No record" is an honest value; a blank row is not. If a steal lands in code, name the file.
+
+| Reference | Studied | What was taken | What was rejected | Landed in |
+|---|---|---|---|---|
+| **RichDEM** | Algorithm only, via Barnes, Lehman & Mulla 2014 (NATURAL_PROCESS_MATH §10). **The tool has never been run.** | Priority-Flood fill semantics: `filled = max(elev, min-over-paths path-max)` (H-003) | Linking the C++ library; treating our fixtures as tool-generated output | `hydrology/flowRouting.ts` `priorityFloodFill`; `fixtures/pitDem.ts` (hand-derived — single-pit + nested-basin, 2026-07-28) |
+| **snowflow** | Demo + API shape, 2026-07-28 | Berm reads as displaced mass; shared surface write; observers sample beauty rather than authoring it (C-002 / GEO-002) | WebGPU deform as hydrology authority; 90 FPS as DoD; screenshot-as-gate (T-006, T-007) | BUILD_GUIDE §4.2 presentation substrate; the depth↔elev mass item is still **open** in §4.1 |
+| **GWSWEX** | API/compartment shape read; no code run | SW / UZ / GW compartment list + per-step Δstore ledger as the shape for a cheap store (**C-001**) | Richards / Celia solver in-browser | Register **C-001**, BUILD_GUIDE §4.3 — **not yet implemented** |
+| **3D-Falling-Sand** · **3DCellularWorld** | Presentation pass, 2026-07-28 | Extent cage, snapped lattice cursor, dual readout, motion-in-time | Voxel CA as world authority (T-007); paint-element UX as a *counterexample* for A-005 | BUILD_GUIDE §4.2 — `ExtentCage.ts`, `SitingCursor.ts`, `FlowCueMesh.ts` |
+| **pysheds** | **No record.** Listed as a Slice 3 oracle; no fixture or artifact exists in the repo | — | — | Nothing. The accumulation tests are self-derived |
+| **OpenFloodLab** · **Landlab** · **SimpleHydrology** | **No record** — top of the study order, no evidence either was opened | — | — | Nothing |
+| **VIC** · **SHUD** · **CWatM** · **GSFLOW** · **H2MV** · **HMC** · others in *Helpful later* | Not yet — gated on a GW store existing | — | — | Nothing |
+
+**Standing correction (2026-07-28).** Docs previously called the priority-flood fixture a "RichDEM oracle." It is hand-derived from the published algorithm; RichDEM was never executed. VERIFICATION_POLICY §3 and MVP_SCOPE now say so. Either run the tool and regenerate, or keep the honest wording — do not restore the stronger claim.
+
+---
+
 ## Helpful now
 
 | Reference | URL | Use for Habitat |
@@ -17,7 +37,7 @@ Survey date: 2026-07-28 (multi-state water pass added).
 | **OpenFloodLab** | https://github.com/taeyeons/OpenFloodLab | Closest architecture peer: browser TypeScript shallow-water, pause/speed, mass-balance documentation, CPU reference vs WebGL path. Study structure and audit patterns — not a library to import. Low stars; treat as a peer prototype. |
 | **GWSWEX** | https://github.com/veethahavya-CU-cz/GWSWEX | Clearest **multi-store** API: surface ponding (SW) · unsaturated layers (UZ) · groundwater head/volume (GW) with per-step mass-balance history. Study compartment list + ledger shape for Slice 8b under **C-001** — do not ship Richards/Celia solvers. |
 | **pysheds** | https://github.com/pysheds/pysheds | Offline oracle for watershed delineation and accumulation. Generate known-good labels on a DEM; compare to Slice 3 `flowRouting.ts` tests. |
-| **RichDEM** | https://github.com/r-barnes/richdem | Priority-flood / depression filling (Barnes 2014). Gold standard before Habitat implements NATURAL_PROCESS_MATH §1.3. Offline validation only. |
+| **RichDEM** | https://github.com/r-barnes/richdem | Priority-flood / depression filling (Barnes 2014). Gold standard before Habitat implements NATURAL_PROCESS_MATH §1.3. Offline validation only. **Implement from the paper, not the repo** — the published algorithm is the source; the C++ is a reading aid. Status: paper used, tool not run (study log). |
 | **SimpleHydrology** | https://github.com/weigert/SimpleHydrology | Play-feel reference for “water that looks alive on terrain.” C++/OpenGL — algorithms and presentation, not a drop-in. Watch for particle/erosion aesthetics that fight S-004 / N-004 (causal, inspectable). |
 | **3D-Falling-Sand** | https://github.com/NicksterSand/3D-Falling-Sand | Presentation patterns only: lattice cursor, extent cage, lit solid clumps. 20³ voxel CA — **not** Habitat’s authoritative model (T-007). See BUILD_GUIDE §4.2. |
 | **3DCellularWorld** | https://github.com/ccrock4t/3DCellularWorld | Dual readout (mesh vs ray-march), motion-through-volume demoability, property-composed motility → map to parameter bundles. Paint-element UX is a counterexample for A-005. See BUILD_GUIDE §4.2. |
@@ -109,4 +129,6 @@ Survey date: 2026-07-28 (multi-state water pass added).
 - What the build must prove → [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)  
 - Execution order + autonomous protocol → [BUILD_GUIDE.md](BUILD_GUIDE.md)  
 
-**Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**, **C-002**, **C-003**). Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.
+**Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**, **C-002**, **C-003**), and must add its row to the **Study log** in the same commit. Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.
+
+**Sourcing.** Where a reference has a published paper (NATURAL_PROCESS_MATH §10 lists one for nearly every algorithm here), implement from the paper. The repository is for reading and for oracles, not for transcription — which keeps the implementation ours, keeps it citable, and keeps the option open if this ever goes anywhere.

@@ -102,7 +102,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 2 | Infrastructure: WorldState, registry, no-flow, clock | Time rate as attention scale | Done |
 | 3 | Terrain → watershed / accumulation | Read structure via inspector | Done |
 | 4 | Surface → soil moisture | Read soil memory (darkening) | **Done — playtest Pass** |
-| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | **Done** (agent; RichDEM-class fixture) |
+| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | **Done** (agent; hand-derived Priority-Flood fixtures) |
 | **5a** | — | **Predict water path / pool** (P-006 mechanical) | **Done — playtest Pass** |
 | **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **Done — playtest Pass** |
 | 5 | Soil → vegetation (one-way) | Green follows wet ground | **Done — playtest Pass** |
