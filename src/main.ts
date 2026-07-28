@@ -1,12 +1,12 @@
 import "./style.css";
 import { config } from "./config";
-import { HeightfieldHydrology } from "./sim/hydrology/HeightfieldHydrology";
-import type { HydrologyModel } from "./sim/hydrology/HydrologyModel";
+import { SimClock } from "./sim/SimClock";
+import { WorldState } from "./sim/WorldState";
 import { generateMountain } from "./sim/terrain/generateMountain";
 import { createScene } from "./render/Scene";
 import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
-import { mountControls } from "./ui/controls";
+import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -25,8 +25,8 @@ const terrain = generateMountain(
   config.terrainSeed,
 );
 
-// Depend on HydrologyModel so a later backend can swap in (T-007).
-const model: HydrologyModel = new HeightfieldHydrology(terrain);
+const world = new WorldState(terrain);
+const model = world.hydrology;
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
@@ -37,11 +37,18 @@ terrainMesh.updateFrom(model);
 waterMesh.updateFrom(model);
 
 let raining = false;
+let timeRate: TimeRate = "1x";
 let steps = 0;
+
+const clock = new SimClock({
+  simDt: config.simDt,
+  maxStepsPerFrame: config.maxStepsPerFrame,
+  timeScale: TIME_SCALE[timeRate],
+});
 
 const ui = mountControls(
   app,
-  { raining },
+  { raining, timeRate },
   {
     onToggleRain: () => {
       raining = !raining;
@@ -50,12 +57,17 @@ const ui = mountControls(
     onReset: () => {
       model.resetWater();
       steps = 0;
+      clock.resetDroppedSteps();
       waterMesh.updateFrom(model);
+    },
+    onTimeRate: (rate) => {
+      timeRate = rate;
+      clock.setTimeScale(TIME_SCALE[rate]);
+      ui.setTimeRate(rate);
     },
   },
 );
 
-let accumulator = 0;
 let lastFrame = performance.now();
 
 function syncMeshes(): void {
@@ -65,25 +77,24 @@ function syncMeshes(): void {
 function frame(now: number): void {
   const wallDt = Math.min((now - lastFrame) / 1000, 0.05);
   lastFrame = now;
-  accumulator += wallDt;
 
-  let stepped = 0;
-  while (accumulator >= config.simDt && stepped < config.maxStepsPerFrame) {
+  const { stepsRun } = clock.tick(wallDt);
+  for (let i = 0; i < stepsRun; i++) {
     if (raining) {
       model.addRain(config.rainPerSecond * config.simDt);
     }
     model.step(config.simDt);
     steps += 1;
-    accumulator -= config.simDt;
-    stepped += 1;
   }
 
-  if (stepped > 0) syncMeshes();
+  if (stepsRun > 0) syncMeshes();
 
+  const dropped = clock.getDroppedSteps();
+  const rateLabel = timeRate === "pause" ? "paused" : timeRate;
   ui.setStatus(
-    raining
-      ? `Slice 1 · raining · step ${steps}`
-      : `Slice 1 · rain off · step ${steps}`,
+    `Slice 2 · ${rateLabel} · step ${steps}` +
+      (dropped > 0 ? ` · dropped ${dropped}` : "") +
+      (raining ? " · raining" : ""),
   );
 
   controls.update();

@@ -41,6 +41,16 @@ body,
   background: #254536;
 }
 
+#time-rates {
+  display: flex;
+  gap: 0.25rem;
+}
+
+#time-rates button.active {
+  background: #3a6b52;
+  border-color: #6fa888;
+}
+
 #status {
   margin-left: 0.35rem;
   font-size: 0.85rem;
