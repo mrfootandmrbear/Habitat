@@ -103,8 +103,9 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 5 | Soil → vegetation (one-way) | Green follows wet ground | **Done — playtest Pass** |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
 | 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
+| **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | Next — BUILD_GUIDE §4.2 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. Post-MVP hygiene queue: BUILD_GUIDE §4.1.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. Post-MVP: BUILD_GUIDE §4.1 hygiene (done) + §4.2 presentation track (volume without voxels) in parallel with systems.
 
 ---
 
@@ -116,6 +117,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 - Full Field Notebook corpus (U-006)  
 - Resolved RC-003 / G-007 (Open entries stay Open; architecture accommodates)  
 - Voxel / cave terrain (T-007 situation-Current)  
+- Falling-sand / voxel CA as the authoritative water or terrain model (presentation cues only — BUILD_GUIDE §4.2)  
 
 ---
 

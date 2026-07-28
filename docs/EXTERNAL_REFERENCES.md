@@ -18,6 +18,8 @@ Survey date: 2026-07-27.
 | **pysheds** | https://github.com/pysheds/pysheds | Offline oracle for watershed delineation and accumulation. Generate known-good labels on a DEM; compare to Slice 3 `flowRouting.ts` tests. |
 | **RichDEM** | https://github.com/r-barnes/richdem | Priority-flood / depression filling (Barnes 2014). Gold standard before Habitat implements NATURAL_PROCESS_MATH §1.3. Offline validation only. |
 | **SimpleHydrology** | https://github.com/weigert/SimpleHydrology | Play-feel reference for “water that looks alive on terrain.” C++/OpenGL — algorithms and presentation, not a drop-in. Watch for particle/erosion aesthetics that fight S-004 / N-004 (causal, inspectable). |
+| **3D-Falling-Sand** | https://github.com/NicksterSand/3D-Falling-Sand | Presentation patterns only: lattice cursor, extent cage, lit solid clumps. 20³ voxel CA — **not** Habitat’s authoritative model (T-007). See BUILD_GUIDE §4.2. |
+| **3DCellularWorld** | https://github.com/ccrock4t/3DCellularWorld | Dual readout (mesh vs ray-march), motion-through-volume demoability, property-composed motility → map to parameter bundles. Paint-element UX is a counterexample for A-005. See BUILD_GUIDE §4.2. |
 
 ---
 
@@ -41,6 +43,7 @@ Survey date: 2026-07-27.
 | Heavy SWE / stormwater | SWMM, ANUGA, coastal shallow-water suites | Fidelity Habitat does not need (U-002, GEO-002). |
 | WebGPU mega-erosion demos | Hyperpoly, TerrainX-class projects | Conflict with T-001, T-006, and “earn its cost.” |
 | Tiny one-off DSM toys | crest, ad-hoc flood-fill demos | Mild reading value at most; not load-bearing. |
+| Falling-sand **as world authority** | Noita clones, Margolus voxel sandboxes shipped as sim | Steal UX cues (BUILD_GUIDE §4.2); never replace heightfield + stacked rasters (T-007, SIMULATION_MODEL §2). |
 
 ---
 
@@ -50,8 +53,9 @@ Survey date: 2026-07-27.
 2. **SimpleHydrology** — fun bar for water playtests ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md))  
 3. **pysheds / RichDEM** — D8, sinks, watersheds for Slice 3+ oracle tests  
 4. **Landlab ecohydrology notebooks** — vegetation ↔ moisture (Slice 5–6)  
-5. **tessapower/hydraulic-erosion** — when terrain evolution lands  
-6. **river-runner** — raindrop / prediction UX for P-006  
+5. **3D-Falling-Sand / 3DCellularWorld** — presentation-only: cage, cursor, dual readout, motion-in-time (BUILD_GUIDE §4.2); do not study as hydrology backends  
+6. **tessapower/hydraulic-erosion** — when terrain evolution lands  
+7. **river-runner** — raindrop / prediction UX for P-006  
 
 ---
 

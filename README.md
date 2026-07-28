@@ -32,13 +32,10 @@ npm run conformance
 
 ## Current slice
 
-**Current slice**
+**Hygiene done** (§4.1). **Next:** presentation track ([BUILD_GUIDE §4.2](docs/BUILD_GUIDE.md)) and/or post-MVP systems.
 
-**Post-MVP hygiene** (after Slice 6 Pass)
-
-- `ledger.et` closes the water balance across daily bands (H-004)
-- D8 accumulation is O(n log n) push-to-receiver (faster berm/dig recompute)
-- Next: ownership test, metric pass, Slice 4b depressions — see BUILD_GUIDE §4.1
+- Extent cage, snapped siting cursor, motion-in-time, dual readouts — volume as column-stack × time, not voxels
+- Study refs: 3D-Falling-Sand / 3DCellularWorld (presentation only)
 
 ```bash
 npm run dev

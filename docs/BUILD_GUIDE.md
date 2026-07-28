@@ -71,7 +71,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** §4.1 hygiene + Slice 4b Priority-Flood + metric pass complete (agent). Next: post-MVP systems (Slice 7+) when ready — no open Tier-O playtest from this batch.
+**Current gate:** §4.1 hygiene complete. Parallel next work: **§4.2 presentation track** (volume without voxels) and post-MVP systems (Slice 7+) when ready. No open Tier-O playtest from hygiene.
 
 ---
 
@@ -91,6 +91,34 @@ Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slic
 - [x] Symmetry invariant; single-source ledgers; register band phase  
 
 *Hygiene batch:* no Tier-O question — agent probes + tests only (VERIFICATION_POLICY).
+
+### 4.2 Presentation track — volume without voxels *(parallel; T-006 / T-007 / A-005)*
+
+Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-Falling-Sand) and [ccrock4t/3DCellularWorld](https://github.com/ccrock4t/3DCellularWorld) — falling-sand voxel toys that sell “stuff moves through volume.” Catalogued in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Steal presentation patterns; do not adopt voxel CA as authority.**
+
+**Loops.** Sim: none new (observers + FX only). Game: volume and agency read as column-stack × time and cause verbs, not as painted voxels.
+
+**Standing bans (do not schedule as work):**
+- Full 3D voxel CA / Margolus / paint-element-as-world-state (fights T-007, A-005)
+- Physics coupled to RAF / display rate (fights S-009, T-006)
+- Opaque cube water as the primary depth language (prefer continuous depth tint / sheet)
+- Duplicate GPU + CPU rule engines for hydrology
+- Treating “need vertical structure” as “need voxels” — vertical = stacked 2D rasters per column (SIMULATION_MODEL §2)
+
+**Checklist (can interleave with Slice 7+; prefer before heavy visual retunes):**
+
+- [ ] **Extent cage** — readable preserve / active-wet bounds so surface water isn’t floating in abstract space (U-005 diorama cue)
+- [ ] **Snapped intervention cursor** — cell-lattice siting gizmo for berm/dig/predict; free orbit remains for look, not for “I put the cause *here*”
+- [ ] **Motion-in-time** — animate transfers on the heightfield (sheet flow direction cue, pond stage rise, soil-moisture pulse down a column); volume = stack × time, not a 3D lattice
+- [ ] **Dual readouts** — living diorama mesh + optional inspector / cutaway strip over the same authoritative rasters (T-005); no second sim backend
+- [ ] **Conservation beat** — notebook seed + probe numbers for ledger-closed water (rain → surface → soil → ET / outlet); already partly proven by probes — surface it in play UI when U-006 starts
+- [ ] **Property bundles** — keep material feel as parameter packs (roughness, infil, porosity), not CA neighborhoods; document any new pack as register-cited
+- [ ] **Presentation-only grains** — optional short-lived particles / streaks driven by flux or depth *deltas*; die after a few frames; never own state (T-006)
+- [ ] Owner play only if a Tier-O question appears (e.g. “does the cage / cursor make siting feel like a cause?”); otherwise Tier-P proxy first
+
+**Notebook seed (track):** “Water moved through the hollow over time — the ground held it until it spilled.”
+
+---
 
 ### Slice 4b — Priority-flood depressions *(promote before scenario objectives)*
 
@@ -178,10 +206,11 @@ Ordered so earlier fixes don’t invalidate later ones ([reviews/2026-07-27-slic
 
 ### Post-MVP (stubs only)
 
-Do not expand these until MVP exit in MVP_SCOPE §4 is met.
+Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentation track (§4.2) may run in parallel — it does not add sim systems.
 
 | Slice | Focus | Register |
 |---|---|---|
+| P (§4.2) | Volume-without-voxels presentation | T-005, T-006, T-007, A-005, U-005 |
 | 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 |
 | 9 | Fire / fuel | ES-002, A-002, A-006 |
 | 10 | Light / succession | ES-001 |
@@ -211,5 +240,6 @@ Do not expand these until MVP exit in MVP_SCOPE §4 is met.
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | Fields, ownership, bands |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | Promotion criteria + ledger |
 | [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim; the ask gate and playtest request format |
+| [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md) | Study-not-ship refs (incl. falling-sand presentation peers for §4.2) |
 | [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md) | Current fun-gate protocol |
 | PLAYER_INTERACTION_SPEC.md | Detailed prediction/siting UX (not yet written) |
