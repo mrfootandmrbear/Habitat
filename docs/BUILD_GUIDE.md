@@ -67,7 +67,7 @@ Summary only — do not reopen unless fixing regressions.
 | 3 | D8 accumulation + watershed | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
 | 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | Infiltration ledger; soil accumulates |
 
-**Current gate:** [PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md) before Slice 5 vegetation.
+**Current gate:** Slice 4 playtest **Pass**. Slice 5b siting is available — raise berm / dig channel, then rain.
 
 ---
 
@@ -112,10 +112,10 @@ Summary only — do not reopen unless fixing regressions.
 **Register.** A-005 spike; N-001 smoke test must still pass.
 
 - [ ] One tool only (prefer berm or dig channel)  
-- [ ] Edit `terrain.elevation` or `structure.obstructionHeight` via WorldState — **never** a hydrology-private copy  
-- [ ] Recompute flow structure after edit  
-- [ ] Preview language / UI describes cause (“raise a berm here”), not wetland stamp  
-- [ ] Invariant: mass conservation still holds after edit; structure invalidation is explicit  
+- [x] Edit `terrain.elevation` or `structure.obstructionHeight` via WorldState — **never** a hydrology-private copy  
+- [x] Recompute flow structure after edit  
+- [x] Preview language / UI describes cause (“raise a berm here”), not wetland stamp  
+- [x] Invariant: mass conservation still holds after edit; structure invalidation is explicit  
 - [ ] Notebook seed: e.g. “The berm changed where water could spill.”  
 - [ ] Owner play + informal A-005 check: would a stranger say “cause” or “outcome”?  
 - [ ] Expand N-001 smoke if new public APIs appear

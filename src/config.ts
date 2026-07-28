@@ -16,6 +16,10 @@ export const config = {
   soilPorosity: 0.45,
   infiltrationRate: 0.08,
   etRate: 0.012,
+  /** Slice 5b siting brush (A-005 — cause, not outcome). */
+  sitingBrushRadius: 1,
+  bermRaise: 0.85,
+  digLower: 0.65,
 } as const;
 
 export type InspectorLayer =
@@ -24,3 +28,6 @@ export type InspectorLayer =
   | "accumulation"
   | "watershed"
   | "soilMoisture";
+
+/** Player siting tools — named as causes (A-005, N-001). */
+export type SitingTool = "none" | "berm" | "dig";

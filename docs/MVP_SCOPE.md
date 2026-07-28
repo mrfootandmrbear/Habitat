@@ -96,11 +96,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 0–1 | — (scaffold) | Observe water motion | Done |
 | 2 | Infrastructure: WorldState, registry, no-flow, clock | Time rate as attention scale | Done |
 | 3 | Terrain → watershed / accumulation | Read structure via inspector | Done |
-| 4 | Surface → soil moisture | Read soil memory (darkening) | Done — **playtest now** |
-| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | Next sim hygiene |
-| **5a** | — | **Predict water path / pool** (P-006 mechanical) | **Next game priority** |
-| **5b** | — | **Site one cause** (berm / channel) (A-005 spike) | Paired with 5a if fun-hold |
-| 5 | Soil → vegetation (one-way) | Green follows wet ground | After fun gate |
+| 4 | Surface → soil moisture | Read soil memory (darkening) | **Done — playtest Pass** |
+| **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | Optional |
+| **5a** | — | **Predict water path / pool** (P-006 mechanical) | Next |
+| **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **In progress / play** |
+| 5 | Soil → vegetation (one-way) | Green follows wet ground | After 5b play |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Sim MVP milestone** |
 | 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
 

@@ -32,16 +32,17 @@ npm run conformance
 
 ## Current slice
 
-**Slice 4 — Flow structure, soil storage, inspector overlays** (H-002, H-001, H-003, T-005, W-002)
+**Slice 5b — Site a cause** (A-005, H-002)
 
-- Everything in Slice 2, plus:
-- D8 flow accumulation and watershed labels from terrain (Slice 3)
-- Soil moisture infiltration; ground darkens as soil wets (Slice 4)
-- T-005 inspector dropdown: water, accumulation, watershed, soil moisture
-- Playtest guide: [docs/PLAYTEST_SLICE4.md](docs/PLAYTEST_SLICE4.md)
+- Everything through Slice 4, plus click-to-site **raise berm** / **dig channel**
+- Edits `terrain.elevation` on WorldState and recomputes flow structure
+- Cause language in the tool menu — not wetland/forest stamps (N-001)
+- Playtest: [docs/PLAYTEST_SLICE4.md](docs/PLAYTEST_SLICE4.md) (Pass) → now mess with terrain and rain
 
 ```bash
-npm run dev   # then follow PLAYTEST_SLICE4.md
+npm run dev
 ```
+
+Select **Tool: raise berm** or **Tool: dig channel**, click the terrain (no drag), turn rain on.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

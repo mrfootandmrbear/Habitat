@@ -162,6 +162,37 @@ export class WorldState {
     return this.soilMoisture.get(x, z);
   }
 
+  /**
+   * Raise a berm at a cell (A-005). Edits terrain.elevation owned by WorldState,
+   * then invalidates / recomputes flow structure. Not a wetland stamp.
+   */
+  raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
+    this.applyTerrainBrush(cx, cz, amount);
+  }
+
+  /**
+   * Dig a channel at a cell (A-005). Lowers terrain.elevation — a cause that
+   * redirects flow; does not place a finished water feature.
+   */
+  digChannel(cx: number, cz: number, amount: number = config.digLower): void {
+    this.applyTerrainBrush(cx, cz, -amount);
+  }
+
+  private applyTerrainBrush(cx: number, cz: number, delta: number): void {
+    const r = config.sitingBrushRadius;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!this.terrain.inBounds(x, z)) continue;
+        const dist = Math.hypot(x - cx, z - cz);
+        if (dist > r + 0.01) continue;
+        const falloff = 1 - dist / (r + 1);
+        const next = this.terrain.get(x, z) + delta * falloff;
+        this.terrain.set(x, z, Math.max(0, next));
+      }
+    }
+    this.recomputeFlowStructure();
+  }
+
   stateHash(): string {
     return this.registry.hashState();
   }

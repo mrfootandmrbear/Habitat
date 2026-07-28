@@ -1,4 +1,4 @@
-import type { InspectorLayer } from "../config";
+import type { InspectorLayer, SitingTool } from "../config";
 
 export type TimeRate = "pause" | "1x" | "4x" | "16x";
 
@@ -17,19 +17,33 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "soilMoisture", label: "Inspect: soil moisture" },
 ];
 
+/** Cause-named tools (A-005) — not outcome stamps. */
+const SITING: { id: SitingTool; label: string }[] = [
+  { id: "none", label: "Tool: look" },
+  { id: "berm", label: "Tool: raise berm" },
+  { id: "dig", label: "Tool: dig channel" },
+];
+
 export function mountControls(
   parent: HTMLElement,
-  initial: { raining: boolean; timeRate: TimeRate; inspector: InspectorLayer },
+  initial: {
+    raining: boolean;
+    timeRate: TimeRate;
+    inspector: InspectorLayer;
+    sitingTool: SitingTool;
+  },
   handlers: {
     onToggleRain: () => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
+    onSitingTool: (tool: SitingTool) => void;
   },
 ): {
   setRaining: (v: boolean) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
+  setSitingTool: (tool: SitingTool) => void;
   setStatus: (text: string) => void;
 } {
   const bar = document.createElement("div");
@@ -72,6 +86,20 @@ export function mountControls(
   };
   syncTimeRate(initial.timeRate);
 
+  const sitingSelect = document.createElement("select");
+  sitingSelect.id = "siting-tool";
+  sitingSelect.setAttribute("aria-label", "Siting tool (A-005)");
+  for (const tool of SITING) {
+    const opt = document.createElement("option");
+    opt.value = tool.id;
+    opt.textContent = tool.label;
+    sitingSelect.appendChild(opt);
+  }
+  sitingSelect.value = initial.sitingTool;
+  sitingSelect.addEventListener("change", () => {
+    handlers.onSitingTool(sitingSelect.value as SitingTool);
+  });
+
   const inspectorSelect = document.createElement("select");
   inspectorSelect.id = "inspector";
   inspectorSelect.setAttribute("aria-label", "Inspector layer (T-005)");
@@ -86,11 +114,23 @@ export function mountControls(
     handlers.onInspector(inspectorSelect.value as InspectorLayer);
   });
 
+  const hint = document.createElement("div");
+  hint.id = "siting-hint";
+  hint.textContent = "Click terrain to site · orbit still works when Tool: look";
+
   const status = document.createElement("div");
   status.id = "status";
-  status.textContent = "Habitat · Slice 4";
+  status.textContent = "Habitat · Slice 5b";
 
-  bar.append(rainBtn, resetBtn, timeGroup, inspectorSelect, status);
+  bar.append(
+    rainBtn,
+    resetBtn,
+    timeGroup,
+    sitingSelect,
+    inspectorSelect,
+    hint,
+    status,
+  );
   parent.appendChild(bar);
 
   return {
@@ -98,6 +138,9 @@ export function mountControls(
     setTimeRate: syncTimeRate,
     setInspector: (layer) => {
       inspectorSelect.value = layer;
+    },
+    setSitingTool: (tool) => {
+      sitingSelect.value = tool;
     },
     setStatus: (text: string) => {
       status.textContent = text;
