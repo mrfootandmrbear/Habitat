@@ -2,9 +2,14 @@ import * as THREE from "three";
 import { config, type InspectorLayer } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
+import { compareClassName } from "../sim/prediction/PredictionSession";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET = new THREE.Color(0x4a5c3a);
+const PREDICT_PENDING = new THREE.Color(0x2ec4b6);
+const PREDICT_HIT = new THREE.Color(0x3dcc6f);
+const PREDICT_MISS = new THREE.Color(0xe85d4c);
+const PREDICT_UNEXPECTED = new THREE.Color(0xe8b84c);
 
 /** Terrain mesh tinted by soil moisture; supports T-005 inspector overlays. */
 export class TerrainMesh {
@@ -47,6 +52,7 @@ export class TerrainMesh {
     model: WaterStateView,
     world?: WorldState,
     overlay: InspectorLayer = "none",
+    predictionClassify: Uint8Array | null = null,
   ): void {
     const pos = this.geometry.attributes.position as THREE.BufferAttribute;
     const cellW = this.worldSize / (this.width - 1);
@@ -72,10 +78,17 @@ export class TerrainMesh {
         if (world && overlay !== "none") {
           this.applyOverlay(col, world, x, z, overlay, maxAcc);
         } else if (world) {
-          const t = Math.min(1, world.getSoilMoisture(x, z) / config.soilPorosity);
+          const t = Math.min(
+            1,
+            world.getSoilMoisture(x, z) / config.soilPorosity,
+          );
           col.copy(BASE).lerp(WET, t);
         } else {
           col.copy(BASE);
+        }
+
+        if (predictionClassify) {
+          this.applyPrediction(col, predictionClassify[i] ?? 0);
         }
 
         this.colors.setXYZ(i, col.r, col.g, col.b);
@@ -85,6 +98,20 @@ export class TerrainMesh {
     pos.needsUpdate = true;
     this.colors.needsUpdate = true;
     this.geometry.computeVertexNormals();
+  }
+
+  private applyPrediction(col: THREE.Color, code: number): void {
+    const kind = compareClassName(code);
+    if (kind === "none") return;
+    const tint =
+      kind === "pending"
+        ? PREDICT_PENDING
+        : kind === "hit"
+          ? PREDICT_HIT
+          : kind === "miss"
+            ? PREDICT_MISS
+            : PREDICT_UNEXPECTED;
+    col.lerp(tint, 0.72);
   }
 
   private applyOverlay(

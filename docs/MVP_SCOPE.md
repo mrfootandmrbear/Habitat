@@ -98,9 +98,9 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 3 | Terrain → watershed / accumulation | Read structure via inspector | Done |
 | 4 | Surface → soil moisture | Read soil memory (darkening) | **Done — playtest Pass** |
 | **4b** | *(optional)* Priority-flood depressions | Ponds that stay honest | Optional |
-| **5a** | — | **Predict water path / pool** (P-006 mechanical) | **Next** |
+| **5a** | — | **Predict water path / pool** (P-006 mechanical) | **Done — playtest Pass** |
 | **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **Done — playtest Pass** |
-| 5 | Soil → vegetation (one-way) | Green follows wet ground | After 5a or when ready |
+| 5 | Soil → vegetation (one-way) | Green follows wet ground | **Next** |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Sim MVP milestone** |
 | 7+ | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | Post-MVP |
 

@@ -20,6 +20,10 @@ export const config = {
   sitingBrushRadius: 1,
   bermRaise: 0.85,
   digLower: 0.65,
+  /** Slice 5a prediction (P-006) — wet if depth exceeds this. */
+  predictionWetThreshold: 0.01,
+  /** Steps after commit before auto-compare. */
+  predictionHorizonSteps: 180,
 } as const;
 
 export type InspectorLayer =
@@ -29,5 +33,5 @@ export type InspectorLayer =
   | "watershed"
   | "soilMoisture";
 
-/** Player siting tools — named as causes (A-005, N-001). */
-export type SitingTool = "none" | "berm" | "dig";
+/** Player land tools — causes (A-005) plus predict marks (P-006). */
+export type SitingTool = "none" | "berm" | "dig" | "predict";

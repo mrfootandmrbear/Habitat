@@ -3,6 +3,10 @@ import { config, type InspectorLayer, type SitingTool } from "./config";
 import { SimClock } from "./sim/SimClock";
 import { WorldState } from "./sim/WorldState";
 import { generateMountain } from "./sim/terrain/generateMountain";
+import {
+  PredictionSession,
+  snapshotWaterReader,
+} from "./sim/prediction/PredictionSession";
 import { createScene } from "./render/Scene";
 import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
@@ -28,13 +32,14 @@ const terrain = generateMountain(
 
 const world = new WorldState(terrain);
 const model = world.hydrologyModel;
+const prediction = new PredictionSession(n, n);
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
-terrainMesh.updateFrom(model, world, "none");
+terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.updateFrom(model);
 
 let raining = false;
@@ -49,6 +54,16 @@ const clock = new SimClock({
   maxStepsPerFrame: config.maxStepsPerFrame,
   timeScale: TIME_SCALE[timeRate],
 });
+
+function runCompare(): void {
+  if (prediction.phase !== "committed" && prediction.phase !== "compared") {
+    return;
+  }
+  // Snapshot so compare cannot alias live buffers (P-006 write isolation).
+  const reader = snapshotWaterReader(n, n, world.water.data);
+  prediction.compare(reader);
+  syncMeshes();
+}
 
 const ui = mountControls(
   app,
@@ -77,8 +92,30 @@ const ui = mountControls(
     onSitingTool: (tool) => {
       sitingTool = tool;
       ui.setSitingTool(tool);
-      // Keep orbit usable; siting uses click without drag.
       controls.enabled = true;
+      if (tool === "predict") {
+        ui.setHint(
+          "Click to mark expected wet cells · Commit · rain · Compare",
+        );
+      } else if (tool === "berm" || tool === "dig") {
+        ui.setHint("Click terrain to site · no drag (orbit still works on look)");
+      } else {
+        ui.setHint(
+          "Predict: mark wet cells → Commit → rain → Compare (teal/green/red/amber)",
+        );
+      }
+    },
+    onCommitPrediction: () => {
+      if (prediction.commit(steps)) {
+        syncMeshes();
+      }
+    },
+    onComparePrediction: () => {
+      runCompare();
+    },
+    onClearPrediction: () => {
+      prediction.clear();
+      syncMeshes();
     },
   },
 );
@@ -98,13 +135,17 @@ canvas.addEventListener("pointerup", (e) => {
   const dx = e.clientX - pointerDown.x;
   const dy = e.clientY - pointerDown.y;
   pointerDown = null;
-  // Ignore drags so OrbitControls can still orbit.
   if (dx * dx + dy * dy > 25) return;
 
   const cell = pickTerrainCell(e, canvas, camera, terrainMesh.mesh);
   if (!cell) return;
 
-  // A-005: site a cause — berm raises ground; dig lowers a channel.
+  if (sitingTool === "predict") {
+    prediction.toggleMark(cell.x, cell.z);
+    syncMeshes();
+    return;
+  }
+
   if (sitingTool === "berm") {
     world.raiseBerm(cell.x, cell.z);
   } else if (sitingTool === "dig") {
@@ -116,8 +157,24 @@ canvas.addEventListener("pointerup", (e) => {
 let lastFrame = performance.now();
 
 function syncMeshes(): void {
-  terrainMesh.updateFrom(model, world, inspector);
+  terrainMesh.updateFrom(model, world, inspector, prediction.overlayClassify());
   waterMesh.updateFrom(model);
+}
+
+function predictionStatus(): string {
+  const nMarks = prediction.markCount;
+  if (prediction.phase === "compared" && prediction.lastCompare) {
+    const c = prediction.lastCompare;
+    return `pred hit ${c.hits} miss ${c.misses} extra ${c.unexpected}`;
+  }
+  if (prediction.phase === "committed") {
+    const since = prediction.stepsSinceCommit(steps) ?? 0;
+    return `pred committed ${nMarks} · ${since}/${config.predictionHorizonSteps}`;
+  }
+  if (prediction.phase === "marking") {
+    return `pred marking ${nMarks}`;
+  }
+  return "pred idle";
 }
 
 function frame(now: number): void {
@@ -133,6 +190,10 @@ function frame(now: number): void {
     steps += 1;
   }
 
+  if (prediction.shouldAutoCompare(steps)) {
+    runCompare();
+  }
+
   if (stepsRun > 0) syncMeshes();
 
   const dropped = clock.getDroppedSteps();
@@ -142,9 +203,11 @@ function frame(now: number): void {
       ? "look"
       : sitingTool === "berm"
         ? "raise berm"
-        : "dig channel";
+        : sitingTool === "dig"
+          ? "dig channel"
+          : "predict";
   ui.setStatus(
-    `Slice 5b · ${rateLabel} · ${toolLabel} · step ${steps}` +
+    `Slice 5a · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (dropped > 0 ? ` · dropped ${dropped}` : "") +
       (raining ? " · raining" : ""),
   );

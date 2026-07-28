@@ -88,11 +88,13 @@ These entries describe the present stack or scope. They are not promotion candid
 
 **Judge.** CI for mechanical; unfamiliar viewer for behavioral.
 
-**Artifact.** Write-access test; paired session notes.
+**Artifact.** Write-access test (`src/sim/prediction/prediction.test.ts`); paired session notes.
 
 **Failure means.** If the behavioral half fails, prediction is an overlay rather than a mechanic.
 
 **Slice trigger.** Mechanical criterion after Slice 3 prediction overlay; behavioral deferred until UI is stable.
+
+**Mechanical status (Slice 5a).** Implemented and **playtest Pass**: `PredictionSession` + `predictionObserver` (empty `writes`); compare uses `snapshotWaterReader`; CI covers write isolation and deterministic classify. Behavioral half still deferred.
 
 ---
 

@@ -17,9 +17,10 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "soilMoisture", label: "Inspect: soil moisture" },
 ];
 
-/** Cause-named tools (A-005) — not outcome stamps. */
+/** Cause tools (A-005) + predict marks (P-006). */
 const SITING: { id: SitingTool; label: string }[] = [
   { id: "none", label: "Tool: look" },
+  { id: "predict", label: "Tool: predict wet" },
   { id: "berm", label: "Tool: raise berm" },
   { id: "dig", label: "Tool: dig channel" },
 ];
@@ -38,6 +39,9 @@ export function mountControls(
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
+    onCommitPrediction: () => void;
+    onComparePrediction: () => void;
+    onClearPrediction: () => void;
   },
 ): {
   setRaining: (v: boolean) => void;
@@ -45,6 +49,7 @@ export function mountControls(
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
   setStatus: (text: string) => void;
+  setHint: (text: string) => void;
 } {
   const bar = document.createElement("div");
   bar.id = "controls";
@@ -88,7 +93,7 @@ export function mountControls(
 
   const sitingSelect = document.createElement("select");
   sitingSelect.id = "siting-tool";
-  sitingSelect.setAttribute("aria-label", "Siting tool (A-005)");
+  sitingSelect.setAttribute("aria-label", "Tool");
   for (const tool of SITING) {
     const opt = document.createElement("option");
     opt.value = tool.id;
@@ -99,6 +104,28 @@ export function mountControls(
   sitingSelect.addEventListener("change", () => {
     handlers.onSitingTool(sitingSelect.value as SitingTool);
   });
+
+  const predictGroup = document.createElement("div");
+  predictGroup.id = "predict-actions";
+  predictGroup.setAttribute("role", "group");
+  predictGroup.setAttribute("aria-label", "Prediction (P-006)");
+
+  const commitBtn = document.createElement("button");
+  commitBtn.type = "button";
+  commitBtn.textContent = "Commit prediction";
+  commitBtn.addEventListener("click", handlers.onCommitPrediction);
+
+  const compareBtn = document.createElement("button");
+  compareBtn.type = "button";
+  compareBtn.textContent = "Compare";
+  compareBtn.addEventListener("click", handlers.onComparePrediction);
+
+  const clearPredBtn = document.createElement("button");
+  clearPredBtn.type = "button";
+  clearPredBtn.textContent = "Clear prediction";
+  clearPredBtn.addEventListener("click", handlers.onClearPrediction);
+
+  predictGroup.append(commitBtn, compareBtn, clearPredBtn);
 
   const inspectorSelect = document.createElement("select");
   inspectorSelect.id = "inspector";
@@ -116,17 +143,19 @@ export function mountControls(
 
   const hint = document.createElement("div");
   hint.id = "siting-hint";
-  hint.textContent = "Click terrain to site · orbit still works when Tool: look";
+  hint.textContent =
+    "Predict: mark wet cells → Commit → rain → Compare (teal/green/red/amber)";
 
   const status = document.createElement("div");
   status.id = "status";
-  status.textContent = "Habitat · Slice 5b";
+  status.textContent = "Habitat · Slice 5a";
 
   bar.append(
     rainBtn,
     resetBtn,
     timeGroup,
     sitingSelect,
+    predictGroup,
     inspectorSelect,
     hint,
     status,
@@ -144,6 +173,9 @@ export function mountControls(
     },
     setStatus: (text: string) => {
       status.textContent = text;
+    },
+    setHint: (text: string) => {
+      hint.textContent = text;
     },
   };
 }

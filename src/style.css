@@ -74,7 +74,13 @@ body,
 #siting-hint {
   font-size: 0.75rem;
   opacity: 0.75;
-  max-width: 14rem;
+  max-width: 18rem;
+}
+
+#predict-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
 }
 
 #status {

@@ -32,16 +32,18 @@ npm run conformance
 
 ## Current slice
 
-**Slice 5b — Site a cause** (A-005, H-002) — **playtest Pass**
+**Slice 5a — Predict wet cells** (P-006) — **playtest Pass**
 
-- Raise berm / dig channel edit WorldState terrain and recompute flow structure
-- Cause language in the tool menu — not wetland/forest stamps (N-001)
-- Next priority: Slice 5a prediction (P-006), then vegetation
+- Mark expected wet cells → Commit → rain → Compare (auto after horizon)
+- Overlay: teal pending · green hit · red miss · amber unexpected wet
+- Observer never writes sim state (write-isolation tests)
+- Next: Slice 5 vegetation (soil → green)
+- Playtest: [docs/PLAYTEST_SLICE5A.md](docs/PLAYTEST_SLICE5A.md)
 
 ```bash
 npm run dev
 ```
 
-Tools: **raise berm** / **dig channel** — click terrain (no drag), rain to see routing change.
+Also available: berm / dig (5b), inspectors (4).
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

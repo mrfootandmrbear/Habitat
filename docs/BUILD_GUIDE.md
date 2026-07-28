@@ -67,7 +67,7 @@ Summary only — do not reopen unless fixing regressions.
 | 3 | D8 accumulation + watershed | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
 | 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | Infiltration ledger; soil accumulates |
 
-**Current gate:** Slice 5b playtest **Pass**. Next: Slice 5a prediction (P-006), or vegetation when ready.
+**Current gate:** Slice 5a playtest **Pass**. Next: Slice 5 vegetation (soil → green).
 
 ---
 
@@ -93,14 +93,14 @@ Summary only — do not reopen unless fixing regressions.
 **Loops.** Sim: none new (read-only observer). Game: expect → commit → compare (P-006).  
 **Register.** P-006 mechanical first; behavioral viewer study deferred.
 
-- [ ] Prediction module with `reads` only — **no** writes to WorldState / water buffers  
-- [ ] Player marks expected wet cells or flow corridor before advancing time  
-- [ ] After N steps, overlay expected vs actual (clear mismatch)  
-- [ ] Invariant class: **Write isolation** — automated test that prediction API cannot mutate sim  
-- [ ] Determinism: replay with same mark + schedule → same compare result  
-- [ ] Notebook seed: e.g. “You expected water here; it went there because of the slope.”  
-- [ ] Owner play: 10 minutes forming and checking predictions (score attention, not accuracy)  
-- [ ] Conformance: cite P-006 in sim observer + tests; criterion artifact named in DECISION_CONFORMANCE
+- [x] Prediction module with `reads` only — **no** writes to WorldState / water buffers  
+- [x] Player marks expected wet cells or flow corridor before advancing time  
+- [x] After N steps, overlay expected vs actual (clear mismatch)  
+- [x] Invariant class: **Write isolation** — automated test that prediction API cannot mutate sim  
+- [x] Determinism: replay with same mark + schedule → same compare result  
+- [x] Notebook seed: e.g. “You expected water here; it went there because of the slope.”  
+- [x] Owner play: 10 minutes forming and checking predictions (score attention, not accuracy) — **Pass**  
+- [x] Conformance: cite P-006 in sim observer + tests; criterion artifact named in DECISION_CONFORMANCE
 
 **Do not** fake prediction with a second hydrology that writes the real buffers.
 
