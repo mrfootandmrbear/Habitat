@@ -27,12 +27,20 @@ Did your eye want to follow it (D-006) · did you form an expectation and care w
 
 ## Ask gate — all four, or keep working
 
-1. `npm test`, `npm run build`, `npm run conformance:check` green.
+1. `npm test`, `npm run build`, `npm run conformance:check`, `npm run probe -- --all --check` green.
 2. Every machine-verifiable claim for the slice is covered by a committed test/probe and you can state the numbers.
 3. Every "is it noticeable" claim has a green proxy measurement.
 4. You can write the owner-only question in **one sentence containing no number**.
 
-Fails 4 → it was your job. Slices with no owner-only question (infrastructure, hygiene, perf, refactor) get **no** playtest request; they batch until the next slice that changes what the world looks like or what the player can do.
+Fails 4 → it was your job. Slices with no owner-only question (infrastructure, hygiene, perf, refactor) get **no** playtest request; they batch.
+
+**The batch fires** on the third accumulated question, or when the next slice can't start without an answer, or when a proxy stayed red through its retune budget — whichever is first. Batching indefinitely is not caution; it means you have been building on unverified taste.
+
+## Close what you proved, and stop when blocked
+
+- A candidate whose **Judge** in `docs/DECISION_CONFORMANCE.md` §3 names only CI/agent probes is **yours to promote** once the criterion is met — same commit as the evidence, numbers in the body. Owner-judged ones get `docs/candidates/<id>-dossier.md` instead. Never weaken a criterion to pass it; a partial result is a blocked note.
+- Blocked (proxy red after 3 retunes · policy no entry covers · owner-judged candidate in the way): write `docs/blocked/<date>-<slice>.md`, name the next queue item, take it. See `docs/BUILD_GUIDE.md` §4.0.1. An idle session is not an acceptable outcome; neither is inventing policy.
+- An unexplained golden-hash or probe-baseline move is a defect to diagnose, never a baseline to accept.
 
 ## Request format
 

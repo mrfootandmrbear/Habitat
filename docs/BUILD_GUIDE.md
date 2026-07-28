@@ -21,11 +21,14 @@ Standing commands:
 ```bash
 npm test
 npm run build
-npm run conformance          # regenerate ledger
-npm run conformance:check    # CI
-npm run probe -- <scenario>  # Tier-M scenario evidence
-npm run dev                  # playtest (owner only after ask gate)
+npm run conformance             # regenerate ledger
+npm run conformance:check       # CI
+npm run probe -- <scenario>     # Tier-M scenario evidence (rewrites baseline-compared table)
+npm run probe -- --all --check  # CI: every scenario vs committed baseline, non-zero on drift
+npm run dev                     # playtest (owner only after ask gate)
 ```
+
+The four green-bar commands (`test`, `build`, `conformance:check`, `probe -- --all --check`) are the session gate in §4.0 step 3. Once the harness closeout in §4.1 lands they are aliased as `npm run gate`.
 
 ---
 
@@ -43,6 +46,8 @@ A slice is complete only when all hold:
 | 6 | **Notebook seed** | One sentence the Field Notebook *could* later say honestly (U-006). May be recorded in the PR even if U-006 UI does not exist. |
 | 7 | **Register citations** | Code/docs cite IDs; unknown IDs fail conformance; new implicit decisions filed as candidates. |
 | 8 | **Owner play** | Required **only** when the slice produces an owner-only question ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) Tier O). Infrastructure / hygiene / perf slices satisfy this row by stating “no owner-only question; deferred to \<next observable slice\>”. If there is one, pass the §4 ask gate first and write the request per §5. |
+| 9 | **Slice manifest** | `docs/slices/<slice>.json` declares register IDs, invariant class, test files, probe scenario(s), notebook seed, and the Tier-O field (a question or the literal deferral sentence). `conformance:check` validates the named artifacts exist. A slice is not checked off in §3 until its manifest validates. |
+| 10 | **Queue stays two deep** | Before closing a slice, the **next-but-one** slice is specified to §4.3 depth (loops, register/candidate IDs, study source, bans, checklist). A session must never finish with only one executable item ahead of it. |
 
 ### 2.1 Invariant classes (pick deliberately)
 
@@ -77,7 +82,7 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Autonomous closeouts (§4.1), then **Slice 8b groundwater / baseflow** (C-001). Batched Tier-O asks: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) + erosion legibility — do not request until ask gate.
+**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness first**, since the rest of the autonomous protocol assumes a scenario-scale tripwire that does not exist yet — then **Slice 8b groundwater / baseflow** (C-001). Batched Tier-O asks: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) + erosion legibility — held until the §4.0 step 6 firing rule trips.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -91,11 +96,27 @@ Every agent session that advances the sim or build plan:
 
 1. **Classify claims** for the slice as Tier **M** / **P** / **O** ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)).  
 2. **Implement** behind tests/probes — Prefer `npm run probe -- <scenario>` for scenario-scale Tier-M.  
-3. **Green bar before “done”:** `npm test`, `npm run build`, `npm run conformance:check`.  
-4. **Name Tier-M artifacts** in the commit body when physics change (golden hash, probe baseline, test file).  
+3. **Green bar before “done”:** `npm test`, `npm run build`, `npm run conformance:check`, `npm run probe -- --all --check`.  
+4. **Name Tier-M artifacts** in the commit body when physics change (golden hash, probe baseline, test file). A probe baseline may only move in a commit that says why.  
 5. **No owner ask** unless VERIFICATION_POLICY §4 ask gate passes (one sentence, no numbers). Hygiene / infrastructure / Closeouts: **never** open a playtest.  
-6. **Batch Tier-O** — Presentation + erosion legibility share one future ask; do not drip-feed.  
-7. **Research discipline** — If acting on an EXTERNAL_REFERENCES steal, cite the register/candidate ID in code or BUILD_GUIDE checklist; if inventing policy, file a candidate first.
+6. **Batch Tier-O** — Presentation + erosion legibility share one future ask; do not drip-feed. The batch **fires** when a third question joins it, or when the next slice cannot start without an answer, whichever comes first (VERIFICATION_POLICY §4).  
+7. **Research discipline** — If acting on an EXTERNAL_REFERENCES steal, cite the register/candidate ID in code or BUILD_GUIDE checklist; if inventing policy, file a candidate first.  
+8. **Close what you proved** — When a candidate's **Judge** in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3 names only CI or agent probes, the agent promotes it itself once the criterion is met, in the same commit as the evidence (DECISION_CONFORMANCE §3.0). When the Judge names the owner, the agent writes the promotion dossier instead and leaves the entry Open. Never leave a question the machine already answered sitting in the owner's queue.  
+9. **Refill the queue** — DoD row 10: leave the next-but-one slice specified to §4.3 depth before closing the current one.
+
+### 4.0.1 Stop conditions — what to do when blocked
+
+Autonomy needs a defined failure exit, or the two failure modes are idling and inventing policy. Both are worse than a note.
+
+| Situation | Action |
+|---|---|
+| Tier-P proxy red after **3** retunes | Stop retuning. Write `docs/blocked/<date>-<slice>.md` naming the encoding tried and the measured gap; add the question to the Tier-O batch; move to the next queue item. |
+| A choice needs policy that no Locked entry or candidate covers | File a candidate (**C-00x**) with the five-part contract, mark it Open, implement nothing under it; move to the next queue item. |
+| `conformance:check` fails on an ID the agent cannot legitimately cite | Fix the citation or file the candidate — never delete the check or invent an ID. |
+| Golden hash or probe baseline changes **unintentionally** | Treat as a defect, not a baseline update. Find the cause before re-committing; an unexplained baseline move is never “done”. |
+| Candidate blocks the slice and its Judge is the owner (e.g. **C-003**) | Write the dossier, park the slice, take the next queue item. Do not implement under an owner-judged Open candidate. |
+
+A blocked note is a normal session outcome. An idle session is not.
 
 ---
 
@@ -103,7 +124,15 @@ Every agent session that advances the sim or build plan:
 
 No Tier-O. Order:
 
-- [ ] **5b one-tool** — Park as won’t-do for now (berm + dig both shipped; “one tool only” was a spike constraint). Document park reason here when closing the checkbox, or finish by removing dig from default UI.  
+- [ ] **Probe baseline harness** *(do first — it is the tripwire everything else in §4.0 assumes)*. Today `npm run probe` writes a current-run table only: no committed baseline, no deltas, no failure mode, and CI never runs it. Until this lands, scenario-scale physics can drift with a green bar, and every autonomous claim below Tier-M is unguarded. Scope:
+  - [ ] `docs/evidence/<scenario>.baseline.json` committed per scenario; each metric carries a tolerance (absolute or relative) chosen with the scenario, not per run  
+  - [ ] `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas**, matching VERIFICATION_POLICY §8  
+  - [ ] `npm run probe -- --all --check` runs every scenario, exits non-zero on any out-of-tolerance metric, writes nothing  
+  - [ ] `npm run gate` = `test` + `build` + `conformance:check` + `probe -- --all --check`; CI runs `gate`  
+  - [ ] Baselines for the three live scenarios (`paired-storm`, `berm-reroute`, `basin-fill`) committed from the current tree, with the numbers stated in the commit body  
+  - Tier-M: a deliberately perturbed constant fails `--check`; an unperturbed run passes. No Tier-O.
+- [ ] **Slice manifest validation** — `docs/slices/<slice>.json` per DoD row 9, plus a `conformance:check` pass that fails when a manifest names a test, probe, or field that does not exist. Backfill manifests for Slices 8 and P; earlier slices are grandfathered.  
+- [ ] **5b one-tool — parked, won’t-do.** Berm and dig both shipped and both read as causes (A-005); “one tool only” was a spike constraint on the original prototype, not a register decision, and removing dig would cost a verb to satisfy a constraint nothing cites. Closed by decision, not by work.  
 - [ ] **Berm/dig ↔ `soil.depth` mass** — snowflow steal (EXTERNAL_REFERENCES): raise/lower depth with elev so edits read as displaced mass (C-002 / GEO-002; T-006). Tier-M: depth+elev delta conservation on brush.  
 - [ ] **Deferred grains** — leave deferred (flow cues sufficient).  
 
@@ -140,27 +169,47 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [ ] Tier-M: conservation across multi-day wet→dry; probe `baseflow-persist` — wet channel after N dry days **with** GW ≫ without  
 - [ ] Inspector overlay for GW / water table proxy  
 - [ ] Notebook seed: e.g. “The hollow kept seeping after the rain stopped.”  
+- [ ] `docs/slices/8b.json` manifest (DoD row 9)  
+- [ ] **Promote C-001** in the same commit as the evidence if its DECISION_CONFORMANCE criterion is met — its Judge is CI/agent probes, so this is the agent's call (§4.0 step 8): flip the register status, strike it from register §16, note it in the version history. If the criterion fails, say so and leave it Open.  
 - [ ] Owner play: Tier-O deferred until persistence is visible without inspector  
 
 ---
 
 ### 4.4 Slice 9 — Limiting factors / HSI spine
 
-**Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2). Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.  
-**Register.** ES-006 path, E-009, S-008; no fixed `K`.
+**Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2) — the first field whose *meaning* is "what is holding this patch back". Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.  
+**Register / candidates.** ES-006 (capacity emerges — no fixed `K`), E-009 (readiness inferred from state), S-008 (hysteresis legible), U-001 layered inspect, N-004 (no hidden rules — the limiting factor must be inspectable, never a magic gate).  
+**Study.** NATURAL_PROCESS_MATH §3.3 Liebig minimum and §8.2 HSI composition; no external steal required — if one is used, cite it per §4.0 step 7.  
+**Bans.** No scalar "health" score standing in for the limiting factor (N-002). No fixed carrying capacity (ES-006). No readiness value that the player cannot trace to a field (N-004, S-004).
 
-- [ ] Derived or owned limiting-factor field(s) from moisture / depth / (later GW)  
-- [ ] Inspector layer; monotonicity tests where applicable  
+- [ ] Limiting-factor field: per cell, which input is minimum and by how much — derived from moisture / soil depth / GW once 8b lands; registered with owner + band (T-005)  
+- [ ] Composition rule written down before code (minimum vs. product), cited to NATURAL_PROCESS_MATH §8.2  
+- [ ] Inspector layer showing the limiting input, not just a score  
+- [ ] Tier-M: monotonicity — improving the limiting input raises HSI; improving a non-limiting input does not (that asymmetry *is* Liebig, and it is the test that catches a disguised average)  
+- [ ] Tier-M: bounds — HSI stays in range, no NaN where an input is zero  
+- [ ] Probe `limiting-shift`: a patch whose limiting factor changes identity across a wet→dry schedule  
+- [ ] `docs/slices/9.json` manifest (DoD row 9)  
 - [ ] Notebook seed: e.g. “Water — not light — is limiting here.”  
-- [ ] No owner ask unless a Tier-O legibility question appears  
+- [ ] Tier-O candidate (batch, do not ask alone): *does the world tell you what it needs without the inspector?* — holds for the §4.0 step 6 firing rule  
 
 ---
 
-### 4.5 Slice 10 — Fire / fuel *(stub)*
+### 4.5 Slice 10 — Fire / fuel
 
-**Loops.** Sim: fuel + fire disturbance (ES-002). Game: pulse intervention with real semantics (A-002, A-006).  
-**Register.** ES-002, A-002, A-006.  
-**Gate.** After Slice 9 spine so readiness/limiting factors exist to disturb.
+**Loops.** Sim: vegetation → fuel load → fire disturbance → cleared cover → succession restart (ES-002 — disturbance is necessary, not a failure state). Game: a pulse intervention with real semantics — the player sites a burn as a *cause* and lives with the result (A-002, A-006, A-005).  
+**Register / candidates.** ES-002, ES-001 (succession emergent), A-002, A-006, A-005, RC-004 (ecological time constrains repetition), N-005. Fire ignition timing touches **C-003** — authored ignition only until C-003 closes; no stochastic arrivals.  
+**Study.** NATURAL_PROCESS_MATH fire/fuel section; EXTERNAL_REFERENCES cellular fire-spread peers are **presentation and rule-shape study only** — spread must run on the same WorldState authority as hydrology (T-006).  
+**Bans.** Fire as a scripted event or scenario trigger (N-004). Fire as pure penalty (ES-002 — it is a process, not a punishment). Stochastic ignition while C-003 is Open. A second disturbance engine parallel to the sim step.  
+**Gate.** After Slice 9, so readiness / limiting factors exist to disturb and recovery is measurable.
+
+- [ ] `fuel` field accumulating from vegetation, depleted by fire; registered with owner + band  
+- [ ] Authored ignition only (C-003); spread rule cited and deterministic under T-001  
+- [ ] Moisture couples to spread — wet ground resists burning, closing fire back onto the hydrology spine  
+- [ ] Tier-M: conservation/accounting across a burn (fuel consumed vs. cover lost); determinism hash across the disturbance  
+- [ ] Tier-M: post-fire recovery trajectory differs by pre-fire moisture (probe `burn-recover`)  
+- [ ] `docs/slices/10.json` manifest (DoD row 9)  
+- [ ] Notebook seed: e.g. “The burn ran to the wet ground and stopped.”  
+- [ ] Tier-O candidate (batch): *did the burn read as something you did, or as something that happened to you?* (A-005 / N-001)
 
 ---
 
@@ -181,7 +230,9 @@ Do not expand these until Slice 8b–9 DoD holds. Presentation (§4.2) may run i
 ## 5. PR / commit hygiene
 
 - Cite register IDs (or C-00x candidates) in new sim modules and tests.  
-- Update `GOLDEN_*` / probe baselines only when physics change is intentional; note why + Tier-M artifact in the commit body.  
+- Update `GOLDEN_*` / probe baselines only when physics change is intentional; note why + Tier-M artifact in the commit body. A baseline diff with no stated reason is a blocking review comment, not a nit — it is the one place drift enters silently.  
+- A candidate promoted under §4.0 step 8 lands in the same commit as its evidence: register status, register §16 queue entry struck, version-history line, `npm run conformance` re-run.  
+- A blocked note (§4.0.1) is committed like any other artifact, with the next queue item named in the same body.  
 - Run `npm run conformance` before claiming a slice done.  
 - Prefer small PRs: sim edge vs game edge can split if WorldState coupling allows.  
 - If a commit acts on an EXTERNAL_REFERENCES steal, refresh the Research↔Decision note in §3 Current gate or the slice checklist.

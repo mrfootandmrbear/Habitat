@@ -32,11 +32,12 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1), then **Slice 8b** groundwater / baseflow (**C-001**).
+**Post-MVP:** autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1) — **probe baseline harness first** — then **Slice 8b** groundwater / baseflow (**C-001**).
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
-- Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — ask gate only
-- Agents: follow BUILD_GUIDE §4.0 (test → probe → conformance → maybe ask)
+- Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)
+- Agents: follow BUILD_GUIDE §4.0 (test → probe → conformance → promote what CI settled → maybe ask), and §4.0.1 when blocked
+- Candidates whose Judge is CI alone are the agent's to promote; owner-judged ones get a dossier ([DECISION_CONFORMANCE.md](docs/DECISION_CONFORMANCE.md) §3.0)
 
 ```bash
 npm run dev

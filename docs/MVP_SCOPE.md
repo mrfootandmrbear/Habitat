@@ -110,10 +110,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Next** — BUILD_GUIDE §4.3 |
-| **9** | Limiting factors / HSI spine | Inspect why a patch is limited | Post-MVP after 8b |
-| **10+** | Fire, succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 9 |
+| **9** | Limiting factors / HSI spine | Inspect why a patch is limited | Post-MVP after 8b — BUILD_GUIDE §4.4 |
+| **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | After Slice 9 — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
+| **11+** | Succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 10 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts → Slice 8b GW/baseflow → Slice 9 Liebig/HSI → Fire; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts (probe baseline harness first) → Slice 8b GW/baseflow → Slice 9 Liebig/HSI → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4. Slices 9 and 10 are specified to executable depth so an autonomous session always has two items ahead of it (BUILD_GUIDE §2 row 10).
 
 ---
 
@@ -132,6 +133,8 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 ## 6. Fun gate (before more post-MVP systems)
 
 The Slice 4 fun gate already **Passed** ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md)). Before opening a new **owner** playtest for post-MVP work, pass [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) ask gate. Agent-only slices (closeouts, 8b Tier-M, hygiene) do not spend a fun-gate session.
+
+The batch does not wait forever: it fires on the third accumulated Tier-O question, or when a slice cannot start without an answer (VERIFICATION_POLICY §4). The more the ladder is built autonomously, the more that firing rule — not the ask gate — is what keeps the world answerable to taste.
 
 | Verdict | Action |
 |---|---|

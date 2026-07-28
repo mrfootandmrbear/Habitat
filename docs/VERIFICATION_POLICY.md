@@ -70,20 +70,28 @@ When a new claim doesn't fit a row, apply §1 and add the row.
 
 The agent may request a playtest only when **all four** hold. Otherwise it keeps working.
 
-1. `npm test`, `npm run build`, and `npm run conformance:check` are green on the current tree.
+1. `npm test`, `npm run build`, `npm run conformance:check`, and `npm run probe -- --all --check` are green on the current tree.
 2. Every Tier-M claim for the slice is covered by a committed test or probe, and the agent can state the numbers.
 3. Every Tier-P claim for the slice has a green proxy.
 4. The agent can write the owner-only question **in one sentence** and that sentence contains no number.
 
 If step 4 is hard, the question was Tier M or P and the answer is more work, not a playtest.
 
-**Corollary — batching.** Slices that produce no new owner-only question (infrastructure, refactors, performance, hygiene items) do not get a playtest request at all. They accumulate. Ask once, at the next slice that actually changes what the world looks like or what the player can do.
+**Corollary — batching.** Slices that produce no new owner-only question (infrastructure, refactors, performance, hygiene items) do not get a playtest request at all. They accumulate.
+
+**When the batch fires.** Batching protects owner time; left unbounded it becomes its own failure, because taste drift compounds silently across every slice built without a look. The batch is spent at whichever comes first:
+
+- a **third** Tier-O question joins it, or
+- the next slice cannot start without an answer, or
+- a Tier-P proxy has gone red through its retune budget ([BUILD_GUIDE.md](BUILD_GUIDE.md) §4.0.1) and the question is now genuinely about attention.
+
+One session, one question ([§5](#5-playtest-request-format) still applies) — the other batched questions wait or are answered by the same sitting only if they share a single sentence honestly. If the batch has been open across three or more merged slices, firing it is overdue: that is a signal the agent has been building on unverified taste, which is exactly the risk autonomy takes on.
 
 ---
 
 ## 5. Playtest request format
 
-When the gate is passed, the request is a file at `docs/playtests/<slice>.md` and it obeys this shape:
+When the gate is passed, the request is a file at `docs/playtests/<slice>.md` and it obeys this shape. (Requests written before this convention live at `docs/PLAYTEST_*.md` and stay valid where they are; new ones go in `docs/playtests/`.)
 
 ```markdown
 # Playtest — <slice>
@@ -141,20 +149,21 @@ Row 2 ("Observable") stays a Tier-P claim: the agent proves the signal is encode
 
 ---
 
-## 8. Where the numbers live (agent task — not yet built)
+## 8. Where the numbers live
 
 Tier M and Tier P need a home for scenario-scale measurement that is coarser than a unit test and reportable to the owner.
 
-**Spec.**
+**Built.** `npm run probe -- <scenario>` runs a named headless scenario against real `WorldState` (T-006), no renderer, fixed seed and schedule. Scenarios are declared in `src/sim/probes/scenarios.ts` and each emits a flat record of named scalars — peak Σw, time-to-peak, infiltration ledger total, ET total, mass residual, time-to-threshold, step ms. Output writes `docs/evidence/<scenario>.md`. Live scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual). The encoded-signal proxy sibling also exists (`src/sim/presentation.proxy.test.ts`), so "Observable" is treated as Tier P.
 
-- `npm run probe -- <scenario>` runs a named headless scenario against real `WorldState` (T-006), no renderer, fixed seed and schedule.
-- Scenarios are declared in `src/sim/probes/` and each emits a flat record of named scalars — peak Σw, time-to-peak, infiltration ledger total, ET total, mass residual, time-to-threshold, step ms.
-- Output writes `docs/evidence/<scenario>.md`: a table of this run vs. the committed baseline, with deltas.
-- Baselines are committed. A changed baseline is a deliberate act with a reason in the commit body, exactly like `GOLDEN_*` hashes (T-001).
-- First scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual), and (Slice 8b) `baseflow-persist` (wet channel after dry days with vs without GW).
-- The *Already proven* block of any playtest request is pasted from the probe output, not hand-written.
+**Not built — and load-bearing.** The baseline half of the contract. Today a probe writes only the current run: there is no committed baseline, no delta column, no tolerance, no non-zero exit, and CI never invokes a probe at all. Every Tier-M claim above unit-test scale is therefore unguarded against silent drift, which is precisely the guarantee the autonomous protocol spends. Closing this is the first item in [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.1.
 
-The encoded-signal proxy (§3) needs a sibling: a pure function extracted from `TerrainMesh` mapping field value → color, so a test can assert perceptual delta without a GPU. That extraction is a prerequisite for treating "Observable" as Tier P rather than Tier O.
+**Baseline contract (the spec to build against).**
+
+- `docs/evidence/<scenario>.baseline.json` is committed per scenario: the recorded scalars plus a per-metric tolerance, absolute or relative, chosen when the scenario is written rather than fitted to whatever a run produced.
+- `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas** — that table, not a hand-written one, is what the *Already proven* block is pasted from.
+- `npm run probe -- --all --check` runs every scenario, writes nothing, and exits non-zero on any out-of-tolerance metric. It joins `npm test`, `npm run build`, and `npm run conformance:check` as `npm run gate`, and CI runs `gate`.
+- A changed baseline is a deliberate act with a reason in the commit body, exactly like `GOLDEN_*` hashes (T-001). An *unexplained* baseline move is a defect to diagnose, never a baseline to accept ([BUILD_GUIDE.md](BUILD_GUIDE.md) §4.0.1).
+- Next scenarios: `baseflow-persist` (Slice 8b — wet channel after dry days with vs. without GW), `limiting-shift` (Slice 9), `burn-recover` (Slice 10).
 
 ---
 

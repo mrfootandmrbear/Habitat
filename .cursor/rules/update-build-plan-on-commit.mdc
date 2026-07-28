@@ -15,8 +15,11 @@ When creating a git commit that advances Habitat (sim, UI, playtest, or slice st
 2. **Update `docs/MVP_SCOPE.md` joint slice table** status cells when a slice moves (e.g. Done — playtest Pass, In progress / play, Next)
 3. **Update `README.md` Current slice** when the playable slice or gate changes
 4. **Research ↔ decisions:** if the commit acts on an [EXTERNAL_REFERENCES.md](docs/EXTERNAL_REFERENCES.md) steal, cite the Locked/Current ID or Open candidate (**C-001**…**C-003**) in the slice checklist or commit body; do not invent Locked policy from Open candidates
-5. **Physics changes:** name Tier-M artifacts in the commit body (golden hash, probe baseline path, test file)
-6. Do **not** leave BUILD_GUIDE stale across a feature commit and a later “docs only” cleanup unless the user asked to split commits
+5. **Physics changes:** name Tier-M artifacts in the commit body (golden hash, probe baseline path, test file). A moved probe baseline needs a stated reason in that body — an unexplained move is a defect, not an update
+6. **Slice manifests:** a slice checked off in BUILD_GUIDE §3/§4 must have `docs/slices/<slice>.json` (DoD row 9) and must leave the next-but-one slice specified to §4.3 depth (DoD row 10)
+7. **Promotions:** if the commit meets a candidate criterion whose Judge is CI/agent alone, promote it here — register status, §16 queue entry struck, version-history line, `npm run conformance` re-run (DECISION_CONFORMANCE §3.0)
+8. **Blocked notes** (BUILD_GUIDE §4.0.1) commit like any other artifact, naming the next queue item in the body
+9. Do **not** leave BUILD_GUIDE stale across a feature commit and a later “docs only” cleanup unless the user asked to split commits
 
 Docs-only commits that *are* the plan update are fine. Pure chore commits with no slice progress (typos, lockfile-only) may skip plan edits.
 
