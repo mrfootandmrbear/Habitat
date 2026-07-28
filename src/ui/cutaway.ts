@@ -6,6 +6,7 @@ export type CutawaySample = {
   x: number;
   z: number;
   soil: number;
+  soilDepth: number;
   water: number;
   veg: number;
   elev: number;
@@ -17,7 +18,8 @@ export function formatCutaway(sample: CutawaySample | null): string {
   const vegPct = Math.round(sample.veg * 100);
   return (
     `Cutaway (${sample.x},${sample.z}) · elev ${sample.elev.toFixed(2)} · ` +
-    `soil ${soilPct}% · water ${sample.water.toFixed(3)} · veg ${vegPct}%`
+    `depth ${sample.soilDepth.toFixed(2)}m · soil ${soilPct}% · ` +
+    `water ${sample.water.toFixed(3)} · veg ${vegPct}%`
   );
 }
 

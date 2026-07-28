@@ -27,6 +27,12 @@ export class WorldState {
   readonly terrain: Grid2D;
   readonly water: Grid2D;
   readonly soilMoisture: Grid2D;
+  /**
+   * Mobile regolith depth (m) — Slice 8 scaffold (SIMULATION_MODEL §3).
+   * Legacy: cannot be reconstructed from current forcing (T-003 / S-007).
+   * Owner geomorphology; no process writes yet.
+   */
+  readonly soilDepth: Grid2D;
   /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
   readonly vegCover: Grid2D;
   /** Manning-like n — owned by vegetation (Slice 6 / E-005). */
@@ -72,6 +78,11 @@ export class WorldState {
     this.terrain = terrain;
     this.water = new Grid2D(this.width, this.height);
     this.soilMoisture = new Grid2D(this.width, this.height);
+    this.soilDepth = new Grid2D(
+      this.width,
+      this.height,
+      config.defaultSoilDepthMeters,
+    );
     this.vegCover = new Grid2D(this.width, this.height);
     this.surfaceRoughness = new Grid2D(
       this.width,
@@ -321,6 +332,17 @@ export class WorldState {
     return this.soilMoisture.get(x, z);
   }
 
+  getSoilDepth(x: number, z: number): number {
+    if (!this.soilDepth.inBounds(x, z)) return 0;
+    return this.soilDepth.get(x, z);
+  }
+
+  /** Bedrock elev = terrain − soil.depth (derived; not stored). */
+  getBedrockElevation(x: number, z: number): number {
+    if (!this.terrain.inBounds(x, z)) return 0;
+    return this.terrain.get(x, z) - this.soilDepth.get(x, z);
+  }
+
   getVegCover(x: number, z: number): number {
     if (!this.vegCover.inBounds(x, z)) return 0;
     return this.vegCover.get(x, z);
@@ -385,6 +407,17 @@ export class WorldState {
         legacy: false,
         data: this.soilMoisture.data,
         range: [0, config.soilPorosity] as const,
+      },
+      {
+        id: "soil.depth",
+        units: "m",
+        shape: "cell" as const,
+        owner: "geomorphology",
+        band: "decadal" as const,
+        // T-003: hysteresis / recovery memory — not reconstructible from rain alone.
+        legacy: true,
+        data: this.soilDepth.data,
+        range: [0, 5] as const,
       },
       {
         id: "veg.cover",

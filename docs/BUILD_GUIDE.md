@@ -71,7 +71,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** §4.2 presentation substrate shipped (Tier-P proxies green). Optional batched Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md). Next systems: Slice 8 when ready.
+**Current gate:** Slice 8 scaffold in progress (schema v2 + `soil.depth` legacy). Optional Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md).
 
 ---
 
@@ -222,6 +222,24 @@ Study origin: [NicksterSand/3D-Falling-Sand](https://github.com/NicksterSand/3D-
 
 ---
 
+### Slice 8 — Soil legacy / erosion memory *(scaffold in progress)*
+
+**Loops.** Sim: soil depth as persistent memory (recovery slows on thin soil later). Game: inspect legacy depth; save invalid without it (T-003).  
+**Register.** S-006, S-007, GEO-002, T-003.  
+**Gate.** Schema versioning before first legacy *process* — scaffold lands version + field first.
+
+- [x] Schema version ≥ 2 + save serialize/apply stub (`src/sim/save.ts`)  
+- [x] Register `soil.depth` (m, [0, 5], owner `geomorphology`, band `decadal`, **legacy: true**)  
+- [x] Derive bedrock as `terrain.elevation − soil.depth` (not stored)  
+- [x] Invariant: omit legacy field → save load fails; round-trip preserves depth + hash  
+- [x] Inspector: soil depth overlay  
+- [x] Notebook seed: e.g. “Thin soil here will take a long time to grow back.”  
+- [ ] Geomorphology process: soil production / erosion couple elev + depth (decadal)  
+- [ ] Wire moisture storage to `moisture · depth · Δx²` in mass balance (when ready)  
+- [ ] Owner play: only when depth becomes visible consequence of erosion — Tier-O later  
+
+---
+
 ### Post-MVP (stubs only)
 
 Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentation track (§4.2) may run in parallel — it does not add sim systems.
@@ -229,7 +247,7 @@ Do not expand systems slices until MVP exit in MVP_SCOPE §4 is met. Presentatio
 | Slice | Focus | Register |
 |---|---|---|
 | P (§4.2) | Volume-without-voxels presentation | T-005, T-006, T-007, A-005, U-005 |
-| 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 |
+| 8 | Soil legacy / erosion memory | S-006, S-007, GEO-002, T-003 | **Scaffold** — schema + `soil.depth` |
 | 9 | Fire / fuel | ES-002, A-002, A-006 |
 | 10 | Light / succession | ES-001 |
 | 11 | Roles / introductions → informs RC-003 | E-*, ES-006 |

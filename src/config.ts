@@ -61,6 +61,8 @@ export const config = {
   determinismSteps: 120,
 
   soilPorosity: 0.45,
+  /** Default mobile regolith depth (m) — Slice 8 scaffold; range [0, 5]. */
+  defaultSoilDepthMeters: 0.8,
   /** Per daily band (absolute; soil step ignores integrator dt). */
   infiltrationRate: 0.08,
   etRate: 0.012,
@@ -84,6 +86,7 @@ export type InspectorLayer =
   | "accumulation"
   | "watershed"
   | "soilMoisture"
+  | "soilDepth"
   | "vegetation"
   | "depression";
 

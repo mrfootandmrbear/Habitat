@@ -52,11 +52,13 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
       x: 3,
       z: 4,
       soil: 0.2,
+      soilDepth: 0.8,
       water: 0.05,
       veg: 0.5,
       elev: 2.1,
     });
     expect(text).toContain("(3,4)");
+    expect(text).toContain("depth");
     expect(text).toContain("soil");
     expect(text).toContain("water");
     expect(text).toContain("veg");

@@ -32,10 +32,9 @@ npm run conformance
 
 ## Current slice
 
-**§4.2 presentation substrate done** (cage, snapped cursor, flow cues, cutaway, conservation HUD). Tier-P proxies green.
+**Slice 8 scaffold** — schema v2 save stub + legacy `soil.depth` (inspectable). Erosion process not yet wired.
 
-- Optional owner ask: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md)
-- Next systems: Slice 8 (soil legacy) when ready
+- Optional owner ask still open: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md)
 
 ```bash
 npm run dev

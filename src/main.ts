@@ -197,6 +197,7 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
     x: cell.x,
     z: cell.z,
     soil: world.getSoilMoisture(cell.x, cell.z),
+    soilDepth: world.getSoilDepth(cell.x, cell.z),
     water: model.getWaterDepth(cell.x, cell.z),
     veg: world.getVegCover(cell.x, cell.z),
     elev: model.getTerrainHeight(cell.x, cell.z),

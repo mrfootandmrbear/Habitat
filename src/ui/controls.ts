@@ -15,6 +15,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "accumulation", label: "Inspect: flow accumulation" },
   { id: "watershed", label: "Inspect: watershed" },
   { id: "soilMoisture", label: "Inspect: soil moisture" },
+  { id: "soilDepth", label: "Inspect: soil depth" },
   { id: "vegetation", label: "Inspect: vegetation cover" },
   { id: "depression", label: "Inspect: depression depth" },
 ];

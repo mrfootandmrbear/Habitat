@@ -88,6 +88,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "ledger.et",
       "ledger.infiltration",
       "ledger.precipitation",
+      "soil.depth",
       "soil.infiltrationCapacity",
       "soil.moisture",
       "surface.roughness",

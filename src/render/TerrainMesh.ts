@@ -149,6 +149,11 @@ export class TerrainMesh {
         col.copy(BASE).lerp(WET, t);
         break;
       }
+      case "soilDepth": {
+        const t = Math.min(1, world.getSoilDepth(x, z) / 5);
+        col.setRGB(0.45 + 0.2 * t, 0.32 + 0.15 * t, 0.22 + 0.1 * t);
+        break;
+      }
       case "vegetation": {
         const t = world.getVegCover(x, z);
         col.copy(BASE).lerp(VEG, t);
