@@ -14,7 +14,7 @@
 ### 0.1 Status definitions
 
 - **Locked** — Examined enough to be binding. Reversal requires a superseding entry and impact review.
-- **Current** — The present direction, still open to testing. Implementations should not make it unnecessarily irreversible.
+- **Current** — The present direction, still open to testing. Implementations should not make it unnecessarily irreversible. Current entries are either **hypothesis-Current** (a direction under test; requires a promotion criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)) or **situation-Current** (a true statement about the present stack or scope; requires a review trigger, not promotion — see that document).
 - **Deferred** — The requirement remains valid; delivery is postponed. Deferral is not permission to build an architecture that forecloses it.
 - **Superseded** — Retained for history, no longer governing. Must name its replacement.
 - **Open** — A consequential question identified but not decided. May state constraints; must not masquerade as policy.
@@ -111,7 +111,18 @@ Corrections and relocations are recorded here. Content changes still require the
 - G-005's prototype window value removed as a tuning parameter and routed to scenario authoring. No decision content lost.
 - BUILD_GUIDE.md renamed from a tool-specific title in §17.
 
+**v2.0.1 — conformance adoption.**
+
+- Added §0.7 and hypothesis-Current versus situation-Current distinction in §0.1.
+- Adopted [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) for promotion criteria, review triggers, and the generated conformance ledger.
+
 **v1.3.1 held items resolved in v2.0.** The Non-Goals survive because they are a scope-control instrument rather than ordinary explanatory decisions. The H-* and GEO-* blocks survive because changing either would redesign the causal foundation of Habitat. Closely related claims remain separate only where they govern different disciplines: D-005 governs product intent, ART-002 art direction, U-003 information hierarchy, and ART-003 state expression. Residual preview and inspector detail is treated as derived-document guidance rather than an immutable list. The attention gap is resolved by D-006.
+
+### 0.7 Decision conformance
+
+Promotion criteria for hypothesis-Current and Open entries, review triggers for situation-Current entries, and the generated build-to-register traceability ledger live in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md). That document is governed here but is not part of this register; machine-generated ledger rows are updated by `npm run conformance`.
+
+A Current entry is not a candidate for Locked status until its promotion criterion is recorded, judged, and the artifact named in that criterion exists. Situation-Current entries are revisited only when their review trigger fires.
 
 ---
 
@@ -1211,13 +1222,13 @@ Ordered by how many other decisions depend on them.
 6. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
 7. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
 
-Until resolved, these are Open or Current and must not be treated as locked implementation requirements.
+Until resolved, these are Open or hypothesis-Current and must not be treated as locked implementation requirements. Situation-Current entries (**T-007**, **W-001**) are not on this queue; they carry review triggers in DECISION_CONFORMANCE.md.
 
 ---
 
 ## 17. Document Authority
 
-This register governs GAME_DESIGN_OVERVIEW.md, SIMULATION_MODEL.md, HYDROLOGY_SPEC.md, PLAYER_INTERACTION_SPEC.md, SPECIES_AND_HABITAT.md, SCENARIO_AUTHORING.md, FIELD_NOTEBOOK_SPEC.md, UI_INFORMATION_ARCHITECTURE.md, ART_DIRECTION.md, MVP_SCOPE.md, and BUILD_GUIDE.md.
+This register governs GAME_DESIGN_OVERVIEW.md, SIMULATION_MODEL.md, HYDROLOGY_SPEC.md, PLAYER_INTERACTION_SPEC.md, SPECIES_AND_HABITAT.md, SCENARIO_AUTHORING.md, FIELD_NOTEBOOK_SPEC.md, UI_INFORMATION_ARCHITECTURE.md, ART_DIRECTION.md, MVP_SCOPE.md, BUILD_GUIDE.md, and DECISION_CONFORMANCE.md.
 
 Derived documents are named by function. A document should not be named after the tool used to produce or consume it, since tool choice is not a decision this register makes and renaming under a tool switch would break every reference.
 
