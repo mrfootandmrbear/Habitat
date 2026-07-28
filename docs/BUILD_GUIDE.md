@@ -82,7 +82,9 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness first**, since the rest of the autonomous protocol assumes a scenario-scale tripwire that does not exist yet — then **Slice 8b groundwater / baseflow** (C-001). Batched Tier-O asks: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) + erosion legibility — held until the §4.0 step 6 firing rule trips.
+**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness first**, since the rest of the autonomous protocol assumes a scenario-scale tripwire that does not exist yet — then **Slice 8b groundwater / baseflow** (C-001), then **Slice 8c the return visit** (§4.3b), which the owner has elected to precede with the batched Tier-O session.
+
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -175,9 +177,30 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.4 Slice 9 — Limiting factors / HSI spine
+### 4.3b Slice 8c — The return visit *(game-side; the thesis slice)*
 
-**Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2) — the first field whose *meaning* is "what is holding this patch back". Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.  
+**Why this exists.** [THESIS.md](THESIS.md): the loop is *build the form → choose the forces → run time → look*. Slice 8 shipped geomorphology as Tier-M and left its legibility deferred, which means the payoff the whole project is named after — nature having its way with what you built — currently exists and is **invisible**. This slice makes the return visit real. It adds no new sim system.
+
+**Loops.** Sim: none new (observers, encoding, and time controls only). Game: you build something you care about, run time forward, and come back to find out what became of it.  
+**Register / candidates.** **C-004** (force regime as the post-build verb), **C-008** (response budget), A-005/N-001 boundary — regimes and pulses, never targeting; T-002/S-009 time rates; GEO-002 erosion already implemented.  
+**Bans.** No new authoritative fields. No targeting a force at a location (THESIS §9). No scripted "your berm collapses now" event — the erosion must be the sim's (N-004).
+
+- [ ] Erosion / deposition legible **without** the inspector on player-made terrain — the berm you built visibly changes  
+- [ ] One force dial the player sets before running time (rainfall regime is the cheapest: intensity × duration, authored by the player, seeded per **C-003**)  
+- [ ] Before/after readable across a fast-forward — the return visit needs a *then* and a *now*, not just a now  
+- [ ] Tier-P: encoded-signal proxy on the eroded-vs-untouched delta at default camera; response-latency proxy per **C-008**  
+- [ ] Tier-M: same seed + same regime → identical hash; different regime → divergent outcome on identical terrain (**C-004** paired-regime probe `regime-divergence`)  
+- [ ] `docs/slices/8c.json` manifest (DoD row 9)  
+- [ ] Notebook seed: e.g. “The berm I built is a low ridge now, and the channel moved.”  
+- [ ] **Tier-O — this is the batched session** ([docs/playtests/8c-return-visit.md](playtests/8c-return-visit.md)): *did you want to run it again with different weather?*  
+
+---
+
+### 4.4 Slice 9 — Limiting factors / HSI spine *(the arrival gate)*
+
+**Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2) — the first field whose *meaning* is "what is holding this patch back". Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.
+
+**Thesis role (C-007).** This is the **arrival gate**, not an inspector layer. THESIS §5: you dig the moat and something moves in *because the conditions suit it*. HSI is the mechanism that decides what shows up — which is why it outranks introduction machinery (E-007, E-008, RC-003) rather than serving it.  
 **Register / candidates.** ES-006 (capacity emerges — no fixed `K`), E-009 (readiness inferred from state), S-008 (hysteresis legible), U-001 layered inspect, N-004 (no hidden rules — the limiting factor must be inspectable, never a magic gate).  
 **Study.** NATURAL_PROCESS_MATH §3.3 Liebig minimum and §8.2 HSI composition; no external steal required — if one is used, cite it per §4.0 step 7.  
 **Bans.** No scalar "health" score standing in for the limiting factor (N-002). No fixed carrying capacity (ES-006). No readiness value that the player cannot trace to a field (N-004, S-004).

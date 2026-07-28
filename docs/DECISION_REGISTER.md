@@ -1074,6 +1074,10 @@ Restored in v1.3. These are binding prohibitions, not summaries. They exist as a
 
 **Leading direction.** Ecological consequence rather than bookkeeping, on the grounds that a cost expressed in the ecosystem satisfies D-003 and remains explainable under S-004, whereas a depleting counter does neither. Recorded as a preference, not a decision; the institutional and temporal candidates remain live.
 
+**Owner direction (2026-07-28).** Ecological consequence via the **Allee effect** (NATURAL_PROCESS_MATH §3.4): failure costs the founding population and the ecological time spent, the mechanism is inspectable, and no counter is introduced. Still Open — the criterion requires the strategy comparison, not a preference.
+
+**Priority note.** If **C-007** resolves toward arrival/colonization as the primary biological verb, deliberate introduction becomes a secondary mode and this entry falls in the §16 queue rather than being answered sooner. Decide C-007 first.
+
 **Known weakness of the leading direction.** Ecological consequence scales with what is already present. In a degraded preserve — precisely where repeated attempts are most likely — there may be little left to damage, so the consequence approaches zero exactly when the limiting mechanism is most needed.
 
 **Constraints.** The consequence must be explainable after the fact. It must not be so punitive that it reintroduces the hard gate E-007 removed, which is the failure mode to watch.
@@ -1214,16 +1218,22 @@ Restored in v1.3. These are binding prohibitions, not summaries. They exist as a
 
 Ordered by how many other decisions depend on them.
 
-1. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
-2. **RC-003** — the consequence of failed biological introduction beyond the elapsed ecological time established by RC-004.
-3. **C-001** — cheap GW/baseflow store (blocks treating Slice 8b as Locked policy).
-4. **C-003** — stochastic vs authored climate (blocks seeded storm generators).
-5. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
-6. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001.
-7. **E-008 and E-009** — role-resolution and inferred-readiness prototypes, including uncertainty and whether multiple candidates ever exist.
-8. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
-9. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
-10. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
+**Reordered 2026-07-28** after [THESIS.md](THESIS.md) was written. The thesis candidates lead because they decide what the remaining slices are *for*; introduction-shaped questions fall until C-007 settles whether introduction is even the primary verb.
+
+1. **C-004** — force control as an intervention axis (the post-build verb; no entry currently records it).
+2. **C-007** — arrival vs introduction as the primary biological verb (re-motivates the HSI spine; demotes RC-003 if it lands).
+3. **C-005** — branch-and-compare as a core instrument rather than deferred tooling.
+4. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
+5. **C-001** — cheap GW/baseflow store (blocks treating Slice 8b as Locked policy).
+6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
+7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
+8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
+9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee), priority contingent on C-007.
+10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
+11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
+12. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
+13. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
+14. **E-008 and E-009** — role-resolution and inferred-readiness prototypes; E-009 rises if C-007 makes readiness the arrival gate.
 
 Until resolved, these are Open or hypothesis-Current and must not be treated as locked implementation requirements. Situation-Current entries (**T-007**, **W-001**) are not on this queue; they carry review triggers in DECISION_CONFORMANCE.md.
 
@@ -1231,7 +1241,9 @@ Until resolved, these are Open or hypothesis-Current and must not be treated as 
 
 ## 16.5 Research candidates (not decided)
 
-Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9 and the multi-state water survey in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md). **Open — do not treat as Locked.** Implementation of Slice 8b may proceed only as a hypothesis under **C-001**, not as settled policy.
+Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-state water survey in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md), and — for **C-004**…**C-008** — [THESIS.md](THESIS.md), the owner-authored origin and loop statement written 2026-07-28. **Open — do not treat as Locked.** Implementation of Slice 8b may proceed only as a hypothesis under **C-001**, not as settled policy.
+
+**On the thesis candidates.** C-004…C-008 exist because the thesis describes a loop the register never recorded: build a form, then control the *forces* acting on it, run time, and look. Where the thesis and an entry disagree, the entry still governs — but the disagreement is a signal to revisit the entry, not to discard the thesis.
 
 ### C-001 — Cheap groundwater / baseflow store
 **Status:** Open
@@ -1252,13 +1264,60 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9 and the multi-
 **Leading direction.** Promote the Slice 8 reading to an explicit decision after a short review, or supersede with a different spatial rule. Until then agents must not invent a second erosion law.
 
 ### C-003 — Stochastic vs authored climate forcing
-**Status:** Open
+**Status:** Open *(owner direction recorded 2026-07-28; evaluation outstanding)*
 
 **Question.** Is weather stochastic-but-reproducible under a stored seed, or authored per scenario? (NATURAL_PROCESS_MATH §9.1.)
 
 **Constraints.** T-001 allows seeded RNGs; P-006 prediction fairness and G-005/G-006 completion evaluation both care.
 
-**Leading direction.** None — **no implementation** of stochastic storm arrivals until this entry closes.
+**Owner direction (2026-07-28).** **Authored schedules**, not stochastic arrivals — deterministic by construction, prediction unambiguously fair, scenarios validatable. [THESIS.md](THESIS.md) §4 refines *who* authors: the **player at runtime**, setting a rainfall regime, with generation seeded and reproducible so branches stay comparable (**C-004**, **C-005**). Scenario-authored schedules remain the other legitimate source.
+
+**Remaining to close.** The criterion in DECISION_CONFORMANCE §3 also requires evaluating the choice against P-006 prediction fairness on one scenario. Until then: still no free-running stochastic storm arrivals, not even behind a flag.
+
+### C-004 — Force control as an intervention axis
+**Status:** Open
+
+**Question.** After the initial build, is the player's primary verb **setting which natural forces operate and at what intensity** (rainfall regime, erosion, fire, season, time rate) rather than acting at a place? Every existing intervention entry — A-005 siting, A-006 pulses — describes a *spatial* act. [THESIS.md](THESIS.md) §4 describes a *process* axis that no entry records.
+
+**Constraints.** D-001 (nature is the protagonist) and N-001 (no ecosystem painter) survive only if forces are **regimes and pulses, not targeted smiting** — set the rainfall, site an ignition, never drag a storm onto a chosen hill. RC-004 already rejects an action economy, so dials need not be rationed. T-001 determinism must hold across force changes.
+
+**Leading direction.** Yes — a force/regime control surface alongside spatial siting, with the targeting ban stated explicitly. Not Locked until a slice demonstrates the surface without collapsing into god-mode.
+
+### C-005 — Branch-and-compare as a core instrument
+**Status:** Open
+
+**Question.** Should forking one world and running it twice under different forces ("same castle, more rain") be a **core mechanic** rather than the deferred convenience currently filed as F-002 and F-005? THESIS §7.
+
+**Constraints.** T-001 determinism and T-003 save compatibility already supply the hard part; P-005 (hypothesis-Current) exists precisely for experimentation. A branch must not become a scoring or optimization surface (N-002) — comparison is for understanding, not for finding the best run.
+
+**Leading direction.** Promote from Deferred to a real mechanic; a run should be reproducible and shareable from seed + force settings. Blocked from Locked until P-005's criterion is discharged and one comparison UI exists.
+
+### C-006 — Sculpting is abundant; scarcity lives in ecological time
+**Status:** Open
+
+**Question.** Is terrain sculpting **abundant and tactile** (RCT3 brush — you do it constantly, undo is free), against a register tone that treats intervention as rationed and deliberate?
+
+**Constraints.** N-001 bans painting *outcomes*; terrain is a cause, so abundance does not breach it. RC-004 already names ecological time — not action count — as the constraint, which supports abundance. A-005's "site a cause" framing stays true; only its implied scarcity is at issue.
+
+**Leading direction.** Abundant sculpting, scarce time. Requires no register supersession — A-005 and RC-004 already permit it — but the tone should be stated so agents stop inferring rationing.
+
+### C-007 — Arrival as the primary biological verb
+**Status:** Open
+
+**Question.** Is the primary biological mode **colonization / arrival** — you make conditions and something shows up if they suit — rather than deliberate introduction (E-007, E-008, RC-003)? THESIS §5.
+
+**Constraints.** D-001 favors arrival. E-007's attemptable-role framing and RC-003's failed-introduction consequence assume introduction is primary; if arrival leads, RC-003 falls in priority rather than being answered. ES-006 (capacity emerges) and E-009 (readiness inferred) both fit arrival naturally.
+
+**Leading direction.** Arrival primary, introduction secondary and later. This re-motivates the limiting-factor / HSI spine as the **arrival gate** rather than an inspector layer.
+
+### C-008 — Intervention → visible response budget
+**Status:** Open
+
+**Question.** Is there a stated maximum delay between a player edit and a visible world response, below which the "mess with it" feeling dies? In RCT3 the land moves instantly; in Habitat a berm's consequence is mediated by the sim clock.
+
+**Constraints.** S-009 keeps duration in simulation time and T-002 fixes the offered rates, so the budget must be expressed as *sim-time to visible delta at a stated rate*, not as wall-clock. Tier-P measurable (VERIFICATION_POLICY §3) — this is a proxy question, not a taste question, until the proxy is green.
+
+**Leading direction.** State a budget per interaction class (sculpt, force change) and make it a Tier-P check on observable slices. No value proposed yet; measure first.
 
 ---
 
