@@ -15,11 +15,16 @@ export class HeightfieldHydrology implements HydrologyModel {
 
   constructor(
     terrain: Grid2D,
-    options?: { flowRate?: number; maxOutflowFraction?: number },
+    options?: {
+      flowRate?: number;
+      maxOutflowFraction?: number;
+      ownTerrain?: boolean;
+    },
   ) {
     this.width = terrain.width;
     this.height = terrain.height;
-    this.terrain = terrain.clone();
+    this.terrain =
+      options?.ownTerrain === false ? terrain : terrain.clone();
     this.water = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
@@ -66,11 +71,16 @@ export class HeightfieldHydrology implements HydrologyModel {
     this.water.fill(0);
   }
 
-  getWaterDepthBuffer(): Float32Array {
-    return this.water.data;
+  snapshotWaterDepth(): Float32Array {
+    return new Float32Array(this.water.data);
   }
 
-  getTerrainHeightBuffer(): Float32Array {
-    return this.terrain.data;
+  setWaterDepth(x: number, z: number, depth: number): void {
+    if (!this.water.inBounds(x, z)) return;
+    this.water.set(x, z, depth);
+  }
+
+  fillWater(depth: number): void {
+    this.water.fill(depth);
   }
 }

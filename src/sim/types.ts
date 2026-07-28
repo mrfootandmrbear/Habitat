@@ -5,6 +5,4 @@ export type WaterStateView = {
   getTerrainHeight(x: number, z: number): number;
   getWaterDepth(x: number, z: number): number;
   getSurfaceHeight(x: number, z: number): number;
-  getWaterDepthBuffer(): Float32Array;
-  getTerrainHeightBuffer(): Float32Array;
 };

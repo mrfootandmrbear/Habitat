@@ -5,6 +5,9 @@ import { hashFloat32Buffer } from "./hash";
 import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
 import { generateMountain } from "./terrain/generateMountain";
 
+/** Golden depth hash for default rain schedule (T-001). Update when physics intentionally changes. */
+const GOLDEN_DEPTH_HASH = "93d6ed95";
+
 function runSchedule(seed: number): string {
   const terrain = generateMountain(
     config.gridSize,
@@ -17,7 +20,7 @@ function runSchedule(seed: number): string {
     model.addRain(config.rainPerSecond * config.simDt);
     model.step(config.simDt);
   }
-  return hashFloat32Buffer(model.getWaterDepthBuffer());
+  return hashFloat32Buffer(model.snapshotWaterDepth());
 }
 
 function rampTerrain(width: number, height: number, slope: number): Grid2D {
@@ -36,6 +39,11 @@ describe("heightfield hydrology (T-001)", () => {
     const b = runSchedule(config.terrainSeed);
     expect(a).toBe(b);
     expect(a).toMatch(/^[0-9a-f]{8}$/);
+  });
+
+  it("matches committed golden depth hash (T-001)", () => {
+    const hash = runSchedule(config.terrainSeed);
+    expect(hash).toBe(GOLDEN_DEPTH_HASH);
   });
 
   it("moves water downhill into basins (readable pooling)", () => {
@@ -78,7 +86,7 @@ describe("heightfield hydrology (T-001)", () => {
     const model = new HeightfieldHydrology(terrain);
     model.addRain(0.1);
     model.step(config.simDt);
-    expect(model.getWaterDepthBuffer().length).toBe(32 * 32);
+    expect(model.snapshotWaterDepth().length).toBe(32 * 32);
   });
 });
 
@@ -89,7 +97,7 @@ describe("flux scaling (dt and flowRate matter)", () => {
         flowRate,
         maxOutflowFraction: 0.5,
       });
-      model.getWaterDepthBuffer()[model.width * 4 + 1] = 1;
+      model.setWaterDepth(1, 4, 1);
       model.step(1 / 60);
       return model.getWaterDepth(1, 4);
     };
@@ -107,7 +115,7 @@ describe("flux scaling (dt and flowRate matter)", () => {
         flowRate: 2.5,
         maxOutflowFraction: 0.5,
       });
-      model.getWaterDepthBuffer()[model.width * 4 + 1] = 1;
+      model.setWaterDepth(1, 4, 1);
       model.step(dt);
       return model.getWaterDepth(1, 4);
     };
@@ -123,14 +131,13 @@ describe("flux scaling (dt and flowRate matter)", () => {
       flowRate: 2.5,
       maxOutflowFraction: 0.5,
     });
-    const buf = model.getWaterDepthBuffer();
-    buf.fill(1);
-    buf[12]! += 1e-6;
+    model.fillWater(1);
+    model.setWaterDepth(2, 2, 1 + 1e-6);
 
     const depths: number[] = [];
     for (let i = 0; i < 8; i++) {
       model.step(1 / 60);
-      depths.push(buf[12]!);
+      depths.push(model.getWaterDepth(2, 2));
     }
 
     for (const d of depths) {
@@ -149,7 +156,7 @@ describe("flux scaling (dt and flowRate matter)", () => {
         model.addRain(0.02 * dt);
         model.step(dt);
       }
-      return new Float32Array(model.getWaterDepthBuffer());
+      return model.snapshotWaterDepth();
     };
 
     const coarse = run(1 / 30, 60);
@@ -161,11 +168,27 @@ describe("flux scaling (dt and flowRate matter)", () => {
     }
     const meanAbs = l1 / coarse.length;
 
-    // Same wall-clock schedule should not diverge wildly after the clamp fix.
     expect(meanAbs).toBeLessThan(0.05);
 
     let fineSum = 0;
     for (let i = 0; i < fine.length; i++) fineSum += fine[i]!;
     expect(fineSum).toBeGreaterThan(0);
+  });
+});
+
+describe("T-006 readonly sim view", () => {
+  it("WaterStateView has no mutable buffer accessors", () => {
+    const terrain = generateMountain(16, 16, 8, 3);
+    const model = new HeightfieldHydrology(terrain);
+    expect("getWaterDepthBuffer" in model).toBe(false);
+    expect("getTerrainHeightBuffer" in model).toBe(false);
+  });
+
+  it("snapshotWaterDepth returns a copy", () => {
+    const model = new HeightfieldHydrology(new Grid2D(4, 4, 1));
+    model.setWaterDepth(1, 1, 0.5);
+    const snap = model.snapshotWaterDepth();
+    snap[5] = 99;
+    expect(model.getWaterDepth(1, 1)).toBe(0.5);
   });
 });
