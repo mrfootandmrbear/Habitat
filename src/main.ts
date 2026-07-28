@@ -12,6 +12,7 @@ import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
 import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
+import { totalWaterVolume } from "./sim/hydrology/fluxStep";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -207,9 +208,11 @@ function frame(now: number): void {
           ? "dig channel"
           : "predict";
   ui.setStatus(
-    `Slice 5 · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
+    `Slice 6 · ${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (dropped > 0 ? ` · dropped ${dropped}` : "") +
-      (raining ? " · raining" : ""),
+      (raining ? " · raining" : "") +
+      ` · Σw ${totalWaterVolume(world.water.data).toFixed(1)}` +
+      ` · infil ${world.infiltrationLedger.toFixed(1)}`,
   );
 
   controls.update();

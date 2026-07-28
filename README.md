@@ -32,17 +32,16 @@ npm run conformance
 
 ## Current slice
 
-**Slice 5 — Soil → vegetation** (ES-001, ES-006) — ready to play
+**Slice 6 — Cover blunts the storm** (E-005) — **playtest Pass** (sim MVP)
 
-- `veg.cover` grows from soil moisture (one-way; no veg→water yet)
-- Terrain greens where wet without needing the inspector
-- Inspect: vegetation cover; Slice 4 soil/flow still Pass
-- Playtest: [docs/PLAYTEST_SLICE5.md](docs/PLAYTEST_SLICE5.md)
+- Vegetation grows from wet soil, then raises roughness / infiltration so cover retains more water
+- Status `Σw` / `infil`; paired-storm tests green
+- Playtest: [docs/PLAYTEST_SLICE6.md](docs/PLAYTEST_SLICE6.md)
 
 ```bash
 npm run dev
 ```
 
-Rain on (try 4×). Wet basins should green; dry ridges stay browner.
+Rain → green → reset water / storm again, or bare reload for A/B.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

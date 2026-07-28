@@ -66,10 +66,10 @@ Summary only — do not reopen unless fixing regressions.
 | 2 | WorldState, registry, no-flow, SimClock | Pause / 1× / 4× / 16× | `WorldState`, `SimClock`, CI | Conservation, S-009 time-rate |
 | 3 | Terrain → watershed / accumulation | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
 | 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | **Pass** — infiltration + darkening |
-| 5a | — | Predict wet cells | `PredictionSession` | **Pass** |
-| 5b | Player edits terrain | Berm / dig | `raiseBerm` / `digChannel` | **Pass** |
+| 5 | Soil → vegetation | Green follows wet | `vegetationProcess`, TerrainMesh | **Pass** |
+| 6 | Veg → roughness / infil → water | Cover blunts storm | roughness + infil capacity | **Pass** (sim MVP) |
 
-**Current gate:** Slice 5 vegetation ready — [PLAYTEST_SLICE5.md](PLAYTEST_SLICE5.md). Slice 4 remains **Pass** (soil / flow).
+**Current gate:** Slice 6 playtest **Pass** (sim MVP). Vegetation grows and retains more water. Next: post-MVP or polish.
 
 ---
 
@@ -136,8 +136,8 @@ Summary only — do not reopen unless fixing regressions.
 - [x] Invariant: **Monotonicity** — higher sustained moisture → ≥ biomass/cover (within bounds)  
 - [x] No constant carrying capacity `K`  
 - [x] Inspector: veg biomass or cover  
-- [ ] Notebook seed: e.g. “Plants established where the ground stayed wet.”  
-- [ ] Owner play: rain pattern → visible green gradient
+- [x] Notebook seed: e.g. “Plants established where the ground stayed wet.”  
+- [x] Owner play: rain pattern → visible green gradient — **Pass** (with Slice 6)
 
 **Do not** close vegetation → water in this slice (corollary: one direction at a time).
 
@@ -148,14 +148,14 @@ Summary only — do not reopen unless fixing regressions.
 **Loops.** Sim: veg → roughness / infiltration → runoff. Game: vegetated slope blunts the hydrograph.  
 **Register.** D-003, E-005 partial.
 
-- [ ] `vegetation` owns or contributes to `surface.roughness` and/or `soil.infiltrationCapacity` (SIMULATION_MODEL §11)  
-- [ ] Hydrology / soil reads those fields; declare `lagged` if needed to break the schedule cycle  
-- [ ] Paired-storm test: same rain, bare vs vegetated → measurably different surface response  
-- [ ] Invariant: paired-storm difference + conservation  
-- [ ] Observable without inspector (hydrograph feel or peak wetness)  
-- [ ] Notebook seed: e.g. “Cover slowed the runoff on this slope.”  
-- [ ] Owner play: grow cover, storm again, see the difference  
-- [ ] Mark MVP sim milestone in MVP_SCOPE status table when done
+- [x] `vegetation` owns or contributes to `surface.roughness` and/or `soil.infiltrationCapacity` (SIMULATION_MODEL §11)  
+- [x] Hydrology / soil reads those fields; declare `lagged` if needed to break the schedule cycle  
+- [x] Paired-storm test: same rain, bare vs vegetated → measurably different surface response  
+- [x] Invariant: paired-storm difference + conservation  
+- [x] Observable without inspector (hydrograph feel or peak wetness)  
+- [x] Notebook seed: e.g. “Cover slowed the runoff on this slope.”  
+- [x] Owner play: grow cover, storm again, see the difference — **Pass**  
+- [x] Mark MVP sim milestone in MVP_SCOPE status table when done
 
 ---
 

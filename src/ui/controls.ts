@@ -149,7 +149,7 @@ export function mountControls(
 
   const status = document.createElement("div");
   status.id = "status";
-  status.textContent = "Habitat · Slice 5";
+  status.textContent = "Habitat · Slice 6";
 
   bar.append(
     rainBtn,

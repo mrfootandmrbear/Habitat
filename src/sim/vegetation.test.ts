@@ -7,9 +7,9 @@ import { WorldState } from "./WorldState";
 import { vegetationProcess } from "./process/vegetationProcess";
 
 describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
-  it("declares soil→veg only — no water writes", () => {
+  it("declares soil→veg only for moisture — no water writes", () => {
     expect(vegetationProcess.reads).toEqual(["soil.moisture"]);
-    expect(vegetationProcess.writes).toEqual(["veg.cover"]);
+    expect(vegetationProcess.writes).toContain("veg.cover");
     expect(vegetationProcess.writes).not.toContain("water.surfaceDepth");
     expect(vegetationProcess.writes).not.toContain("soil.moisture");
   });
@@ -39,7 +39,7 @@ describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
     expect(world.getVegCover(wet, 0)).toBeGreaterThan(0.05);
   });
 
-  it("vegetation step does not mutate water or soil buffers", () => {
+  it("vegetation step does not mutate water or soil moisture buffers", () => {
     const world = new WorldState(generateMountain(8, 8, 2, 1));
     world.soilMoisture.fill(0.2);
     world.water.fill(0.05);
@@ -49,6 +49,9 @@ describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
     expect([...world.water.data]).toEqual([...waterBefore]);
     expect([...world.soilMoisture.data]).toEqual([...soilBefore]);
     expect(world.vegCover.data.some((v) => v > 0)).toBe(true);
+    expect(world.surfaceRoughness.get(0, 0)).toBeGreaterThan(
+      config.baseRoughness - 1e-9,
+    );
   });
 
   it("source has no fixed carrying-capacity K symbol (ES-006)", () => {

@@ -27,6 +27,12 @@ export class WorldState {
   readonly soilMoisture: Grid2D;
   /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
   readonly vegCover: Grid2D;
+  /** Manning-like n — owned by vegetation (Slice 6 / E-005). */
+  readonly surfaceRoughness: Grid2D;
+  /** Infiltration capacity — owned by soilWater; veg contributes (Slice 6). */
+  readonly infiltrationCapacity: Grid2D;
+  /** Veg inbox contribution toward infiltration capacity. */
+  readonly vegInfiltrationContribution: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -56,6 +62,17 @@ export class WorldState {
     this.water = new Grid2D(this.width, this.height);
     this.soilMoisture = new Grid2D(this.width, this.height);
     this.vegCover = new Grid2D(this.width, this.height);
+    this.surfaceRoughness = new Grid2D(
+      this.width,
+      this.height,
+      config.baseRoughness,
+    );
+    this.infiltrationCapacity = new Grid2D(
+      this.width,
+      this.height,
+      config.infiltrationRate,
+    );
+    this.vegInfiltrationContribution = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -114,6 +131,9 @@ export class WorldState {
       dt,
       this.flowRate,
       this.maxOutflowFraction,
+      undefined,
+      this.surfaceRoughness.data,
+      config.baseRoughness,
     );
     this.boundaryOutflowLedger += result.boundaryOutflow;
     this.syncLedgers();
@@ -122,14 +142,20 @@ export class WorldState {
   runSoilWaterStep(_dt: number): void {
     const w = this.water.data;
     const m = this.soilMoisture.data;
+    const cap = this.infiltrationCapacity.data;
+    const contrib = this.vegInfiltrationContribution.data;
     const porosity = config.soilPorosity;
-    const infilRate = config.infiltrationRate;
     const et = config.etRate;
+
+    // Owner integrates vegetation contribution (lagged vs this band's veg step).
+    for (let i = 0; i < cap.length; i++) {
+      cap[i] = config.infiltrationRate + contrib[i]!;
+    }
 
     for (let i = 0; i < w.length; i++) {
       const surface = w[i]!;
       const room = Math.max(0, porosity - m[i]!);
-      const infiltrate = Math.min(surface, infilRate, room);
+      const infiltrate = Math.min(surface, cap[i]!, room);
       if (infiltrate > 0) {
         w[i]! -= infiltrate;
         m[i]! += infiltrate;
@@ -144,12 +170,14 @@ export class WorldState {
   }
 
   /**
-   * Grow / decay cover from soil moisture only (Slice 5).
-   * Does not write water or soil. No fixed carrying capacity K (ES-006).
+   * Grow / decay cover from soil moisture; write roughness + infil contribution.
+   * Does not write water.surfaceDepth. No fixed carrying capacity K (ES-006).
    */
   runVegetationStep(_dt: number): void {
     const m = this.soilMoisture.data;
     const c = this.vegCover.data;
+    const rough = this.surfaceRoughness.data;
+    const infilContrib = this.vegInfiltrationContribution.data;
     const growth = config.vegGrowthRate;
     const decay = config.vegDecayRate;
     const thresh = config.vegMoistureThreshold;
@@ -158,12 +186,14 @@ export class WorldState {
       const moisture = m[i]!;
       let cover = c[i]!;
       if (moisture > thresh) {
-        // Wetter → faster approach toward full cover; ceiling is unit bound [0,1].
         cover += growth * moisture * (1 - cover);
       } else {
         cover -= decay * (1 - moisture / Math.max(thresh, 1e-6));
       }
-      c[i] = Math.min(1, Math.max(0, cover));
+      cover = Math.min(1, Math.max(0, cover));
+      c[i] = cover;
+      rough[i] = config.baseRoughness + cover * config.vegRoughnessBonus;
+      infilContrib[i] = cover * config.vegInfiltrationBonus;
     }
   }
 
@@ -271,6 +301,33 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.vegCover.data,
+      },
+      {
+        id: "surface.roughness",
+        units: "Manning n",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.surfaceRoughness.data,
+      },
+      {
+        id: "veg.infiltrationContribution",
+        units: "m/step",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.vegInfiltrationContribution.data,
+      },
+      {
+        id: "soil.infiltrationCapacity",
+        units: "m/step",
+        shape: "cell" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: true,
+        data: this.infiltrationCapacity.data,
       },
       {
         id: "ledger.precipitation",

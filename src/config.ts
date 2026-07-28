@@ -14,12 +14,18 @@ export const config = {
   /** Event steps between daily soil-water updates (Slice 4). */
   dailyEventSteps: 360,
   soilPorosity: 0.45,
+  /** Base infiltration when bare (also soil.infiltrationCapacity init). */
   infiltrationRate: 0.08,
   etRate: 0.012,
   /** Slice 5 — cover growth from soil moisture (no fixed K). */
   vegGrowthRate: 0.12,
   vegDecayRate: 0.03,
   vegMoistureThreshold: 0.04,
+  /** Slice 6 — Manning-like roughness; bare matches prior flow feel. */
+  baseRoughness: 0.03,
+  vegRoughnessBonus: 0.12,
+  /** Extra infiltration capacity at full cover (soil owner integrates). */
+  vegInfiltrationBonus: 0.1,
   /** Slice 5b siting brush (A-005 — cause, not outcome). */
   sitingBrushRadius: 1,
   bermRaise: 0.85,

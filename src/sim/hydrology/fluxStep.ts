@@ -20,6 +20,12 @@ export function fluxStep(
   flowRate: number,
   maxOutflowFraction: number,
   outletCells?: ReadonlySet<number>,
+  /**
+   * Per-cell roughness (Slice 6). Higher → slower local flow.
+   * Scaled relative to baseRoughness so bare land matches prior hydrology.
+   */
+  roughness?: Float32Array,
+  baseRoughness = 0.03,
 ): FluxStepResult {
   delta.fill(0);
   const n = width * height;
@@ -32,6 +38,8 @@ export function fluxStep(
     const x = i % width;
     const z = (i / width) | 0;
     const s = terrain[i]! + w;
+    const nCell = roughness?.[i] ?? baseRoughness;
+    const localFlow = flowRate * (baseRoughness / Math.max(nCell, 1e-4));
 
     let d0 = 0;
     let d1 = 0;
@@ -51,7 +59,7 @@ export function fluxStep(
       }
       const diff = s - neighborSurface;
       if (diff > 0) {
-        const d = diff * flowRate * dt;
+        const d = diff * localFlow * dt;
         if (dir === 0) d0 = d;
         else if (dir === 1) d1 = d;
         else if (dir === 2) d2 = d;
