@@ -67,7 +67,7 @@ Summary only — do not reopen unless fixing regressions.
 | 3 | D8 accumulation + watershed | Inspector: accumulation / watershed | `flowRouting.ts` | Accumulation ≥ 1; channels form |
 | 4 | Surface → soil moisture | Ground darkens; soil overlay | `soilWaterProcess`, TerrainMesh tint | Infiltration ledger; soil accumulates |
 
-**Current gate:** Slice 4 playtest **Pass**. Slice 5b siting is available — raise berm / dig channel, then rain.
+**Current gate:** Slice 5b playtest **Pass**. Next: Slice 5a prediction (P-006), or vegetation when ready.
 
 ---
 
@@ -117,7 +117,7 @@ Summary only — do not reopen unless fixing regressions.
 - [x] Preview language / UI describes cause (“raise a berm here”), not wetland stamp  
 - [x] Invariant: mass conservation still holds after edit; structure invalidation is explicit  
 - [ ] Notebook seed: e.g. “The berm changed where water could spill.”  
-- [ ] Owner play + informal A-005 check: would a stranger say “cause” or “outcome”?  
+- [x] Owner play + informal A-005 check: would a stranger say “cause” or “outcome”? — **Pass**  
 - [ ] Expand N-001 smoke if new public APIs appear
 
 ---

@@ -32,17 +32,16 @@ npm run conformance
 
 ## Current slice
 
-**Slice 5b — Site a cause** (A-005, H-002)
+**Slice 5b — Site a cause** (A-005, H-002) — **playtest Pass**
 
-- Everything through Slice 4, plus click-to-site **raise berm** / **dig channel**
-- Edits `terrain.elevation` on WorldState and recomputes flow structure
+- Raise berm / dig channel edit WorldState terrain and recompute flow structure
 - Cause language in the tool menu — not wetland/forest stamps (N-001)
-- Playtest: [docs/PLAYTEST_SLICE4.md](docs/PLAYTEST_SLICE4.md) (Pass) → now mess with terrain and rain
+- Next priority: Slice 5a prediction (P-006), then vegetation
 
 ```bash
 npm run dev
 ```
 
-Select **Tool: raise berm** or **Tool: dig channel**, click the terrain (no drag), turn rain on.
+Tools: **raise berm** / **dig channel** — click terrain (no drag), rain to see routing change.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.
