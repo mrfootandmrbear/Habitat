@@ -26,7 +26,12 @@ This document is the beginning of Habitat's design encyclopedia, not a tradition
 
 > **Read [THESIS.md](THESIS.md) first.** This wiki was written before the thesis was recorded (2026-07-28) and is the longest document in the repo, which makes it the easiest place to absorb the wrong picture. Habitat is a **living sand castle**: build a form, choose the forces acting on it, run time, and see what became of it. "Restoration" here means **founding** — set something up that will thrive — not repair toward a baseline.
 >
-> Two pillars below are in tension with that and are **under review**, not authoritative: *"Intervene sparingly"* (see candidate **C-006**, sculpting is abundant and scarcity lives in ecological time) and *"Knowledge is progression"* (no progression gating exists or is planned; sandbox stays open per G-001). Do not build from either without checking the thesis and the register first.
+> This wiki's restoration language is not an error — it comes from the **scenario** layer (THESIS §3.1), whose motivating premise is *cleaning up a toxic waste site using natural processes*. Sandbox and scenarios are the same simulation seen at different pressures: the sandbox is the sand castle, a scenario puts that loop into a situation with a finite objective (G-002).
+>
+> Two pillars below need that scoping to be read correctly:
+>
+> - ***"Intervene sparingly"*** — true of *ecological* intervention, not of sculpting. You do not repeatedly introduce species or force outcomes; you may shape terrain as much as you like (**C-006**: sculpting is abundant, scarcity lives in ecological time, RC-004).
+> - ***"Knowledge is progression"*** — legitimate **within a scenario campaign**, where methods are introduced as situations call for them. It does **not** apply to sandbox, which stays fully open (G-001). No progression gating exists today; do not add one to sandbox.
 
 ### Purpose
 

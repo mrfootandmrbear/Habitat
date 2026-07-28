@@ -31,15 +31,22 @@ build the form → choose the forces → run time → look → change the forces
 
 The castle coming alive is the good ending: a vegetated berm meets the next storm differently than a bare one. Slice 6 + Slice 8 already do this — it has never been shown.
 
-## "Restoration" means founding, not repair
+## "Restoration" is a method, not a starting condition
 
-Set something up that will thrive; the test is whether it carries on without you (G-005 persistence window). Not damage-to-baseline. Where docs say "restoration," read founding.
+Founding: set something up that will thrive, and the test is whether it carries on without you (G-005). A ruined site is a fine place to start — what the player never does is repair it directly. You route water, shape ground, set forces; recovery is something the *system* performs (D-001, N-001).
+
+## Sandbox and scenarios are the same loop
+
+Sandbox is the sand castle — no objective. **Scenarios** put that loop under a finite objective (G-002, Locked). The motivating premise, and the source of the older docs' restoration language: *clean up a toxic waste site using natural processes* — you cannot dig the poison out, so you establish the conditions under which the landscape processes it, then run time. Post-MVP, but it constrains design now: see **C-010** (legacy substances) and its dependency on **C-009**.
+
+DESIGN_WIKI is long and predates the thesis; read its restoration framing as scenario-scoped.
 
 ## What this rules out
 
 - Force control that targets a place — you set the rainfall, you site an ignition; you never drag a storm onto a hill you dislike. Regimes and pulses, not smiting.
-- Rationing sculpting. Scarcity lives in ecological time (RC-004), not in an action economy.
-- Progression gates that withhold tools until the player "understands" — sandbox stays open (G-001).
+- Rationing **sculpting**. Scarcity lives in ecological time (RC-004), not an action economy. "Intervene sparingly" governs *ecological* intervention only.
+- Progression gating in **sandbox** — it stays open (G-001). Method progression inside a scenario campaign is legitimate; none exists today.
+- A cleanup tool applied to a cell. The player sets conditions; the landscape does the processing (C-010).
 - Any payoff that only exists in the inspector. If the world cannot show it, it is not done.
 
 ## The standard

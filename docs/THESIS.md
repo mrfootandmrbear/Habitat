@@ -44,11 +44,34 @@ A consequence worth naming: if sand is substrate, then **digging moves material*
 
 ## 3. What "restoration" means here
 
-Not repair. **Founding.**
+**Founding is the method. Damage may be the situation.**
 
-The goal is not to return a damaged landscape to a baseline. It is to *set something up that will thrive* — and the test is whether it carries on without you. The register already contains this idea as a rule: **G-005**, completion measured by a persistence window. Did it keep going on its own.
+The goal is to *set something up that will thrive* — and the test is whether it carries on without you. The register already contains this as a rule: **G-005**, completion measured by a persistence window. Did it keep going on its own.
 
-The word "restoration" in the README imports repair semantics that this thesis does not have. Read it as founding-for-thriving wherever it appears.
+That is a statement about *how* the player acts, not about what condition the land starts in. A ruined site is a perfectly good starting condition. What the player never does is repair it directly — no scrubbing, no placing a finished wetland. You route water, you shape ground, you set the forces, and the recovery is something the system performs. Repair is an **outcome nature produces**, never an action the player takes (D-001, N-001).
+
+So read "restoration" as founding-for-thriving. It does not mean the land starts healthy.
+
+### 3.1 Scenarios — where the damage lives
+
+The sandbox is the sand castle: no objective, mess with it, watch. **Scenarios put the same loop into a situation with a finite objective** (G-002, Locked).
+
+The motivating premise, and the reason much of the older documentation speaks in restoration language: **clean up a toxic waste site using natural processes.** You cannot dig the poison out. You establish the conditions under which the landscape processes it — hydrologic isolation so it stops spreading, plants that take it up, wet ground where it breaks down, time. Then you run time forward and find out whether you were right.
+
+That premise is the thesis under load, not an exception to it:
+
+| Thesis element | How the toxic site expresses it |
+|---|---|
+| Build the form | Grade, berm, and channel to control where contaminated water goes |
+| Choose the forces | Rain regime decides whether you are flushing or concentrating the problem |
+| Run time, then look | Remediation is decadal; fast-forward is the only way to see it |
+| Nature takes what you built | Your containment erodes if you built it wrong |
+| **Life moves in** | The readout of success — something arrives because the place finally suits it (**C-007**) |
+| Persistence | It counts when it keeps going after you stop (G-005) |
+
+It is also the natural home for two Locked entries with nothing to stand on yet. **S-007** (hysteresis is fundamental) and **S-008** (hysteresis must be legible) both describe a legacy condition blocking recovery after its cause is gone — which is exactly what a contaminant load is. S-008's promotion criterion asks whether a viewer can say *which historical condition is blocking*. A toxic site is the cleanest possible test of that, and it is currently unbuildable because no legacy-damage field exists beyond `soil.porosity`'s compaction memory.
+
+Scenarios remain post-MVP (MVP_SCOPE §5). Recording the premise now matters anyway, because it constrains the substrate design: see **C-010**.
 
 ---
 
@@ -132,6 +155,7 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-007** | Arrival / colonization as the primary biological verb |
 | **C-008** | Intervention → visible response budget (the RCT3 immediacy constraint) |
 | **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
+| **C-010** | Legacy substances (contaminant load) — the toxic-site scenario premise, and the missing substrate for S-007 / S-008 |
 
 ---
 

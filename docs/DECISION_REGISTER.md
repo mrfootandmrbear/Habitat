@@ -1229,6 +1229,7 @@ Ordered by how many other decisions depend on them.
 7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
 8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
 8b. **C-009** — substrate differentiation (the "sand" of the thesis); gated behind the displaced-mass closeout.
+8c. **C-010** — legacy substances / contaminant load; gated behind C-009, but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise, so C-009's material table must not foreclose it.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee), priority contingent on C-007.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1329,7 +1330,18 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Leading direction.** Yes, minimally: one owned per-cell material class plus a small data-driven property table (infiltration rate, erodibility, cohesion, water retention), consumed first by the processes that already exist rather than by new ones. Not Locked until a slice shows two substrates producing visibly different outcomes from the same intervention.
 
-**Coupled work.** Berm/dig ↔ `soil.depth` displaced mass (BUILD_GUIDE §4.1) is a prerequisite in spirit: if substrates are the material, an edit must move material.
+**Coupled work.** Berm/dig ↔ `soil.depth` displaced mass (BUILD_GUIDE §4.1) is a prerequisite in spirit: if substrates are the material, an edit must move material. Design the material table so **C-010** can attach a mobile substance to it later.
+
+### C-010 — Legacy substances (contaminant load)
+**Status:** Open
+
+**Question.** Should the soil column carry one or more **mobile, transformable substances** — a contaminant load being the motivating case — that travel with water, are taken up or immobilised by vegetation, degrade or sequester over decades, and gate habitat suitability until they fall?
+
+**Motivation.** The scenario premise behind much of the older restoration language: *clean up a toxic waste site using natural processes* ([THESIS.md](THESIS.md) §3.1). It is also the missing substrate for two Locked entries — **S-007** (hysteresis is fundamental) and **S-008** (hysteresis must be legible) — whose promotion criterion requires a legacy condition that blocks recovery after its cause is gone. Today the only such field is `soil.porosity`'s compaction memory.
+
+**Constraints.** Legacy by SIMULATION_MODEL §12's definition — not reconstructible from current forcing — so it is save-invalidating (T-003) and belongs in the decadal band. Transport must ride the existing water mass balance rather than introduce a second one (H-004, GEO-002 earn-its-cost). Uptake couples to vegetation, which already exists. Must not become a cleanup *tool* the player applies to a cell (N-001, D-001): the player sets conditions; the landscape processes the substance. Scenario objectives read it through arrival and persistence (**C-007**, G-005), never as a raw score (N-002).
+
+**Leading direction.** Yes, but not before **C-009** — substance and substrate are one design, and a material table that cannot carry a mobile quantity would have to be rebuilt. Deliberately deferred until scenarios are near; recorded now so the substrate work does not foreclose it.
 
 ---
 
