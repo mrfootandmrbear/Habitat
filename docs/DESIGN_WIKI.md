@@ -24,6 +24,10 @@ This document is the beginning of Habitat's design encyclopedia, not a tradition
 
 ## 0. Introduction
 
+> **Read [THESIS.md](THESIS.md) first.** This wiki was written before the thesis was recorded (2026-07-28) and is the longest document in the repo, which makes it the easiest place to absorb the wrong picture. Habitat is a **living sand castle**: build a form, choose the forces acting on it, run time, and see what became of it. "Restoration" here means **founding** — set something up that will thrive — not repair toward a baseline.
+>
+> Two pillars below are in tension with that and are **under review**, not authoritative: *"Intervene sparingly"* (see candidate **C-006**, sculpting is abundant and scarcity lives in ecological time) and *"Knowledge is progression"* (no progression gating exists or is planned; sandbox stays open per G-001). Do not build from either without checking the thesis and the register first.
+
 ### Purpose
 
 Habitat is a systems-driven ecological restoration game about learning to understand living landscapes.

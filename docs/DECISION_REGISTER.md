@@ -1337,6 +1337,8 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 This register governs GAME_DESIGN_OVERVIEW.md, SIMULATION_MODEL.md, HYDROLOGY_SPEC.md, PLAYER_INTERACTION_SPEC.md, SPECIES_AND_HABITAT.md, SCENARIO_AUTHORING.md, FIELD_NOTEBOOK_SPEC.md, UI_INFORMATION_ARCHITECTURE.md, ART_DIRECTION.md, MVP_SCOPE.md, BUILD_GUIDE.md, and DECISION_CONFORMANCE.md.
 
+**[THESIS.md](THESIS.md) is not on that list, deliberately.** It is a *source* document — the owner's statement of where Habitat came from and what it is trying to feel like — not a derived one. This register still wins any procedural conflict: an entry is not overridden by the thesis. But a conflict between them is evidence that the entry was written without the vision in view, and the correct response is to revisit the entry, not to ignore the thesis. Candidates **C-004**…**C-009** in §16.5 exist precisely because the thesis exposed decisions this register had never made.
+
 Derived documents are named by function. A document should not be named after the tool used to produce or consume it, since tool choice is not a decision this register makes and renaming under a tool switch would break every reference.
 
 When a derived document conflicts with this register, either the derived document is corrected or the register is explicitly superseded. No document silently wins by being newer.

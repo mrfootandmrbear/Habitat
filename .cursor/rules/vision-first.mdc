@@ -1,0 +1,53 @@
+---
+description: What Habitat is trying to be — read before deciding what to build or how it should feel
+alwaysApply: true
+---
+
+# The vision comes first
+
+Full statement: `docs/THESIS.md`. Read it before any slice that changes what the player sees or does. This rule is the operative summary; when they differ, the thesis is right.
+
+## The one sentence
+
+**Habitat is a living sand castle.** You build a form out of the substrates nature gives you, then you choose the forces at work on it, run time forward, and see what became of it — including what life moved in and what the water took.
+
+Origin: terrain editing in RCT3 sandbox, and wanting water to trickle down a sculpted mountain and pool. That is the thing being rebuilt, at simulation depth.
+
+## The loop
+
+```
+build the form → choose the forces → run time → look → change the forces → run again
+```
+
+- **Phase one is sculpting.** Tactile and **abundant** — RCT3, not rationed (C-006). Terrain is a cause; ecosystems are never painted (N-001).
+- **Phase two is not more sculpting.** The post-build verb is **controlling which forces act and how hard** — rain regime, erosion, fire, season, time (C-004). This axis is *not* the same as spatial siting, which is all the register historically recorded.
+- **Running time is the instrument**, not a convenience. Fast-forward is the tide coming in.
+- **Then run it again differently.** Same castle, more rain (C-005).
+
+## The two payoffs
+
+1. **Nature takes what you built** — berms slump, channels incise, pools silt. Already implemented (Slice 8) and still invisible to a player.
+2. **Life moves into it** — something arrives *because the conditions suit it*, not because it was introduced (C-007). The limiting-factor / HSI spine is the **arrival gate**, not an inspector layer.
+
+The castle coming alive is the good ending: a vegetated berm meets the next storm differently than a bare one. Slice 6 + Slice 8 already do this — it has never been shown.
+
+## "Restoration" means founding, not repair
+
+Set something up that will thrive; the test is whether it carries on without you (G-005 persistence window). Not damage-to-baseline. Where docs say "restoration," read founding.
+
+## What this rules out
+
+- Force control that targets a place — you set the rainfall, you site an ignition; you never drag a storm onto a hill you dislike. Regimes and pulses, not smiting.
+- Rationing sculpting. Scarcity lives in ecological time (RC-004), not in an action economy.
+- Progression gates that withhold tools until the player "understands" — sandbox stays open (G-001).
+- Any payoff that only exists in the inspector. If the world cannot show it, it is not done.
+
+## The standard
+
+**The 20-second clip test** (THESIS §8): could you record twenty seconds — build, run time, watch nature have its way with it — that reads to a stranger with no explanation and makes them want to try it? When the answer is no, the next work is whatever moves that clip closest to existing, and **it is almost never a new system**.
+
+Use it to order work. It costs no owner session.
+
+## Where the open questions live
+
+Register §16.5 candidates **C-004**…**C-009** are the thesis's unresolved edges: force control, branch-and-compare, abundant sculpting, arrival vs introduction, response latency, substrate differentiation. They are **Open** — implement under them as hypotheses, never as settled policy, and never invent a tenth without filing it.

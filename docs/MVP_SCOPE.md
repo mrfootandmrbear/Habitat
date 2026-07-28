@@ -31,18 +31,29 @@ The player fantasy is steward, not god (Design Wiki). Engagement is attention (D
 
 ```mermaid
 flowchart LR
+  build[Build the form — sculpt C-006] --> forces[Choose the forces C-004]
+  forces --> advance[Run time — the tide T-002]
+  advance --> look[Look at what became of it]
+  look --> forces
+  look --> build
   observe[Observe world] --> expect[Form expectation]
   expect --> predict[Commit prediction P-006]
-  predict --> advance[Advance sim time]
+  predict --> advance
   advance --> compare[Compare expected vs actual]
   compare --> observe
-  observe --> intervene[Site a cause A-005]
-  intervene --> advance
+  observe --> build
+  look --> branch[Run it again, different forces C-005]
   compare --> explain[Optional notebook U-006]
 ```
 
+The outer ring — **build → forces → time → look** — is the thesis loop ([THESIS.md](THESIS.md) §4). The inner ring is the prediction loop, and the two are the same activity seen from different distances: thinking about how tides and gravity work *is* forming an expectation. Prediction is not a feature attached to this game; it is the mental act the sandcastle is made of.
+
 | Edge | Register | MVP? | Notes |
 |---|---|---|---|
+| Build the form — abundant sculpting | A-005, **C-006** | **Yes** | Shipped Slice 5b (berm/dig). Unrationed by design; scarcity is ecological time (RC-004) |
+| Choose the forces — regime control | **C-004** | **Post-MVP, thesis-critical** | The post-build verb. Today only `Rain: on/off` exists — a toggle where a regime belongs |
+| Return visit — see what became of it | **C-008**, GEO-002 | **Post-MVP** | Slice 8c. The payoff exists in sim and is invisible in play |
+| Run it again, different forces | **C-005** | **Post-MVP** | Needs branch/compare; T-001 determinism already supplies the hard half |
 | Observe ↔ readable change | P-003, U-003, ART-001 | **Yes** | World is primary visualization |
 | Expect → commit prediction | P-006 | **Yes** | Load-bearing; not polish |
 | Intervene as cause, not outcome | A-005, N-001 | **Yes** | One siting verb on water/terrain is enough |

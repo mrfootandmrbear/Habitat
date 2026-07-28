@@ -1,4 +1,6 @@
-# Playtest — Presentation track (§4.2)
+# Playtest — Presentation track (§4.2) — **SUPERSEDED**
+
+> **Do not run this.** The batched Tier-O session fired on 2026-07-28 into [playtests/8c-return-visit.md](playtests/8c-return-visit.md), which subsumes both this question and the deferred erosion-legibility one. Two live playtest requests would risk spending the owner's session on the narrower question. Kept for the record of what was asked and why.
 
 **When.** After Tier-P proxies are green (`npm test` includes `presentation.proxy.test.ts`).  
 **Already proven (agent):** extent cage spans `worldSize`; siting cursor snaps with `worldToGrid`; flow cues draw on wet directed cells; soil encoding delta > 0.15 wet vs dry; cutaway names soil/water/veg; conservation line on HUD; paired-storm bare downslope > vegetated.
