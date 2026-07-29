@@ -158,17 +158,15 @@ Row 2 ("Observable") stays a Tier-P claim: the agent proves the signal is encode
 
 Tier M and Tier P need a home for scenario-scale measurement that is coarser than a unit test and reportable to the owner.
 
-**Built.** `npm run probe -- <scenario>` runs a named headless scenario against real `WorldState` (T-006), no renderer, fixed seed and schedule. Scenarios are declared in `src/sim/probes/scenarios.ts` and each emits a flat record of named scalars — peak Σw, time-to-peak, infiltration ledger total, ET total, mass residual, time-to-threshold, step ms. Output writes `docs/evidence/<scenario>.md`. Live scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual). The encoded-signal proxy sibling also exists (`src/sim/presentation.proxy.test.ts`), so "Observable" is treated as Tier P.
+**Built.** `npm run probe -- <scenario>` runs a named headless scenario against real `WorldState` (T-006), no renderer, fixed seed and schedule. Scenarios are declared in `src/sim/probes/scenarios.ts` and each emits a flat record of named scalars. Output rewrites `docs/evidence/<scenario>.md` as **this run vs. committed baseline, with deltas**. Live scenarios: `paired-storm` (bare vs. vegetated), `berm-reroute` (accumulation delta across a siting edit), `basin-fill` (spill elevation and residual). The encoded-signal proxy sibling also exists (`src/sim/presentation.proxy.test.ts`), so "Observable" is treated as Tier P.
 
-**Not built — and load-bearing.** The baseline half of the contract. Today a probe writes only the current run: there is no committed baseline, no delta column, no tolerance, no non-zero exit, and CI never invokes a probe at all. Every Tier-M claim above unit-test scale is therefore unguarded against silent drift, which is precisely the guarantee the autonomous protocol spends. Closing this is the first item in [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.1.
-
-**Baseline contract (the spec to build against).**
+**Baseline harness (BUILD_GUIDE §4.1 — landed).**
 
 - `docs/evidence/<scenario>.baseline.json` is committed per scenario: the recorded scalars plus a per-metric tolerance, absolute or relative, chosen when the scenario is written rather than fitted to whatever a run produced.
 - `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas** — that table, not a hand-written one, is what the *Already proven* block is pasted from.
 - `npm run probe -- --all --check` runs every scenario, writes nothing, and exits non-zero on any out-of-tolerance metric. It joins `npm test`, `npm run build`, and `npm run conformance:check` as `npm run gate`, and CI runs `gate`.
-- A changed baseline is a deliberate act with a reason in the commit body, exactly like `GOLDEN_*` hashes (T-001). An *unexplained* baseline move is a defect to diagnose, never a baseline to accept ([BUILD_GUIDE.md](BUILD_GUIDE.md) §4.0.1).
-- Next scenarios: `baseflow-persist` (Slice 8b — wet channel after dry days with vs. without GW), `limiting-shift` (Slice 9), `burn-recover` (Slice 10).
+- Intentional baseline refresh: `npm run probe -- <scenario> --write-baseline`, with the reason in the commit body — exactly like `GOLDEN_*` hashes (T-001). An *unexplained* baseline move is a defect to diagnose, never a baseline to accept ([BUILD_GUIDE.md](BUILD_GUIDE.md) §4.0.1).
+- Next scenarios: `deep-time` (§4.1), `baseflow-persist` (Slice 8b — wet channel after dry days with vs. without GW), `limiting-shift` (Slice 9), `burn-recover` (Slice 10).
 
 ---
 

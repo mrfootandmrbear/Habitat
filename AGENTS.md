@@ -5,13 +5,12 @@ Habitat is a living sand castle: sculpt substrates, set forces, run time, watch 
 ## Green bar (session gate)
 
 ```bash
-npm test
-npm run build
-npm run conformance:check
-npm run probe -- --all --check
+npm run gate
 ```
 
-When `npm run gate` exists, use that. Until probe `--all --check` lands (BUILD_GUIDE §4.1), run the first three and treat missing probe-check as a known gap — never invent a passing baseline.
+Equivalent to `npm test` · `npm run build` · `npm run conformance:check` · `npm run probe -- --all --check`. Prefer the alias.
+
+Intentional probe baseline refresh: `npm run probe -- <scenario> --write-baseline` — state why in the commit body.
 
 ## Non-negotiables
 
@@ -37,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): **probe baseline harness first**, then `deep-time`, then Slice **8b** (C-001).
+Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): **probe baseline harness done** → **`deep-time` probe next**, then Slice **8b** (C-001).
 
 ## Cursor Cloud specific instructions
 
@@ -46,7 +45,7 @@ Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): **probe base
 - Computer use / browser: only for presentation/encoding checks after a proxy metric exists — never to "see if the pond looks right" as a substitute for Tier-M.
 - Long jobs (`deep-time`, full probe suite): run to completion; paste measured scalars into the commit body / evidence md.
 - Open PRs with gate results summarized; never silently refresh baselines.
-- **Green bar must stay green.** `npm test`, `npm run build`, and `npm run conformance:check` are expected to pass on a clean install. If they fail, fix them — do not document a red gate as normal. `@types/node` is a declared devDependency for `node:` imports under `tsc`.
-- Until `probe -- --all --check` exists (BUILD_GUIDE §4.1), run named probes individually: `paired-storm`, `berm-reroute`, `basin-fill`. Do not invent baselines to “pass.”
+- **Green bar must stay green.** `npm run gate` is expected to pass on a clean install. If it fails, fix it — do not document a red gate as normal.
+- Named probes also work individually (`paired-storm`, `berm-reroute`, `basin-fill`); `--all --check` is the CI tripwire.
 - If `conformance:check` says the ledger is out of date, run `npm run conformance` and commit the ledger with the doc change that made it stale — do not leave the check red.
 - Hello-world smoke (optional after gate): `npm run dev` → Rain on → 4×/16× → water pools downhill; inspect water-depth layer. Residual and hashes are Tier-M — report numbers, don’t ask the owner.

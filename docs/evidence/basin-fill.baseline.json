@@ -1,0 +1,21 @@
+{
+  "scenario": "basin-fill",
+  "metrics": {
+    "row0.pitRawElev": {
+      "value": 0,
+      "abs": 0
+    },
+    "row0.spillFilledElev": {
+      "value": 4,
+      "abs": 0
+    },
+    "row0.depressionDepth": {
+      "value": 4,
+      "abs": 0
+    },
+    "row0.volumeResidual": {
+      "value": 1.30385160446167e-8,
+      "abs": 0.000001
+    }
+  }
+}

@@ -28,7 +28,7 @@ npm run probe -- --all --check  # CI: every scenario vs committed baseline, non-
 npm run dev                     # playtest (owner only after ask gate)
 ```
 
-The four green-bar commands (`test`, `build`, `conformance:check`, `probe -- --all --check`) are the session gate in §4.0 step 3. Once the harness closeout in §4.1 lands they are aliased as `npm run gate`.
+The four green-bar commands (`test`, `build`, `conformance:check`, `probe -- --all --check`) are the session gate in §4.0 step 3. Alias: `npm run gate` (CI runs `gate`).
 
 ---
 
@@ -82,7 +82,7 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness first**, since the rest of the autonomous protocol assumes a scenario-scale tripwire that does not exist yet — then **Slice 8b groundwater / baseflow** (C-001), then **Slice 8c the return visit** (§4.3b), which the owner has elected to precede with the batched Tier-O session.
+**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness done** → **`deep-time` probe next**, then Slice **8b** groundwater / baseflow (C-001), then **Slice 8c the return visit** (§4.3b), which the owner has elected to precede with the batched Tier-O session.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -128,13 +128,13 @@ A blocked note is a normal session outcome. An idle session is not. Skill: `/blo
 
 No Tier-O. Order:
 
-- [ ] **Probe baseline harness** *(do first — it is the tripwire everything else in §4.0 assumes)*. Today `npm run probe` writes a current-run table only: no committed baseline, no deltas, no failure mode, and CI never runs it. Until this lands, scenario-scale physics can drift with a green bar, and every autonomous claim below Tier-M is unguarded. Scope:
-  - [ ] `docs/evidence/<scenario>.baseline.json` committed per scenario; each metric carries a tolerance (absolute or relative) chosen with the scenario, not per run  
-  - [ ] `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas**, matching VERIFICATION_POLICY §8  
-  - [ ] `npm run probe -- --all --check` runs every scenario, exits non-zero on any out-of-tolerance metric, writes nothing  
-  - [ ] `npm run gate` = `test` + `build` + `conformance:check` + `probe -- --all --check`; CI runs `gate`  
-  - [ ] Baselines for the three live scenarios (`paired-storm`, `berm-reroute`, `basin-fill`) committed from the current tree, with the numbers stated in the commit body  
-  - Tier-M: a deliberately perturbed constant fails `--check`; an unperturbed run passes. No Tier-O.
+- [x] **Probe baseline harness** *(do first — it is the tripwire everything else in §4.0 assumes)*. `npm run probe` compares against committed baselines; CI runs `npm run gate`. Scope:
+  - [x] `docs/evidence/<scenario>.baseline.json` committed per scenario; each metric carries a tolerance (absolute or relative) chosen with the scenario, not per run  
+  - [x] `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas**, matching VERIFICATION_POLICY §8  
+  - [x] `npm run probe -- --all --check` runs every scenario, exits non-zero on any out-of-tolerance metric, writes nothing  
+  - [x] `npm run gate` = `test` + `build` + `conformance:check` + `probe -- --all --check`; CI runs `gate`  
+  - [x] Baselines for the three live scenarios (`paired-storm`, `berm-reroute`, `basin-fill`) committed from the current tree, with the numbers stated in the commit body  
+  - Tier-M: a deliberately perturbed constant fails `--check`; an unperturbed run passes (`src/sim/probes/baseline.test.ts`). No Tier-O.
 - [ ] **`deep-time` probe** *(do second — it is the cheapest de-risking available)*. The longest run in the entire suite is **180 steps** (`hydrology.determinism.test.ts`). Every payoff the thesis names — erosion, succession, remediation, "come back and see what became of it" — is **decadal**, and nobody has ever run this world that long. SIMULATION_MODEL §7 documents the failure mode precisely: `f32` accumulation over long horizons "loses the increment entirely once the running total is large enough, which reads in play as a slow variable that simply stops moving." Documented, plausible, unmeasured.
   - [ ] Headless run over a decadal horizon at fixed seed; record what actually moved — elevation, soil depth, cover, ledgers — at intervals, not just at the end  
   - [ ] Assert slow accumulators are **still changing** late in the run, which is the specific f32-stall failure  

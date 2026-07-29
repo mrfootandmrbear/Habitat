@@ -27,8 +27,9 @@ Authority: [VERIFICATION_POLICY.md](../../../docs/VERIFICATION_POLICY.md) §8, [
 2. Implement in `scenarios.ts` — real `WorldState`, no renderer (T-006).
 3. Emit named scalars only (peak Σw, residual, step ms, paired deltas, …).
 4. Commit `docs/evidence/<scenario>.baseline.json` with tolerances; state the numbers in the commit body.
-5. Wire `--all --check` if missing. Prove: unperturbed run passes; deliberate constant perturbation fails.
-6. Update BUILD_GUIDE / slice manifest probe list.
+5. Wire `--all --check` (already in `scripts/probe.ts`). Prove: unperturbed run passes; deliberate constant perturbation fails (`baseline.test.ts`).
+6. Register tolerances in `scripts/probe.ts` `BASELINE_TOLERANCES` before `--write-baseline`.
+7. Update BUILD_GUIDE / slice manifest probe list.
 
 ## Bans
 

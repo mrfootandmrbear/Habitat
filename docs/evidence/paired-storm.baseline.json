@@ -1,0 +1,37 @@
+{
+  "scenario": "paired-storm",
+  "metrics": {
+    "bare.cover": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "bare.downslope": {
+      "value": 0.42301928997039795,
+      "abs": 0.00001
+    },
+    "bare.roughness": {
+      "value": 0.029999999329447746,
+      "abs": 0.000001
+    },
+    "bare.infiltrated": {
+      "value": 11.519999742507935,
+      "abs": 0.0001
+    },
+    "vegetated.cover": {
+      "value": 0.9700000286102295,
+      "abs": 0.000001
+    },
+    "vegetated.downslope": {
+      "value": 0.15537701547145844,
+      "abs": 0.00001
+    },
+    "vegetated.roughness": {
+      "value": 0.14640000462532043,
+      "abs": 0.000001
+    },
+    "vegetated.infiltrated": {
+      "value": 25.48800015449524,
+      "abs": 0.0001
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "scenario": "berm-reroute",
+  "metrics": {
+    "row0.cellsChanged": {
+      "value": 64,
+      "abs": 0
+    },
+    "row0.maxAccumulationDelta": {
+      "value": 53,
+      "abs": 0
+    },
+    "row0.bermCellAccBefore": {
+      "value": 12,
+      "abs": 0
+    },
+    "row0.bermCellAccAfter": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}
