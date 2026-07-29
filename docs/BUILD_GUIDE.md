@@ -82,7 +82,7 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Autonomous closeouts (§4.1) — probe baseline harness + **`deep-time` done** → **Slice manifest validation** next, then **berm/dig ↔ soil.depth mass**, then Slice **8b** groundwater / baseflow (C-001).
+**Current gate:** Autonomous closeouts (§4.1) **complete** → **Slice 8b** groundwater / baseflow (**C-001**) next; next-but-one remains **Slice 8c** the return visit (§4.3b).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -141,10 +141,10 @@ No Tier-O. Order:
   - [x] Report mass residual and step ms across the horizon (feeds **C-008** and **C-012**)  
   - [x] P-005's criterion — advance 100 sim-years, reload, advance again, identical hash — landed in `deep-time` (+ legacy `soil.depth` production divergence)  
   - Tier-M only. No Tier-O.
-- [ ] **Slice manifest validation** — `docs/slices/<slice>.json` per DoD row 9, plus a `conformance:check` pass that fails when a manifest names a test, probe, or field that does not exist. Backfill manifests for Slices 8 and P; earlier slices are grandfathered.  
-- [ ] **5b one-tool — parked, won’t-do.** Berm and dig both shipped and both read as causes (A-005); “one tool only” was a spike constraint on the original prototype, not a register decision, and removing dig would cost a verb to satisfy a constraint nothing cites. Closed by decision, not by work.  
-- [ ] **Berm/dig ↔ `soil.depth` mass** — *thesis-critical, not hygiene.* [THESIS.md](THESIS.md) §2.1: if the "sand" is the substrate, then digging **moves material** rather than lowering a number. Snowflow steal (EXTERNAL_REFERENCES): raise/lower depth with elev so edits read as displaced mass (C-002 / GEO-002; T-006), and **C-009** substrate class has nothing to attach to until this exists. Tier-M: depth+elev delta conservation on brush.  
-- [ ] **Deferred grains** — leave deferred (flow cues sufficient).  
+- [x] **Slice manifest validation** — `docs/slices/<slice>.json` per DoD row 9; `conformance:check` fails when a manifest names a missing test, probe, or field. Manifests for Slices **8** and **P** committed; earlier slices grandfathered.  
+- [x] **5b one-tool — parked, won’t-do.** Berm and dig both shipped and both read as causes (A-005); “one tool only” was a spike constraint on the original prototype, not a register decision, and removing dig would cost a verb to satisfy a constraint nothing cites. Closed by decision, not by work.  
+- [x] **Berm/dig ↔ `soil.depth` mass** — *thesis-critical.* Dig/berm move `soil.depth` with elevation so bedrock = elev − depth is unchanged (THESIS §2.1; snowflow steal; **C-002** / GEO-002). Tier-M in `siting.test.ts`: per-cell Δelev = Δdepth; ΣΔelev = ΣΔdepth across the brush. Moisture column conserved on depth change.  
+- [x] **Deferred grains** — leave deferred (flow cues sufficient).  
 
 ---
 

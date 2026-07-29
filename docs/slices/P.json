@@ -1,0 +1,13 @@
+{
+  "id": "P",
+  "title": "Presentation — volume without voxels",
+  "simLoop": "none new — observers and FX only (T-006)",
+  "gameLoop": "Extent cage, snapped cursor, flow cues, and dual readouts make column-stack and cause verbs readable.",
+  "registerIds": ["T-006", "T-007", "A-005", "U-003", "ART-001"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/sim/presentation.proxy.test.ts"],
+  "probes": [],
+  "fields": ["water.surfaceDepth", "veg.cover", "depression.depth"],
+  "notebookSeed": "The water sat in the hollow I could already see from the cage.",
+  "tierO": "no owner-only question; deferred to batched presentation + erosion legibility ask"
+}

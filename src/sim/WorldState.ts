@@ -449,16 +449,62 @@ export class WorldState {
   }
 
   private applyTerrainBrush(cx: number, cz: number, delta: number): void {
+    // Berm/dig move mobile soil with the surface so bedrock = elev − depth
+    // stays put (THESIS §2.1, snowflow steal / C-002 · GEO-002). Tier-M:
+    // per-cell Δelev === Δdepth when clamps do not bind.
     const r = config.sitingBrushRadius;
     const zFloor = config.elevationFloor;
+    const minDepth = 1e-3;
     for (let z = cz - r; z <= cz + r; z++) {
       for (let x = cx - r; x <= cx + r; x++) {
         if (!this.terrain.inBounds(x, z)) continue;
         const dist = Math.hypot(x - cx, z - cz);
         if (dist > r + 0.01) continue;
         const falloff = 1 - dist / (r + 1);
-        const next = this.terrain.get(x, z) + delta * falloff;
-        this.terrain.set(x, z, Math.max(zFloor, next));
+        const i = z * this.width + x;
+        const elev0 = this.terrain.data[i]!;
+        const depth0 = this.soilDepth.data[i]!;
+        let dh = delta * falloff;
+
+        let nextDepth = depth0 + dh;
+        let nextElev = elev0 + dh;
+        if (nextDepth < 0) {
+          dh = -depth0;
+          nextDepth = 0;
+          nextElev = elev0 + dh;
+        }
+        if (nextDepth > 5) {
+          dh = 5 - depth0;
+          nextDepth = 5;
+          nextElev = elev0 + dh;
+        }
+        if (nextElev < zFloor) {
+          dh = zFloor - elev0;
+          nextElev = zFloor;
+          nextDepth = depth0 + dh;
+          if (nextDepth < 0) {
+            nextDepth = 0;
+            dh = -depth0;
+            nextElev = elev0 + dh;
+          }
+          if (nextDepth > 5) {
+            nextDepth = 5;
+            dh = 5 - depth0;
+            nextElev = elev0 + dh;
+          }
+        }
+
+        if (dh === 0) continue;
+
+        const oldH = Math.max(depth0, minDepth);
+        const newH = Math.max(nextDepth, minDepth);
+        // Conserve column water when depth changes (match geomorphology).
+        this.soilMoisture.data[i]! =
+          nextDepth <= 0
+            ? 0
+            : (this.soilMoisture.data[i]! * oldH) / newH;
+        this.soilDepth.data[i]! = nextDepth;
+        this.terrain.data[i]! = nextElev;
       }
     }
     this.markStructureDirty();

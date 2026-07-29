@@ -11,10 +11,17 @@ import {
   statSync,
 } from "node:fs";
 import { join, relative } from "node:path";
+import {
+  knownProbeIds,
+  knownRegistryFieldIds,
+  loadManifests,
+  validateManifests,
+} from "./validate-slice-manifests.ts";
 
 const ROOT = join(import.meta.dirname, "..");
 const REGISTER = join(ROOT, "docs/DECISION_REGISTER.md");
 const CONFORMANCE = join(ROOT, "docs/DECISION_CONFORMANCE.md");
+const SLICES_DIR = join(ROOT, "docs/slices");
 const ID_PATTERN = /\b([A-Z]{1,4}-\d{3})\b/g;
 
 const SIM_DECISION_PREFIXES = new Set([
@@ -252,6 +259,29 @@ function main(): void {
       );
       failed = true;
     }
+  }
+
+  // DoD row 9 — slice manifests (Slices 8 and P required; earlier grandfathered)
+  const requiredManifestIds = new Set(["8", "P"]);
+  const manifests = loadManifests(SLICES_DIR);
+  const presentIds = new Set(manifests.map((m) => m.id));
+  for (const id of requiredManifestIds) {
+    if (!presentIds.has(id)) {
+      console.error(
+        `slice manifest missing: docs/slices/${id}.json (BUILD_GUIDE DoD row 9)`,
+      );
+      failed = true;
+    }
+  }
+  const manifestIssues = validateManifests(manifests, {
+    root: ROOT,
+    registerIds,
+    knownFields: knownRegistryFieldIds(),
+    knownProbes: knownProbeIds(),
+  });
+  for (const issue of manifestIssues) {
+    console.error(`slice ${issue.sliceId}: ${issue.message}`);
+    failed = true;
   }
 
   for (const w of warnings) console.warn(`warn: ${w}`);

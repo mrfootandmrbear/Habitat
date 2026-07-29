@@ -1,0 +1,16 @@
+{
+  "id": "8",
+  "title": "Soil depth legacy + geomorphology",
+  "simLoop": "Soil production and cover-blunted erosion rewrite elevation and soil.depth on the decadal band; thin soil stores less water.",
+  "gameLoop": "Player-made forms can be taken by geomorphology over time (legibility deferred to 8c).",
+  "registerIds": ["S-006", "S-007", "GEO-002", "T-003", "H-003", "C-002"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/geomorphology.test.ts",
+    "src/sim/save.test.ts"
+  ],
+  "probes": ["basin-fill", "deep-time"],
+  "fields": ["terrain.elevation", "soil.depth", "soil.moisture"],
+  "notebookSeed": "The thin ground at the channel held less of the storm.",
+  "tierO": "no owner-only question; deferred to Slice 8c return visit"
+}

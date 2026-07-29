@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1) — probe baseline + **`deep-time` done** (P-005 Locked); next **slice manifests**, then **Slice 8b** groundwater / baseflow (**C-001**).
+**Post-MVP:** autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1) **complete**. Next: **Slice 8b** groundwater / baseflow (**C-001**); next-but-one **Slice 8c** return visit.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

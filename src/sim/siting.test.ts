@@ -48,6 +48,42 @@ describe("terrain siting (Slice 5b, A-005)", () => {
       initial + 1e-3,
     );
   });
+
+  it("berm/dig move soil.depth with elevation (THESIS §2.1 / C-002)", () => {
+    const world = new WorldState(generateMountain(24, 24, 6, 2));
+    const x = 12;
+    const z = 12;
+    const elev0 = world.terrain.get(x, z);
+    const depth0 = world.soilDepth.get(x, z);
+    const bed0 = elev0 - depth0;
+
+    world.raiseBerm(x, z, 1.0);
+    const elev1 = world.terrain.get(x, z);
+    const depth1 = world.soilDepth.get(x, z);
+    expect(elev1 - elev0).toBeCloseTo(depth1 - depth0, 5);
+    expect(elev1 - depth1).toBeCloseTo(bed0, 5);
+
+    world.digChannel(x, z, 0.5);
+    const elev2 = world.terrain.get(x, z);
+    const depth2 = world.soilDepth.get(x, z);
+    expect(elev2 - elev1).toBeCloseTo(depth2 - depth1, 5);
+    expect(elev2 - depth2).toBeCloseTo(bed0, 5);
+  });
+
+  it("brush conserves ΣΔelev = ΣΔdepth across the footprint", () => {
+    const world = new WorldState(generateMountain(20, 20, 5, 4));
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.raiseBerm(10, 10, 0.8);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(dElev).toBeCloseTo(dDepth, 5);
+    expect(dElev).toBeGreaterThan(0);
+  });
 });
 
 describe("worldToGrid (siting pick)", () => {
