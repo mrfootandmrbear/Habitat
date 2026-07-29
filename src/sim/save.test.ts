@@ -11,8 +11,8 @@ import {
 } from "./save";
 
 describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
-  it("uses schema version 2 before first soil-legacy process", () => {
-    expect(SCHEMA_VERSION).toBe(2);
+  it("uses schema version 3 with groundwater legacy store (Slice 8b / C-001)", () => {
+    expect(SCHEMA_VERSION).toBe(3);
   });
 
   it("round-trips registered state including soil.depth", () => {
@@ -21,7 +21,7 @@ describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
     world.addRain(0.02);
     const before = world.stateHash();
     const doc = serializeRegistry(world.registry);
-    expect(doc.schemaVersion).toBe(2);
+    expect(doc.schemaVersion).toBe(3);
     expect(doc.fields.some((f) => f.id === "soil.depth" && f.legacy)).toBe(
       true,
     );

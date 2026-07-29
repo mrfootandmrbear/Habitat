@@ -88,6 +88,16 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "p005.hashFirstN": { abs: 0 },
     "p005.hashSecondN": { abs: 0 },
   },
+  "baseflow-persist": {
+    "withGw.channelWet": { abs: 1e-5 },
+    "withGw.gwSum": { abs: 1e-3 },
+    "withGw.massResidual": { abs: 1e-3 },
+    "withoutGw.channelWet": { abs: 0 },
+    "withoutGw.gwSum": { abs: 0 },
+    "withoutGw.massResidual": { abs: 1e-3 },
+    "delta.channelWetDelta": { abs: 1e-5 },
+    "delta.ratio": { abs: 1 },
+  },
 };
 
 const args = process.argv.slice(2);

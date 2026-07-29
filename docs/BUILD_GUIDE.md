@@ -81,8 +81,9 @@ Summary only — do not reopen unless fixing regressions.
 | §4.1 hygiene | Ledgers, D8, metric clock, bounds, symmetry | — | probes | Agent-only |
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
+| 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
 
-**Current gate:** Autonomous closeouts (§4.1) **complete** → **Slice 8b** groundwater / baseflow (**C-001**) next; next-but-one remains **Slice 8c** the return visit (§4.3b).
+**Current gate:** Slice 8b **Done** (C-001 Locked) → **Slice 8c** the return visit next; next-but-one **Slice 9** limiting factors / HSI.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -166,22 +167,22 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.3 Slice 8b — Groundwater / baseflow store *(next systems)*
+### 4.3 Slice 8b — Groundwater / baseflow store *(Done — C-001 Locked)*
 
 **Loops.** Sim: soil ↔ cheap GW store ↔ baseflow to surface so channels persist between storms (H-001, H-004, **C-001**). Game: dry spell does not instantly empty the hollow — storage, not a silent leak.  
-**Register / candidates.** H-001, H-004, T-001, T-006; **C-001** (not Locked — implement as hypothesis under that candidate).  
+**Register / candidates.** H-001, H-004, T-001, T-006; **C-001** Locked.  
 **Study.** GWSWEX SW/UZ/GW compartment + mass-balance history ([EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md)); NATURAL_PROCESS_MATH §4 Darcy/Boussinesq *lite*.  
 **Bans.** Richards / Celia / MODFLOW in-browser; ML water-cycle cores as authority.
 
-- [ ] Register `groundwater` (or equivalent) storage field + owner/band; schema bump if legacy  
-- [ ] Recharge from soil moisture; baseflow contribution onto surface (or channel cells)  
-- [ ] Extend water balance residual to include GW compartment  
-- [ ] Tier-M: conservation across multi-day wet→dry; probe `baseflow-persist` — wet channel after N dry days **with** GW ≫ without  
-- [ ] Inspector overlay for GW / water table proxy  
-- [ ] Notebook seed: e.g. “The hollow kept seeping after the rain stopped.”  
-- [ ] `docs/slices/8b.json` manifest (DoD row 9)  
-- [ ] **Promote C-001** in the same commit as the evidence if its DECISION_CONFORMANCE criterion is met — its Judge is CI/agent probes, so this is the agent's call (§4.0 step 8): flip the register status, strike it from register §16, note it in the version history. If the criterion fails, say so and leave it Open.  
-- [ ] Owner play: Tier-O deferred until persistence is visible without inspector  
+- [x] Register `groundwater` (or equivalent) storage field + owner/band; schema bump if legacy  
+- [x] Recharge from soil moisture; baseflow contribution onto surface (or channel cells)  
+- [x] Extend water balance residual to include GW compartment  
+- [x] Tier-M: conservation across multi-day wet→dry; probe `baseflow-persist` — wet channel after N dry days **with** GW ≫ without  
+- [x] Inspector overlay for GW / water table proxy  
+- [x] Notebook seed: e.g. “The hollow kept seeping after the rain stopped.”  
+- [x] `docs/slices/8b.json` manifest (DoD row 9)  
+- [x] **Promote C-001** — channel ≈ 0.011 vs 0; GW sum ≈ 30; H-004 rel residual < 1e-4  
+- [x] Owner play: Tier-O deferred until persistence is visible without inspector  
 
 ---
 

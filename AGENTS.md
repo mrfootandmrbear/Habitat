@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1) **complete** → **Slice 8b** (C-001) next; next-but-one **8c** return visit.
+Autonomous closeouts **complete**; Slice **8b** **Done** (**C-001** Locked). Next: **Slice 8c** return visit; next-but-one **Slice 9** HSI / limiting factors.
 
 ## Cursor Cloud specific instructions
 

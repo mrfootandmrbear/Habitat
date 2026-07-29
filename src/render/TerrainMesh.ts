@@ -165,6 +165,11 @@ export class TerrainMesh {
         col.setRGB(0.15 + 0.2 * t, 0.35 + 0.25 * t, 0.55 + 0.35 * t);
         break;
       }
+      case "groundwater": {
+        const t = Math.min(1, world.getGroundwater(x, z) / 0.5);
+        col.setRGB(0.12 + 0.15 * t, 0.28 + 0.35 * t, 0.4 + 0.45 * t);
+        break;
+      }
       default:
         col.copy(BASE);
     }

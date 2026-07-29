@@ -120,6 +120,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Promoted **P-005** (save states) from hypothesis-Current to Locked after the `deep-time` probe discharged its criterion: save → advance 100 compressed sim-years → reload → advance again yields an identical state hash, and legacy `soil.depth` from a save still drives divergent decadal production. Artifact: `docs/evidence/deep-time.baseline.json`, `src/sim/probes/deepTime.ts`.
 
+**v2.0.3 — C-001 Locked (Slice 8b).**
+
+- Promoted **C-001** (cheap groundwater / baseflow store) from Open to Locked after Tier-M conservation including the GW compartment stayed within H-004 bounds and probe `baseflow-persist` showed channel wetness after wet→dry with GW strictly greater than the no-GW baseline (channel ≈ 0.011 vs 0; GW sum ≈ 30). Artifact: `docs/evidence/baseflow-persist.baseline.json`. Richards/MODFLOW remain banned in-browser.
+
 **v1.3.1 held items resolved in v2.0.** The Non-Goals survive because they are a scope-control instrument rather than ordinary explanatory decisions. The H-* and GEO-* blocks survive because changing either would redesign the causal foundation of Habitat. Closely related claims remain separate only where they govern different disciplines: D-005 governs product intent, ART-002 art direction, U-003 information hierarchy, and ART-003 state expression. Residual preview and inspector detail is treated as derived-document guidance rather than an immutable list. The attention gap is resolved by D-006.
 
 ### 0.7 Decision conformance
@@ -1230,7 +1234,7 @@ Ordered by how many other decisions depend on them.
 2. **C-007** — arrival vs introduction as the primary biological verb (re-motivates the HSI spine; demotes RC-003 if it lands).
 3. **C-005** — branch-and-compare as a core instrument rather than deferred tooling.
 4. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
-5. **C-001** — cheap GW/baseflow store (blocks treating Slice 8b as Locked policy).
+5. ~~**C-001** — cheap GW/baseflow store~~ **Locked** (Slice 8b / `baseflow-persist`).
 6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
 7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
 8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
@@ -1252,19 +1256,24 @@ Until resolved, these are Open or hypothesis-Current and must not be treated as 
 
 ## 16.5 Research candidates (not decided)
 
-Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-state water survey in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md), and — for **C-004**…**C-008** — [THESIS.md](THESIS.md), the owner-authored origin and loop statement written 2026-07-28. **Open — do not treat as Locked.** Implementation of Slice 8b may proceed only as a hypothesis under **C-001**, not as settled policy.
+Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-state water survey in [EXTERNAL_REFERENCES.md](EXTERNAL_REFERENCES.md), and — for **C-004**…**C-008** — [THESIS.md](THESIS.md), the owner-authored origin and loop statement written 2026-07-28. **Open — do not treat as Locked** unless an entry below has been promoted.
 
 **On the thesis candidates.** C-004…C-008 exist because the thesis describes a loop the register never recorded: build a form, then control the *forces* acting on it, run time, and look. Where the thesis and an entry disagree, the entry still governs — but the disagreement is a signal to revisit the entry, not to discard the thesis.
 
 ### C-001 — Cheap groundwater / baseflow store
-**Status:** Open
+**Status:** Locked
 
-**Question.** May Habitat add a cheap per-cell or watershed-scale groundwater / baseflow store so inter-storm channel persistence is a storage loop (H-001, H-004 spine), studying GWSWEX-style compartments without shipping Richards or MODFLOW?
+**Decision.** Habitat includes a cheap per-cell groundwater storage field with soil recharge above field capacity and linear-reservoir baseflow preferential on high-accumulation cells, so inter-storm channel persistence is a storage loop (H-001, H-004). The compartment shape follows GWSWEX SW/UZ/GW study notes; Richards, Celia, and MODFLOW are not shipped in-browser.
+
+**Why.** Without a GW store, dry spells empty channels by ET and infiltration alone, so the watershed cannot retain history between storms. A linear reservoir is enough to prove the storage story under T-001 / T-006 without iterative solves.
+
+**Implications.** `groundwater.storage` is legacy (T-003). Water-balance residuals must include the GW compartment. Process order keeps soilWater before groundwater so baseflow survives into the next event band.
+
+**Rejected alternatives.** Richards/Celia/MODFLOW in-client (EXTERNAL_REFERENCES ban). Watershed-only scalar store (too coarse for channel preference). Alphabetical process sorting that re-infiltrated baseflow before the event band.
+
+**Evidence.** Probe `baseflow-persist`: after wet→dry with storm pulse drained to the boundary ledger, channel wetness with GW ≈ 0.011 vs 0 without; GW sum ≈ 30; H-004 relative residual < 1e-4. Artifact: `docs/evidence/baseflow-persist.baseline.json`.
 
 **Constraints.** T-001 determinism; T-006 headless authority; GEO-002 earn-its-cost; EXTERNAL_REFERENCES ban on in-browser Richards/Celia/MODFLOW and ML water-cycle cores as authority.
-
-**Leading direction.** Yes as a post-MVP Slice 8b hypothesis with Tier-M conservation + `baseflow-persist` probe — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.3. Not Locked until promotion criteria exist in DECISION_CONFORMANCE.
-
 ### C-002 — GEO-002 spatial cost test
 **Status:** Open
 

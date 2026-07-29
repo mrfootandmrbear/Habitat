@@ -18,6 +18,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "soilDepth", label: "Inspect: soil depth" },
   { id: "vegetation", label: "Inspect: vegetation cover" },
   { id: "depression", label: "Inspect: depression depth" },
+  { id: "groundwater", label: "Inspect: groundwater" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */

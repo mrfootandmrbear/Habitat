@@ -7,6 +7,7 @@ import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
 import { vegetationProcess } from "./process/vegetationProcess";
 import { geomorphologyProcess } from "./process/geomorphologyProcess";
+import { groundwaterProcess } from "./process/groundwaterProcess";
 import { fluxStep } from "./hydrology/fluxStep";
 import {
   computeD8Accumulation,
@@ -20,7 +21,8 @@ import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
 
 /**
  * Owns authoritative world fields and the field registry.
- * Structural flow (3), soil (4), vegetation (5–6), geomorphology (8), hygiene.
+ * Structural flow (3), soil (4), vegetation (5–6), geomorphology (8),
+ * cheap GW/baseflow (8b / C-001), hygiene.
  */
 export class WorldState {
   readonly width: number;
@@ -34,6 +36,11 @@ export class WorldState {
    * Owner geomorphology (production / erosion).
    */
   readonly soilDepth: Grid2D;
+  /**
+   * Groundwater storage depth (m) — Slice 8b / C-001 (GWSWEX-style compartment).
+   * Legacy: slow storage memory, not reconstructible from current rain (T-003).
+   */
+  readonly groundwaterStorage: Grid2D;
   /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
   readonly vegCover: Grid2D;
   /** Manning-like n — owned by vegetation (Slice 6 / E-005). */
@@ -70,11 +77,21 @@ export class WorldState {
   private readonly hydrology: HeightfieldHydrology;
   private readonly flowRate: number;
   private readonly maxOutflowFraction: number;
+  /** Per-instance GW rates — zeroed for no-GW probe baselines (C-001). */
+  private readonly gwRechargeRate: number;
+  private readonly gwRecessionAlpha: number;
+  private readonly gwFieldCapacityFraction: number;
+  private readonly gwChannelBoost: number;
   private structureDirty = false;
 
   constructor(
     terrain: Grid2D,
-    options?: { flowRate?: number; maxOutflowFraction?: number },
+    options?: {
+      flowRate?: number;
+      maxOutflowFraction?: number;
+      /** When false, recharge and baseflow are off (paired probe baseline). */
+      groundwaterEnabled?: boolean;
+    },
   ) {
     this.width = terrain.width;
     this.height = terrain.height;
@@ -86,6 +103,7 @@ export class WorldState {
       this.height,
       config.defaultSoilDepthMeters,
     );
+    this.groundwaterStorage = new Grid2D(this.width, this.height);
     this.vegCover = new Grid2D(this.width, this.height);
     this.surfaceRoughness = new Grid2D(
       this.width,
@@ -103,6 +121,11 @@ export class WorldState {
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
       options?.maxOutflowFraction ?? config.maxOutflowFraction;
+    const gwOn = options?.groundwaterEnabled !== false;
+    this.gwRechargeRate = gwOn ? config.gwRechargeRate : 0;
+    this.gwRecessionAlpha = gwOn ? config.gwRecessionAlpha : 0;
+    this.gwFieldCapacityFraction = config.gwFieldCapacityFraction;
+    this.gwChannelBoost = config.gwChannelBoost;
 
     this.registry = new FieldRegistry();
     this.registerFields();
@@ -111,6 +134,7 @@ export class WorldState {
     this.scheduler = new SimScheduler([
       surfaceWaterProcess,
       soilWaterProcess,
+      groundwaterProcess,
       vegetationProcess,
       geomorphologyProcess,
     ]);
@@ -287,6 +311,50 @@ export class WorldState {
   }
 
   /**
+   * Cheap GW recharge + channel-preferential baseflow (C-001 / H-001 / H-004).
+   * Linear reservoir — not Darcy iterative solve / Richards (EXTERNAL_REFERENCES).
+   */
+  runGroundwaterStep(_dt: number): void {
+    if (this.gwRechargeRate === 0 && this.gwRecessionAlpha === 0) return;
+
+    this.ensureStructureFresh();
+    const m = this.soilMoisture.data;
+    const depth = this.soilDepth.data;
+    const gw = this.groundwaterStorage.data;
+    const w = this.water.data;
+    const acc = this.flowAccumulation;
+    const porosity = config.soilPorosity;
+    const fc = porosity * this.gwFieldCapacityFraction;
+    const minDepth = 1e-3;
+    const nCells = this.width * this.height;
+
+    for (let i = 0; i < gw.length; i++) {
+      const h = Math.max(depth[i]!, minDepth);
+
+      if (this.gwRechargeRate > 0 && m[i]! > fc) {
+        const excess = (m[i]! - fc) * h;
+        const recharge = Math.min(excess, this.gwRechargeRate);
+        if (recharge > 0) {
+          m[i]! -= recharge / h;
+          gw[i]! += recharge;
+        }
+      }
+
+      if (this.gwRecessionAlpha > 0 && gw[i]! > 0) {
+        const a = acc ? acc[i]! : 1;
+        const aNorm = Math.min(1, a / nCells);
+        const channelFactor = 1 + this.gwChannelBoost * aNorm;
+        const q = Math.min(
+          gw[i]!,
+          gw[i]! * this.gwRecessionAlpha * channelFactor,
+        );
+        gw[i]! -= q;
+        w[i]! += q;
+      }
+    }
+  }
+
+  /**
    * Decadal soil production + GEO-002 erosion (NATURAL_PROCESS_MATH §3.8).
    * Production everywhere; channel erosion where accumulation earns cost.
    * Elev and depth move together so bedrock = elev − depth is invariant.
@@ -387,6 +455,7 @@ export class WorldState {
   resetWater(): void {
     this.water.fill(0);
     this.soilMoisture.fill(0);
+    this.groundwaterStorage.fill(0);
     this.precipitationLedger = 0;
     this.boundaryOutflowLedger = 0;
     this.infiltrationLedger = 0;
@@ -407,21 +476,37 @@ export class WorldState {
     return this.soilMoisture.data[i]! * this.soilDepth.data[i]!;
   }
 
+  /** Sum of groundwater storage depths (m · cell) — C-001 compartment. */
+  groundwaterStorageSum(): number {
+    let sum = 0;
+    for (let i = 0; i < this.groundwaterStorage.data.length; i++) {
+      sum += this.groundwaterStorage.data[i]!;
+    }
+    return sum;
+  }
+
   waterBalanceResidual(): number {
     let surface = 0;
     let soil = 0;
+    let gw = 0;
     for (let i = 0; i < this.water.data.length; i++) {
       surface += this.water.data[i]!;
       soil += this.soilStorageDepth(i);
+      gw += this.groundwaterStorage.data[i]!;
     }
     const accounted =
-      surface + soil + this.etLedger + this.boundaryOutflowLedger;
+      surface + soil + gw + this.etLedger + this.boundaryOutflowLedger;
     return this.precipitationLedger - accounted;
   }
 
   getSoilMoisture(x: number, z: number): number {
     if (!this.soilMoisture.inBounds(x, z)) return 0;
     return this.soilMoisture.get(x, z);
+  }
+
+  getGroundwater(x: number, z: number): number {
+    if (!this.groundwaterStorage.inBounds(x, z)) return 0;
+    return this.groundwaterStorage.get(x, z);
   }
 
   getSoilDepth(x: number, z: number): number {
@@ -556,6 +641,17 @@ export class WorldState {
         legacy: true,
         data: this.soilDepth.data,
         range: [0, 5] as const,
+      },
+      {
+        id: "groundwater.storage",
+        units: "m",
+        shape: "cell" as const,
+        owner: "groundwater",
+        band: "daily" as const,
+        // T-003: slow storage — not reconstructible from current forcing.
+        legacy: true,
+        data: this.groundwaterStorage.data,
+        range: [0, 20] as const,
       },
       {
         id: "veg.cover",

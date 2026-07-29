@@ -91,6 +91,19 @@ export const config = {
   predictionWetThreshold: 0.01,
   /** Horizon in event steps (~45 sim-hours at 15 min/event). */
   predictionHorizonSteps: 180,
+
+  /**
+   * Cheap GW / baseflow (Slice 8b / C-001) — linear reservoir, not Richards.
+   * Moisture above field-capacity fraction recharges GW; recession returns
+   * baseflow preferentially on high-accumulation cells.
+   */
+  gwFieldCapacityFraction: 0.55,
+  /** Max soil→GW transfer depth (m) per daily band. */
+  gwRechargeRate: 0.04,
+  /** Fraction of GW storage released per daily band (linear reservoir). */
+  gwRecessionAlpha: 0.12,
+  /** Extra recession multiplier at max accumulation (channel preference). */
+  gwChannelBoost: 3,
 } as const;
 
 export type InspectorLayer =
@@ -101,7 +114,8 @@ export type InspectorLayer =
   | "soilMoisture"
   | "soilDepth"
   | "vegetation"
-  | "depression";
+  | "depression"
+  | "groundwater";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict";

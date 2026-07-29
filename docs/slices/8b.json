@@ -1,0 +1,16 @@
+{
+  "id": "8b",
+  "title": "Groundwater / baseflow store",
+  "simLoop": "Soil moisture above field capacity recharges a per-cell GW store; linear-reservoir baseflow returns water preferentially on high-accumulation cells so channels persist between storms.",
+  "gameLoop": "A dry spell does not instantly empty the hollow — storage seeps, not a silent leak (legibility of persistence deferred to a later Tier-O batch).",
+  "registerIds": ["C-001", "H-001", "H-004", "T-001", "T-003", "T-006"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/soil-water.test.ts",
+    "src/sim/save.test.ts"
+  ],
+  "probes": ["baseflow-persist"],
+  "fields": ["groundwater.storage", "soil.moisture", "water.surfaceDepth"],
+  "notebookSeed": "The hollow kept seeping after the rain stopped.",
+  "tierO": "no owner-only question; deferred until persistence is visible without inspector"
+}

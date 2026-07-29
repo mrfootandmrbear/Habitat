@@ -4,14 +4,16 @@ import type { Process } from "./Process";
 
 /** Minimal band scheduler — Slice 2 runs the event band only (SIMULATION_MODEL §6). */
 /**
- * Band runner. Process order is fixed registration order for now.
+ * Band runner. Process order is **registration order** (not alphabetical).
  * `lagged` / `contributes` stay declarative until a fourth process forces topo sort.
+ * Slice 8b requires soilWater before groundwater so baseflow survives into the
+ * next event band (C-001).
  */
 export class SimScheduler {
   private readonly processes: Process[];
 
   constructor(processes: Process[]) {
-    this.processes = [...processes].sort((a, b) => a.id.localeCompare(b.id));
+    this.processes = [...processes];
   }
 
   runBand(band: TimescaleBand, world: WorldState, dt: number): void {

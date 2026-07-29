@@ -97,7 +97,7 @@ flowchart TB
 | Vegetation → water (return) | D-003, E-005 partial | **MVP core** | Slice 6 — first true two-way ecology |
 | Priority-flood / depressions | H-003 | **Yes** | Slice 4b Done (agent) |
 | Soil depth / geomorphology | S-006, S-007, GEO-002, C-002 | **Post-MVP** | Slice 8 Tier-M |
-| Groundwater / baseflow | H-001, H-004, **C-001** | **Post-MVP next** | Slice 8b — not Locked |
+| Groundwater / baseflow | H-001, H-004, **C-001** | **Done** (Locked) | Slice 8b — `baseflow-persist` |
 | Fire / succession / populations | ES-*, E-* | **No** | After limiting-factor spine (Slice 9+) |
 | Full beaver write-back | E-005, F-001 | **Architecture yes, breadth no** | Path must exist; one later engineer |
 
@@ -120,13 +120,13 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
 | **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
-| **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Next** — BUILD_GUIDE §4.3 |
-| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Next game-side** — BUILD_GUIDE §4.3b; the thesis slice (**C-004**, **C-008**) |
+| **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
+| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Next** — BUILD_GUIDE §4.3b; the thesis slice (**C-004**, **C-008**) |
 | **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | Post-MVP after 8c — BUILD_GUIDE §4.4 |
 | **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | After Slice 9 — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
 | **11+** | Succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 10 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → Slice 8b GW/baseflow → Slice 9 Liebig/HSI → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4. Slices 9 and 10 are specified to executable depth so an autonomous session always has two items ahead of it (BUILD_GUIDE §2 row 10).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → Slice 8b GW/baseflow **done** → Slice 8c return visit → Slice 9 Liebig/HSI → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4. Slices 9 and 10 are specified to executable depth so an autonomous session always has two items ahead of it (BUILD_GUIDE §2 row 10).
 
 ---
 

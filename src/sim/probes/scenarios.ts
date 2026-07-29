@@ -2,6 +2,7 @@ import { config } from "../../config";
 import { Grid2D } from "../Grid2D";
 import { WorldState } from "../WorldState";
 import { totalWaterVolume } from "../hydrology/fluxStep";
+import { generateMountain } from "../terrain/generateMountain";
 import {
   DEEP_TIME_SIM_YEARS,
   decadalBandsForYears,
@@ -240,11 +241,120 @@ export function probeDeepTime(): ProbeResult {
   return { scenario: "deep-time", records };
 }
 
+/**
+ * Slice 8b / C-001: after wet→dry, channel cells stay wetter with GW than without.
+ * Linear-reservoir baseflow — not Richards (EXTERNAL_REFERENCES ban).
+ *
+ * Ponded storm water is drained to the boundary ledger before the dry spell so
+ * the comparison isolates storage-fed seepage (H-004 still closes).
+ */
+export function probeBaseflowPersist(): ProbeResult {
+  const makeWorld = (groundwaterEnabled: boolean): WorldState =>
+    new WorldState(generateMountain(24, 24, 6, 3), { groundwaterEnabled });
+
+  const channelWetness = (world: WorldState): number => {
+    world.ensureStructureFresh();
+    const acc = world.flowAccumulation!;
+    const sorted = Array.from(acc).sort((a, b) => a - b);
+    const threshold = sorted[Math.floor(sorted.length * 0.75)]!;
+    let sum = 0;
+    let n = 0;
+    for (let i = 0; i < acc.length; i++) {
+      if (acc[i]! >= threshold) {
+        sum += world.water.data[i]!;
+        n++;
+      }
+    }
+    return n > 0 ? sum / n : 0;
+  };
+
+  const runSchedule = (groundwaterEnabled: boolean) => {
+    const world = makeWorld(groundwaterEnabled);
+    const wetDays = 5;
+    const dryDays = 6;
+    for (let d = 0; d < wetDays; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.addRain(config.rainDepthPerEvent * 2.5);
+        world.stepEvent();
+      }
+    }
+    // Storm pulse leaves the preserve — counted as boundary outflow (H-004).
+    let removed = 0;
+    for (let i = 0; i < world.water.data.length; i++) {
+      removed += world.water.data[i]!;
+      world.water.data[i] = 0;
+    }
+    world.boundaryOutflowLedger += removed;
+
+    for (let d = 0; d < dryDays; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.stepEvent();
+      }
+    }
+    return {
+      channelWet: channelWetness(world),
+      gwSum: world.groundwaterStorageSum(),
+      massResidual: world.waterBalanceResidual(),
+      precip: world.precipitationLedger,
+    };
+  };
+
+  const withGw = runSchedule(true);
+  const withoutGw = runSchedule(false);
+
+  if (!(withGw.channelWet > withoutGw.channelWet)) {
+    throw new Error(
+      `baseflow-persist: expected with-GW channel wetness (${withGw.channelWet}) > without (${withoutGw.channelWet})`,
+    );
+  }
+  if (!(withGw.gwSum > 0)) {
+    throw new Error(
+      "baseflow-persist: expected positive GW storage after wet→dry",
+    );
+  }
+  const relResidual =
+    Math.abs(withGw.massResidual) / Math.max(1, withGw.precip);
+  if (relResidual >= 1e-4) {
+    throw new Error(
+      `baseflow-persist: H-004 residual too large (${withGw.massResidual}, rel=${relResidual})`,
+    );
+  }
+
+  return {
+    scenario: "baseflow-persist",
+    records: [
+      {
+        label: "withGw",
+        channelWet: withGw.channelWet,
+        gwSum: withGw.gwSum,
+        massResidual: withGw.massResidual,
+      },
+      {
+        label: "withoutGw",
+        channelWet: withoutGw.channelWet,
+        gwSum: withoutGw.gwSum,
+        massResidual: withoutGw.massResidual,
+      },
+      {
+        label: "delta",
+        channelWetDelta: withGw.channelWet - withoutGw.channelWet,
+        ratio:
+          withoutGw.channelWet > 1e-12
+            ? withGw.channelWet / withoutGw.channelWet
+            : withGw.channelWet > 0
+              ? 1e6
+              : 0,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
   "basin-fill": probeBasinFill,
   "deep-time": probeDeepTime,
+  "baseflow-persist": probeBaseflowPersist,
 };
 
 export function runProbe(name: string): ProbeResult {

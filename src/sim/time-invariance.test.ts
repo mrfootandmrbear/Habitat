@@ -85,6 +85,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "clock.eventStepsSinceDaily",
       "clock.simMinutes",
       "depression.depth",
+      "groundwater.storage",
       "ledger.boundaryOutflow",
       "ledger.et",
       "ledger.infiltration",
