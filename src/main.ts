@@ -17,6 +17,11 @@ import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
 import { totalWaterVolume } from "./sim/hydrology/fluxStep";
+import {
+  EditUndoStack,
+  loadFromLocalStorage,
+  saveToLocalStorage,
+} from "./sim/sessionPersist";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -38,6 +43,7 @@ const terrain = generateMountain(
 const world = new WorldState(terrain);
 const model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
+const editUndo = new EditUndoStack();
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
@@ -132,6 +138,44 @@ const ui = mountControls(
       prediction.clear();
       syncMeshes();
     },
+    onSave: () => {
+      try {
+        saveToLocalStorage(world);
+        ui.setHint(`Saved · hash ${world.stateHash()}`);
+      } catch (err) {
+        ui.setHint(
+          `Save failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    },
+    onLoad: () => {
+      try {
+        if (!loadFromLocalStorage(world)) {
+          ui.setHint("No saved world in this browser");
+          return;
+        }
+        editUndo.noteEditEpoch();
+        prediction.clear();
+        steps = 0;
+        clock.resetDroppedSteps();
+        syncMeshes();
+        ui.setUndoEnabled(false);
+        ui.setHint(`Loaded · hash ${world.stateHash()}`);
+      } catch (err) {
+        ui.setHint(
+          `Load failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    },
+    onUndo: () => {
+      if (!editUndo.undo(world)) {
+        ui.setHint("Nothing to undo (edits only, before time runs)");
+        return;
+      }
+      syncMeshes();
+      ui.setUndoEnabled(editUndo.canUndo);
+      ui.setHint("Undid last terrain edit");
+    },
   },
 );
 
@@ -183,9 +227,13 @@ canvas.addEventListener("pointerup", (e) => {
   }
 
   if (sitingTool === "berm") {
+    editUndo.pushCheckpoint(world);
     world.raiseBerm(cell.x, cell.z);
+    ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "dig") {
+    editUndo.pushCheckpoint(world);
     world.digChannel(cell.x, cell.z);
+    ui.setUndoEnabled(editUndo.canUndo);
   }
   syncMeshes();
 });
@@ -259,6 +307,8 @@ function frame(now: number): void {
   }
 
   if (stepsRun > 0) {
+    editUndo.noteTimeAdvanced();
+    ui.setUndoEnabled(false);
     syncMeshes();
     if (cutawayCell) {
       ui.setCutaway(formatCutaway(sampleCutaway(cutawayCell)));

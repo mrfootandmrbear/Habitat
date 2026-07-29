@@ -83,7 +83,7 @@ Summary only — do not reopen unless fixing regressions.
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 | 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
 
-**Current gate:** Slice 8b **Done** (C-001 Locked) → **Slice 8c** the return visit next; next-but-one **Slice 9** limiting factors / HSI.
+**Current gate:** Slice 8b **Done** → **Slice 8c** return visit **in progress** (save/load + edit undo landed); next-but-one **Slice 9** limiting factors / HSI.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -194,8 +194,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Register / candidates.** **C-004** (force regime as the post-build verb), **C-008** (response budget), A-005/N-001 boundary — regimes and pulses, never targeting; T-002/S-009 time rates; GEO-002 erosion already implemented.  
 **Bans.** No new authoritative fields. No targeting a force at a location (THESIS §9). No scripted "your berm collapses now" event — the erosion must be the sim's (N-004).
 
-- [ ] **Save / load in the UI** — `save.ts` exists and T-003 is tested, but nothing in `src/ui/` or `main.ts` can save. Today the return visit dies when the tab closes, which makes the thesis loop unavailable across sessions and the shareable seed (THESIS §7) impossible. A return visit that cannot survive a night is not one.  
-- [ ] **Undo** for sculpting (**C-013**) — edits only; once time has advanced the route back is a restore point, never a rewind (S-007). Shares machinery with save/load, which is why they land together.  
+- [x] **Save / load in the UI** — localStorage via `sessionPersist.ts` (T-003 / P-005)  
+- [x] **Undo** for sculpting (**C-013** hypothesis) — edits only; cleared when time advances (S-007)  
 - [ ] Erosion / deposition legible **without** the inspector on player-made terrain — the berm you built visibly changes  
 - [ ] One force dial the player sets before running time (rainfall regime is the cheapest: intensity × duration, authored by the player, seeded per **C-003**)  
 - [ ] Before/after readable across a fast-forward — the return visit needs a *then* and a *now*, not just a now  

@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slice **8b** groundwater / baseflow **Done** (**C-001** Locked). Next: **Slice 8c** return visit; next-but-one **Slice 9** limiting factors / HSI.
+**Post-MVP:** Slice **8b** Done (**C-001** Locked). **Slice 8c** return visit **in progress** (save/load + edit undo); next-but-one **Slice 9** HSI.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

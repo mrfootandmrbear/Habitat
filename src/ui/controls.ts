@@ -46,6 +46,9 @@ export function mountControls(
     onCommitPrediction: () => void;
     onComparePrediction: () => void;
     onClearPrediction: () => void;
+    onSave: () => void;
+    onLoad: () => void;
+    onUndo: () => void;
   },
 ): {
   setRaining: (v: boolean) => void;
@@ -55,6 +58,7 @@ export function mountControls(
   setStatus: (text: string) => void;
   setHint: (text: string) => void;
   setCutaway: (text: string) => void;
+  setUndoEnabled: (enabled: boolean) => void;
 } {
   const bar = document.createElement("div");
   bar.id = "controls";
@@ -71,6 +75,25 @@ export function mountControls(
   resetBtn.type = "button";
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.textContent = "Save";
+  saveBtn.setAttribute("aria-label", "Save world (T-003)");
+  saveBtn.addEventListener("click", handlers.onSave);
+
+  const loadBtn = document.createElement("button");
+  loadBtn.type = "button";
+  loadBtn.textContent = "Load";
+  loadBtn.setAttribute("aria-label", "Load world");
+  loadBtn.addEventListener("click", handlers.onLoad);
+
+  const undoBtn = document.createElement("button");
+  undoBtn.type = "button";
+  undoBtn.textContent = "Undo edit";
+  undoBtn.setAttribute("aria-label", "Undo last terrain edit (C-013)");
+  undoBtn.disabled = true;
+  undoBtn.addEventListener("click", handlers.onUndo);
 
   const timeGroup = document.createElement("div");
   timeGroup.id = "time-rates";
@@ -162,6 +185,9 @@ export function mountControls(
   bar.append(
     rainBtn,
     resetBtn,
+    saveBtn,
+    loadBtn,
+    undoBtn,
     timeGroup,
     sitingSelect,
     predictGroup,
@@ -189,6 +215,9 @@ export function mountControls(
     },
     setCutaway: (text: string) => {
       cutaway.textContent = text;
+    },
+    setUndoEnabled: (enabled: boolean) => {
+      undoBtn.disabled = !enabled;
     },
   };
 }
