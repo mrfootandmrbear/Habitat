@@ -46,3 +46,7 @@ Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): **probe base
 - Computer use / browser: only for presentation/encoding checks after a proxy metric exists — never to "see if the pond looks right" as a substitute for Tier-M.
 - Long jobs (`deep-time`, full probe suite): run to completion; paste measured scalars into the commit body / evidence md.
 - Open PRs with gate results summarized; never silently refresh baselines.
+- **Green bar must stay green.** `npm test`, `npm run build`, and `npm run conformance:check` are expected to pass on a clean install. If they fail, fix them — do not document a red gate as normal. `@types/node` is a declared devDependency for `node:` imports under `tsc`.
+- Until `probe -- --all --check` exists (BUILD_GUIDE §4.1), run named probes individually: `paired-storm`, `berm-reroute`, `basin-fill`. Do not invent baselines to “pass.”
+- If `conformance:check` says the ledger is out of date, run `npm run conformance` and commit the ledger with the doc change that made it stale — do not leave the check red.
+- Hello-world smoke (optional after gate): `npm run dev` → Rain on → 4×/16× → water pools downhill; inspect water-depth layer. Residual and hashes are Tier-M — report numbers, don’t ask the owner.
