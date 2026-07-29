@@ -2,6 +2,14 @@ import { config } from "../../config";
 import { Grid2D } from "../Grid2D";
 import { WorldState } from "../WorldState";
 import { totalWaterVolume } from "../hydrology/fluxStep";
+import {
+  DEEP_TIME_SIM_YEARS,
+  decadalBandsForYears,
+  makeDeepTimeWorld,
+  p005LegacyDepthEffect,
+  p005SaveAdvanceReloadHash,
+  sampleHorizon,
+} from "./deepTime";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -162,10 +170,81 @@ export function probeBasinFill(): ProbeResult {
   return { scenario: "basin-fill", records };
 }
 
+/**
+ * Decadal horizon + P-005 save criterion (BUILD_GUIDE §4.1).
+ * Asserts slow fields still move late (f32-stall tripwire) and save/reload
+ * trajectories hash-equal over 100 compressed sim-years.
+ */
+export function probeDeepTime(): ProbeResult {
+  const totalBands = decadalBandsForYears(DEEP_TIME_SIM_YEARS);
+  const sampleEvery = 2; // every 20 compressed sim-years
+  const world = makeDeepTimeWorld();
+  const samples = sampleHorizon(world, totalBands, sampleEvery);
+
+  if (samples.length < 3) {
+    throw new Error("deep-time: expected at least t0 + two interval samples");
+  }
+  const prev = samples[samples.length - 2]!;
+  const last = samples[samples.length - 1]!;
+  const lateSoilDelta = last.meanSoilDepth - prev.meanSoilDepth;
+  const lateElevDelta = last.meanElev - prev.meanElev;
+  const lateCoverDelta = last.meanCover - prev.meanCover;
+  const lateMoved =
+    Math.abs(lateSoilDelta) > 1e-8 ||
+    Math.abs(lateElevDelta) > 1e-8 ||
+    Math.abs(lateCoverDelta) > 1e-8;
+  if (!lateMoved) {
+    throw new Error(
+      `deep-time: f32-stall suspected — no late change in soil/elev/cover between ${prev.simYears}y and ${last.simYears}y (deltas ${lateSoilDelta}, ${lateElevDelta}, ${lateCoverDelta})`,
+    );
+  }
+
+  const p005 = p005SaveAdvanceReloadHash();
+  if (!p005.match) {
+    throw new Error(
+      `deep-time P-005: hash mismatch after save/advance/reload/advance (${p005.hashFirst} vs ${p005.hashSecond})`,
+    );
+  }
+  const legacy = p005LegacyDepthEffect();
+  if (!legacy.thinGainedMore) {
+    throw new Error(
+      `deep-time P-005 legacy: thin soil from save did not out-produce deep soil over decades (thin=${legacy.thinFinalDepth}, deep=${legacy.deepFinalDepth})`,
+    );
+  }
+
+  const records: ProbeRecord[] = samples.map((s) => ({
+    label: `y${s.simYears}`,
+    meanElev: s.meanElev,
+    meanSoilDepth: s.meanSoilDepth,
+    meanCover: s.meanCover,
+    massResidual: s.massResidual,
+    stepMsMean: s.stepMsMean,
+  }));
+  records.push({
+    label: "lateDelta",
+    soilDepthDelta: lateSoilDelta,
+    elevDelta: lateElevDelta,
+    coverDelta: lateCoverDelta,
+    stillMoving: lateMoved ? 1 : 0,
+  });
+  records.push({
+    label: "p005",
+    hashMatch: p005.match ? 1 : 0,
+    simYears: DEEP_TIME_SIM_YEARS,
+    legacyThinGainedMore: legacy.thinGainedMore ? 1 : 0,
+    // Encode hashes as numeric fingerprints for baseline (first 8 hex → int)
+    hashFirstN: Number.parseInt(p005.hashFirst.slice(0, 8), 16),
+    hashSecondN: Number.parseInt(p005.hashSecond.slice(0, 8), 16),
+  });
+
+  return { scenario: "deep-time", records };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
   "basin-fill": probeBasinFill,
+  "deep-time": probeDeepTime,
 };
 
 export function runProbe(name: string): ProbeResult {

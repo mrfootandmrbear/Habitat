@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): **probe baseline harness done** → **`deep-time` probe next**, then Slice **8b** (C-001).
+Autonomous closeouts ([BUILD_GUIDE.md](docs/BUILD_GUIDE.md) §4.1): probe baseline + **`deep-time` done** (P-005 Locked) → **slice manifests** next, then Slice **8b** (C-001).
 
 ## Cursor Cloud specific instructions
 

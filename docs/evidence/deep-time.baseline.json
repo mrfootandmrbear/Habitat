@@ -1,0 +1,161 @@
+{
+  "scenario": "deep-time",
+  "metrics": {
+    "y0.meanElev": {
+      "value": 1.684711873569883,
+      "abs": 0.00001
+    },
+    "y0.meanSoilDepth": {
+      "value": 0.800000011920929,
+      "abs": 0.00001
+    },
+    "y0.meanCover": {
+      "value": 0,
+      "abs": 0.00001
+    },
+    "y0.massResidual": {
+      "value": 0,
+      "abs": 0.001
+    },
+    "y0.stepMsMean": {
+      "value": 0,
+      "abs": 1000000000
+    },
+    "y20.meanElev": {
+      "value": 1.6865737846383126,
+      "abs": 0.00001
+    },
+    "y20.meanSoilDepth": {
+      "value": 0.8018619260854192,
+      "abs": 0.00001
+    },
+    "y20.meanCover": {
+      "value": 0.26950462811186704,
+      "abs": 0.00001
+    },
+    "y20.massResidual": {
+      "value": -0.0006226137957696665,
+      "abs": 0.001
+    },
+    "y20.stepMsMean": {
+      "value": 0.02256475677083333,
+      "abs": 1000000000
+    },
+    "y40.meanElev": {
+      "value": 1.688430619292679,
+      "abs": 0.00001
+    },
+    "y40.meanSoilDepth": {
+      "value": 0.8037187586435013,
+      "abs": 0.00001
+    },
+    "y40.meanCover": {
+      "value": 0.4730991648458358,
+      "abs": 0.00001
+    },
+    "y40.massResidual": {
+      "value": -0.0045331530446901525,
+      "abs": 0.001
+    },
+    "y40.stepMsMean": {
+      "value": 0.019731705729166663,
+      "abs": 1000000000
+    },
+    "y60.meanElev": {
+      "value": 1.6902820407332102,
+      "abs": 0.00001
+    },
+    "y60.meanSoilDepth": {
+      "value": 0.8055701711111598,
+      "abs": 0.00001
+    },
+    "y60.meanCover": {
+      "value": 0.5935173292891704,
+      "abs": 0.00001
+    },
+    "y60.massResidual": {
+      "value": -0.00939504121970458,
+      "abs": 0.001
+    },
+    "y60.stepMsMean": {
+      "value": 0.019469596354166674,
+      "abs": 1000000000
+    },
+    "y80.meanElev": {
+      "value": 1.6921277197769895,
+      "abs": 0.00001
+    },
+    "y80.meanSoilDepth": {
+      "value": 0.8074158098962572,
+      "abs": 0.00001
+    },
+    "y80.meanCover": {
+      "value": 0.6710074087831244,
+      "abs": 0.00001
+    },
+    "y80.massResidual": {
+      "value": -0.01420489538008951,
+      "abs": 0.001
+    },
+    "y80.stepMsMean": {
+      "value": 0.019142165625000002,
+      "abs": 1000000000
+    },
+    "y100.meanElev": {
+      "value": 1.6939675501521885,
+      "abs": 0.00001
+    },
+    "y100.meanSoilDepth": {
+      "value": 0.809255596353776,
+      "abs": 0.00001
+    },
+    "y100.meanCover": {
+      "value": 0.7255820999408671,
+      "abs": 0.00001
+    },
+    "y100.massResidual": {
+      "value": -0.0192530698018345,
+      "abs": 0.001
+    },
+    "y100.stepMsMean": {
+      "value": 0.017840668750000004,
+      "abs": 1000000000
+    },
+    "lateDelta.soilDepthDelta": {
+      "value": 0.0018397864575188105,
+      "abs": 0.000001
+    },
+    "lateDelta.elevDelta": {
+      "value": 0.0018398303751989697,
+      "abs": 0.000001
+    },
+    "lateDelta.coverDelta": {
+      "value": 0.054574691157742716,
+      "abs": 0.000001
+    },
+    "lateDelta.stillMoving": {
+      "value": 1,
+      "abs": 0
+    },
+    "p005.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "p005.simYears": {
+      "value": 100,
+      "abs": 0
+    },
+    "p005.legacyThinGainedMore": {
+      "value": 1,
+      "abs": 0
+    },
+    "p005.hashFirstN": {
+      "value": 2491763272,
+      "abs": 0
+    },
+    "p005.hashSecondN": {
+      "value": 2491763272,
+      "abs": 0
+    }
+  }
+}

@@ -116,6 +116,10 @@ Corrections and relocations are recorded here. Content changes still require the
 - Added §0.7 and hypothesis-Current versus situation-Current distinction in §0.1.
 - Adopted [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) for promotion criteria, review triggers, and the generated conformance ledger.
 
+**v2.0.2 — P-005 Locked.**
+
+- Promoted **P-005** (save states) from hypothesis-Current to Locked after the `deep-time` probe discharged its criterion: save → advance 100 compressed sim-years → reload → advance again yields an identical state hash, and legacy `soil.depth` from a save still drives divergent decadal production. Artifact: `docs/evidence/deep-time.baseline.json`, `src/sim/probes/deepTime.ts`.
+
 **v1.3.1 held items resolved in v2.0.** The Non-Goals survive because they are a scope-control instrument rather than ordinary explanatory decisions. The H-* and GEO-* blocks survive because changing either would redesign the causal foundation of Habitat. Closely related claims remain separate only where they govern different disciplines: D-005 governs product intent, ART-002 art direction, U-003 information hierarchy, and ART-003 state expression. Residual preview and inspector detail is treated as derived-document guidance rather than an immutable list. The attention gap is resolved by D-006.
 
 ### 0.7 Decision conformance
@@ -433,15 +437,17 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 **Rejected alternatives.** Hidden one-off thresholds. Scenario-specific tricks. Unexplained trial and error.
 
 ### P-005 — Save states support experimentation
-**Status:** Current
+**Status:** Locked
 
 **Decision.** Players can save or snapshot a simulation state and return to it.
 
 **Why.** Ecological systems are slow and path-dependent. Save states allow serious experimentation without replaying long setup periods.
 
-**Implications.** Saves preserve the historical state hysteresis requires (T-003). Basic saving is distinct from comparison tooling (F-002). Determinism policy is unresolved (T-001).
+**Implications.** Saves preserve the historical state hysteresis requires (T-003). Basic saving is distinct from comparison tooling (F-002 / **C-005**). Determinism of a save→advance→reload→advance trajectory is proven by the `deep-time` probe (T-001).
 
 **Rejected alternatives.** One irreversible timeline. Saves that store visible state but omit causal history. Framing saves as optimization checkpoints.
+
+**Promotion.** Criterion in DECISION_CONFORMANCE discharged 2026-07-28 by `deep-time` probe + `src/sim/save.test.ts` (agent, Judge CI).
 
 ### P-006 — Prediction is an explicit commit-and-compare mechanic
 **Status:** Current

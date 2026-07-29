@@ -82,7 +82,7 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 
-**Current gate:** Autonomous closeouts (§4.1) — **probe baseline harness done** → **`deep-time` probe next**, then Slice **8b** groundwater / baseflow (C-001), then **Slice 8c the return visit** (§4.3b), which the owner has elected to precede with the batched Tier-O session.
+**Current gate:** Autonomous closeouts (§4.1) — probe baseline harness + **`deep-time` done** → **Slice manifest validation** next, then **berm/dig ↔ soil.depth mass**, then Slice **8b** groundwater / baseflow (C-001).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -135,12 +135,12 @@ No Tier-O. Order:
   - [x] `npm run gate` = `test` + `build` + `conformance:check` + `probe -- --all --check`; CI runs `gate`  
   - [x] Baselines for the three live scenarios (`paired-storm`, `berm-reroute`, `basin-fill`) committed from the current tree, with the numbers stated in the commit body  
   - Tier-M: a deliberately perturbed constant fails `--check`; an unperturbed run passes (`src/sim/probes/baseline.test.ts`). No Tier-O.
-- [ ] **`deep-time` probe** *(do second — it is the cheapest de-risking available)*. The longest run in the entire suite is **180 steps** (`hydrology.determinism.test.ts`). Every payoff the thesis names — erosion, succession, remediation, "come back and see what became of it" — is **decadal**, and nobody has ever run this world that long. SIMULATION_MODEL §7 documents the failure mode precisely: `f32` accumulation over long horizons "loses the increment entirely once the running total is large enough, which reads in play as a slow variable that simply stops moving." Documented, plausible, unmeasured.
-  - [ ] Headless run over a decadal horizon at fixed seed; record what actually moved — elevation, soil depth, cover, ledgers — at intervals, not just at the end  
-  - [ ] Assert slow accumulators are **still changing** late in the run, which is the specific f32-stall failure  
-  - [ ] Report mass residual and step ms across the horizon (feeds **C-008** and **C-012**)  
-  - [ ] P-005's criterion — advance 100 sim-years, reload, advance again, identical hash — is currently unimplemented; this probe is where it lands  
-  - Tier-M only. No Tier-O. If nothing visibly moves over decades, that is the most important finding this project could surface right now, and it changes the ladder rather than the probe.
+- [x] **`deep-time` probe** *(do second — it is the cheapest de-risking available)*. Headless 100 compressed sim-years (10 decadal bands × prototype ladder) on a fixed-seed 24² mountain. Slow fields still move late (no f32 stall). Mass residual and step ms reported at 20-year intervals (feeds **C-008** / **C-012**). **Finding:** water-balance residual grows to ≈ −0.019 by year 100 on this fixture — recorded, not zero; investigate as ledger follow-up, not a stall. P-005 criterion discharged and entry **Locked**.
+  - [x] Headless run over a decadal horizon at fixed seed; record what actually moved — elevation, soil depth, cover, ledgers — at intervals, not just at the end  
+  - [x] Assert slow accumulators are **still changing** late in the run, which is the specific f32-stall failure  
+  - [x] Report mass residual and step ms across the horizon (feeds **C-008** and **C-012**)  
+  - [x] P-005's criterion — advance 100 sim-years, reload, advance again, identical hash — landed in `deep-time` (+ legacy `soil.depth` production divergence)  
+  - Tier-M only. No Tier-O.
 - [ ] **Slice manifest validation** — `docs/slices/<slice>.json` per DoD row 9, plus a `conformance:check` pass that fails when a manifest names a test, probe, or field that does not exist. Backfill manifests for Slices 8 and P; earlier slices are grandfathered.  
 - [ ] **5b one-tool — parked, won’t-do.** Berm and dig both shipped and both read as causes (A-005); “one tool only” was a spike constraint on the original prototype, not a register decision, and removing dig would cost a verb to satisfy a constraint nothing cites. Closed by decision, not by work.  
 - [ ] **Berm/dig ↔ `soil.depth` mass** — *thesis-critical, not hygiene.* [THESIS.md](THESIS.md) §2.1: if the "sand" is the substrate, then digging **moves material** rather than lowering a number. Snowflow steal (EXTERNAL_REFERENCES): raise/lower depth with elev so edits read as displaced mass (C-002 / GEO-002; T-006), and **C-009** substrate class has nothing to attach to until this exists. Tier-M: depth+elev delta conservation on brush.  
