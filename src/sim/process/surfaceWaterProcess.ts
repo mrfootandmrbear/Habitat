@@ -7,7 +7,7 @@ import type { Process } from "./Process";
 export const surfaceWaterProcess: Process = {
   id: "surfaceWater",
   band: "event",
-  reads: ["terrain.elevation", "surface.roughness"],
+  reads: ["terrain.elevation", "surface.roughness", "climate.cloudWater"],
   lagged: ["surface.roughness"],
   writes: [
     "water.surfaceDepth",

@@ -140,9 +140,9 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | **Done** — D-007 clip Pass 2026-07-30 (full clouds later) |
 | **A+** | Recovery audible (**AUD-003**) | Second ambient bed from `veg.cover` | **Done** — BUILD_GUIDE §4.19 (agent; C-014 still Open) |
 | — | Field Notebook UI (**U-006**) | Bounded causal explanation chrome | **Done** — BUILD_GUIDE §4.20 (machine; Lock still reviewer) |
-| — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Next** — BUILD_GUIDE §4.21 (D-007 clip first) |
+| — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Done** — BUILD_GUIDE §4.21 (machine; Lock still owner) |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** Done (machine). **Next:** full C-020 clouds (§4.21). Scenario campaign after C-009/C-010 framing.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** Done (machine); **Full C-020 clouds** Done (machine). **Next:** scenario campaign after C-009/C-010 framing.
 
 ---
 

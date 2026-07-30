@@ -81,6 +81,9 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
     const world = new WorldState(generateMountain(16, 16, 8, 2));
     const ids = world.registry.list().map((f) => f.id);
     expect(ids).toEqual([
+      "climate.airTemperature",
+      "climate.cloudWater",
+      "climate.precipPhase",
       "clock.daysSinceAnnual",
       "clock.daysSinceDecadal",
       "clock.daysSinceSeasonal",

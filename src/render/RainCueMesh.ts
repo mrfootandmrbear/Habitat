@@ -61,10 +61,26 @@ export class RainCueMesh {
   /**
    * Arm or clear the storm event. Presentation fades — no hard blink.
    * `strength` 0..1 scales veil/streak density feel (arid vs monsoon).
+   * `phase` 0 rain · 1 sleet · 2 snow (C-020).
    */
-  setStorm(active: boolean, strength: number = 1): void {
+  setStorm(active: boolean, strength: number = 1, phase: number = 0): void {
     const s = Math.min(1, Math.max(0, strength));
     this.targetOpacity = active ? s : 0;
+    const streakMat = this.points.material as THREE.PointsMaterial;
+    const veilMat = this.veil.material as THREE.MeshBasicMaterial;
+    if (phase >= 2) {
+      streakMat.color.setHex(0xeef2f6);
+      streakMat.size = 0.28;
+      veilMat.color.setHex(0xb8c4d0);
+    } else if (phase >= 1) {
+      streakMat.color.setHex(0xc0d0dc);
+      streakMat.size = 0.2;
+      veilMat.color.setHex(0x7a8a98);
+    } else {
+      streakMat.color.setHex(0xb8c8d4);
+      streakMat.size = 0.16;
+      veilMat.color.setHex(0x6a7a88);
+    }
     if (active) this.group.visible = true;
   }
 

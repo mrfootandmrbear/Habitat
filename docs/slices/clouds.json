@@ -1,0 +1,18 @@
+{
+  "id": "clouds",
+  "title": "Full C-020 — clouds / precip phase via atmosphere Process",
+  "simLoop": "Climate dial charges climate.cloudWater; storm window discharges orographic precip; phase from air temperature (C-020)",
+  "gameLoop": "Sky builds before the shower; Heat dial chooses rain / sleet / snow look — watch the place, not a meter",
+  "registerIds": ["C-020", "C-004", "D-007", "T-001", "T-006", "H-004", "N-004"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/atmosphere.test.ts", "src/sim/ownership.test.ts"],
+  "probes": ["cloud-delivery"],
+  "fields": [
+    "climate.cloudWater",
+    "climate.airTemperature",
+    "climate.precipPhase",
+    "ledger.precipitation"
+  ],
+  "notebookSeed": "The sky thickened before the shower; the cold spell left the hollow pale.",
+  "tierO": "no new owner-only question this closeout — C-020 Lock remains owner taste (dossier); machine half green"
+}

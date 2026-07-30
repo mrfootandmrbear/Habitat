@@ -1,0 +1,57 @@
+{
+  "scenario": "cloud-delivery",
+  "metrics": {
+    "warm.precip": {
+      "value": 18.936986335587335,
+      "abs": 0.01
+    },
+    "warm.peakCloud": {
+      "value": 0.016128198500904627,
+      "abs": 0.0001
+    },
+    "warm.phase": {
+      "value": 0,
+      "abs": 0
+    },
+    "warm.relResidual": {
+      "value": 3.113005106036229e-8,
+      "abs": 0.000001
+    },
+    "warm.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "warm.hashN": {
+      "value": 1701168224,
+      "abs": 0
+    },
+    "cold.precip": {
+      "value": 18.936986335587335,
+      "abs": 0.01
+    },
+    "cold.peakCloud": {
+      "value": 0.016128198500904627,
+      "abs": 0.0001
+    },
+    "cold.phase": {
+      "value": 2,
+      "abs": 0
+    },
+    "cold.hashN": {
+      "value": 2419055556,
+      "abs": 0
+    },
+    "delta.phaseDiverged": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.conserved": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.precipRatio": {
+      "value": 1.0000000177558115,
+      "abs": 0.001
+    }
+  }
+}

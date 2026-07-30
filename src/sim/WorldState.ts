@@ -13,7 +13,18 @@ import { habitatProcess } from "./process/habitatProcess";
 import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
+import { atmosphereProcess } from "./process/atmosphereProcess";
 import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
+import {
+  stepAtmosphere,
+  type PrecipPhase,
+  PRECIP_PHASE_RAIN,
+} from "./climate/atmosphere";
+import {
+  rainRegimeById,
+  type RainRegimeId,
+} from "./climate/rainRegime";
+import { fillOrographicRainDepths } from "./climate/orographicPrecip";
 import {
   countIntertidal,
   fillIntertidalMask,
@@ -202,6 +213,18 @@ export class WorldState {
   /** Global wind components (unit-ish) — C-004 / C-017 force dial. */
   private windUx = 0;
   private windUz = 0;
+  /** Climate moisture archetype (C-004 / C-020) — no cell targeting. */
+  private rainRegimeId: RainRegimeId = "dry";
+  /** Atmosphere delivery armed only after setRainRegime (probes may still addRain). */
+  private atmosphereArmed = false;
+  /** Air temperature (°C) from Heat dial — drives precip phase. */
+  private readonly airTempBox: ScalarBox = { value: 16 };
+  /** Global precipitable cloud water (m depth-equivalent). */
+  private readonly cloudWaterBox: ScalarBox = { value: 0 };
+  /** 0 rain · 1 sleet · 2 snow. */
+  private readonly precipPhaseBox: ScalarBox = { value: PRECIP_PHASE_RAIN };
+  /** Scratch for orographic discharge (atmosphere Process). */
+  private readonly atmosphereRainScratch: Float32Array;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
@@ -319,6 +342,7 @@ export class WorldState {
     this.shoreExposure = new Grid2D(this.width, this.height);
     this.shoreLongshore = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
+    this.atmosphereRainScratch = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
       options?.maxOutflowFraction ?? config.maxOutflowFraction;
@@ -358,6 +382,7 @@ export class WorldState {
 
     this.hydrology = new HeightfieldHydrology(this);
     this.scheduler = new SimScheduler([
+      atmosphereProcess,
       surfaceWaterProcess,
       soilWaterProcess,
       groundwaterProcess,
@@ -482,6 +507,72 @@ export class WorldState {
     this.windUx = Number.isFinite(ux) ? ux : 0;
     this.windUz = Number.isFinite(uz) ? uz : 0;
     this.recomputeShoreExposure();
+  }
+
+  /** Climate rainfall archetype (C-004 / C-020) — global only. */
+  setRainRegime(id: RainRegimeId): void {
+    this.rainRegimeId = id;
+    this.atmosphereArmed = true;
+  }
+
+  get rainRegime(): RainRegimeId {
+    return this.rainRegimeId;
+  }
+
+  /** Heat dial → air temperature (°C). Phase follows (C-020). */
+  setAirTemperature(tempC: number): void {
+    this.airTempBox.value = Number.isFinite(tempC) ? tempC : 16;
+  }
+
+  get airTemperature(): number {
+    return this.airTempBox.value;
+  }
+
+  get cloudWater(): number {
+    return this.cloudWaterBox.value;
+  }
+
+  get precipPhase(): PrecipPhase {
+    const v = this.precipPhaseBox.value;
+    if (v >= 2) return 2;
+    if (v >= 1) return 1;
+    return 0;
+  }
+
+  /**
+   * Atmosphere Process step (full C-020): charge cloud from climate dial,
+   * discharge orographic precip when the storm window opens. No cell args.
+   * No-op until setRainRegime arms delivery (legacy probes keep explicit addRain).
+   */
+  runAtmosphereStep(): void {
+    if (!this.atmosphereArmed) return;
+    const eventsDone = this.simMinutes / config.eventDtMinutes;
+    const dayIndex = Math.floor(eventsDone / config.dailyEventSteps);
+    const indexInDay = this.eventStepsSinceDaily;
+    const result = stepAtmosphere({
+      regime: rainRegimeById(this.rainRegimeId),
+      airTempC: this.airTempBox.value,
+      cloudWater: this.cloudWaterBox.value,
+      dayIndex,
+      eventIndexInDay: indexInDay,
+      dailyEventSteps: config.dailyEventSteps,
+      baseDepthPerEvent: config.rainDepthPerEvent,
+    });
+    this.cloudWaterBox.value = result.cloudWater;
+    this.precipPhaseBox.value = result.precipPhase;
+    if (result.dischargeDepth > 0) {
+      fillOrographicRainDepths(
+        this.atmosphereRainScratch,
+        this.terrain.data,
+        this.width,
+        this.height,
+        result.dischargeDepth,
+        { ux: this.windUx, uz: this.windUz },
+        config.orographicGamma,
+        (cell) => this.oceanCells.has(cell),
+      );
+      this.addRainField(this.atmosphereRainScratch);
+    }
   }
 
   get infiltrationLedger(): number {
@@ -1385,6 +1476,8 @@ export class WorldState {
     this.transpirationLedger = 0;
     this.soilEvaporationLedger = 0;
     this.openWaterEvaporationLedger = 0;
+    this.cloudWaterBox.value = 0;
+    this.precipPhaseBox.value = PRECIP_PHASE_RAIN;
     this.eventStepsSinceDaily = 0;
     this.daysSinceDecadal = 0;
     this.simMinutes = 0;
@@ -1934,6 +2027,36 @@ export class WorldState {
         legacy: false,
         data: this.fuelConsumedBox,
         range: [0, 1e12] as const,
+      },
+      {
+        id: "climate.cloudWater",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "climate",
+        band: "event" as const,
+        legacy: false,
+        data: this.cloudWaterBox,
+        range: [0, 50] as const,
+      },
+      {
+        id: "climate.airTemperature",
+        units: "°C",
+        shape: "scalar" as const,
+        owner: "climate",
+        band: "event" as const,
+        legacy: false,
+        data: this.airTempBox,
+        range: [-60, 60] as const,
+      },
+      {
+        id: "climate.precipPhase",
+        units: "enum",
+        shape: "scalar" as const,
+        owner: "climate",
+        band: "event" as const,
+        legacy: false,
+        data: this.precipPhaseBox,
+        range: [0, 2] as const,
       },
       {
         id: "ledger.precipitation",

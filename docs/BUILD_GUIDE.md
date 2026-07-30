@@ -102,10 +102,11 @@ Summary only — do not reopen unless fixing regressions.
 | **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner legibility Pass 2026-07-30; deposit+rock machine green (Lock still owner) |
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
+| — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — agent (C-020 Lock still owner) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** / **A+** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine; U-006 Current — Lock still reviewer).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** / **A+** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine; U-006 Current — Lock still reviewer). **Full C-020 clouds** Done (machine; C-020 Open — Lock still owner).
 
-**Next:** Full C-020 clouds / precip phase — §4.21 (new `Process`; needs its own D-007 clip line). Scenario campaign remains gated on C-009/C-010 framing. C-009 Lock still owner. C-016…C-019 Lock still owner.
+**Next:** Scenario campaign / toxic-site premise (G-002 / C-010) — gated on C-009 framing. Optional C-020 remainder: persistent `snow.waterEquivalent` store. C-009 Lock still owner. C-016…C-019 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -687,22 +688,27 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.21 Full C-020 clouds / precip phase (stub)
+### 4.21 Full C-020 clouds / precip phase *(Done — agent; C-020 still Open)*
 
-**Why this exists.** Slice R / mid-path rain-feel Pass left clouds as the remaining weather read. Full C-020 is a new precip-phase / cloud `Process` — **D-007 clip line required before implementation**.
+**Why this exists.** Slice R / mid-path rain-feel Pass left clouds as the remaining weather read. Full C-020 is a precip-phase / cloud `Process`.
 
-**Loops.** Sim: cloud / precip-phase process (TBD). Game: weather reads as weather, not only ground darkening + cue streaks.
+**Clip verdict (D-007).** **Pass (2026-07-30, authorizing).** Slice R established the twenty-second clip — weather the world made. Owner queued full visible clouds / precip phase and directed §4.21. Clip exists → Process registration allowed.
 
-**Register / candidates.** C-020 Open; D-007 Locked.
+**Loops.** Sim: `climate` Process owns `climate.cloudWater` / `airTemperature` / `precipPhase`; wet-day dawn charges cloud from the rainfall dial; storm window discharges via orographic `addRainField` (H-004). Game: sky builds; Heat dial selects rain / sleet / snow presentation; still no cell targeting.
 
-**Bans.** Skipping the twenty-second clip verdict. Place-targeted storms.
+**Register / candidates.** C-020 Open (do not Lock); D-007 Locked; C-004; T-001; T-006; H-004; N-004.
+
+**Bans.** Skipping the twenty-second clip verdict. Place-targeted storms. Stochastic free weather while C-003 Open. Claiming C-020 Locked.
 
 **Gate.** After Field Notebook machine green; clip Pass before coding the Process.
 
-- [ ] D-007 twenty-second clip verdict recorded in this entry before Process registration
-- [ ] Composition note + process ownership
-- [ ] Tier-M probes / baselines with stated reasons
-- [ ] Next-but-one: scenario campaign or other queue tip
+- [x] D-007 twenty-second clip verdict recorded in this entry before Process registration
+- [x] Composition note + process ownership (`docs/slices/clouds-composition.md`)
+- [x] Atmosphere Process + Heat dial + CloudMesh / phase cues
+- [x] Tier-M: `src/sim/atmosphere.test.ts`; probe `cloud-delivery` (T-001, H-004, phase divergence)
+- [x] `docs/slices/clouds.json` manifest
+- [x] Notebook seed: “The sky thickened before the shower; the cold spell left the hollow pale.”
+- [x] **Next-but-one:** scenario campaign / toxic-site premise (G-002 / C-010) — still gated on C-009 framing; or SWE store if Lock needs persistent snow
 
 ---
 
@@ -712,10 +718,10 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 |---|---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed from `veg.cover` | AUD-003, C-014 | **Done** (§4.19) |
 | — | Field Notebook UI | U-006 | **Done** (§4.20) — Lock still reviewer |
-| — | Full C-020 clouds / precip phase | C-020 | **Next** (§4.21) — new Process needs clip line |
+| — | Full C-020 clouds / precip phase | C-020 | **Done** (§4.21) — Lock still owner |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Next: full C-020 clouds** (§4.21).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **Next:** scenario campaign after C-009/C-010 framing (or SWE store under C-020 remainder).
 
 ---
 

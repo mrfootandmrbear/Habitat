@@ -11,9 +11,11 @@ import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
 import { vegetationSeasonalProcess } from "./process/vegetationSeasonalProcess";
+import { atmosphereProcess } from "./process/atmosphereProcess";
 import type { Process } from "./process/Process";
 
 const PROCESSES: Process[] = [
+  atmosphereProcess,
   surfaceWaterProcess,
   soilWaterProcess,
   groundwaterProcess,
@@ -83,11 +85,9 @@ describe("scheduler order (SIMULATION_MODEL §5.1)", () => {
     expect(() => world.scheduler.orderedForBand("daily")).not.toThrow();
   });
 
-  it("orders seasonal vegetation after habitat-readable seed bank exists", () => {
+  it("orders event climate before surfaceWater (cloud → precip → route)", () => {
     const world = new WorldState(generateMountain(8, 8, 2, 1));
-    const seasonal = world.scheduler.orderedForBand("seasonal").map((p) => p.id);
-    expect(seasonal).toContain("vegetation");
-    const annual = world.scheduler.orderedForBand("annual").map((p) => p.id);
-    expect(annual).toEqual(["dispersal"]);
+    const ids = world.scheduler.orderedForBand("event").map((p) => p.id);
+    expect(ids.indexOf("climate")).toBeLessThan(ids.indexOf("surfaceWater"));
   });
 });

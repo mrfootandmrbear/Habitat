@@ -406,6 +406,21 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.replayMatch": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "cloud-delivery": {
+    "warm.precip": { abs: 1e-2 },
+    "warm.peakCloud": { abs: 1e-4 },
+    "warm.phase": { abs: 0 },
+    "warm.relResidual": { abs: 1e-6 },
+    "warm.replayMatch": { abs: 0 },
+    "warm.hashN": { abs: 0 },
+    "cold.precip": { abs: 1e-2 },
+    "cold.peakCloud": { abs: 1e-4 },
+    "cold.phase": { abs: 0 },
+    "cold.hashN": { abs: 0 },
+    "delta.phaseDiverged": { abs: 0 },
+    "delta.conserved": { abs: 0 },
+    "delta.precipRatio": { abs: 1e-3 },
+  },
 };
 
 const args = process.argv.slice(2);

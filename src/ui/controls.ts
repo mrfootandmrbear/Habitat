@@ -1,5 +1,9 @@
 import type { InspectorLayer, SitingTool } from "../config";
 import {
+  HEAT_REGIMES,
+  type HeatId,
+} from "../sim/climate/atmosphere";
+import {
   RAIN_REGIMES,
   type RainRegimeId,
 } from "../sim/climate/rainRegime";
@@ -75,6 +79,7 @@ export function mountControls(
   parent: HTMLElement,
   initial: {
     rainRegime: RainRegimeId;
+    heat: HeatId;
     seaLevel: SeaLevelId;
     tide: TideId;
     wind: WindId;
@@ -85,6 +90,7 @@ export function mountControls(
   },
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
+    onHeat: (id: HeatId) => void;
     onSeaLevel: (id: SeaLevelId) => void;
     onTide: (id: TideId) => void;
     onWind: (id: WindId) => void;
@@ -105,6 +111,7 @@ export function mountControls(
   },
 ): {
   setRainRegime: (id: RainRegimeId) => void;
+  setHeat: (id: HeatId) => void;
   setSeaLevel: (id: SeaLevelId) => void;
   setTide: (id: TideId) => void;
   setWind: (id: WindId) => void;
@@ -142,6 +149,23 @@ export function mountControls(
   rainSelect.value = initial.rainRegime;
   rainSelect.addEventListener("change", () => {
     handlers.onRainRegime(rainSelect.value as RainRegimeId);
+  });
+
+  const heatSelect = document.createElement("select");
+  heatSelect.id = "heat-regime";
+  heatSelect.setAttribute(
+    "aria-label",
+    "Heat (C-020 — air temperature → rain/snow/sleet phase)",
+  );
+  for (const regime of HEAT_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    heatSelect.appendChild(opt);
+  }
+  heatSelect.value = initial.heat;
+  heatSelect.addEventListener("change", () => {
+    handlers.onHeat(heatSelect.value as HeatId);
   });
 
   const seaSelect = document.createElement("select");
@@ -195,7 +219,7 @@ export function mountControls(
     handlers.onWind(windSelect.value as WindId);
   });
 
-  forcePanel.append(rainSelect, seaSelect, tideSelect, windSelect);
+  forcePanel.append(rainSelect, heatSelect, seaSelect, tideSelect, windSelect);
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
@@ -379,6 +403,9 @@ export function mountControls(
   return {
     setRainRegime: (id) => {
       rainSelect.value = id;
+    },
+    setHeat: (id) => {
+      heatSelect.value = id;
     },
     setSeaLevel: (id) => {
       seaSelect.value = id;

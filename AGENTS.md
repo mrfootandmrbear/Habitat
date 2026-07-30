@@ -38,9 +38,9 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** mid-path via F+R — D-007 rain-feel clip **Pass** (2026-07-30); full clouds later. **Slice A+** Done (AUD-003). **Field Notebook** Done (U-006 machine; Lock still reviewer). W-001 supersession still owner.
+Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** machine path via F+R+clouds — Lock still owner. **Slice A+** Done (AUD-003). **Field Notebook** Done (U-006 machine; Lock still reviewer). W-001 supersession still owner.
 
-**Queue tip:** Full C-020 clouds / precip phase (**§4.21**) — D-007 clip line before registering a new Process. Scenario campaign remains later. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
+**Queue tip:** Scenario campaign / toxic-site premise (G-002 / C-010) after C-009 framing. Optional C-020 SWE store. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
 
 ## Cursor Cloud specific instructions
 

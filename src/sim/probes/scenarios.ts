@@ -9,6 +9,7 @@ import {
   regimeRainsThisEvent,
   type RainRegimeId,
 } from "../climate/rainRegime";
+import { heatById } from "../climate/atmosphere";
 import { fillOrographicRainDepths } from "../climate/orographicPrecip";
 import { windById, type WindId } from "../climate/windRegime";
 import { meanExposure } from "../climate/shoreExposure";
@@ -2543,6 +2544,112 @@ export function probeIslandArrival(): ProbeResult {
   };
 }
 
+/**
+ * Full C-020 — atmosphere Process: cloud charges → precip discharges;
+ * phase from heat; no cell targeting; mass residual closes; T-001 replay.
+ */
+export function probeCloudDelivery(): ProbeResult {
+  const seed = 42;
+  const days = 8;
+
+  const run = (heatId: "warm" | "cold", windUx: number) => {
+    const world = new WorldState(generateMountain(24, 24, 6, seed), {
+      closedBoundary: true,
+      windUx,
+      windUz: 0,
+    });
+    world.setRainRegime("moderate");
+    world.setAirTemperature(heatById(heatId).airTempC);
+    let peakCloud = 0;
+    let maxPhase = 0;
+    for (let d = 0; d < days; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.stepEvent();
+        peakCloud = Math.max(peakCloud, world.cloudWater);
+        maxPhase = Math.max(maxPhase, world.precipPhase);
+      }
+    }
+    const precip = world.precipitationLedger;
+    const residual = world.waterBalanceResidual();
+    const relResidual =
+      precip > 0 ? Math.abs(residual) / Math.max(precip, 1e-9) : Math.abs(residual);
+    return {
+      world,
+      precip,
+      peakCloud,
+      maxPhase,
+      relResidual,
+      hash: world.stateHash(),
+      hashN: Number.parseInt(world.stateHash().slice(0, 8), 16),
+    };
+  };
+
+  const warmA = run("warm", 1);
+  const warmB = run("warm", 1);
+  const cold = run("cold", 1);
+  const calm = run("warm", 0);
+
+  if (warmA.hash !== warmB.hash) {
+    throw new Error(
+      `cloud-delivery: same forcing must match (T-001) ${warmA.hash} vs ${warmB.hash}`,
+    );
+  }
+  if (warmA.precip <= 0 || warmA.peakCloud <= 0) {
+    throw new Error(
+      `cloud-delivery: expected cloud charge and precip (cloud=${warmA.peakCloud} precip=${warmA.precip})`,
+    );
+  }
+  if (warmA.maxPhase !== 0) {
+    throw new Error(
+      `cloud-delivery: warm heat should stay rain phase (got ${warmA.maxPhase})`,
+    );
+  }
+  if (cold.maxPhase < 2) {
+    throw new Error(
+      `cloud-delivery: cold heat should reach snow phase (got ${cold.maxPhase})`,
+    );
+  }
+  if (warmA.relResidual > 1e-4) {
+    throw new Error(
+      `cloud-delivery: H-004 residual too large (rel=${warmA.relResidual})`,
+    );
+  }
+  // Orographic placement still diverges with wind (calm vs west) under same mean.
+  if (Math.abs(warmA.precip - calm.precip) / Math.max(warmA.precip, 1e-9) > 0.15) {
+    throw new Error(
+      `cloud-delivery: precip should track climate mean (west/calm ratio drifted)`,
+    );
+  }
+
+  return {
+    scenario: "cloud-delivery",
+    records: [
+      {
+        label: "warm",
+        precip: warmA.precip,
+        peakCloud: warmA.peakCloud,
+        phase: warmA.maxPhase,
+        relResidual: warmA.relResidual,
+        replayMatch: 1,
+        hashN: warmA.hashN,
+      },
+      {
+        label: "cold",
+        precip: cold.precip,
+        peakCloud: cold.peakCloud,
+        phase: cold.maxPhase,
+        hashN: cold.hashN,
+      },
+      {
+        label: "delta",
+        phaseDiverged: cold.maxPhase > warmA.maxPhase ? 1 : 0,
+        conserved: warmA.relResidual <= 1e-4 ? 1 : 0,
+        precipRatio: warmA.precip / Math.max(calm.precip, 1e-9),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -2567,6 +2674,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,
+  "cloud-delivery": probeCloudDelivery,
 };
 
 export function runProbe(name: string): ProbeResult {

@@ -22,9 +22,10 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 | Control | IDs | Semantics |
 |---|---|---|
 | **Rainfall** | arid / light / moderate / wet | **Climate archetype** — real-scale annual means (~150 / 550 / 1000 / 2200 mm/yr) plus spell cadence (C-020). Arid = rare desert storms; light/moderate = rain events; wet = monsoon block. Not the old cartoon rates that flooded the island. Orography places precip; no cell targeting. |
+| **Heat** | warm / mild / cold | Air temperature → precip phase rain / sleet / snow (**C-020**). |
 | **Sea** | off / low / mid / high | Global sea datum (**C-015**). |
 | **Tide** | off / neap / mean / spring | MHW/MLW envelope half-range around sea (**C-016**). No per-event phase. |
-| **Wind** | calm / from west / east / south / north | Global wind vector; orographic mean rain (**C-020** lite) and shore exposure (**C-017**). |
+| **Wind** | calm / from west / east / south / north | Global wind vector; orographic mean rain (**C-020**) and shore exposure (**C-017**). |
 
 Chrome: one **Forces** group containing these selects (exact labels in `src/ui/controls.ts`). No cell arguments on any handler.
 
@@ -44,7 +45,7 @@ then normalize over land so ΣP ≈ N_land · P₀ (mean tracks the dial; placem
 
 ## Targeting ban
 
-APIs: `rainDepthForRegime(regime, base)`, `windById(id)`, `setSeaLevel(level)`, `setTidalAmplitude(amp)` / `tideById(id)` — no `(x,z)` / cell index parameters. Conformance: cite **C-004**.
+APIs: `rainDepthForRegime(regime, base)`, `heatById(id)` / `setAirTemperature(t)`, `setRainRegime(id)`, `windById(id)`, `setSeaLevel(level)`, `setTidalAmplitude(amp)` / `tideById(id)` — no `(x,z)` / cell index parameters. Conformance: cite **C-004**.
 
 ## Slice R mid-path (C-020 / C-004)
 
@@ -52,4 +53,4 @@ Regimes are **weather archetypes**, not a faucet: multi-day wet/dry cycles with 
 
 ## Full C-020
 
-Visible clouds and precip phase (rain/snow/sleet) remain later (owner 2026-07-30: mid-path reads as weather; clouds still wanted). Slice F / Slice R do not claim **C-020** Locked.
+Visible clouds + precip phase (rain/snow/sleet) via `climate` Process and Heat dial (shipped §4.21). Rainfall dial remains the moisture budget; clouds charge then discharge; phase from air temperature. Melt-on-contact for snow/sleet this pass — dedicated SWE store optional later. Slice F / R / clouds do not claim **C-020** Locked.

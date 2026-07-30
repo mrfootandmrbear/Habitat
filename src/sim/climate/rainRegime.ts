@@ -165,3 +165,11 @@ export function rainDailyMeanDepth(
   }
   return sum / regime.cycleDays;
 }
+
+/** Storm events in one wet day (exported for atmosphere dawn charge). */
+export function regimeStormEventsPerWetDay(
+  regime: RainRegime,
+  dailyEventSteps: number,
+): number {
+  return stormEventsPerWetDay(regime, dailyEventSteps);
+}
