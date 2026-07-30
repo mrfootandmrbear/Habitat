@@ -55,6 +55,12 @@ import {
   terrainInsolation,
 } from "./vegetation/lightCompetition";
 import { evaluateEt } from "./hydrology/evapotranspiration";
+import {
+  MAX_SUBSTRATE_POROSITY,
+  SUBSTRATE_CLAY,
+  SUBSTRATE_LOAM,
+  substrateProps,
+} from "./terrain/substrates";
 
 /**
  * Owns authoritative world fields and the field registry.
@@ -73,6 +79,12 @@ export class WorldState {
    * 1 = seawater-equivalent; rides water column (no separate salt ledger).
    */
   readonly soilSalinity: Grid2D;
+  /**
+   * Substrate class id — Slice S / C-009 (loam=0, sand=1, clay=2).
+   * Legacy: material memory (T-003). Owner geomorphology. Properties from
+   * `substrates.ts` table (T-004) — not per-material process forks.
+   */
+  readonly soilMaterial: Grid2D;
   /**
    * Mobile regolith depth (m) — Slice 8 (SIMULATION_MODEL §3).
    * Legacy: cannot be reconstructed from current forcing (T-003 / S-007).
@@ -264,6 +276,11 @@ export class WorldState {
     this.water = new Grid2D(this.width, this.height);
     this.soilMoisture = new Grid2D(this.width, this.height);
     this.soilSalinity = new Grid2D(this.width, this.height);
+    this.soilMaterial = new Grid2D(
+      this.width,
+      this.height,
+      SUBSTRATE_LOAM,
+    );
     this.soilDepth = new Grid2D(
       this.width,
       this.height,
@@ -701,6 +718,7 @@ export class WorldState {
     const w = this.water.data;
     const m = this.soilMoisture.data;
     const salt = this.soilSalinity.data;
+    const mat = this.soilMaterial.data;
     const depth = this.soilDepth.data;
     const cap = this.infiltrationCapacity.data;
     const contrib = this.vegInfiltrationContribution.data;
@@ -708,8 +726,6 @@ export class WorldState {
     const elev = this.terrain.data;
     const petField = this.potentialEt.data;
     const aetField = this.actualEt.data;
-    const porosity = config.soilPorosity;
-    const infilCap = config.infiltrationRate * scale;
     const petAtFullSun = config.etRate * scale;
     const openWaterPet = config.openWaterEtRate * scale;
     const minDepth = 1e-3;
@@ -720,13 +736,16 @@ export class WorldState {
         ? computeShorelineCells(this.width, this.height, this.oceanCells)
         : null;
 
+    // Per-cell substrate base + veg contribution (C-009 / T-004).
     for (let i = 0; i < cap.length; i++) {
-      cap[i] = infilCap + contrib[i]! * scale;
+      const base = substrateProps(mat[i]!).infiltrationRate * scale;
+      cap[i] = base + contrib[i]! * scale;
     }
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const i = z * this.width + x;
+        const porosity = substrateProps(mat[i]!).porosity;
         const h = Math.max(depth[i]!, minDepth);
         const room = Math.max(0, (porosity - m[i]!) * h);
         const storageBefore = m[i]! * h;
@@ -799,12 +818,11 @@ export class WorldState {
 
     this.ensureStructureFresh();
     const m = this.soilMoisture.data;
+    const mat = this.soilMaterial.data;
     const depth = this.soilDepth.data;
     const gw = this.groundwaterStorage.data;
     const w = this.water.data;
     const acc = this.flowAccumulation;
-    const porosity = config.soilPorosity;
-    const fc = porosity * this.gwFieldCapacityFraction;
     const minDepth = 1e-3;
     const nCells = this.width * this.height;
     const rechargeCap = this.gwRechargeRate * scale;
@@ -813,6 +831,8 @@ export class WorldState {
 
     for (let i = 0; i < gw.length; i++) {
       const h = Math.max(depth[i]!, minDepth);
+      const porosity = substrateProps(mat[i]!).porosity;
+      const fc = porosity * this.gwFieldCapacityFraction;
 
       if (rechargeCap > 0 && m[i]! > fc) {
         const excess = (m[i]! - fc) * h;
@@ -841,13 +861,13 @@ export class WorldState {
    */
   runHabitatStep(_dt: number): void {
     const m = this.soilMoisture.data;
+    const mat = this.soilMaterial.data;
     const depth = this.soilDepth.data;
     const gw = this.groundwaterStorage.data;
     const salt = this.soilSalinity.data;
     const hsi = this.habitatSuitability.data;
     const lim = this.habitatLimitingFactor.data;
     const gap = this.habitatLimitingGap.data;
-    const porosity = config.soilPorosity;
     const depthRef = config.hsiDepthRefMeters;
     const gwRef = config.hsiGwRefMeters;
 
@@ -856,7 +876,7 @@ export class WorldState {
         moisture: m[i]!,
         soilDepth: depth[i]!,
         groundwater: gw[i]!,
-        porosity,
+        porosity: substrateProps(mat[i]!).porosity,
         depthRef,
         gwRef,
         salinity: salt[i]!,
@@ -880,6 +900,7 @@ export class WorldState {
     const scale = Math.max(0, dt);
     const elev = this.terrain.data;
     const depth = this.soilDepth.data;
+    const mat = this.soilMaterial.data;
     const cover = this.vegCover.data;
     const exposure = this.shoreExposure.data;
     const acc = this.flowAccumulation;
@@ -888,7 +909,6 @@ export class WorldState {
     const zFloor = config.elevationFloor;
     const p0 = config.soilProductionP0 * scale;
     const h0 = config.soilProductionH0;
-    const kE = config.soilErosionK * scale;
     const kCoast = config.shoreErosionK * scale;
     const retain = Math.min(1, Math.max(0, config.longshoreRetainFraction));
     const aMin = config.erosionMinAccumulation;
@@ -911,6 +931,7 @@ export class WorldState {
           const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
           const aNorm = Math.min(1, a / (this.width * this.height));
           const cFactor = 1 - cover[i]! * 0.85;
+          const kE = substrateProps(mat[i]!).erosionK * scale;
           erode = kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
         }
 
@@ -1335,7 +1356,7 @@ export class WorldState {
   ): void {
     const moisture = this.soilMoisture.data;
     const water = this.water.data;
-    const porosity = config.soilPorosity;
+    const porosity = substrateProps(this.soilMaterial.data[i]!).porosity;
     const storage = moisture[i]! * oldH;
     if (nextDepth <= 0) {
       water[i]! += storage;
@@ -1468,6 +1489,10 @@ export class WorldState {
   getSoilMoisture(x: number, z: number): number {
     if (!this.soilMoisture.inBounds(x, z)) return 0;
     return this.soilMoisture.get(x, z);
+  }
+
+  getSoilMaterial(x: number, z: number): number {
+    return this.soilMaterial.get(x, z);
   }
 
   getSoilSalinity(x: number, z: number): number {
@@ -1642,7 +1667,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.soilMoisture.data,
-        range: [0, config.soilPorosity] as const,
+        range: [0, MAX_SUBSTRATE_POROSITY] as const,
       },
       {
         id: "soil.salinity",
@@ -1654,6 +1679,17 @@ export class WorldState {
         legacy: true,
         data: this.soilSalinity.data,
         range: [0, 1] as const,
+      },
+      {
+        id: "soil.material",
+        units: "class",
+        shape: "cell" as const,
+        owner: "geomorphology",
+        band: "decadal" as const,
+        // T-003 / C-009: substrate class — not reconstructible from rain alone.
+        legacy: true,
+        data: this.soilMaterial.data,
+        range: [0, SUBSTRATE_CLAY] as const,
       },
       {
         id: "soil.depth",

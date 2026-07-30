@@ -7,6 +7,7 @@ import { understoryLightRgb } from "../ui/lightEncoding";
 import { defaultTerrainRgb } from "../ui/terrainEncoding";
 import { herbBiomassRgb } from "../ui/occupantEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
+import { substrateProps } from "../sim/terrain/substrates";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET = new THREE.Color(0x4a5c3a);
@@ -91,13 +92,16 @@ export class TerrainMesh {
         if (world && overlay !== "none") {
           this.applyOverlay(col, world, x, z, overlay, maxAcc);
         } else if (world) {
+          const material = world.getSoilMaterial(x, z);
+          const porosity = substrateProps(material).porosity;
           const [r, g, b] = defaultTerrainRgb(
             world.getSoilMoisture(x, z),
-            config.soilPorosity,
+            porosity,
             world.getVegCover(x, z),
             world.getFireScar(x, z),
             world.isForeshore(x, z),
             world.getSoilSalinity(x, z),
+            material,
           );
           col.setRGB(r, g, b);
           if (elevDelta) {

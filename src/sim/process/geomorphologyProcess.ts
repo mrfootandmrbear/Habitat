@@ -13,12 +13,13 @@ export const geomorphologyProcess: Process = {
   reads: [
     "terrain.elevation",
     "soil.depth",
+    "soil.material",
     "veg.cover",
     "depression.depth",
     "shore.exposure",
     "shore.longshore",
   ],
-  writes: ["terrain.elevation", "soil.depth", "ledger.shoreErosion"],
+  writes: ["terrain.elevation", "soil.depth", "soil.material", "ledger.shoreErosion"],
   lagged: ["veg.cover"],
   step(world, dt) {
     world.runGeomorphologyStep(dt);

@@ -2,19 +2,19 @@
   "scenario": "regime-divergence",
   "metrics": {
     "light.hashN": {
-      "value": 3865410156,
+      "value": 2602372011,
       "abs": 0
     },
     "light.precip": {
-      "value": 70.50240000000011,
+      "value": 6.9435616438356575,
       "abs": 0.000001
     },
     "light.soilSum": {
-      "value": 30.925850991079237,
+      "value": 2.4131010570981886,
       "abs": 0.0001
     },
     "light.meanCover": {
-      "value": 0.016093114750320738,
+      "value": 0.0006745245255943802,
       "abs": 0.00001
     },
     "light.replayMatch": {
@@ -22,27 +22,27 @@
       "abs": 0
     },
     "heavy.hashN": {
-      "value": 3860278602,
+      "value": 1118167448,
       "abs": 0
     },
     "heavy.precip": {
-      "value": 261.2735999999976,
+      "value": 36.453698630137445,
       "abs": 0.000001
     },
     "heavy.soilSum": {
-      "value": 77.53488078877139,
+      "value": 15.093913794248685,
       "abs": 0.0001
     },
     "heavy.meanCover": {
-      "value": 0.04348259378497864,
+      "value": 0.007710348397975192,
       "abs": 0.00001
     },
     "delta.precipDelta": {
-      "value": 190.7711999999975,
+      "value": 29.510136986301788,
       "abs": 0.000001
     },
     "delta.soilDelta": {
-      "value": 46.60902979769215,
+      "value": 12.680812737150497,
       "abs": 0.0001
     },
     "delta.hashDiverged": {

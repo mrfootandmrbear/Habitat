@@ -99,8 +99,12 @@ Summary only — do not reopen unless fixing regressions.
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
+| **S** | Substrate contrast (**C-009**) | Sand vs clay under one storm | `substrates.ts`, `substrate-contrast` | **Done** — owner legibility Pass 2026-07-30 (Lock still owner) |
+| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — agent (full C-020 Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md) — C-018 / C-019; Lock still owner). Full **C-020** clouds/phase later (owner: rain dial still reads as a spigot — dossier). **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open. Next: later stubs (AUD-003 / Field Notebook / scenario campaign).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** audio wired (C-014 Open). C-004 stewardship reading still Open.
+
+**Next constrained by D-007.** **Slice S** owner legibility **Pass** (two surfaces). **Slice R** machine green. Remaining clip question is rain-feel (weather vs faucet) — one sentence, no ask gate. Later stubs remain **gated** until the full clip exists. Full C-020 clouds/phase still later. C-009 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -604,19 +608,52 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-M: paired small/large island under identical regimes; hash-stable (T-001); island worlds must not use perimeter mainland rain as sole source
 - [x] Probe `island-arrival`; `docs/slices/21.json`
 - [x] C-019 dossier (owner sparse-earned **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-B; Lock still owner)
-- [x] **Next-but-one:** AUD-003 recovery ambient / Field Notebook UI / scenario campaign — pick when gate opens (see Later stubs)
+- [x] **Next-but-one:** Slice **S** substrate contrast (§4.17) — D-007 redirects away from later stubs until the clip moves
+
+---
+
+### 4.17 Slice S — Substrate contrast (**C-009**)
+
+**Why this exists.** The thesis noun is still one undifferentiated soil. Under **D-007**, the next work must move the twenty-second clip — sand vs clay under the same storm is the highest clip yield per unit work, and it registers **no new Process** (property table + existing soilWater / geomorphology). Berm/dig ↔ `soil.depth` is closed (§4.1).
+
+**Clip verdict (D-007).** Before claiming this slice done for queue purposes: can you film twenty seconds — berm on sand, berm on clay, same rain regime, no inspector — where a stranger sees two materials answer differently? Record Pass/Hold in the closeout commit body. Not a playtest; no ask gate.
+
+**Gate.** After Slice 21 Done; displaced-mass closeout (§4.1) already green.
+
+- [x] Composition note `docs/slices/S-composition.md`; material table `src/sim/terrain/substrates.ts` (sand, clay)
+- [x] `soil.material` (or equivalent class raster) + properties drive infil / porosity / erodibility — one law, data-driven (T-004)
+- [x] Default island seed paints a readable sand/clay mosaic; encoding Tier-P without inspector
+- [x] Probe `substrate-contrast`; `docs/slices/S.json`
+- [x] C-009 dossier (owner legibility half — Lock still owner)
+- [x] **Next-but-one:** C-020 rain-feel mid-path (§4.18) — still no cloud `Process`
+
+---
+
+### 4.18 Slice R — Rain-feel mid-path (**C-020** / **C-004**, no new Process)
+
+**Why this exists.** Owner: rain dial still reads as a spigot (island-brief, salt-overseas). Full atmospheric clouds/phase would register a new `Process` and is **gated by D-007** until a clip exists. This slice changes regime **temporal shape** + observer precip cues only.
+
+**Clip verdict (D-007).** After this slice: when rain falls / stops, does it read as weather the world made rather than a faucet? One sentence in the closeout body.
+
+**Gate.** After Slice S machine half green (may overlap presentation work).
+
+- [x] Deterministic shower / front cadence inside climate-mean regimes (mean intensity conserved or baselines updated with reason)
+- [x] Observer-only wind-aligned precip presentation (T-006)
+- [x] Arid dry-down encoding retune if needed; Tier-P proxy — shower off + existing moisture darkening; no new Process
+- [x] Update `docs/candidates/C-020-dossier.md`; FORCE_PANEL.md mid-path note
+- [x] **Next-but-one:** clip re-check — if Pass, later stubs may open; if Hold, retune presentation (not a new Process)
 
 ---
 
 ### Later stubs
 
-| Slice | Focus | Register |
-|---|---|---|
-| A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
-| — | Field Notebook UI | U-006 |
-| — | Scenario campaign / toxic-site premise | G-002, C-010 |
+| Slice | Focus | Register | Gate |
+|---|---|---|---|
+| A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 | **Blocked by D-007** until clip exists |
+| — | Field Notebook UI | U-006 | **Blocked by D-007** |
+| — | Scenario campaign / toxic-site premise | G-002, C-010 | **Blocked by D-007** (+ C-009 for C-010) |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([batch-salt-overseas.md](playtests/batch-salt-overseas.md)). Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done (machine). C-018 / C-019 Tier-O **Pass**. **Next: D-007 clip self-check** — if Pass, later stubs may open; if Hold, retune presentation (not a new Process).
 
 ---
 

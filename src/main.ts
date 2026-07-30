@@ -5,6 +5,7 @@ import { WorldState } from "./sim/WorldState";
 import {
   generateIsland,
 } from "./sim/terrain/generateIsland";
+import { paintSubstrateMosaic } from "./sim/terrain/substrates";
 import {
   PredictionSession,
   snapshotWaterReader,
@@ -18,6 +19,7 @@ import { SitingCursor } from "./render/SitingCursor";
 import { FlowCueMesh } from "./render/FlowCueMesh";
 import { OccupantMesh } from "./render/OccupantMesh";
 import { WindArrowMesh } from "./render/WindArrowMesh";
+import { RainCueMesh } from "./render/RainCueMesh";
 import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
@@ -75,6 +77,13 @@ const world = new WorldState(terrain, {
   windUx: windById("west").ux,
   windUz: windById("west").uz,
 });
+paintSubstrateMosaic(
+  world.soilMaterial.data,
+  world.width,
+  world.height,
+  world.oceanCells,
+  config.terrainSeed,
+);
 const model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
 const editUndo = new EditUndoStack();
@@ -95,11 +104,13 @@ const flowCue = new FlowCueMesh(n, n, config.worldSize);
 const occupantMesh = new OccupantMesh(n, n, config.worldSize);
 const windArrow = new WindArrowMesh(config.worldSize);
 windArrow.setWind("west");
+const rainCue = new RainCueMesh(config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
 scene.add(oceanMesh.mesh);
 scene.add(extentCage);
 scene.add(windArrow.group);
+scene.add(rainCue.group);
 
 const briefChrome = mountBriefChrome(app);
 let scenarioSession: ScenarioSession | null = null;
@@ -189,7 +200,7 @@ const ui = mountControls(
       rainRegime = id;
       ui.setRainRegime(id);
       ui.setHint(
-        `Climate: ${rainRegimeById(id).label} — watch the ground wetten`,
+        `Climate: ${rainRegimeById(id).label} — watch for a weather spell`,
       );
     },
     onWind: (id) => {
@@ -465,9 +476,12 @@ function syncMeshes(nowWall?: number): void {
   syncAudio();
 }
 
+/** Presentation: storm event active (rain cue + muted shallow sheet). */
+let stormDisplayActive = false;
+
 function syncWaterDisplay(wallDt: number, snap = false): void {
   if (snap) waterMesh.snapFrom(model, world.oceanCells);
-  else waterMesh.updateFrom(model, world.oceanCells, wallDt);
+  else waterMesh.updateFrom(model, world.oceanCells, wallDt, stormDisplayActive);
 }
 
 function predictionStatus(): string {
@@ -509,10 +523,25 @@ function frame(now: number): void {
   const { stepsRun } = clock.tick(wallDt);
   const regime = rainRegimeById(rainRegime);
   const wind = windById(windId);
-  const depth = rainDepthForRegime(regime, config.rainDepthPerEvent);
+  const depth = rainDepthForRegime(
+    regime,
+    config.rainDepthPerEvent,
+    config.dailyEventSteps,
+  );
+  let rainingThisTick = false;
   for (let i = 0; i < stepsRun; i++) {
+    const dayIndex = Math.floor(steps / config.dailyEventSteps);
     const indexInDay = steps % config.dailyEventSteps;
-    if (depth > 0 && regimeRainsThisEvent(regime, indexInDay, config.dailyEventSteps)) {
+    const shower =
+      depth > 0 &&
+      regimeRainsThisEvent(
+        regime,
+        indexInDay,
+        config.dailyEventSteps,
+        dayIndex,
+      );
+    if (shower) {
+      rainingThisTick = true;
       fillOrographicRainDepths(
         rainDepthScratch,
         world.terrain.data,
@@ -542,6 +571,17 @@ function frame(now: number): void {
       break;
     }
   }
+  // Storm event cue — fade holds across the spell (T-006 — no write).
+  if (stepsRun > 0) {
+    stormDisplayActive = rainingThisTick;
+    const strength =
+      regime.id === "heavy" ? 1 : regime.id === "moderate" ? 0.75 : 0.55;
+    rainCue.setStorm(rainingThisTick, strength);
+  } else if (timeRate === "pause") {
+    stormDisplayActive = false;
+    rainCue.setStorm(false);
+  }
+  rainCue.update(wallDt, wind.ux, wind.uz);
 
   if (prediction.shouldAutoCompare(steps)) {
     runCompare();

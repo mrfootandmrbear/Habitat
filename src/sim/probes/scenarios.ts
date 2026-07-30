@@ -26,6 +26,11 @@ import {
   sampleHorizon,
 } from "./deepTime";
 import {
+  SUBSTRATE_CLAY,
+  SUBSTRATE_SAND,
+  substrateProps,
+} from "../terrain/substrates";
+import {
   generateIsland,
   DEFAULT_SEA_LEVEL_METERS,
 } from "../terrain/generateIsland";
@@ -392,12 +397,16 @@ export function probeRegimeDivergence(): ProbeResult {
   const run = (regimeId: RainRegimeId) => {
     const world = new WorldState(generateMountain(24, 24, 6, seed));
     const regime = rainRegimeById(regimeId);
-    const depth = rainDepthForRegime(regime, config.rainDepthPerEvent);
+    const depth = rainDepthForRegime(
+      regime,
+      config.rainDepthPerEvent,
+      config.dailyEventSteps,
+    );
     for (let d = 0; d < days; d++) {
       for (let i = 0; i < config.dailyEventSteps; i++) {
         if (
           depth > 0 &&
-          regimeRainsThisEvent(regime, i, config.dailyEventSteps)
+          regimeRainsThisEvent(regime, i, config.dailyEventSteps, d)
         ) {
           world.addRain(depth);
         }
@@ -1741,9 +1750,14 @@ export function probeOrographicWind(): ProbeResult {
   const w = 40;
   const h = 24;
   const seedPeak = 12;
-  const days = 2;
   const regime = rainRegimeById("moderate");
-  const base = rainDepthForRegime(regime, config.rainDepthPerEvent);
+  // Real-scale means need more than one cartoon day for wet/dry sides to encode.
+  const days = regime.cycleDays * 3;
+  const base = rainDepthForRegime(
+    regime,
+    config.rainDepthPerEvent,
+    config.dailyEventSteps,
+  );
   const depths = new Float32Array(w * h);
 
   const ridge = () => {
@@ -1768,7 +1782,7 @@ export function probeOrographicWind(): ProbeResult {
       for (let i = 0; i < config.dailyEventSteps; i++) {
         if (
           base > 0 &&
-          regimeRainsThisEvent(regime, i, config.dailyEventSteps)
+          regimeRainsThisEvent(regime, i, config.dailyEventSteps, d)
         ) {
           fillOrographicRainDepths(
             depths,
@@ -2107,6 +2121,129 @@ export function probeSalinityArrival(): ProbeResult {
 }
 
 /**
+ * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
+ * infiltration and hillslope erosion; properties from substrates.ts table.
+ */
+export function probeSubstrateContrast(): ProbeResult {
+  const w = 16;
+  const h = 16;
+
+  const ramp = (): Grid2D => {
+    const t = new Grid2D(w, h);
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        // Steep west→east fall so D8 accumulates toward the east edge.
+        t.set(x, z, (w - 1 - x) * 0.55 + z * 0.02);
+      }
+    }
+    return t;
+  };
+
+  const make = (material: number) => {
+    const world = new WorldState(ramp(), { closedBoundary: true });
+    world.soilMaterial.fill(material);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.defaultSoilDepthMeters);
+    world.soilMoisture.fill(0);
+    world.runVegetationStep(1);
+    world.runSoilWaterStep(1);
+    return world;
+  };
+
+  const sandA = make(SUBSTRATE_SAND);
+  const sandB = make(SUBSTRATE_SAND);
+  const clay = make(SUBSTRATE_CLAY);
+
+  const replayMatch = sandA.stateHash() === sandB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("substrate-contrast: sand replay hash mismatch");
+  }
+
+  const soak = (world: WorldState) => {
+    world.water.fill(0.35);
+    world.infiltrationLedger = 0;
+    world.runSoilWaterStep(1);
+    return world.infiltrationLedger;
+  };
+
+  const sandInfil = soak(sandA);
+  const clayInfil = soak(clay);
+
+  // Fresh twins for erosion — bare, steep, many bands so K difference accumulates.
+  const meanChannelLoss = (world: WorldState): number => {
+    const elev0 = Float32Array.from(world.terrain.data);
+    for (let n = 0; n < 24; n++) world.runGeomorphologyStep(1);
+    world.ensureStructureFresh();
+    const acc = world.flowAccumulation;
+    if (!acc) return 0;
+    const aMin = config.erosionMinAccumulation;
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < elev0.length; i++) {
+      if (acc[i]! < aMin) continue;
+      sum += elev0[i]! - world.terrain.data[i]!;
+      count += 1;
+    }
+    return count > 0 ? sum / count : 0;
+  };
+
+  const sandErode = meanChannelLoss(make(SUBSTRATE_SAND));
+  const clayErode = meanChannelLoss(make(SUBSTRATE_CLAY));
+
+  const sandProps = substrateProps(SUBSTRATE_SAND);
+  const clayProps = substrateProps(SUBSTRATE_CLAY);
+  const tableDriven =
+    sandProps.infiltrationRate > clayProps.infiltrationRate &&
+    sandProps.erosionK > clayProps.erosionK
+      ? 1
+      : 0;
+
+  if (!(sandInfil > clayInfil)) {
+    throw new Error(
+      `substrate-contrast: expected sand infil (${sandInfil}) > clay (${clayInfil})`,
+    );
+  }
+  if (!(sandErode > clayErode)) {
+    throw new Error(
+      `substrate-contrast: expected sand channel loss (${sandErode}) > clay (${clayErode})`,
+    );
+  }
+  if (tableDriven !== 1) {
+    throw new Error("substrate-contrast: substrate table ordering broken");
+  }
+
+  return {
+    scenario: "substrate-contrast",
+    records: [
+      {
+        label: "sand",
+        infiltrated: sandInfil,
+        erode: sandErode,
+        porosity: sandProps.porosity,
+        infilRate: sandProps.infiltrationRate,
+        erosionK: sandProps.erosionK,
+      },
+      {
+        label: "clay",
+        infiltrated: clayInfil,
+        erode: clayErode,
+        porosity: clayProps.porosity,
+        infilRate: clayProps.infiltrationRate,
+        erosionK: clayProps.erosionK,
+      },
+      {
+        label: "delta",
+        infilDelta: sandInfil - clayInfil,
+        erodeDelta: sandErode - clayErode,
+        replayMatch,
+        tableDriven,
+        hashN: Number.parseInt(sandA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice 21 / C-019 — overseas arrival: small vs large island under identical
  * regimes; isolation monotonicity; not mainland-perimeter rain.
  */
@@ -2289,6 +2426,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "scenario-window": probeScenarioWindow,
   "salinity-arrival": probeSalinityArrival,
   "island-arrival": probeIslandArrival,
+  "substrate-contrast": probeSubstrateContrast,
 };
 
 export function runProbe(name: string): ProbeResult {

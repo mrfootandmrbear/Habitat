@@ -14,6 +14,7 @@ export const soilWaterProcess: Process = {
     "water.surfaceDepth",
     "soil.moisture",
     "soil.salinity",
+    "soil.material",
     "soil.infiltrationCapacity",
     "terrain.elevation",
     "veg.cover",

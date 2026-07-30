@@ -40,7 +40,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** lite via F (full clouds later — rain still reads as spigot). W-001 supersession still owner.
 
-**Next is constrained by D-007.** The clip does not yet exist — rain has read as a spigot across three sittings — so the next slice is the one that moves the twenty-second clip closest to existing, not a new system. That points at **C-020** rain delivery / **C-004** force feel, or **C-009** substrate differentiation (the thesis's central noun, still one undifferentiated soil, and the highest clip yield per unit work). Later stubs (AUD-003 / Field Notebook / scenario campaign) register new processes and are gated behind a clip verdict. **C-012** is live again with corrected units: 960 m at 10 m cells, and Δx — not extent — is the suspect value.
+**Next is constrained by D-007.** Slice **S** owner legibility **Pass** (sand/clay read as two surfaces). Slice **R** machine green. **Queue tip:** clip remainder is rain-feel (weather vs faucet) — one sentence, no ask gate; if Hold, retune presentation, not a new Process. Later stubs stay gated. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
 
 ## Cursor Cloud specific instructions
 

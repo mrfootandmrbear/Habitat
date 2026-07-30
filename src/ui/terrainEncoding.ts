@@ -3,11 +3,18 @@
  * Moisture remains legible under vegetation; burn scars tint without an inspector.
  * Intertidal foreshore (C-016) tints without requiring the inspector layer.
  * High soil.salinity (C-018) washes green and adds a pale crust without Inspect.
+ * Substrate class (C-009) sets dry BASE from the material table.
  */
+
+import {
+  SUBSTRATE_CLAY,
+  SUBSTRATE_LOAM,
+  SUBSTRATE_SAND,
+  substrateProps,
+} from "../sim/terrain/substrates";
 
 export type TerrainRgb = readonly [number, number, number];
 
-const BASE: TerrainRgb = [0x8b / 255, 0x73 / 255, 0x55 / 255];
 const WET: TerrainRgb = [0x4a / 255, 0x5c / 255, 0x3a / 255];
 const VEG: TerrainRgb = [0x3a / 255, 0x7a / 255, 0x3a / 255];
 const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
@@ -30,8 +37,8 @@ function lerpRgb(a: TerrainRgb, b: TerrainRgb, t: number): TerrainRgb {
 }
 
 /**
- * Default terrain color from moisture, cover, burn scar, intertidal, and salinity.
- * Cover greens the wet base rather than replacing it, so dry-down stays visible.
+ * Default terrain color from moisture, cover, burn scar, intertidal, salinity,
+ * and substrate class. Cover greens the wet base rather than replacing it.
  * Salinity suppresses green and pulls toward crust so salty hollows stay pale.
  */
 export function defaultTerrainRgb(
@@ -41,12 +48,14 @@ export function defaultTerrainRgb(
   scar: number = 0,
   intertidal: boolean = false,
   salinity: number = 0,
+  materialClass: number = SUBSTRATE_LOAM,
 ): TerrainRgb {
+  const base = substrateProps(materialClass).dryRgb;
   const soilT = Math.min(1, Math.max(0, soilMoisture / Math.max(porosity, 1e-6)));
   const coverT = Math.min(1, Math.max(0, cover));
   const scarT = Math.min(1, Math.max(0, scar));
   const saltT = Math.min(1, Math.max(0, salinity));
-  const wetBase = lerpRgb(BASE, WET, soilT);
+  const wetBase = lerpRgb(base, WET, soilT);
   // Stronger green only where soil is also wet — dry vegetation reads muted.
   // Salt washes the green so a salty hollow does not read as a healthy lawn.
   const vegAmount = coverT * (0.28 + 0.62 * soilT) * (1 - saltT * 0.9);
@@ -69,6 +78,7 @@ export type TerrainEncodingSample = {
   scar?: number;
   intertidal?: boolean;
   salinity?: number;
+  material?: number;
 };
 
 export function terrainEncodingDelta(
@@ -83,6 +93,7 @@ export function terrainEncodingDelta(
     a.scar ?? 0,
     a.intertidal ?? false,
     a.salinity ?? 0,
+    a.material ?? SUBSTRATE_LOAM,
   );
   const cb = defaultTerrainRgb(
     b.moisture,
@@ -91,6 +102,7 @@ export function terrainEncodingDelta(
     b.scar ?? 0,
     b.intertidal ?? false,
     b.salinity ?? 0,
+    b.material ?? SUBSTRATE_LOAM,
   );
   return Math.hypot(ca[0] - cb[0], ca[1] - cb[1], ca[2] - cb[2]);
 }
@@ -116,6 +128,27 @@ export function salinityEncodingDelta(
   return terrainEncodingDelta(
     { moisture: 0.25, cover: 0.35, salinity: freshSalinity },
     { moisture: 0.25, cover: 0.35, salinity: saltySalinity },
+    porosity,
+  );
+}
+
+/**
+ * Color distance between dry sand and dry clay under the same moisture/cover
+ * (Tier-P floor for C-009 default-view substrate contrast).
+ */
+export function substrateEncodingDelta(): number {
+  const porosity = 0.4;
+  return terrainEncodingDelta(
+    {
+      moisture: 0.05,
+      cover: 0,
+      material: SUBSTRATE_SAND,
+    },
+    {
+      moisture: 0.05,
+      cover: 0,
+      material: SUBSTRATE_CLAY,
+    },
     porosity,
   );
 }

@@ -14,10 +14,12 @@ export class OceanMesh {
     geo.rotateX(-Math.PI / 2);
     // Opaque-enough + depthWrite + FrontSide: DoubleSide + depthWrite:false
     // z-fought the shoreline every sim/camera frame (playtest flash).
+    // Opacity kept moderate so Sea: mid reads as a surrounding plane, not a
+    // filled aquarium tank that looks like the island is drowning (playtest).
     this.material = new THREE.MeshBasicMaterial({
       color: 0x1a4a6e,
       transparent: true,
-      opacity: 0.88,
+      opacity: 0.55,
       depthWrite: true,
       depthTest: true,
       side: THREE.FrontSide,

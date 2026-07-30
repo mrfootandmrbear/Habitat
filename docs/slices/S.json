@@ -1,0 +1,17 @@
+{
+  "id": "S",
+  "title": "Substrate contrast — sand vs clay",
+  "simLoop": "soil.material class drives per-cell porosity, infiltration, and hillslope erodibility from a data table (C-009 / T-004); one law, no new Process.",
+  "gameLoop": "West-sand / east-clay island mosaic reads as two materials under the same storm without the inspector.",
+  "registerIds": ["C-009", "C-011", "T-004", "T-003", "GEO-002", "D-007", "N-001", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/substrate.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/save.test.ts"
+  ],
+  "probes": ["substrate-contrast"],
+  "fields": ["soil.material"],
+  "notebookSeed": "The sand berm slumped; the clay hollow still held last week's rain.",
+  "tierO": "owner legibility half — see docs/candidates/C-009-dossier.md; Lock still owner"
+}

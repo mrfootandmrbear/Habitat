@@ -104,11 +104,14 @@ export class WaterMesh {
    * Observer water surface. `wallDt` drives exponential catch-up so fast
    * event-step depth chatter (rain pulses, sheet flow, baseflow) reads as
    * continuous water rather than a strobe.
+   * `stormActive`: during a precip event, shallow sheets stay more transparent
+   * so rain reads as weather (streaks/veil) rather than a blue mass (T-006).
    */
   updateFrom(
     model: WaterStateView,
     oceanCells?: ReadonlySet<number>,
     wallDt = 1 / 60,
+    stormActive = false,
   ): void {
     const tau = Math.max(1e-3, config.waterDisplayTauSeconds);
     const alpha = 1 - Math.exp(-Math.max(0, wallDt) / tau);
@@ -128,13 +131,14 @@ export class WaterMesh {
         }
       }
     }
-    this.applyDisplay(model, oceanCells, false);
+    this.applyDisplay(model, oceanCells, false, stormActive);
   }
 
   private applyDisplay(
     model: WaterStateView,
     oceanCells: ReadonlySet<number> | undefined,
     forceNormals: boolean,
+    stormActive = false,
   ): void {
     const pos = this.geometry.attributes.position as THREE.BufferAttribute;
     const cellW = this.worldSize / (this.width - 1);
@@ -144,6 +148,8 @@ export class WaterMesh {
     let i = 0;
     let wetSum = 0;
     let wetCount = 0;
+    // During a storm, hide the microfilm sheet; keep deeper pools readable.
+    const showEps = stormActive ? Math.max(this.dryEpsilon, 0.012) : this.dryEpsilon;
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const cell = z * this.width + x;
@@ -155,12 +161,15 @@ export class WaterMesh {
           continue;
         }
         const w = this.displayDepth[cell]!;
-        const wet = w > this.dryEpsilon;
+        const wet = w > showEps;
         const y = (wet ? h + w : h) + 0.04;
         pos.setXYZ(i, ox + x * cellW, y, oz + z * cellH);
 
         const t = wet ? Math.min(1, w * 2) : 0;
-        const a = wet ? 0.55 + 0.35 * t : 0;
+        let a = wet ? 0.55 + 0.35 * t : 0;
+        if (stormActive && wet && w < 0.04) {
+          a *= 0.35;
+        }
         this.waterColor.setXYZW(i, 0, 0, t, a);
         if (wet) {
           wetSum += y;

@@ -1,0 +1,13 @@
+{
+  "id": "R",
+  "title": "Rain-feel mid-path — shower cadence + precip cue",
+  "simLoop": "Climate-mean regimes deliver deterministic shower blocks (wetFraction < 1) with depth boosted so daily mean matches Slice F; no new Process (C-020 / C-004 / D-007).",
+  "gameLoop": "Rain starts and stops in pulses; wind-aligned streaks show delivery without an inspector or faucet read.",
+  "registerIds": ["C-020", "C-004", "D-007", "T-001", "T-006", "H-004"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/rainRegime.test.ts"],
+  "probes": ["orographic-wind", "regime-divergence"],
+  "fields": [],
+  "notebookSeed": "The shower passed; the hollow stayed dark where the clay held it.",
+  "tierO": "no owner-only question this closeout — D-007 clip self-check; full C-020 still Open — see docs/candidates/C-020-dossier.md"
+}

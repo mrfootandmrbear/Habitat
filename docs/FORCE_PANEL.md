@@ -21,7 +21,7 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 
 | Control | IDs | Semantics |
 |---|---|---|
-| **Rainfall** | arid / light / moderate / wet | **Mean climate precip intensity** — average depth the world lives under (every event when intensity > 0). Not a storm-duty on/off switch. Multiplier on `rainDepthPerEvent`; orography redistributes without changing the regime’s mean. |
+| **Rainfall** | arid / light / moderate / wet | **Climate archetype** — real-scale annual means (~150 / 550 / 1000 / 2200 mm/yr) plus spell cadence (C-020). Arid = rare desert storms; light/moderate = rain events; wet = monsoon block. Not the old cartoon rates that flooded the island. Orography places precip; no cell targeting. |
 | **Sea** | off / low / mid / high | Global sea datum (**C-015**). |
 | **Tide** | off / neap / mean / spring | MHW/MLW envelope half-range around sea (**C-016**). No per-event phase. |
 | **Wind** | calm / from west / east / south / north | Global wind vector; orographic mean rain (**C-020** lite) and shore exposure (**C-017**). |
@@ -46,6 +46,10 @@ then normalize over land so ΣP ≈ N_land · P₀ (mean tracks the dial; placem
 
 APIs: `rainDepthForRegime(regime, base)`, `windById(id)`, `setSeaLevel(level)`, `setTidalAmplitude(amp)` / `tideById(id)` — no `(x,z)` / cell index parameters. Conformance: cite **C-004**.
 
+## Slice R mid-path (C-020 / C-004)
+
+Regimes are **weather archetypes**, not a faucet: multi-day wet/dry cycles with one contiguous storm chunk on wet days. Cycle-mean depth matches the Slice F intensity calibration. Observer storm cue = soft overcast veil + streaks; shallow water sheet is muted during the event so rain reads as weather, not a blue mass (T-006).
+
 ## Full C-020
 
-Visible clouds and precip phase (rain/snow/sleet) remain later. Slice F does not claim **C-020** Locked.
+Visible clouds and precip phase (rain/snow/sleet) remain later. Slice F / Slice R do not claim **C-020** Locked.

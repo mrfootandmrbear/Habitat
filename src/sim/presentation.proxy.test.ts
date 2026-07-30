@@ -22,6 +22,7 @@ import {
   defaultTerrainRgb,
   intertidalEncodingDelta,
   salinityEncodingDelta,
+  substrateEncodingDelta,
 } from "../ui/terrainEncoding";
 import {
   occupantEncodingDelta,
@@ -219,6 +220,10 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       terrainEncodingDelta(fresh, salty, config.soilPorosity),
     ).toBeGreaterThan(0.08);
+  });
+
+  it("sand vs clay dry BASE clears the perceptual floor without inspector (C-009)", () => {
+    expect(substrateEncodingDelta()).toBeGreaterThan(0.12);
   });
 
   it("overseas shore fringe occupant encoding clears floor vs interior (C-019)", () => {

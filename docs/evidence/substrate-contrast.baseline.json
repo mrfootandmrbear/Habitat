@@ -1,0 +1,65 @@
+{
+  "scenario": "substrate-contrast",
+  "metrics": {
+    "sand.infiltrated": {
+      "value": 56.31999969482422,
+      "abs": 0.0001
+    },
+    "sand.erode": {
+      "value": -0.019822665035548644,
+      "abs": 0.00001
+    },
+    "sand.porosity": {
+      "value": 0.35,
+      "abs": 0
+    },
+    "sand.infilRate": {
+      "value": 0.22,
+      "abs": 0
+    },
+    "sand.erosionK": {
+      "value": 0.007,
+      "abs": 0
+    },
+    "clay.infiltrated": {
+      "value": 6.400000095367432,
+      "abs": 0.0001
+    },
+    "clay.erode": {
+      "value": -0.021618691339032856,
+      "abs": 0.00001
+    },
+    "clay.porosity": {
+      "value": 0.52,
+      "abs": 0
+    },
+    "clay.infilRate": {
+      "value": 0.025,
+      "abs": 0
+    },
+    "clay.erosionK": {
+      "value": 0.0012,
+      "abs": 0
+    },
+    "delta.infilDelta": {
+      "value": 49.91999959945679,
+      "abs": 0.0001
+    },
+    "delta.erodeDelta": {
+      "value": 0.0017960263034842126,
+      "abs": 0.00001
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.tableDriven": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 3534275977,
+      "abs": 0
+    }
+  }
+}
