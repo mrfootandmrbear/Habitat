@@ -137,7 +137,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow earns differently | **Done** — Tier-O Pass (batch-salt-overseas) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | **Done** — Tier-O Pass (batch-salt-overseas) |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done (machine). **D-007:** next is the owner clip self-check; later stubs (AUD-003 / Field Notebook / scenario campaign) blocked until the twenty-second clip exists.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** (deposit + rock) / **Slice R** Done (machine). **D-007:** next is the owner clip self-check; later stubs (AUD-003 / Field Notebook / scenario campaign) blocked until the twenty-second clip exists.
 
 ---
 

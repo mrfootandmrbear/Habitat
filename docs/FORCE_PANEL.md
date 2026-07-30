@@ -13,9 +13,9 @@ Primary information is **watching the world develop** — not overlays, charts, 
 | Axis | Player verb | Must never |
 |---|---|---|
 | **Force panel** | Set which forces act and how hard (whole preserve) | Target a cell, paint a storm, drag weather onto a hill; become a readout dashboard |
-| **Siting tools** | Shape land / mark prediction / authored ignition | Become the rainfall or sea-level control |
+| **Siting tools** | Geological setup (berm / dig / **deposit** sand·clay·rock) / mark prediction / authored ignition | Become the rainfall or sea-level control; paint ecosystems (N-001) |
 
-Geography decides *where* a regime bites. The player sets the mean; the island decides the pattern. Proof is in the place, not in the panel.
+Geography decides *where* a regime bites. The player sets the mean; the island decides the pattern. Proof is in the place, not in the panel. **Deposit** is geological setup (C-009) — raises ground and stamps substrate — not a force dial.
 
 ## Live dials (Slice F)
 

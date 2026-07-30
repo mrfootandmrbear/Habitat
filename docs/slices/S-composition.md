@@ -1,11 +1,11 @@
 # Slice S — Substrate contrast (C-009)
 
-**Status:** In progress  
+**Status:** Done (machine + owner legibility Pass; Lock still owner)  
 **Register:** **C-009** Open (hypothesis). T-004 data-driven properties. No new `Process` (D-007).
 
 ## Steal
 
-From Dust / falling-sand *personality* is rejected as invented rules (THESIS §2.2). What transfers: **real substrates under the same forces answer differently** — sand drains and slumps; clay holds. Property table, one law.
+From Dust: deposit matter as a **cause**; sand erodes, rock resists. Falling-sand *personality* rejected as invented rules (THESIS §2.2). Property table, one law. Carry-sphere / arcade erosion / lava→rock rejected.
 
 ## Ownership
 
@@ -23,27 +23,34 @@ soilWater and geomorphology **read** material and apply the existing laws. No pe
 | loam | 0 | Prior globals — default for probes |
 | sand | 1 | Higher infil + erosionK; lower porosity; warm dry BASE |
 | clay | 2 | Lower infil + erosionK; higher porosity; cool dry BASE |
+| rock | 3 | Near-zero infil + erosionK; very low porosity; gray dry BASE |
+
+Rock = rocky ground / lithosol — **not** derived bedrock (`elev − depth`).
+
+## Geological deposit tool
+
+Opening tools = geological setup (sandcastle). **Tool: deposit** + **Material** (sand / clay / rock): raises elev+depth like berm and stamps `soil.material` where mass lands. Berm/dig stay material-agnostic.
 
 ## Paired expectation
 
-Identical slope + storm; sand vs clay only:
+Identical slope + storm; material class only:
 
-1. Sand infiltrates more than clay (soilWater)
-2. Sand loses more elevation than clay under hillslope erosion (geomorphology)
+1. Sand infiltrates more than clay / rock (soilWater)
+2. Sand loses more elevation than clay / rock under hillslope erosion (geomorphology)
 
-Probe: `substrate-contrast`.
+Probes: `substrate-contrast` (sand vs clay fill); `substrate-deposit` (deposit API + sand vs rock).
 
 ## Encoding
 
-Default view dry BASE from `dryRgb` on the table. West sand / east clay mosaic on the island (`paintSubstrateMosaic`). Tier-P: `substrateEncodingDelta` > 0.12.
+Default view dry BASE from `dryRgb` on the table. West sand / east clay mosaic on the island (`paintSubstrateMosaic`). Tier-P: `substrateEncodingDelta` > 0.12 (min of sand↔clay and sand↔rock).
 
 ## Bans
 
-- Player paint-ecosystem / paint-wetland (N-001)
+- Player paint-ecosystem / paint-wetland (N-001) — deposits are causes, not outcomes
 - Second infiltration or erosion Process
 - Invented material with no real-world referent (C-011 / N-004)
-- Full rock/organic table this slice
+- Gravel / organic this pass; From Dust carry-sphere
 
 ## Clip verdict (D-007)
 
-Can you film berm-on-sand vs berm-on-clay under one rain regime with no inspector? Record in closeout.
+Can you film berm-on-sand vs berm-on-clay under one rain regime with no inspector? Owner legibility Pass 2026-07-30. Rain-feel remains a separate clip sentence (Slice R).

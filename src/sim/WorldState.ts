@@ -57,8 +57,8 @@ import {
 import { evaluateEt } from "./hydrology/evapotranspiration";
 import {
   MAX_SUBSTRATE_POROSITY,
-  SUBSTRATE_CLAY,
   SUBSTRATE_LOAM,
+  SUBSTRATE_ROCK,
   substrateProps,
 } from "./terrain/substrates";
 
@@ -1574,7 +1574,25 @@ export class WorldState {
     this.applyTerrainBrush(cx, cz, -amount);
   }
 
-  private applyTerrainBrush(cx: number, cz: number, delta: number): void {
+  /**
+   * Geological deposit (C-009): raise elev+depth like berm and stamp material
+   * only where mass actually lands (dh ≠ 0). Berm/dig stay material-agnostic.
+   */
+  depositSubstrate(
+    cx: number,
+    cz: number,
+    materialId: number,
+    amount: number = config.bermRaise,
+  ): void {
+    this.applyTerrainBrush(cx, cz, amount, materialId);
+  }
+
+  private applyTerrainBrush(
+    cx: number,
+    cz: number,
+    delta: number,
+    stampMaterial?: number,
+  ): void {
     // Berm/dig move mobile soil with the surface so bedrock = elev − depth
     // stays put (THESIS §2.1, snowflow steal / C-002 · GEO-002). Tier-M:
     // per-cell Δelev === Δdepth when clamps do not bind.
@@ -1628,6 +1646,9 @@ export class WorldState {
         this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
         this.soilDepth.data[i]! = nextDepth;
         this.terrain.data[i]! = nextElev;
+        if (stampMaterial !== undefined) {
+          this.soilMaterial.data[i]! = stampMaterial;
+        }
       }
     }
     this.markStructureDirty();
@@ -1689,7 +1710,7 @@ export class WorldState {
         // T-003 / C-009: substrate class — not reconstructible from rain alone.
         legacy: true,
         data: this.soilMaterial.data,
-        range: [0, SUBSTRATE_CLAY] as const,
+        range: [0, SUBSTRATE_ROCK] as const,
       },
       {
         id: "soil.depth",

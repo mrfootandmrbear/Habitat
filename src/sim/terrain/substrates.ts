@@ -2,17 +2,29 @@
  * Substrate property table (Slice S / C-009 / T-004).
  * One infiltration + erosion law; materials differ by data, not process forks.
  * Loam matches the pre-S global knobs so existing probes keep their baselines.
+ * Rock = rocky ground / lithosol — not derived bedrock (elev − depth).
  */
 
 /** Class ids stored in soil.material (Float32 raster). */
 export const SUBSTRATE_LOAM = 0;
 export const SUBSTRATE_SAND = 1;
 export const SUBSTRATE_CLAY = 2;
+export const SUBSTRATE_ROCK = 3;
 
 export type SubstrateId =
   | typeof SUBSTRATE_LOAM
   | typeof SUBSTRATE_SAND
-  | typeof SUBSTRATE_CLAY;
+  | typeof SUBSTRATE_CLAY
+  | typeof SUBSTRATE_ROCK;
+
+/** Player-depositable geological materials (loam stays the probe default). */
+export const DEPOSIT_MATERIALS = [
+  SUBSTRATE_SAND,
+  SUBSTRATE_CLAY,
+  SUBSTRATE_ROCK,
+] as const;
+
+export type DepositMaterialId = (typeof DEPOSIT_MATERIALS)[number];
 
 export type SubstrateProps = {
   id: SubstrateId;
@@ -28,7 +40,7 @@ export type SubstrateProps = {
 };
 
 /**
- * Data table — process code must look up, never hardcode sand/clay constants.
+ * Data table — process code must look up, never hardcode sand/clay/rock constants.
  * Loam = prior config.soilPorosity / infiltrationRate / soilErosionK.
  */
 export const SUBSTRATES: readonly SubstrateProps[] = [
@@ -57,6 +69,15 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     erosionK: 0.0012,
     // Cooler red-brown — holds and darkens dry.
     dryRgb: [0x6e / 255, 0x4a / 255, 0x3a / 255],
+  },
+  {
+    id: SUBSTRATE_ROCK,
+    name: "rock",
+    porosity: 0.08,
+    infiltrationRate: 0.002,
+    erosionK: 0.00015,
+    // Cool gray — sheds and resists.
+    dryRgb: [0x7a / 255, 0x78 / 255, 0x74 / 255],
   },
 ] as const;
 

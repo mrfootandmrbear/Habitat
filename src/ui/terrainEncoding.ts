@@ -9,6 +9,7 @@
 import {
   SUBSTRATE_CLAY,
   SUBSTRATE_LOAM,
+  SUBSTRATE_ROCK,
   SUBSTRATE_SAND,
   substrateProps,
 } from "../sim/terrain/substrates";
@@ -133,12 +134,12 @@ export function salinityEncodingDelta(
 }
 
 /**
- * Color distance between dry sand and dry clay under the same moisture/cover
- * (Tier-P floor for C-009 default-view substrate contrast).
+ * Color distance between dry sand and dry rock under the same moisture/cover
+ * (Tier-P floor for C-009 default-view substrate contrast, including rock).
  */
 export function substrateEncodingDelta(): number {
   const porosity = 0.4;
-  return terrainEncodingDelta(
+  const sandClay = terrainEncodingDelta(
     {
       moisture: 0.05,
       cover: 0,
@@ -151,4 +152,18 @@ export function substrateEncodingDelta(): number {
     },
     porosity,
   );
+  const sandRock = terrainEncodingDelta(
+    {
+      moisture: 0.05,
+      cover: 0,
+      material: SUBSTRATE_SAND,
+    },
+    {
+      moisture: 0.05,
+      cover: 0,
+      material: SUBSTRATE_ROCK,
+    },
+    porosity,
+  );
+  return Math.min(sandClay, sandRock);
 }

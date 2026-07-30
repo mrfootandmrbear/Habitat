@@ -239,4 +239,10 @@ export type InspectorLayer =
   | "salinity";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
-export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";
+export type SitingTool =
+  | "none"
+  | "berm"
+  | "dig"
+  | "deposit"
+  | "predict"
+  | "ignite";

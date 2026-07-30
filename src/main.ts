@@ -5,7 +5,7 @@ import { WorldState } from "./sim/WorldState";
 import {
   generateIsland,
 } from "./sim/terrain/generateIsland";
-import { paintSubstrateMosaic } from "./sim/terrain/substrates";
+import { paintSubstrateMosaic, SUBSTRATE_SAND, type DepositMaterialId } from "./sim/terrain/substrates";
 import {
   PredictionSession,
   snapshotWaterReader,
@@ -150,6 +150,7 @@ let tideId: TideId = "off";
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
+let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
 let cutawayCell: { x: number; z: number } | null = null;
@@ -194,6 +195,7 @@ const ui = mountControls(
     timeRate,
     inspector,
     sitingTool,
+    depositMaterial,
   },
   {
     onRainRegime: (id) => {
@@ -287,10 +289,19 @@ const ui = mountControls(
         ui.setHint(
           "Yellow cell = mark · Commit → set Rain regime → Compare",
         );
+      } else if (tool === "deposit") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Deposit = geological dump — raises ground and sets sand/clay/rock",
+        );
       } else {
         sitingCursor.setVisible(true);
         ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
       }
+    },
+    onDepositMaterial: (id) => {
+      depositMaterial = id;
+      ui.setDepositMaterial(id);
     },
     onCommitPrediction: () => {
       if (prediction.commit(steps)) {
@@ -406,6 +417,10 @@ canvas.addEventListener("pointerup", (e) => {
   } else if (sitingTool === "dig") {
     editUndo.pushCheckpoint(world);
     world.digChannel(cell.x, cell.z);
+    ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "deposit") {
+    editUndo.pushCheckpoint(world);
+    world.depositSubstrate(cell.x, cell.z, depositMaterial);
     ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "ignite") {
     // Authored ignition only (C-003 Open) — pulse cause, not stochastic (A-002 / A-005).
@@ -607,9 +622,11 @@ function frame(now: number): void {
         ? "raise berm"
         : sitingTool === "dig"
           ? "dig channel"
-          : sitingTool === "ignite"
-            ? "ignite"
-            : "predict";
+          : sitingTool === "deposit"
+            ? "deposit"
+            : sitingTool === "ignite"
+              ? "ignite"
+              : "predict";
   ui.setStatus(
     `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +

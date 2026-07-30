@@ -27,6 +27,7 @@ import {
 } from "./deepTime";
 import {
   SUBSTRATE_CLAY,
+  SUBSTRATE_ROCK,
   SUBSTRATE_SAND,
   substrateProps,
 } from "../terrain/substrates";
@@ -2244,6 +2245,144 @@ export function probeSubstrateContrast(): ProbeResult {
 }
 
 /**
+ * C-009 geological deposit — sand vs rock ridges under identical storm + slope.
+ * Deposit raises elev+depth and stamps material; rock resists washout vs sand.
+ */
+export function probeSubstrateDeposit(): ProbeResult {
+  const w = 16;
+  const h = 16;
+
+  const ramp = (): Grid2D => {
+    const t = new Grid2D(w, h);
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        t.set(x, z, (w - 1 - x) * 0.55 + z * 0.02);
+      }
+    }
+    return t;
+  };
+
+  const makeDeposited = (material: number) => {
+    const world = new WorldState(ramp(), { closedBoundary: true });
+    world.soilMaterial.fill(0);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.defaultSoilDepthMeters);
+    world.soilMoisture.fill(0);
+    world.depositSubstrate(8, 8, material, 1.5);
+    const stampedAtRidge = world.getSoilMaterial(8, 8);
+    // Whole-slope class so infil/erosion laws diverge clearly (GEO-002).
+    world.soilMaterial.fill(material);
+    world.runVegetationStep(1);
+    world.runSoilWaterStep(1);
+    return { world, stampedAtRidge };
+  };
+
+  const sandA = makeDeposited(SUBSTRATE_SAND);
+  const sandB = makeDeposited(SUBSTRATE_SAND);
+  const rock = makeDeposited(SUBSTRATE_ROCK);
+
+  const replayMatch =
+    sandA.world.stateHash() === sandB.world.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("substrate-deposit: sand replay hash mismatch");
+  }
+
+  const stamped =
+    sandA.stampedAtRidge === SUBSTRATE_SAND &&
+    rock.stampedAtRidge === SUBSTRATE_ROCK
+      ? 1
+      : 0;
+  if (stamped !== 1) {
+    throw new Error("substrate-deposit: deposit did not stamp material");
+  }
+
+  const soak = (world: WorldState) => {
+    world.water.fill(0.35);
+    world.infiltrationLedger = 0;
+    world.runSoilWaterStep(1);
+    return world.infiltrationLedger;
+  };
+
+  const sandInfil = soak(sandA.world);
+  const rockInfil = soak(rock.world);
+
+  const meanChannelLoss = (world: WorldState): number => {
+    const elev0 = Float32Array.from(world.terrain.data);
+    for (let n = 0; n < 24; n++) world.runGeomorphologyStep(1);
+    world.ensureStructureFresh();
+    const acc = world.flowAccumulation;
+    if (!acc) return 0;
+    const aMin = config.erosionMinAccumulation;
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < elev0.length; i++) {
+      if (acc[i]! < aMin) continue;
+      sum += elev0[i]! - world.terrain.data[i]!;
+      count += 1;
+    }
+    return count > 0 ? sum / count : 0;
+  };
+
+  const sandErode = meanChannelLoss(makeDeposited(SUBSTRATE_SAND).world);
+  const rockErode = meanChannelLoss(makeDeposited(SUBSTRATE_ROCK).world);
+
+  const sandProps = substrateProps(SUBSTRATE_SAND);
+  const rockProps = substrateProps(SUBSTRATE_ROCK);
+  const tableDriven =
+    sandProps.infiltrationRate > rockProps.infiltrationRate &&
+    sandProps.erosionK > rockProps.erosionK
+      ? 1
+      : 0;
+
+  if (!(sandInfil > rockInfil)) {
+    throw new Error(
+      `substrate-deposit: expected sand infil (${sandInfil}) > rock (${rockInfil})`,
+    );
+  }
+  if (!(sandErode > rockErode)) {
+    throw new Error(
+      `substrate-deposit: expected sand channel loss (${sandErode}) > rock (${rockErode})`,
+    );
+  }
+  if (tableDriven !== 1) {
+    throw new Error("substrate-deposit: substrate table ordering broken");
+  }
+
+  return {
+    scenario: "substrate-deposit",
+    records: [
+      {
+        label: "sand",
+        infiltrated: sandInfil,
+        erode: sandErode,
+        porosity: sandProps.porosity,
+        infilRate: sandProps.infiltrationRate,
+        erosionK: sandProps.erosionK,
+        stamped: sandA.stampedAtRidge,
+      },
+      {
+        label: "rock",
+        infiltrated: rockInfil,
+        erode: rockErode,
+        porosity: rockProps.porosity,
+        infilRate: rockProps.infiltrationRate,
+        erosionK: rockProps.erosionK,
+        stamped: rock.stampedAtRidge,
+      },
+      {
+        label: "delta",
+        infilDelta: sandInfil - rockInfil,
+        erodeDelta: sandErode - rockErode,
+        replayMatch,
+        tableDriven,
+        stamped,
+        hashN: Number.parseInt(sandA.world.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice 21 / C-019 — overseas arrival: small vs large island under identical
  * regimes; isolation monotonicity; not mainland-perimeter rain.
  */
@@ -2427,6 +2566,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "salinity-arrival": probeSalinityArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
+  "substrate-deposit": probeSubstrateDeposit,
 };
 
 export function runProbe(name: string): ProbeResult {

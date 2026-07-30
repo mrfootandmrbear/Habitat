@@ -99,12 +99,12 @@ Summary only — do not reopen unless fixing regressions.
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
-| **S** | Substrate contrast (**C-009**) | Sand vs clay under one storm | `substrates.ts`, `substrate-contrast` | **Done** — owner legibility Pass 2026-07-30 (Lock still owner) |
+| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner legibility Pass 2026-07-30; deposit+rock machine green (Lock still owner) |
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — agent (full C-020 Open) |
 
 **Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** audio wired (C-014 Open). C-004 stewardship reading still Open.
 
-**Next constrained by D-007.** **Slice S** owner legibility **Pass** (two surfaces). **Slice R** machine green. Remaining clip question is rain-feel (weather vs faucet) — one sentence, no ask gate. Later stubs remain **gated** until the full clip exists. Full C-020 clouds/phase still later. C-009 Lock still owner.
+**Next constrained by D-007.** **Slice S** owner legibility **Pass**; geological **deposit** tool + rock table machine green. **Slice R** machine green. Remaining clip question is rain-feel (weather vs faucet) — one sentence, no ask gate. Later stubs remain **gated** until the full clip exists. Full C-020 clouds/phase still later. C-009 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -620,11 +620,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 21 Done; displaced-mass closeout (§4.1) already green.
 
-- [x] Composition note `docs/slices/S-composition.md`; material table `src/sim/terrain/substrates.ts` (sand, clay)
+- [x] Composition note `docs/slices/S-composition.md`; material table `src/sim/terrain/substrates.ts` (sand, clay, rock)
 - [x] `soil.material` (or equivalent class raster) + properties drive infil / porosity / erodibility — one law, data-driven (T-004)
 - [x] Default island seed paints a readable sand/clay mosaic; encoding Tier-P without inspector
-- [x] Probe `substrate-contrast`; `docs/slices/S.json`
-- [x] C-009 dossier (owner legibility half — Lock still owner)
+- [x] Probe `substrate-contrast`; geological **deposit** tool + probe `substrate-deposit`; `docs/slices/S.json`
+- [x] C-009 dossier (owner legibility half — Lock still owner; deposit framing vs N-001)
 - [x] **Next-but-one:** C-020 rain-feel mid-path (§4.18) — still no cloud `Process`
 
 ---
@@ -653,7 +653,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 | **Blocked by D-007** |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | **Blocked by D-007** (+ C-009 for C-010) |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done (machine). C-018 / C-019 Tier-O **Pass**. **Next: D-007 clip self-check** — if Pass, later stubs may open; if Hold, retune presentation (not a new Process).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** (deposit + rock) / **Slice R** Done (machine). C-018 / C-019 Tier-O **Pass**. **Next: D-007 clip self-check** — if Pass, later stubs may open; if Hold, retune presentation (not a new Process).
 
 ---
 

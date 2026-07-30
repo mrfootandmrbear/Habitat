@@ -1,0 +1,77 @@
+{
+  "scenario": "substrate-deposit",
+  "metrics": {
+    "sand.infiltrated": {
+      "value": 56.31999969482422,
+      "abs": 0.0001
+    },
+    "sand.erode": {
+      "value": -0.018547205755021424,
+      "abs": 0.00001
+    },
+    "sand.porosity": {
+      "value": 0.35,
+      "abs": 0
+    },
+    "sand.infilRate": {
+      "value": 0.22,
+      "abs": 0
+    },
+    "sand.erosionK": {
+      "value": 0.007,
+      "abs": 0
+    },
+    "sand.stamped": {
+      "value": 1,
+      "abs": 0
+    },
+    "rock.infiltrated": {
+      "value": 0.5120000243186951,
+      "abs": 0.0001
+    },
+    "rock.erode": {
+      "value": -0.021348217269405723,
+      "abs": 0.00001
+    },
+    "rock.porosity": {
+      "value": 0.08,
+      "abs": 0
+    },
+    "rock.infilRate": {
+      "value": 0.002,
+      "abs": 0
+    },
+    "rock.erosionK": {
+      "value": 0.00015,
+      "abs": 0
+    },
+    "rock.stamped": {
+      "value": 3,
+      "abs": 0
+    },
+    "delta.infilDelta": {
+      "value": 55.807999670505524,
+      "abs": 0.0001
+    },
+    "delta.erodeDelta": {
+      "value": 0.002801011514384298,
+      "abs": 0.00001
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.tableDriven": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.stamped": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 3348606572,
+      "abs": 0
+    }
+  }
+}

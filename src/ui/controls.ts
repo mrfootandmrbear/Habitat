@@ -15,6 +15,12 @@ import {
   WIND_REGIMES,
   type WindId,
 } from "../sim/climate/windRegime";
+import {
+  SUBSTRATE_CLAY,
+  SUBSTRATE_ROCK,
+  SUBSTRATE_SAND,
+  type DepositMaterialId,
+} from "../sim/terrain/substrates";
 
 export type TimeRate = "pause" | "1x" | "4x" | "16x";
 
@@ -49,14 +55,21 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "salinity", label: "Inspect: soil salinity" },
 ];
 
-/** Cause tools (A-005) + predict marks (P-006). */
+/** Cause tools (A-005) + predict marks (P-006). Geological deposit = C-009. */
 const SITING: { id: SitingTool; label: string }[] = [
   { id: "none", label: "Tool: look" },
   { id: "predict", label: "Tool: predict wet" },
   { id: "berm", label: "Tool: raise berm" },
   { id: "dig", label: "Tool: dig channel" },
+  { id: "deposit", label: "Tool: deposit" },
   { id: "ignite", label: "Tool: ignite (authored)" },
 ];
+
+const MATERIAL_LABEL: Record<DepositMaterialId, string> = {
+  [SUBSTRATE_SAND]: "Material: sand",
+  [SUBSTRATE_CLAY]: "Material: clay",
+  [SUBSTRATE_ROCK]: "Material: rock",
+};
 
 export function mountControls(
   parent: HTMLElement,
@@ -68,6 +81,7 @@ export function mountControls(
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
+    depositMaterial: DepositMaterialId;
   },
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
@@ -78,6 +92,7 @@ export function mountControls(
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
+    onDepositMaterial: (id: DepositMaterialId) => void;
     onCommitPrediction: () => void;
     onComparePrediction: () => void;
     onClearPrediction: () => void;
@@ -95,6 +110,7 @@ export function mountControls(
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
+  setDepositMaterial: (id: DepositMaterialId) => void;
   setStatus: (text: string) => void;
   setHint: (text: string) => void;
   setCutaway: (text: string) => void;
@@ -261,6 +277,25 @@ export function mountControls(
     handlers.onSitingTool(sitingSelect.value as SitingTool);
   });
 
+  const materialSelect = document.createElement("select");
+  materialSelect.id = "deposit-material";
+  materialSelect.setAttribute(
+    "aria-label",
+    "Deposit material (C-009 geological setup)",
+  );
+  for (const id of [SUBSTRATE_SAND, SUBSTRATE_CLAY, SUBSTRATE_ROCK] as const) {
+    const opt = document.createElement("option");
+    opt.value = String(id);
+    opt.textContent = MATERIAL_LABEL[id];
+    materialSelect.appendChild(opt);
+  }
+  materialSelect.value = String(initial.depositMaterial);
+  materialSelect.addEventListener("change", () => {
+    handlers.onDepositMaterial(
+      Number(materialSelect.value) as DepositMaterialId,
+    );
+  });
+
   const predictGroup = document.createElement("div");
   predictGroup.id = "predict-actions";
   predictGroup.setAttribute("role", "group");
@@ -320,6 +355,7 @@ export function mountControls(
     undoBtn,
     timeGroup,
     sitingSelect,
+    materialSelect,
     predictGroup,
     inspectorSelect,
     hint,
@@ -347,6 +383,9 @@ export function mountControls(
     },
     setSitingTool: (tool) => {
       sitingSelect.value = tool;
+    },
+    setDepositMaterial: (id) => {
+      materialSelect.value = String(id);
     },
     setStatus: (text: string) => {
       status.textContent = text;
