@@ -34,12 +34,15 @@ export class FlowCueMesh {
       new THREE.BufferAttribute(positions, 3),
     );
     const mat = new THREE.LineBasicMaterial({
-      color: 0x7ec8e8,
-      transparent: true,
-      opacity: 0.65,
+      color: 0x5a9bb8,
+      // Opaque segments — transparent lines strobed against water when orbiting.
+      transparent: false,
+      depthWrite: false,
+      depthTest: true,
     });
     this.object = new THREE.LineSegments(this.geometry, mat);
     this.object.name = "flowCue";
+    this.object.renderOrder = 2;
     this.object.frustumCulled = false;
   }
 

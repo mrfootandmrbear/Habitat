@@ -29,11 +29,14 @@ export function createExtentCage(
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   const mat = new THREE.LineBasicMaterial({
-    color: 0x5a7a68,
-    transparent: true,
-    opacity: 0.55,
+    // Opaque so the cage stays out of the transparent sort list (orbit flash).
+    color: 0x3d5548,
+    transparent: false,
+    depthWrite: false,
+    depthTest: true,
   });
   const lines = new THREE.LineSegments(geo, mat);
   lines.name = "extentCage";
+  lines.renderOrder = -1;
   return lines;
 }

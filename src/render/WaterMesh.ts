@@ -61,12 +61,18 @@ export class WaterMesh {
     this.waterColor = new THREE.BufferAttribute(new Float32Array(count * 4), 4);
     this.geometry.setAttribute("waterColor", this.waterColor);
 
+    // depthWrite + FrontSide: transparent DoubleSide + depthWrite:false was
+    // re-sorting against terrain/cage every camera move (orbit flash).
     const material = new THREE.ShaderMaterial({
       vertexShader: waterVertex,
       fragmentShader: waterFragment,
       transparent: true,
-      depthWrite: false,
-      side: THREE.DoubleSide,
+      depthWrite: true,
+      depthTest: true,
+      side: THREE.FrontSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
     });
 
     this.mesh = new THREE.Mesh(this.geometry, material);
@@ -80,15 +86,15 @@ export class WaterMesh {
     const cellH = this.worldSize / (this.height - 1);
     const ox = -this.worldSize / 2;
     const oz = -this.worldSize / 2;
-
     let i = 0;
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const h = model.getTerrainHeight(x, z);
         const w = model.getWaterDepth(x, z);
         const wet = w > this.dryEpsilon;
-        const y = wet ? h + w : h;
-        pos.setXYZ(i, ox + x * cellW, y + 0.02, oz + z * cellH);
+        // Slight lift above terrain; dry verts are discarded in-shader.
+        const y = (wet ? h + w : h) + 0.04;
+        pos.setXYZ(i, ox + x * cellW, y, oz + z * cellH);
 
         const t = wet ? Math.min(1, w * 2) : 0;
         const a = wet ? 0.55 + 0.35 * t : 0;

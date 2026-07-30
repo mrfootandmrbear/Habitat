@@ -37,6 +37,11 @@ export class SitingCursor {
       transparent: true,
       opacity: 0.4,
       depthTest: true,
+      depthWrite: false,
+      // Stable against terrain while the camera moves under a siting tool.
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
     });
     this.box = new THREE.Mesh(geo, mat);
     this.box.visible = false;
