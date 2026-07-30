@@ -1,12 +1,16 @@
 /**
- * Arrival / establishment composition (Slice 12).
+ * Arrival / establishment composition (Slice 12 + Slice 21 overseas).
  * Rule: docs/slices/12-composition.md — NATURAL_PROCESS_MATH seed kernel × Liebig HSI.
+ * Island: docs/slices/21-composition.md — over-water kernel × S_elig = f(A,d) (C-019).
  *
  * Continuous deterministic establishment (C-003 Open forbids stochastic arrivals).
  * Zero suitability blocks establishment (C-007 arrival gate).
  */
 
 import { clamp01 } from "./hsiComposition";
+
+const DX4 = [1, -1, 0, 0] as const;
+const DZ4 = [0, 0, 1, -1] as const;
 
 /** Distance in cell units from (x,z) to the nearest preserve perimeter cell. */
 export function distanceToPreserveEdge(
@@ -22,7 +26,7 @@ export function distanceToPreserveEdge(
 
 /**
  * Isotropic exponential seed pressure from a fixed external perimeter source.
- * Highest at the edge, decays toward the interior.
+ * Highest at the edge, decays toward the interior. Mainland worlds only.
  */
 export function seedPressureAt(
   x: number,
@@ -35,6 +39,84 @@ export function seedPressureAt(
   const d = distanceToPreserveEdge(x, z, width, height);
   const mean = Math.max(seedMeanDistance, 1e-6);
   return seedSourceStrength * Math.exp(-d / mean);
+}
+
+/**
+ * MacArthur–Wilson-shaped eligible richness multiplier (C-019).
+ * Monotone in area ↑ and isolation ↓; sizes pressure, does not invent types.
+ */
+export function eligibleRichness(args: {
+  landCells: number;
+  isolationCells: number;
+  areaRefCells: number;
+  isolationMeanCells: number;
+  sMin: number;
+  sMax: number;
+}): number {
+  const A = Math.max(0, args.landCells);
+  const Aref = Math.max(1e-6, args.areaRefCells);
+  const d = Math.max(0, args.isolationCells);
+  const ld = Math.max(1e-6, args.isolationMeanCells);
+  const sMin = clamp01(args.sMin);
+  const sMax = Math.max(sMin, Math.min(1, args.sMax));
+  const areaFactor = A / (A + Aref);
+  const isolationFactor = Math.exp(-d / ld);
+  return sMin + (sMax - sMin) * areaFactor * isolationFactor;
+}
+
+/**
+ * Shore-distance field (cells). Shoreline = 0; BFS inland on land only.
+ * Ocean cells remain +Infinity (caller skips them).
+ */
+export function shoreDistanceField(
+  width: number,
+  height: number,
+  oceanCells: ReadonlySet<number>,
+  shorelineCells: ReadonlySet<number>,
+): Float32Array {
+  const n = width * height;
+  const dist = new Float32Array(n);
+  dist.fill(Number.POSITIVE_INFINITY);
+  const queue: number[] = [];
+  for (const i of shorelineCells) {
+    if (oceanCells.has(i)) continue;
+    dist[i] = 0;
+    queue.push(i);
+  }
+  let head = 0;
+  while (head < queue.length) {
+    const i = queue[head++]!;
+    const x = i % width;
+    const z = (i / width) | 0;
+    const d0 = dist[i]!;
+    for (let dir = 0; dir < 4; dir++) {
+      const nx = x + DX4[dir]!;
+      const nz = z + DZ4[dir]!;
+      if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+      const ni = nz * width + nx;
+      if (oceanCells.has(ni)) continue;
+      const nd = d0 + 1;
+      if (nd < dist[ni]!) {
+        dist[ni] = nd;
+        queue.push(ni);
+      }
+    }
+  }
+  return dist;
+}
+
+/**
+ * Overseas seed pressure at a land cell: strength · exp(−distToShore / λ).
+ * Ocean / non-finite distance → 0.
+ */
+export function overseasSeedPressure(
+  distToShore: number,
+  overseasStrength: number,
+  overseasMeanDistance: number,
+): number {
+  if (!Number.isFinite(distToShore) || distToShore < 0) return 0;
+  const mean = Math.max(overseasMeanDistance, 1e-6);
+  return Math.max(0, overseasStrength) * Math.exp(-distToShore / mean);
 }
 
 /**

@@ -16,7 +16,7 @@
 | Wave exposure / fetch | **Derived** then dial wind (shipped; Slice 18) | Exposure from fetch × wind; shoreline change via geomorphology only (**C-017**). |
 | Longshore / beaches | **Derived** deposit (shipped; Slice 19) | `shore.longshore` tendency + lee deposit budget inside geomorphology (**C-017**). |
 | Salinity / salt spray | **Deferred** (20) | First everyday **C-010** instance (**C-018**). |
-| Overseas seed pressure | **Deferred** (21) | Island biogeography (**C-019**). |
+| Overseas seed pressure | **Derived** (shipped; Slice 21) | Shore-biased overseas kernel × \(S_{\text{elig}}=f(A,d)\) on island worlds (**C-019**). Mainland perimeter rain retained when seaLevel absent. |
 | Clouds → rain/snow/sleet | **Deferred** (full **C-020**) | Slice F lite is orographic mean only; phase + visible clouds later. |
 | Season / climate regime (beyond precip mean) | **Deferred** | Unfiled beyond candidates; mean rainfall is the precip half. |
 | Storm surge | **Deferred** | Unfiled gap — do not invent a C-id here. |

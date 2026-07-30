@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** Done. Next: **Slice 21** island biogeography (§4.16). Maritime candidates C-015…C-019 Open (C-018 machine half discharged); **C-020** lite via F (full clouds later). W-001 supersession still owner.
+Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Maritime candidates C-016…C-019 Open (machine halves discharged; owner dossiers); **C-020** lite via F (full clouds later). W-001 supersession still owner.
 
 ## Cursor Cloud specific instructions
 

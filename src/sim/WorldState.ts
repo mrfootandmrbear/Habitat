@@ -32,10 +32,13 @@ import {
   mixTowardSeawater,
 } from "./habitat/salinityComposition";
 import {
+  eligibleRichness,
   establishmentProbability,
   nextHerbBiomass,
+  overseasSeedPressure,
   physicalCoverFrom,
   seedPressureAt,
+  shoreDistanceField,
 } from "./habitat/arrivalComposition";
 import {
   computeD8Accumulation,
@@ -180,6 +183,8 @@ export class WorldState {
   private readonly closedBoundary: boolean;
   /** Global sea datum (m). Undefined = legacy closed / perimeter mode. */
   private seaLevelMeters: number | undefined;
+  /** Authored isolation (cells) for overseas S_elig — C-019. */
+  private isolationCells: number;
   /** Half-range tidal amplitude (m) around sea level — C-016 envelope. */
   private tidalAmplitudeMeters = 0;
   /** Global wind components (unit-ish) — C-004 / C-017 force dial. */
@@ -246,6 +251,11 @@ export class WorldState {
       /** Global wind (C-004 / C-017) — no cell targeting. */
       windUx?: number;
       windUz?: number;
+      /**
+       * Authored island isolation in cells (C-019). Used when seaLevel is set.
+       * Larger → lower eligible richness / overseas seed pressure.
+       */
+      islandIsolation?: number;
     },
   ) {
     this.width = terrain.width;
@@ -319,6 +329,12 @@ export class WorldState {
       options?.windUz !== undefined && Number.isFinite(options.windUz)
         ? options.windUz
         : 0;
+    this.isolationCells =
+      options?.islandIsolation !== undefined &&
+      Number.isFinite(options.islandIsolation) &&
+      options.islandIsolation >= 0
+        ? options.islandIsolation
+        : config.islandIsolationDefaultCells;
 
     this.registry = new FieldRegistry();
     this.registerFields();
@@ -380,6 +396,23 @@ export class WorldState {
     return this.seaLevelMeters;
   }
 
+  /** Authored isolation (cells) for overseas eligible richness (C-019). */
+  get islandIsolation(): number {
+    return this.isolationCells;
+  }
+
+  /**
+   * Set authored isolation (C-019). No-op on NaN / negative.
+   * Recomputes overseas seed pressure when sea level is set.
+   */
+  setIslandIsolation(cells: number): void {
+    if (!Number.isFinite(cells) || cells < 0) return;
+    this.isolationCells = cells;
+    if (this.seaLevelMeters !== undefined) {
+      this.runDispersalStep(1);
+    }
+  }
+
   /**
    * Set global sea level (C-015 force dial — no cell targeting).
    * Pass `undefined` to clear and restore legacy perimeter outlets.
@@ -389,6 +422,7 @@ export class WorldState {
       level !== undefined && Number.isFinite(level) ? level : undefined;
     this.markStructureDirty();
     this.ensureStructureFresh();
+    this.runDispersalStep(1);
   }
 
   /** Current tidal half-range amplitude (m). 0 when envelope is off. */
@@ -1020,31 +1054,54 @@ export class WorldState {
   }
 
   /**
-   * Annual seed bank from fixed preserve-perimeter source (Slice 12 / C-007).
-   * Also snapshots establishment probability from current Liebig HSI.
+   * Annual seed bank (Slice 12 / C-007; Slice 21 / C-019).
+   * Mainland: fixed preserve-perimeter source.
+   * Island (seaLevel set): overseas shore-biased kernel × S_elig(A,d).
+   * Snapshots establishment probability from current Liebig HSI.
    */
   runDispersalStep(_dt: number): void {
     const seed = this.herbSeedBank.data;
     const est = this.herbEstablishment.data;
     const hsi = this.habitatSuitability.data;
-    const strength = config.seedSourceStrength;
-    const mean = config.seedMeanDistanceCells;
     const scale = config.herbEstablishmentScale;
 
-    for (let z = 0; z < this.height; z++) {
-      for (let x = 0; x < this.width; x++) {
-        const i = z * this.width + x;
-        const pressure = seedPressureAt(
-          x,
-          z,
-          this.width,
-          this.height,
-          strength,
-          mean,
-        );
-        seed[i] = pressure;
-        est[i] = establishmentProbability(pressure, hsi[i]!, scale);
+    if (this.seaLevelMeters === undefined) {
+      const strength = config.seedSourceStrength;
+      const mean = config.seedMeanDistanceCells;
+      for (let z = 0; z < this.height; z++) {
+        for (let x = 0; x < this.width; x++) {
+          const i = z * this.width + x;
+          const pressure = seedPressureAt(
+            x,
+            z,
+            this.width,
+            this.height,
+            strength,
+            mean,
+          );
+          seed[i] = pressure;
+          est[i] = establishmentProbability(pressure, hsi[i]!, scale);
+        }
       }
+      return;
+    }
+
+    const ocean = this.oceanCells;
+    const shore = computeShorelineCells(this.width, this.height, ocean);
+    const dist = shoreDistanceField(this.width, this.height, ocean, shore);
+    const strength =
+      config.overseasSeedBase * this.eligibleRichness();
+    const mean = config.overseasMeanDistanceCells;
+
+    for (let i = 0; i < seed.length; i++) {
+      if (ocean.has(i)) {
+        seed[i] = 0;
+        est[i] = 0;
+        continue;
+      }
+      const pressure = overseasSeedPressure(dist[i]!, strength, mean);
+      seed[i] = pressure;
+      est[i] = establishmentProbability(pressure, hsi[i]!, scale);
     }
   }
 
@@ -1354,6 +1411,27 @@ export class WorldState {
   /** Count of ocean cells under current sea level (0 if unset). */
   oceanCellCount(): number {
     return this.oceanCells.size;
+  }
+
+  /** Land cell count (total − ocean). Full grid when sea level absent. */
+  landCellCount(): number {
+    return this.width * this.height - this.oceanCells.size;
+  }
+
+  /**
+   * Eligible richness multiplier S_elig = f(A, d) when sea level is set (C-019).
+   * Mainland worlds return 1 (perimeter rain is not scaled by biogeography).
+   */
+  eligibleRichness(): number {
+    if (this.seaLevelMeters === undefined) return 1;
+    return eligibleRichness({
+      landCells: this.landCellCount(),
+      isolationCells: this.isolationCells,
+      areaRefCells: config.eligibleAreaRefCells,
+      isolationMeanCells: config.eligibleIsolationMeanCells,
+      sMin: config.eligibleRichnessMin,
+      sMax: config.eligibleRichnessMax,
+    });
   }
 
   /** Land cells adjacent to ocean — shoreline length proxy (C-015 / C-012). */

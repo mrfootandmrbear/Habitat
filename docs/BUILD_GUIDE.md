@@ -98,12 +98,13 @@ Summary only — do not reopen unless fixing regressions.
 | **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore retreats via geomorphology | `shoreExposure`, `shore-exposure` | **Done** — agent; Tier-O shore-legibility batched |
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — agent; Tier-O shore-legibility batched |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — agent; C-018 Open (owner S-008 batched) |
+| **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — agent; C-019 Open (owner sparse-earned batched) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** Done (agent). Next: Slice **21** island biogeography (§4.16). Island is the default playable world. C-016 / C-017 / C-018 Open pending owner halves. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done (agent). Next: later stubs — AUD-003 recovery ambient / Field Notebook UI / scenario campaign (pick when gate opens). Island is the default playable world. C-016 / C-017 / C-018 / C-019 Open pending owner halves. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); 21 overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
-**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked. Slice 20 acted on coastal salinity / freshening → `soil.salinity` + `salinity-arrival` (**C-018**); rejected player cleanup and a second salt ledger.
+**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked. Slice 21 acted on MacArthur–Wilson + new-island succession → overseas kernel + `island-arrival` (**C-019**); rejected species simulator, equilibrium paint, perimeter-as-island-default.
 
 ---
 
@@ -581,7 +582,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.16 Slice 21 — Island biogeography *(stub; after Slice 20)*
+### 4.16 Slice 21 — Island biogeography *(Done — agent; C-019 owner half outstanding)*
 
 **Why this exists.** Slice 12's mainland-perimeter seed rain is wrong on an island — seeds arrive over water, sparsely, and richness should track area and isolation (**C-019**). Closes the maritime arrival story after salt gates who can establish (**C-018**).
 
@@ -595,10 +596,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 20 (preferably after C-018 machine half — discharged).
 
-- [ ] Composition note; over-water dispersal kernel + area/isolation eligibility
-- [ ] Tier-M: paired small/large island under identical regimes; hash-stable (T-001); island worlds must not use perimeter mainland rain as sole source
-- [ ] Probe `island-arrival` (name TBD); `docs/slices/21.json`
-- [ ] **Next-but-one:** AUD-003 recovery ambient / Field Notebook UI / scenario campaign — pick when gate opens (see Later stubs)
+- [x] Composition note; over-water dispersal kernel + area/isolation eligibility
+- [x] Tier-M: paired small/large island under identical regimes; hash-stable (T-001); island worlds must not use perimeter mainland rain as sole source
+- [x] Probe `island-arrival`; `docs/slices/21.json`
+- [x] C-019 dossier (owner sparse-earned feel outstanding)
+- [x] **Next-but-one:** AUD-003 recovery ambient / Field Notebook UI / scenario campaign — pick when gate opens (see Later stubs)
 
 ---
 
@@ -610,7 +612,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** / **20** Done. Next: Slice **21** island biogeography (§4.16). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** / **20** / **21** Done. Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

@@ -1,7 +1,7 @@
 import { config } from "../../config";
 import { Grid2D } from "../Grid2D";
 import { WorldState } from "../WorldState";
-import { totalWaterVolume } from "../hydrology/fluxStep";
+import { computeShorelineCells, totalWaterVolume } from "../hydrology/fluxStep";
 import { generateMountain } from "../terrain/generateMountain";
 import {
   rainDepthForRegime,
@@ -41,6 +41,7 @@ import {
 } from "../scenario/ScenarioSession";
 import { soilEncodingDelta } from "../../ui/cutaway";
 import { intertidalEncodingDelta } from "../../ui/terrainEncoding";
+import { seedPressureAt } from "../habitat/arrivalComposition";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -2105,6 +2106,167 @@ export function probeSalinityArrival(): ProbeResult {
   };
 }
 
+/**
+ * Slice 21 / C-019 — overseas arrival: small vs large island under identical
+ * regimes; isolation monotonicity; not mainland-perimeter rain.
+ */
+export function probeIslandArrival(): ProbeResult {
+  const size = 32;
+  const sea = 2;
+  const isolation = 16;
+
+  const disk = (radius: number): Grid2D => {
+    const t = new Grid2D(size, size, 0.5);
+    const cx = (size - 1) * 0.5;
+    const cz = (size - 1) * 0.5;
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        if (Math.hypot(x - cx, z - cz) <= radius) t.set(x, z, 3);
+      }
+    }
+    return t;
+  };
+
+  const firstShore = (world: WorldState): { x: number; z: number } => {
+    const shore = computeShorelineCells(
+      world.width,
+      world.height,
+      world.oceanCells,
+    );
+    for (const i of shore) {
+      return { x: i % world.width, z: (i / world.width) | 0 };
+    }
+    throw new Error("island-arrival: no shoreline");
+  };
+
+  const establish = (world: WorldState) => {
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    for (const i of world.oceanCells) {
+      world.soilMoisture.data[i] = 0;
+      world.groundwaterStorage.data[i] = 0;
+    }
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+  };
+
+  const run = (radius: number, isol: number) => {
+    const world = new WorldState(disk(radius), {
+      seaLevel: sea,
+      islandIsolation: isol,
+    });
+    const sample = firstShore(world);
+    establish(world);
+    const perimeterWouldBe = seedPressureAt(
+      sample.x,
+      sample.z,
+      world.width,
+      world.height,
+      config.seedSourceStrength,
+      config.seedMeanDistanceCells,
+    );
+    return {
+      world,
+      sample,
+      landCells: world.landCellCount(),
+      sElig: world.eligibleRichness(),
+      seed: world.getHerbSeedBank(sample.x, sample.z),
+      biomass: world.getHerbBiomass(sample.x, sample.z),
+      hsi: world.getHabitatSuitability(sample.x, sample.z),
+      perimeterWouldBe,
+      notPerimeter:
+        Math.abs(world.getHerbSeedBank(sample.x, sample.z) - perimeterWouldBe) >
+        1e-6
+          ? 1
+          : 0,
+      oceanSeedZero: [...world.oceanCells].every(
+        (i) => world.herbSeedBank.data[i] === 0,
+      )
+        ? 1
+        : 0,
+    };
+  };
+
+  const smallA = run(4, isolation);
+  const smallB = run(4, isolation);
+  const large = run(10, isolation);
+  const near = run(8, 4);
+  const far = run(8, 80);
+
+  const replayMatch =
+    smallA.world.stateHash() === smallB.world.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("island-arrival: small-island replay hash mismatch");
+  }
+  if (!(large.landCells > smallA.landCells)) {
+    throw new Error("island-arrival: expected larger land area");
+  }
+  if (!(large.sElig > smallA.sElig)) {
+    throw new Error(
+      `island-arrival: expected S_elig large (${large.sElig}) > small (${smallA.sElig})`,
+    );
+  }
+  if (!(large.biomass > smallA.biomass)) {
+    throw new Error(
+      `island-arrival: expected biomass large (${large.biomass}) > small (${smallA.biomass})`,
+    );
+  }
+  if (!(near.biomass > far.biomass)) {
+    throw new Error(
+      `island-arrival: expected near biomass (${near.biomass}) > far (${far.biomass})`,
+    );
+  }
+  if (smallA.notPerimeter !== 1 || smallA.oceanSeedZero !== 1) {
+    throw new Error(
+      "island-arrival: island must not use perimeter rain / ocean seed must be 0",
+    );
+  }
+
+  return {
+    scenario: "island-arrival",
+    records: [
+      {
+        label: "small",
+        landCells: smallA.landCells,
+        sElig: smallA.sElig,
+        seed: smallA.seed,
+        biomass: smallA.biomass,
+        hsi: smallA.hsi,
+        notPerimeter: smallA.notPerimeter,
+        oceanSeedZero: smallA.oceanSeedZero,
+      },
+      {
+        label: "large",
+        landCells: large.landCells,
+        sElig: large.sElig,
+        seed: large.seed,
+        biomass: large.biomass,
+        hsi: large.hsi,
+      },
+      {
+        label: "isolation",
+        nearBiomass: near.biomass,
+        farBiomass: far.biomass,
+        nearSElig: near.sElig,
+        farSElig: far.sElig,
+        isolationDelta: near.biomass - far.biomass,
+      },
+      {
+        label: "delta",
+        landDelta: large.landCells - smallA.landCells,
+        sEligDelta: large.sElig - smallA.sElig,
+        biomassDelta: large.biomass - smallA.biomass,
+        replayMatch,
+        hashN: Number.parseInt(smallA.world.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -2126,6 +2288,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
   "salinity-arrival": probeSalinityArrival,
+  "island-arrival": probeIslandArrival,
 };
 
 export function runProbe(name: string): ProbeResult {

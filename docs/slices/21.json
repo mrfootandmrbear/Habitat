@@ -1,0 +1,16 @@
+{
+  "id": "21",
+  "title": "Island biogeography / overseas arrival",
+  "simLoop": "On island worlds, overseas shore-biased seed pressure × S_elig(A,d) replaces mainland-perimeter rain (C-019).",
+  "gameLoop": "A smaller or more isolated island earns fewer occupants under identical regimes; suitable cells can stay empty.",
+  "registerIds": ["C-019", "C-007", "C-015", "W-003", "T-001", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/islandArrival.test.ts",
+    "src/sim/arrival.test.ts"
+  ],
+  "probes": ["island-arrival"],
+  "fields": ["veg.seedBank.herb"],
+  "notebookSeed": "The little island stayed emptier than the big one under the same weather.",
+  "tierO": "no owner-only question this closeout; sparse-earned feel batched — see docs/candidates/C-019-dossier.md"
+}

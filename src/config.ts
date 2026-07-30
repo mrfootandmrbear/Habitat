@@ -188,6 +188,23 @@ export const config = {
   herbBiomassMax: 2.5,
 
   /**
+   * Slice 21 / C-019 — overseas seed pressure on island worlds (seaLevel set).
+   * Mainland perimeter rain (seedSourceStrength) is unused when seaLevel is set.
+   */
+  overseasSeedBase: 40,
+  /** Shore-biased exponential mean distance (cells) — shorter than mainland λ. */
+  overseasMeanDistanceCells: 4,
+  /** Default authored isolation when seaLevel is set (cells). */
+  islandIsolationDefaultCells: 16,
+  /** Area half-saturation for S_elig (cells). */
+  eligibleAreaRefCells: 200,
+  /** Isolation decay length for S_elig (cells). */
+  eligibleIsolationMeanCells: 24,
+  /** Floor / ceiling on eligible richness multiplier. */
+  eligibleRichnessMin: 0.05,
+  eligibleRichnessMax: 1,
+
+  /**
    * Slice 20 / C-018 — soil porewater salinity.
    * Shoreline land mixes toward seawater each daily band (fraction of gap closed).
    */

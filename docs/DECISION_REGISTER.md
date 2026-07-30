@@ -1480,7 +1480,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** W-003 is Locked — this reframes how the pool is *sized and sourced*, not whether a pool exists. T-001: overseas arrivals stay seeded/authored (C-003). No random spawn table (N-004). C-015 required.
 
-**Leading direction.** Fixed functional-type catalogue still curated; which types are *eligible* and how hard seed pressure arrives depends on island area / isolation parameters. Not Locked until perimeter seed rain is replaced by an over-water kernel and a smaller island earns fewer occupants under identical regimes.
+**Leading direction.** Fixed functional-type catalogue still curated; which types are *eligible* and how hard seed pressure arrives depends on island area / isolation parameters. Machine half landed Slice 21 (overseas kernel + `island-arrival`); remains Open until owner sparse-earned feel (dossier).
 
 ### C-020 — Atmospheric precip delivery (clouds from wind, moisture, heat)
 **Status:** Open

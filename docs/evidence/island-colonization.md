@@ -149,8 +149,8 @@ For [EXTERNAL_REFERENCES.md](../EXTERNAL_REFERENCES.md) Study log (same commit a
 
 | Slice | Read |
 |---|---|
-| **20** (next) | §3 C-018 steal + paired hollow expectation |
-| **21** (after 20) | §4 C-019 steal + monotonicity tests; do not expand BUILD_GUIDE stub until gate opens |
-| Presentation | Empty-suitable windows and sparse overseas are the owner-feel hinge — only after Tier-M probes exist |
+| **20** | §3 C-018 steal + paired hollow expectation — **landed** (machine half; dossier) |
+| **21** | §4 C-019 steal + monotonicity tests — **landed** (machine half; dossier) |
+| Presentation | Empty-suitable windows and sparse overseas are the owner-feel hinge — dossier C-019; only after Tier-M (done) |
 
 **Researchers:** [Theory](665911ca-6d32-4f87-a10a-3ffc66239ee6) · [Tropical](51b62ea8-3d4c-4eea-8432-cdd158d29733) · [Temperate](2d13a2aa-24b3-4a9c-af9e-8d09f1f78146) · [Cold](ad5d4d9c-5e4c-4c7b-a812-01a3a87e693e) · [Volcanic](d047bef5-b367-48d0-b1c4-caa6b2cf7378).
