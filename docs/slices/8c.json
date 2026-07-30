@@ -1,0 +1,17 @@
+{
+  "id": "8c",
+  "title": "The return visit",
+  "simLoop": "No new authoritative fields — observers, authored rainfall regime, and form memory only.",
+  "gameLoop": "Build a form, remember it, set a rainfall regime, run time, and see what nature did to it.",
+  "registerIds": ["C-004", "C-008", "C-013", "C-003", "T-001", "T-003", "S-007", "S-009", "GEO-002", "P-005"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/sessionPersist.test.ts",
+    "src/sim/rainRegime.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["regime-divergence"],
+  "fields": ["terrain.elevation", "water.surfaceDepth"],
+  "notebookSeed": "The berm I built is a low ridge now, and the channel moved.",
+  "tierO": "Did you want to run it again with different weather?"
+}

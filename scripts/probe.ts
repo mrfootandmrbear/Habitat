@@ -98,6 +98,20 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.channelWetDelta": { abs: 1e-5 },
     "delta.ratio": { abs: 1 },
   },
+  "regime-divergence": {
+    "light.hashN": { abs: 0 },
+    "light.precip": { abs: 1e-6 },
+    "light.soilSum": { abs: 1e-4 },
+    "light.meanCover": { abs: 1e-5 },
+    "light.replayMatch": { abs: 0 },
+    "heavy.hashN": { abs: 0 },
+    "heavy.precip": { abs: 1e-6 },
+    "heavy.soilSum": { abs: 1e-4 },
+    "heavy.meanCover": { abs: 1e-5 },
+    "delta.precipDelta": { abs: 1e-6 },
+    "delta.soilDelta": { abs: 1e-4 },
+    "delta.hashDiverged": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

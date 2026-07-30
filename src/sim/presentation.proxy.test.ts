@@ -7,6 +7,11 @@ import { formatCutaway, soilEncodingDelta } from "../ui/cutaway";
 import { Grid2D } from "./Grid2D";
 import { WorldState } from "./WorldState";
 import { FlowCueMesh } from "../render/FlowCueMesh";
+import { generateMountain } from "./terrain/generateMountain";
+import {
+  elevChangeEncodingStrength,
+  FormMemory,
+} from "./formMemory";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("worldToGrid snaps world hits to integer cells", () => {
@@ -77,5 +82,27 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     cue.updateFrom(world.hydrologyModel, world);
     const draw = cue.object.geometry.drawRange.count;
     expect(draw).toBeGreaterThan(0);
+  });
+
+  it("berm elev-change encoding exceeds floor after geomorphology (Slice 8c)", () => {
+    const w = 24;
+    const world = new WorldState(generateMountain(w, w, 6, 3));
+    world.vegCover.fill(0);
+    world.raiseBerm(12, 12, 3);
+    const mem = new FormMemory();
+    mem.capture(world.terrain.data, w, w);
+    for (let i = 0; i < 40; i++) {
+      world.runGeomorphologyStep(1);
+    }
+    let maxStrength = 0;
+    for (let z = 0; z < w; z++) {
+      for (let x = 0; x < w; x++) {
+        const d = mem.deltaAt(world.terrain.data, x, z);
+        maxStrength = Math.max(maxStrength, elevChangeEncodingStrength(d));
+      }
+    }
+    // Perceptual floor used across presentation proxies.
+    expect(maxStrength).toBeGreaterThan(0.15);
+    expect(mem.meanAbsDelta(world.terrain.data)).toBeGreaterThan(0.01);
   });
 });

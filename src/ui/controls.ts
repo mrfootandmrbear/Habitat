@@ -1,4 +1,8 @@
 import type { InspectorLayer, SitingTool } from "../config";
+import {
+  RAIN_REGIMES,
+  type RainRegimeId,
+} from "../sim/climate/rainRegime";
 
 export type TimeRate = "pause" | "1x" | "4x" | "16x";
 
@@ -32,13 +36,13 @@ const SITING: { id: SitingTool; label: string }[] = [
 export function mountControls(
   parent: HTMLElement,
   initial: {
-    raining: boolean;
+    rainRegime: RainRegimeId;
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
   },
   handlers: {
-    onToggleRain: () => void;
+    onRainRegime: (id: RainRegimeId) => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
@@ -49,9 +53,10 @@ export function mountControls(
     onSave: () => void;
     onLoad: () => void;
     onUndo: () => void;
+    onRememberForm: () => void;
   },
 ): {
-  setRaining: (v: boolean) => void;
+  setRainRegime: (id: RainRegimeId) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
@@ -63,18 +68,36 @@ export function mountControls(
   const bar = document.createElement("div");
   bar.id = "controls";
 
-  const rainBtn = document.createElement("button");
-  rainBtn.type = "button";
-  const syncRainLabel = (raining: boolean): void => {
-    rainBtn.textContent = raining ? "Rain: on" : "Rain: off";
-  };
-  syncRainLabel(initial.raining);
-  rainBtn.addEventListener("click", handlers.onToggleRain);
+  const rainSelect = document.createElement("select");
+  rainSelect.id = "rain-regime";
+  rainSelect.setAttribute(
+    "aria-label",
+    "Rainfall regime (C-004 force dial)",
+  );
+  for (const regime of RAIN_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    rainSelect.appendChild(opt);
+  }
+  rainSelect.value = initial.rainRegime;
+  rainSelect.addEventListener("change", () => {
+    handlers.onRainRegime(rainSelect.value as RainRegimeId);
+  });
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
+
+  const rememberBtn = document.createElement("button");
+  rememberBtn.type = "button";
+  rememberBtn.textContent = "Remember form";
+  rememberBtn.setAttribute(
+    "aria-label",
+    "Remember current landform as then (return visit)",
+  );
+  rememberBtn.addEventListener("click", handlers.onRememberForm);
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
@@ -172,7 +195,7 @@ export function mountControls(
   const hint = document.createElement("div");
   hint.id = "siting-hint";
   hint.textContent =
-    "Predict: mark wet cells → Commit → rain → Compare (teal/green/red/amber)";
+    "Build → Remember form → set Rain regime → run time → look (then vs now)";
 
   const cutaway = document.createElement("div");
   cutaway.id = "cutaway";
@@ -183,8 +206,9 @@ export function mountControls(
   status.textContent = "Habitat";
 
   bar.append(
-    rainBtn,
+    rainSelect,
     resetBtn,
+    rememberBtn,
     saveBtn,
     loadBtn,
     undoBtn,
@@ -199,7 +223,9 @@ export function mountControls(
   parent.appendChild(bar);
 
   return {
-    setRaining: syncRainLabel,
+    setRainRegime: (id) => {
+      rainSelect.value = id;
+    },
     setTimeRate: syncTimeRate,
     setInspector: (layer) => {
       inspectorSelect.value = layer;

@@ -3,10 +3,13 @@ import { config, type InspectorLayer } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
+import { elevChangeEncodingStrength } from "../sim/formMemory";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET = new THREE.Color(0x4a5c3a);
 const VEG = new THREE.Color(0x3a7a3a);
+const ERODE = new THREE.Color(0xc45c3a);
+const DEPOSIT = new THREE.Color(0xe8d5a8);
 const PREDICT_PENDING = new THREE.Color(0x2ec4b6);
 const PREDICT_HIT = new THREE.Color(0x3dcc6f);
 const PREDICT_MISS = new THREE.Color(0xe85d4c);
@@ -54,6 +57,8 @@ export class TerrainMesh {
     world?: WorldState,
     overlay: InspectorLayer = "none",
     predictionClassify: Uint8Array | null = null,
+    /** Per-cell elev delta (now − then) for return-visit encoding; null = off. */
+    elevDelta: Float32Array | null = null,
   ): void {
     const pos = this.geometry.attributes.position as THREE.BufferAttribute;
     const cellW = this.worldSize / (this.width - 1);
@@ -85,6 +90,13 @@ export class TerrainMesh {
           );
           const cover = world.getVegCover(x, z);
           col.copy(BASE).lerp(WET, soilT).lerp(VEG, cover);
+          if (elevDelta) {
+            const d = elevDelta[i] ?? 0;
+            const strength = elevChangeEncodingStrength(d);
+            if (strength > 0) {
+              col.lerp(d < 0 ? ERODE : DEPOSIT, Math.min(0.9, strength * 0.95));
+            }
+          }
         } else {
           col.copy(BASE);
         }

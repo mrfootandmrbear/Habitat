@@ -22,6 +22,12 @@ import {
   loadFromLocalStorage,
   saveToLocalStorage,
 } from "./sim/sessionPersist";
+import {
+  rainDepthForRegime,
+  rainRegimeById,
+  type RainRegimeId,
+} from "./sim/climate/rainRegime";
+import { FormMemory } from "./sim/formMemory";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -44,6 +50,8 @@ const world = new WorldState(terrain);
 const model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
 const editUndo = new EditUndoStack();
+const formMemory = new FormMemory();
+const elevDeltaScratch = new Float32Array(n * n);
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
@@ -59,7 +67,7 @@ scene.add(flowCue.object);
 terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.updateFrom(model);
 
-let raining = false;
+let rainRegime: RainRegimeId = "dry";
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
@@ -83,13 +91,24 @@ function runCompare(): void {
   syncMeshes();
 }
 
+function fillElevDelta(): Float32Array | null {
+  if (!formMemory.hasThen) return null;
+  for (let i = 0; i < world.terrain.data.length; i++) {
+    const x = i % n;
+    const z = (i / n) | 0;
+    elevDeltaScratch[i] = formMemory.deltaAt(world.terrain.data, x, z);
+  }
+  return elevDeltaScratch;
+}
+
 const ui = mountControls(
   app,
-  { raining, timeRate, inspector, sitingTool },
+  { rainRegime, timeRate, inspector, sitingTool },
   {
-    onToggleRain: () => {
-      raining = !raining;
-      ui.setRaining(raining);
+    onRainRegime: (id) => {
+      rainRegime = id;
+      ui.setRainRegime(id);
+      ui.setHint(`Force: ${rainRegimeById(id).label} (whole preserve)`);
     },
     onReset: () => {
       model.resetWater();
@@ -119,7 +138,7 @@ const ui = mountControls(
       } else if (tool === "predict") {
         sitingCursor.setVisible(true);
         ui.setHint(
-          "Yellow cell = mark · Commit → rain → Compare",
+          "Yellow cell = mark · Commit → set Rain regime → Compare",
         );
       } else {
         sitingCursor.setVisible(true);
@@ -138,6 +157,11 @@ const ui = mountControls(
       prediction.clear();
       syncMeshes();
     },
+    onRememberForm: () => {
+      formMemory.capture(world.terrain.data, n, n);
+      syncMeshes();
+      ui.setHint("Remembered form — run time, then look for change tint");
+    },
     onSave: () => {
       try {
         saveToLocalStorage(world);
@@ -155,6 +179,7 @@ const ui = mountControls(
           return;
         }
         editUndo.noteEditEpoch();
+        formMemory.clear();
         prediction.clear();
         steps = 0;
         clock.resetDroppedSteps();
@@ -254,7 +279,13 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
 
 function syncMeshes(): void {
   world.ensureStructureFresh();
-  terrainMesh.updateFrom(model, world, inspector, prediction.overlayClassify());
+  terrainMesh.updateFrom(
+    model,
+    world,
+    inspector,
+    prediction.overlayClassify(),
+    fillElevDelta(),
+  );
   waterMesh.updateFrom(model);
   flowCue.updateFrom(model, world);
 }
@@ -294,9 +325,13 @@ function frame(now: number): void {
   lastFrame = now;
 
   const { stepsRun } = clock.tick(wallDt);
+  const depth = rainDepthForRegime(
+    rainRegimeById(rainRegime),
+    config.rainDepthPerEvent,
+  );
   for (let i = 0; i < stepsRun; i++) {
-    if (raining) {
-      model.addRain(config.rainDepthPerEvent);
+    if (depth > 0) {
+      model.addRain(depth);
     }
     world.stepEvent();
     steps += 1;
@@ -328,7 +363,8 @@ function frame(now: number): void {
   ui.setStatus(
     `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
-      (raining ? " · raining" : "") +
+      ` · ${rainRegimeById(rainRegime).label}` +
+      (formMemory.hasThen ? " · then" : "") +
       ` · ${conservationLine()}`,
   );
 

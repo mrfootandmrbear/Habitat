@@ -121,7 +121,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
-| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **In progress** — save/load + undo; BUILD_GUIDE §4.3b |
+| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
 | **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | Post-MVP after 8c — BUILD_GUIDE §4.4 |
 | **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | After Slice 9 — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
 | **11+** | Succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 10 |

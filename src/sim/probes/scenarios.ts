@@ -4,6 +4,11 @@ import { WorldState } from "../WorldState";
 import { totalWaterVolume } from "../hydrology/fluxStep";
 import { generateMountain } from "../terrain/generateMountain";
 import {
+  rainDepthForRegime,
+  rainRegimeById,
+  type RainRegimeId,
+} from "../climate/rainRegime";
+import {
   DEEP_TIME_SIM_YEARS,
   decadalBandsForYears,
   makeDeepTimeWorld,
@@ -349,12 +354,98 @@ export function probeBaseflowPersist(): ProbeResult {
   };
 }
 
+/**
+ * Slice 8c / C-004: same seed + same regime → identical hash;
+ * different authored regime → divergent outcome. Force dial is global
+ * (no cell targeting — THESIS §9).
+ */
+export function probeRegimeDivergence(): ProbeResult {
+  const seed = 11;
+  const days = 6;
+
+  const run = (regimeId: RainRegimeId) => {
+    const world = new WorldState(generateMountain(24, 24, 6, seed));
+    const depth = rainDepthForRegime(
+      rainRegimeById(regimeId),
+      config.rainDepthPerEvent,
+    );
+    for (let d = 0; d < days; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        if (depth > 0) world.addRain(depth);
+        world.stepEvent();
+      }
+    }
+    let soil = 0;
+    let cover = 0;
+    for (let i = 0; i < world.soilMoisture.data.length; i++) {
+      soil += world.soilStorageDepth(i);
+      cover += world.vegCover.data[i]!;
+    }
+    const n = world.vegCover.data.length;
+    return {
+      hash: world.stateHash(),
+      precip: world.precipitationLedger,
+      soilSum: soil,
+      meanCover: cover / n,
+      hashN: Number.parseInt(world.stateHash().slice(0, 8), 16),
+    };
+  };
+
+  const lightA = run("light");
+  const lightB = run("light");
+  const heavy = run("heavy");
+
+  if (lightA.hash !== lightB.hash) {
+    throw new Error(
+      `regime-divergence: same regime must match (T-001) ${lightA.hash} vs ${lightB.hash}`,
+    );
+  }
+  if (lightA.hash === heavy.hash) {
+    throw new Error(
+      "regime-divergence: light and heavy regimes produced identical hashes",
+    );
+  }
+  if (!(heavy.precip > lightA.precip)) {
+    throw new Error(
+      `regime-divergence: expected heavy precip (${heavy.precip}) > light (${lightA.precip})`,
+    );
+  }
+
+  return {
+    scenario: "regime-divergence",
+    records: [
+      {
+        label: "light",
+        hashN: lightA.hashN,
+        precip: lightA.precip,
+        soilSum: lightA.soilSum,
+        meanCover: lightA.meanCover,
+        replayMatch: lightA.hash === lightB.hash ? 1 : 0,
+      },
+      {
+        label: "heavy",
+        hashN: heavy.hashN,
+        precip: heavy.precip,
+        soilSum: heavy.soilSum,
+        meanCover: heavy.meanCover,
+      },
+      {
+        label: "delta",
+        precipDelta: heavy.precip - lightA.precip,
+        soilDelta: heavy.soilSum - lightA.soilSum,
+        hashDiverged: lightA.hash !== heavy.hash ? 1 : 0,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
   "basin-fill": probeBasinFill,
   "deep-time": probeDeepTime,
   "baseflow-persist": probeBaseflowPersist,
+  "regime-divergence": probeRegimeDivergence,
 };
 
 export function runProbe(name: string): ProbeResult {

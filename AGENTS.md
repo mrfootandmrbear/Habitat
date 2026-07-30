@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **8b** **Done**; **Slice 8c** **in progress** (save/load + edit undo under C-013). Next-but-one **Slice 9** HSI / limiting factors.
+Slice **8c** agent DoD **complete**; **Tier-O batch ready** (`docs/playtests/8c-return-visit.md`). Next-but-one **Slice 9** HSI. C-004 dossier filed (owner half).
 
 ## Cursor Cloud specific instructions
 

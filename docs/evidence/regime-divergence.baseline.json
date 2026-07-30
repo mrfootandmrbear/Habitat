@@ -1,0 +1,53 @@
+{
+  "scenario": "regime-divergence",
+  "metrics": {
+    "light.hashN": {
+      "value": 2707221254,
+      "abs": 0
+    },
+    "light.precip": {
+      "value": 207.35999999999558,
+      "abs": 0.000001
+    },
+    "light.soilSum": {
+      "value": 81.98881510991697,
+      "abs": 0.0001
+    },
+    "light.meanCover": {
+      "value": 0.07511572654685653,
+      "abs": 0.00001
+    },
+    "light.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "heavy.hashN": {
+      "value": 308188717,
+      "abs": 0
+    },
+    "heavy.precip": {
+      "value": 1036.8000000000225,
+      "abs": 0.000001
+    },
+    "heavy.soilSum": {
+      "value": 134.0645081840757,
+      "abs": 0.0001
+    },
+    "heavy.meanCover": {
+      "value": 0.12061488851112598,
+      "abs": 0.00001
+    },
+    "delta.precipDelta": {
+      "value": 829.4400000000269,
+      "abs": 0.000001
+    },
+    "delta.soilDelta": {
+      "value": 52.07569307415872,
+      "abs": 0.0001
+    },
+    "delta.hashDiverged": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}
