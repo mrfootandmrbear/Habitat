@@ -100,3 +100,42 @@ body,
   max-width: 42rem;
   line-height: 1.35;
 }
+
+#scenario-brief {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.75rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(8, 14, 11, 0.85);
+  border: 1px solid #3d5c4c;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  z-index: 2;
+}
+
+.scenario-brief-title {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #a8c4b4;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.scenario-brief-body {
+  margin-bottom: 0.5rem;
+}
+
+.scenario-brief-status[data-satisfied="true"] {
+  color: #7dcea0;
+}
+
+.scenario-brief-status[data-satisfied="false"] {
+  color: #c9a86c;
+}
+
+.scenario-brief-status[data-satisfied="past"] {
+  color: #9bb0a4;
+}

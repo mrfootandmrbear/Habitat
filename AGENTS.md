@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **16** island / sea level (**C-015** Open) is **Next** (§4.10b) — before Slice 15. Slice 14 agent Tier-M done; Tier-O batched. Slice 13 + 8c Pass (2026-07-30). Slice **A** audio wired (C-014 Open — next batch). Maritime ladder: C-015…C-019 filed.
+Slices **16** + **15** agent **Done**. Tier-O batch: [docs/playtests/batch-island-brief.md](docs/playtests/batch-island-brief.md). Next: **Slice 17** tidal envelope (§4.12). Maritime candidates C-015…C-019 Open.
 
 ## Cursor Cloud specific instructions
 

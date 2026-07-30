@@ -69,6 +69,7 @@ export function mountControls(
     onLoad: () => void;
     onUndo: () => void;
     onRememberForm: () => void;
+    onToggleBrief: () => void;
   },
 ): {
   setRainRegime: (id: RainRegimeId) => void;
@@ -122,6 +123,16 @@ export function mountControls(
   resetBtn.type = "button";
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
+
+  const briefBtn = document.createElement("button");
+  briefBtn.type = "button";
+  briefBtn.id = "toggle-brief";
+  briefBtn.textContent = "Accept brief";
+  briefBtn.setAttribute(
+    "aria-label",
+    "Accept or dismiss scenario brief (G-002 / Slice 15)",
+  );
+  briefBtn.addEventListener("click", handlers.onToggleBrief);
 
   const rememberBtn = document.createElement("button");
   rememberBtn.type = "button";
@@ -241,6 +252,7 @@ export function mountControls(
   bar.append(
     rainSelect,
     seaSelect,
+    briefBtn,
     resetBtn,
     rememberBtn,
     saveBtn,

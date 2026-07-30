@@ -17,6 +17,8 @@ import {
 import { lightEncodingDelta } from "../ui/lightEncoding";
 import { terrainEncodingDelta, defaultTerrainRgb } from "../ui/terrainEncoding";
 import { occupantEncodingDelta } from "../ui/occupantEncoding";
+import { briefChromePresent } from "../ui/briefChrome";
+import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("worldToGrid snaps world hits to integer cells", () => {
@@ -189,5 +191,26 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       shorelineEncodingDelta(48, 48, terrain.data, 3.5),
     ).toBeGreaterThan(shoreFrac);
+  });
+
+  it("scenario brief chrome is present when a brief is active (Slice 15)", () => {
+    expect(
+      briefChromePresent({
+        active: true,
+        brief: LIVING_HOLLOW_BRIEF,
+        currentlySatisfied: false,
+        achieved: false,
+        samplesTaken: 0,
+      }),
+    ).toBe(true);
+    expect(
+      briefChromePresent({
+        active: false,
+        brief: LIVING_HOLLOW_BRIEF,
+        currentlySatisfied: false,
+        achieved: false,
+        samplesTaken: 0,
+      }),
+    ).toBe(false);
   });
 });

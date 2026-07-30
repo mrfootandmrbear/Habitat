@@ -42,6 +42,11 @@ import {
   snapshotSurfaceDepthReader,
 } from "./audio/AudioBus";
 import { applyMixToGain, type GainTarget } from "./audio/webAudioHook";
+import { mountBriefChrome } from "./ui/briefChrome";
+import {
+  ScenarioSession,
+  livingHollowObjective,
+} from "./sim/scenario/ScenarioSession";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -85,6 +90,32 @@ scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
 scene.add(oceanMesh.mesh);
 scene.add(extentCage);
+scene.add(extentCage);
+
+const briefChrome = mountBriefChrome(app);
+let scenarioSession: ScenarioSession | null = null;
+
+function syncBriefChrome(): void {
+  if (!scenarioSession) {
+    briefChrome.setState({
+      active: false,
+      brief: "",
+      currentlySatisfied: false,
+      achieved: false,
+      samplesTaken: 0,
+    });
+    return;
+  }
+  const o = scenarioSession.outcome();
+  briefChrome.setState({
+    active: true,
+    brief: scenarioSession.definition.brief,
+    currentlySatisfied: o.currentlySatisfied,
+    achieved: o.achievedAtSimMinutes !== null,
+    samplesTaken: o.samplesTaken,
+  });
+}
+
 scene.add(sitingCursor.group);
 scene.add(flowCue.object);
 scene.add(occupantMesh.object);
@@ -138,6 +169,17 @@ const ui = mountControls(
       rainRegime = id;
       ui.setRainRegime(id);
       ui.setHint(`Force: ${rainRegimeById(id).label} (whole preserve)`);
+    },
+    onToggleBrief: () => {
+      if (scenarioSession) {
+        scenarioSession = null;
+        syncBriefChrome();
+        ui.setHint("Brief dismissed — sandbox continues (G-001)");
+        return;
+      }
+      scenarioSession = new ScenarioSession(livingHollowObjective());
+      syncBriefChrome();
+      ui.setHint("Brief accepted — same loop, finite objective (G-002)");
     },
     onSeaLevel: (id) => {
       seaLevelId = id;
@@ -406,6 +448,10 @@ function frame(now: number): void {
     }
     try {
       world.stepEvent();
+      if (scenarioSession) {
+        scenarioSession.observe(world);
+        syncBriefChrome();
+      }
       steps += 1;
     } catch (err) {
       clock.setTimeScale(0);

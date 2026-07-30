@@ -1,0 +1,16 @@
+{
+  "id": "15",
+  "title": "Scenario brief chrome",
+  "simLoop": "None new — loads Slice 14 ScenarioDefinition and calls ScenarioSession.observe (T-006).",
+  "gameLoop": "Accept a brief on the island world; see whether the hollow is holding the criterion without the inspector.",
+  "registerIds": ["G-002", "G-001", "G-005", "G-007", "T-006", "U-003", "D-006", "N-002"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/scenario.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["scenario-window"],
+  "fields": [],
+  "notebookSeed": "The brief asked me to keep the hollow wet long enough for life to hold the next storm.",
+  "tierO": "Batched — did the objective feel like a reason to run the same loop — or like a different game?"
+}
