@@ -1,0 +1,16 @@
+{
+  "id": "14",
+  "title": "Scenario objective scaffold",
+  "simLoop": "None new — authored objective + schedule evaluated by an observer over existing WorldState (T-006).",
+  "gameLoop": "Accept a finite objective, run the same sculpt → forces → time loop, and see whether the preserve meets the authored criterion window.",
+  "registerIds": ["G-002", "G-001", "G-005", "G-006", "G-007", "G-008", "T-006", "N-001", "N-004", "S-009"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/scenario.test.ts",
+    "src/sim/ownership.test.ts"
+  ],
+  "probes": ["scenario-window"],
+  "fields": [],
+  "notebookSeed": "The brief asked me to keep the hollow wet long enough for life to hold the next storm.",
+  "tierO": "Batched — did the objective feel like a reason to run the same loop — or like a different game?"
+}

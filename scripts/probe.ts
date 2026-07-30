@@ -211,6 +211,24 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.coverHeld": { abs: 0 },
     "delta.earned": { abs: 0 },
   },
+  "scenario-window": {
+    "meet.satisfied": { abs: 0 },
+    "meet.achieved": { abs: 0 },
+    "meet.achievedAt": { abs: 0 },
+    "meet.rollingMet": { abs: 0 },
+    "meet.samples": { abs: 0 },
+    "meet.worldHashMatch": { abs: 0 },
+    "fail.satisfied": { abs: 0 },
+    "fail.achieved": { abs: 0 },
+    "fail.achievedAt": { abs: 0 },
+    "fail.rollingMet": { abs: 0 },
+    "fail.samples": { abs: 0 },
+    "fail.worldHashMatch": { abs: 0 },
+    "delta.hashMatch": { abs: 0 },
+    "delta.pairedDiverge": { abs: 0 },
+    "delta.writeIsolated": { abs: 0 },
+    "delta.outcomeHashNum": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

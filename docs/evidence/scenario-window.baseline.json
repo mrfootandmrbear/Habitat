@@ -1,0 +1,69 @@
+{
+  "scenario": "scenario-window",
+  "metrics": {
+    "meet.satisfied": {
+      "value": 1,
+      "abs": 0
+    },
+    "meet.achieved": {
+      "value": 1,
+      "abs": 0
+    },
+    "meet.achievedAt": {
+      "value": 4320,
+      "abs": 0
+    },
+    "meet.rollingMet": {
+      "value": 1,
+      "abs": 0
+    },
+    "meet.samples": {
+      "value": 5,
+      "abs": 0
+    },
+    "meet.worldHashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "fail.satisfied": {
+      "value": 0,
+      "abs": 0
+    },
+    "fail.achieved": {
+      "value": 0,
+      "abs": 0
+    },
+    "fail.achievedAt": {
+      "value": -1,
+      "abs": 0
+    },
+    "fail.rollingMet": {
+      "value": 0,
+      "abs": 0
+    },
+    "fail.samples": {
+      "value": 5,
+      "abs": 0
+    },
+    "fail.worldHashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.pairedDiverge": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.writeIsolated": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.outcomeHashNum": {
+      "value": -1549772368,
+      "abs": 0
+    }
+  }
+}

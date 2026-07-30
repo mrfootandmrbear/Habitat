@@ -21,6 +21,11 @@ import {
   p005SaveAdvanceReloadHash,
   sampleHorizon,
 } from "./deepTime";
+import {
+  ScenarioSession,
+  criterionReaderFromWorld,
+  livingHollowObjective,
+} from "../scenario/ScenarioSession";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -1196,6 +1201,97 @@ export function probeLivingHollow(): ProbeResult {
   };
 }
 
+/**
+ * Slice 14 / G-002 — paired meeting vs failing preserve under one authored
+ * criterion window. Evaluator is observer-only (T-006); G-007 shapes stored.
+ */
+export function probeScenarioWindow(): ProbeResult {
+  const def = livingHollowObjective({
+    threshold: 0.5,
+    lengthDays: 3,
+    entryDays: 1,
+    exitDays: 2,
+  });
+
+  const runTwin = (biomass: number) => {
+    const world = new WorldState(new Grid2D(8, 8, 1));
+    world.herbBiomass.fill(biomass);
+    const hashBefore = world.stateHash();
+    const session = new ScenarioSession(def);
+    const reader = criterionReaderFromWorld(world);
+    for (let day = 1; day <= 5; day++) {
+      const t = day * config.dailyEventSteps * config.eventDtMinutes;
+      session.sampleNow({ ...reader, simMinutes: t });
+    }
+    const hashAfter = world.stateHash();
+    const o = session.outcome();
+    return {
+      worldHashMatch: hashBefore === hashAfter ? 1 : 0,
+      satisfied: o.currentlySatisfied ? 1 : 0,
+      achieved: o.achievedAtSimMinutes !== null ? 1 : 0,
+      achievedAt: o.achievedAtSimMinutes ?? -1,
+      rollingMet: o.rollingMet ? 1 : 0,
+      samples: o.samplesTaken,
+      outcomeHash: session.outcomeHash(),
+    };
+  };
+
+  const meetA = runTwin(2);
+  const meetB = runTwin(2);
+  const fail = runTwin(0);
+
+  if (meetA.outcomeHash !== meetB.outcomeHash) {
+    throw new Error("scenario-window: replay outcome hash mismatch");
+  }
+  if (!(meetA.satisfied === 1 && meetA.achieved === 1)) {
+    throw new Error("scenario-window: meet twin should satisfy window");
+  }
+  if (!(fail.satisfied === 0 && fail.achieved === 0)) {
+    throw new Error("scenario-window: fail twin should not satisfy");
+  }
+  if (meetA.worldHashMatch !== 1 || fail.worldHashMatch !== 1) {
+    throw new Error("scenario-window: evaluator mutated WorldState");
+  }
+
+  // Encode outcome hash as stable numeric for baseline (djb2 over chars).
+  let hashNum = 5381;
+  for (let i = 0; i < meetA.outcomeHash.length; i++) {
+    hashNum = ((hashNum << 5) + hashNum + meetA.outcomeHash.charCodeAt(i)) | 0;
+  }
+
+  return {
+    scenario: "scenario-window",
+    records: [
+      {
+        label: "meet",
+        satisfied: meetA.satisfied,
+        achieved: meetA.achieved,
+        achievedAt: meetA.achievedAt,
+        rollingMet: meetA.rollingMet,
+        samples: meetA.samples,
+        worldHashMatch: meetA.worldHashMatch,
+      },
+      {
+        label: "fail",
+        satisfied: fail.satisfied,
+        achieved: fail.achieved,
+        achievedAt: fail.achievedAt,
+        rollingMet: fail.rollingMet,
+        samples: fail.samples,
+        worldHashMatch: fail.worldHashMatch,
+      },
+      {
+        label: "delta",
+        hashMatch: meetA.outcomeHash === meetB.outcomeHash ? 1 : 0,
+        pairedDiverge: meetA.outcomeHash !== fail.outcomeHash ? 1 : 0,
+        writeIsolated:
+          meetA.worldHashMatch === 1 && fail.worldHashMatch === 1 ? 1 : 0,
+        outcomeHashNum: hashNum,
+      },
+    ],
+  };
+}
+
 function meanGrid(data: Float32Array): number {
   return sumGrid(data) / data.length;
 }
@@ -1239,6 +1335,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "disturbance-recovery": probeDisturbanceRecovery,
   "arrival-earned": probeArrivalEarned,
   "living-hollow": probeLivingHollow,
+  "scenario-window": probeScenarioWindow,
 };
 
 export function runProbe(name: string): ProbeResult {

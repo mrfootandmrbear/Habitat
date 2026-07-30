@@ -121,15 +121,16 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
-| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
+| **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Done** — Tier-O Pass (batch 2026-07-30) |
 | **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 Locked via Slice 12 |
 | **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Done — Tier-M** (Tier-O deferred; authored ignition; **C-003** Open) |
 | **11** | Insolation / Beer–Lambert light → succession trajectory | North/south, burned/unburned, wet/dry as different futures | **Done — Tier-M + Tier-P** (Tier-O deferred) |
 | **12** | Arrival / first occupant (**C-007** Locked) | Something appears because the place suits it | **Done** — BUILD_GUIDE §4.8; owner Pass |
-| **13** | Biology → physics integration | Living hollow meets the next storm differently | **Done** — BUILD_GUIDE §4.9; Tier-O batched |
-| **14** | Scenario objective scaffold (G-002) | Finite objective over the same sculpt → forces → time loop | **Next** — BUILD_GUIDE §4.10 |
+| **13** | Biology → physics integration | Living hollow meets the next storm differently | **Done** — BUILD_GUIDE §4.9; Tier-O Pass ([batch-living-return.md](playtests/batch-living-return.md)) |
+| **14** | Scenario objective scaffold (G-002) | Finite objective over the same sculpt → forces → time loop | **In progress** — BUILD_GUIDE §4.10 (agent Tier-M; Tier-O batched) |
+| **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **Next** — BUILD_GUIDE §4.11 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival **done** (**C-007 Locked**) → Slice 13 biology→physics **done** (agent; Tier-O batched) → Slice 14 scenario scaffold **next** (§4.10); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c **done** (Tier-O Pass 2026-07-30) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival **done** (**C-007 Locked**) → Slice 13 biology→physics **done** (Tier-O Pass 2026-07-30) → Slice 14 scenario scaffold **in progress** (§4.10); Slice 15 brief chrome **next** (§4.11); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
 
 ---
 

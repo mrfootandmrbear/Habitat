@@ -82,18 +82,19 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 | 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
-| 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | Agent Done / Tier-O ready |
+| 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | **Done** — Tier-O Pass (batch 2026-07-30) |
 | 9 | Liebig HSI / limiting factor | Inspect what holds a patch back | `hsiComposition`, `limiting-shift` | Tier-M; Tier-O deferred |
 | 10 | Fire / fuel (Olson + BFS) | Authored ignition; wet resists | `fireProcess`, `burn-recover` | Tier-M; Tier-O deferred |
 | 11 | Slope/aspect + Beer–Lambert light | Same rules, different succession trajectories | `lightCompetition`, `succession-diverge` | Tier-M + Tier-P; Tier-O deferred |
 | drydown | Insolation × cover ET partitions | World dries unevenly after rain | `evapotranspiration`, `drydown-feedback` | Tier-M + Tier-P; audio wired |
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 | 12 | Arrival / first occupant (C-007) | Shoots appear where conditions suit | `dispersalProcess`, `arrival-earned` | **Done** — C-007 Locked |
-| 13 | Biology → physics (E-005) | Living hollow blunts the next storm | `physicalCover`, `living-hollow` | **Done** — agent; Tier-O batched |
+| 13 | Biology → physics (E-005) | Living hollow blunts the next storm | `physicalCover`, `living-hollow` | **Done** — Tier-O Pass (batch 2026-07-30) |
+| 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **In progress** — agent Tier-M; Tier-O batched |
 
-**Current gate:** Slice 13 biology → physics **Done** (agent) — earned herb biomass stacks into roughness/infiltration (`living-hollow`: downslope 0.152 vs 0.423; infil 25.83 vs 11.52). **Next:** Slice 14 scenario objective scaffold (§4.10). **Slice A** audio scaffold wired (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
+**Current gate:** Slice **14** scenario objective scaffold **In progress** (§4.10) — composition, observer session, `scenario-window` probe. Slice 13 + 8c Tier-O **Pass** (owner 2026-07-30). **Slice A** audio scaffold wired (C-014 still Open — next batch). C-004 stewardship reading still Open (dossier).
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002). Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -211,7 +212,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-M: same seed + same regime → identical hash; different regime → divergent outcome (`regime-divergence`)  
 - [x] `docs/slices/8c.json` manifest (DoD row 9)  
 - [x] Notebook seed: “The berm I built is a low ridge now, and the channel moved.”  
-- [ ] **Tier-O — this is the batched session** ([docs/playtests/8c-return-visit.md](playtests/8c-return-visit.md)): *did you want to run it again with different weather?* — retuned after owner flood report; re-run pending; C-004 dossier filed for the stewardship reading 
+- [x] **Tier-O Pass** ([docs/playtests/batch-living-return.md](playtests/batch-living-return.md), owner 2026-07-30): living hollow answered the storm; wanted another run — subsumes prior 8c return-visit ask; C-004 stewardship reading remains Open in dossier
 
 ---
 
@@ -361,7 +362,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.9 Slice 13 — Biology → physics integration *(Done — agent; Tier-O batched)*
+### 4.9 Slice 13 — Biology → physics integration *(Done — Tier-O Pass)*
 
 **Why this exists.** Slice 12 ships a first occupant that does not yet change how water moves. The thesis payoff is that a vegetated hollow meets the next storm differently than a bare one — Slice 6 already couples aggregate `veg.cover` to roughness/infiltration; this slice closes the loop from **earned herb biomass** into those physical properties (E-005) without inventing a second hydrology.
 
@@ -383,12 +384,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-P: soil-soak encoding delta after herb-driven infiltration clears perceptual floor `> 0.15`
 - [x] `docs/slices/13.json` manifest (DoD row 9)
 - [x] Notebook seed: “The hollow I kept wet held the next rain differently once shoots took.”
-- [ ] Tier-O (batch): *did the living hollow feel like it changed how the water moved — or like a separate green layer?*
+- [x] Tier-O **Pass** ([docs/playtests/batch-living-return.md](playtests/batch-living-return.md), owner 2026-07-30): *did the living hollow feel like it changed how the water moved — enough that you wanted another storm?*
 - [x] **Next-but-one:** specify Slice 14 scenario objective scaffold to §4.3 depth before Slice 13 closes (DoD row 10) — §4.10
 
 ---
 
-### 4.10 Slice 14 — Scenario objective scaffold *(specified; gate after Slice 13)*
+### 4.10 Slice 14 — Scenario objective scaffold *(In progress)*
 
 **Why this exists.** Sandbox already runs the living-sand-castle loop (THESIS §4). **G-002** (Locked) says scenarios provide finite objectives under that same loop — not a second game. Without a scenario scaffold, G-005 / G-006 / G-007 stay unexercised and the toxic-site premise (C-010 / THESIS §7) has nowhere to land. This slice builds the **minimum objective container**, not a campaign or a win-condition resolution of Open **G-007**.
 
@@ -402,15 +403,39 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 13 (**Done** agent): biology→physics feedback exists so a scenario can ask the player to earn a living hollow that blunts a storm.
 
-- [ ] Composition note: objective schema; evaluation window; G-007 three-shape storage; no register invention
-- [ ] Scenario container loads an authored objective + schedule over sandbox WorldState (observer evaluation only)
-- [ ] Tier-M: same seed + schedule → identical evaluation outcome hash; write isolation (evaluator does not mutate sim)
-- [ ] Tier-M: objective window uses hysteresis / rolling interval shape compatible with G-005 without locking its tuning
-- [ ] Probe `scenario-window` (name TBD): paired meeting / failing preserve states under one authored criterion
-- [ ] `docs/slices/14.json` manifest (DoD row 9)
-- [ ] Notebook seed: “The brief asked me to keep the hollow wet long enough for life to hold the next storm.”
+- [x] Composition note: objective schema; evaluation window; G-007 three-shape storage; no register invention — `docs/slices/14-composition.md`
+- [x] Scenario container loads an authored objective + schedule over sandbox WorldState (observer evaluation only) — `ScenarioSession`
+- [x] Tier-M: same seed + schedule → identical evaluation outcome hash; write isolation (evaluator does not mutate sim)
+- [x] Tier-M: objective window uses hysteresis / rolling interval shape compatible with G-005 without locking its tuning
+- [x] Probe `scenario-window`: paired meeting / failing preserve states under one authored criterion
+- [x] `docs/slices/14.json` manifest (DoD row 9)
+- [x] Notebook seed: “The brief asked me to keep the hollow wet long enough for life to hold the next storm.”
 - [ ] Tier-O (batch): *did the objective feel like a reason to run the same loop — or like a different game?*
-- [ ] **Next-but-one:** specify the following queue item to §4.3 depth before Slice 14 closes (DoD row 10)
+- [x] **Next-but-one:** Slice 15 scenario brief chrome specified at §4.11 (DoD row 10)
+
+---
+
+### 4.11 Slice 15 — Scenario brief chrome *(specified; gate after Slice 14 agent)*
+
+**Why this exists.** Slice 14’s evaluator and `scenario-window` probe prove the objective container machine-side. Tier-O cannot answer “same loop or different game?” until the player can **accept a brief** and see window satisfaction without an inspector. This is presentation + load chrome over the existing observer — not a campaign and not G-007 resolution.
+
+**Loops.** Sim: none new (loads Slice 14 `ScenarioDefinition` + calls `ScenarioSession.observe`). Game: see the authored brief, run time, notice whether the hollow is holding the criterion — still the sculpt → forces → time loop.
+
+**Register / candidates.** **G-002**, G-001, G-005 (window legible), G-007 (Open — still store-only; no end-of-scenario victory screen that picks an alternative), T-006, U-003, D-006, N-002.
+
+**Study.** Slice 14 composition; PredictionSession chrome pattern; rain-regime control as a prior force dial.
+
+**Bans.** Victory screen that resolves G-007. Health meter / second score (N-002). Scripted cutscenes that bypass sim (N-004). Closing sandbox (G-001).
+
+**Gate.** After Slice 14 agent Tier-M green (`scenario-window` probe).
+
+- [ ] Load `livingHollowObjective` (or equivalent) as an optional scenario over sandbox
+- [ ] Brief visible without inspector; satisfied / not-yet encoding from `CompletionState` (no G-007 pick)
+- [ ] Tier-P proxy: brief + satisfaction affordance present when scenario active
+- [ ] Wire `observe` on event step when scenario loaded (write isolation retained)
+- [ ] `docs/slices/15.json` manifest; notebook seed from Slice 14 brief
+- [ ] Fire Slice 14 Tier-O from this chrome (batch with C-014 / presentation as needed)
+- [ ] **Next-but-one:** specify following item to §4.3 depth (likely Field Notebook U-006 or C-009 substrate — not inventing)
 
 ---
 
@@ -422,7 +447,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slice **13** is Done (agent) at §4.9. Slice **14** is specified at §4.10. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slice **14** is In progress at §4.10 (agent Tier-M landed; Tier-O batched pending brief chrome). Slice **15** specified at §4.11. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice 13 biology → physics **Done** (agent; Tier-O batched) — `living-hollow` probe. Next: **Slice 14** scenario objective scaffold (§4.10). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
+Slice **14** scenario scaffold **In progress** (agent Tier-M + `scenario-window` probe). Tier-O batched pending Slice 15 brief chrome (§4.11). Slice 13 + 8c Pass (2026-07-30). Slice **A** audio wired (C-014 Open — next batch).
 
 ## Cursor Cloud specific instructions
 
