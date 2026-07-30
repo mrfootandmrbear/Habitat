@@ -29,6 +29,7 @@ import {
   shoreInteriorOccupantDelta,
 } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
+import { notebookChromePresent } from "../ui/notebookChrome";
 import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
@@ -409,6 +410,36 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         currentlySatisfied: false,
         achieved: false,
         samplesTaken: 0,
+      }),
+    ).toBe(false);
+  });
+
+  it("field notebook chrome is present when open with an answer (U-006)", () => {
+    expect(
+      notebookChromePresent({
+        open: true,
+        question: "what-changed",
+        answer: {
+          question: "what-changed",
+          empty: false,
+          lines: [
+            {
+              entryId: "flooded-stands",
+              event: "flooded",
+              scale: "preserve",
+              sentence: "Water stands where the land dips.",
+              fieldIds: ["water.surfaceDepth"],
+              uncertainty: null,
+            },
+          ],
+        },
+      }),
+    ).toBe(true);
+    expect(
+      notebookChromePresent({
+        open: false,
+        question: "what-changed",
+        answer: null,
       }),
     ).toBe(false);
   });

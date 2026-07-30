@@ -1,0 +1,25 @@
+{
+  "id": "notebook",
+  "title": "Field Notebook UI — bounded causal explanation chrome",
+  "simLoop": "none new — notebook is a pure observer of frozen registry fields (T-006)",
+  "gameLoop": "After noticing a change, open Notebook and ask what is evident / what might have contributed (U-004 / U-006)",
+  "registerIds": ["U-006", "U-004", "T-006", "T-001", "D-007"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/notebook/notebook.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": [],
+  "fields": [
+    "water.surfaceDepth",
+    "soil.moisture",
+    "groundwater.storage",
+    "veg.cover",
+    "veg.biomass.herb",
+    "fire.scar",
+    "habitat.limitingFactor",
+    "soil.salinity"
+  ],
+  "notebookSeed": "The ground still held water where the hollow stayed wet.",
+  "tierO": "no new owner-only question — U-006 Lock awaits reviewer corpus sample (dossier); hygiene chrome"
+}

@@ -103,9 +103,9 @@ Summary only — do not reopen unless fixing regressions.
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** / **A+** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** / **A+** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine; U-006 Current — Lock still reviewer).
 
-**Next:** Field Notebook UI (**U-006**) — §4.20. Full C-020 clouds/phase stays later (owner: mid-path reads as weather; clouds still wanted). Scenario campaign remains gated on C-009/C-010 framing. C-009 Lock still owner. C-016…C-019 Lock still owner.
+**Next:** Full C-020 clouds / precip phase — §4.21 (new `Process`; needs its own D-007 clip line). Scenario campaign remains gated on C-009/C-010 framing. C-009 Lock still owner. C-016…C-019 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -669,21 +669,40 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ### 4.20 Field Notebook UI (**U-006**)
 
-**Why this exists.** U-006 (Locked) requires a bounded causal explanation layer — event vocabulary, scale selection, uncertainty language, supported questions — without becoming an inspector dashboard or spoiling curiosity (U-004). Clip gate is clear; this slice registers **no** new `Process`.
+**Why this exists.** U-006 (Current) requires a bounded causal explanation layer — event vocabulary, scale selection, uncertainty language, supported questions — without becoming an inspector dashboard or spoiling curiosity (U-004). Clip gate is clear; this slice registers **no** new `Process`.
 
 **Loops.** Sim: none — notebook is an observer of existing events / fields. Game: after something noticeable happens, the player can open a short notebook answer that names causes already visible in the world.
 
-**Register / candidates.** U-006 Locked; U-004; T-006.
+**Register / candidates.** U-006 Current (Lock still reviewer); U-004; T-006.
 
 **Bans.** Charts as primary readout. Guaranteed next-move advice. Inventing events not backed by sim state. Cloud / precip-phase `Process` (full C-020, later).
 
 **Gate.** After Slice A+ machine green.
 
-- [ ] Composition note `docs/slices/notebook-composition.md` — MVP question set + event vocabulary
-- [ ] Minimal notebook UI chrome (observer); seed from existing notebook strings
-- [ ] Tier-M: write isolation if it reads WorldState; no sim RNG
-- [ ] `docs/slices/notebook.json` (or equivalent id)
-- [ ] **Next-but-one:** full C-020 clouds or scenario campaign — choose at closeout
+- [x] Composition note `docs/slices/notebook-composition.md` — MVP question set + event vocabulary
+- [x] Minimal notebook UI chrome (observer); seed from existing notebook strings
+- [x] Tier-M: write isolation if it reads WorldState; no sim RNG
+- [x] `docs/slices/notebook.json` (or equivalent id)
+- [x] **Next-but-one:** full C-020 clouds (§4.21) — chosen at closeout (owner still wants clouds; scenario campaign still gated on C-009/C-010)
+
+---
+
+### 4.21 Full C-020 clouds / precip phase (stub)
+
+**Why this exists.** Slice R / mid-path rain-feel Pass left clouds as the remaining weather read. Full C-020 is a new precip-phase / cloud `Process` — **D-007 clip line required before implementation**.
+
+**Loops.** Sim: cloud / precip-phase process (TBD). Game: weather reads as weather, not only ground darkening + cue streaks.
+
+**Register / candidates.** C-020 Open; D-007 Locked.
+
+**Bans.** Skipping the twenty-second clip verdict. Place-targeted storms.
+
+**Gate.** After Field Notebook machine green; clip Pass before coding the Process.
+
+- [ ] D-007 twenty-second clip verdict recorded in this entry before Process registration
+- [ ] Composition note + process ownership
+- [ ] Tier-M probes / baselines with stated reasons
+- [ ] Next-but-one: scenario campaign or other queue tip
 
 ---
 
@@ -692,11 +711,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | Slice | Focus | Register | Gate |
 |---|---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed from `veg.cover` | AUD-003, C-014 | **Done** (§4.19) |
-| — | Field Notebook UI | U-006 | **Next** (§4.20) |
-| — | Full C-020 clouds / precip phase | C-020 | Later — owner wants; new `Process` needs its own clip line |
+| — | Field Notebook UI | U-006 | **Done** (§4.20) — Lock still reviewer |
+| — | Full C-020 clouds / precip phase | C-020 | **Next** (§4.21) — new Process needs clip line |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Next: Field Notebook UI** (§4.20). Full C-020 clouds later.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Next: full C-020 clouds** (§4.21).
 
 ---
 

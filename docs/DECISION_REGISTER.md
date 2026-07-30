@@ -134,6 +134,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.8 — U-006 MVP Field Notebook contract shipped.**
+
+- Filed MVP question set, event vocabulary, scale, and uncertainty language in `docs/slices/notebook-composition.md` with observer chrome (`src/notebook/`, `src/ui/notebookChrome.ts`). §16 item 12 struck as contract-complete; **U-006** remains Current until reviewer Lock (criterion + [docs/candidates/U-006-dossier.md](candidates/U-006-dossier.md)).
+
 **v2.0.7 — Maritime shore Tier-O Pass (C-016 / C-017 owner halves).**
 
 - Owner Pass on [batch-maritime-shore.md](playtests/batch-maritime-shore.md) after wind/tide cues and water display-depth smoothing. **C-016** / **C-017** owner halves discharged; remain Open until Lock (Promotion authority: Owner). Presentation: `WindArrowMesh`, MHW cage ring, `waterDisplayTauSeconds` observer lerp.
@@ -1281,7 +1285,7 @@ Ordered by how many other decisions depend on them.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
-12. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
+12. ~~**U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions~~ **Contract shipped** (Field Notebook UI / `docs/slices/notebook-composition.md`); **Lock** still reviewer corpus sample ([docs/candidates/U-006-dossier.md](candidates/U-006-dossier.md)).
 13. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
 14. **E-008 and E-009** — role-resolution and inferred-readiness prototypes; E-009 rises if C-007 makes readiness the arrival gate.
 

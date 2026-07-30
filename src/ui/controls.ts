@@ -101,6 +101,7 @@ export function mountControls(
     onUndo: () => void;
     onRememberForm: () => void;
     onToggleBrief: () => void;
+    onToggleNotebook: () => void;
   },
 ): {
   setRainRegime: (id: RainRegimeId) => void;
@@ -210,6 +211,16 @@ export function mountControls(
     "Accept or dismiss scenario brief (G-002 / Slice 15)",
   );
   briefBtn.addEventListener("click", handlers.onToggleBrief);
+
+  const notebookBtn = document.createElement("button");
+  notebookBtn.type = "button";
+  notebookBtn.id = "toggle-notebook";
+  notebookBtn.textContent = "Notebook";
+  notebookBtn.setAttribute(
+    "aria-label",
+    "Open or close Field Notebook (U-006)",
+  );
+  notebookBtn.addEventListener("click", handlers.onToggleNotebook);
 
   const rememberBtn = document.createElement("button");
   rememberBtn.type = "button";
@@ -348,6 +359,7 @@ export function mountControls(
   bar.append(
     forcePanel,
     briefBtn,
+    notebookBtn,
     resetBtn,
     rememberBtn,
     saveBtn,

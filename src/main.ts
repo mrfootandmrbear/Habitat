@@ -50,6 +50,12 @@ import {
 } from "./audio/AudioBus";
 import { applyMixToGain, type GainTarget } from "./audio/webAudioHook";
 import { mountBriefChrome } from "./ui/briefChrome";
+import { mountNotebookChrome } from "./ui/notebookChrome";
+import {
+  answerNotebook,
+  freezeNotebookSnapshot,
+} from "./notebook/FieldNotebook";
+import type { NotebookQuestionId } from "./notebook/types";
 import {
   ScenarioSession,
   livingHollowObjective,
@@ -114,7 +120,10 @@ scene.add(windArrow.group);
 scene.add(rainCue.group);
 
 const briefChrome = mountBriefChrome(app);
+const notebookChrome = mountNotebookChrome(app);
 let scenarioSession: ScenarioSession | null = null;
+let notebookOpen = false;
+let notebookQuestion: NotebookQuestionId = "what-changed";
 
 function syncBriefChrome(): void {
   if (!scenarioSession) {
@@ -136,6 +145,37 @@ function syncBriefChrome(): void {
     samplesTaken: o.samplesTaken,
   });
 }
+
+function syncNotebookChrome(): void {
+  if (!notebookOpen) {
+    notebookChrome.setState({
+      open: false,
+      question: notebookQuestion,
+      answer: null,
+    });
+    return;
+  }
+  const snap = freezeNotebookSnapshot({
+    surfaceDepth: world.water.data,
+    soilMoisture: world.soilMoisture.data,
+    groundwater: world.groundwaterStorage.data,
+    cover: world.vegCover.data,
+    herbBiomass: world.herbBiomass.data,
+    fireScar: world.fireScar.data,
+    limitingFactor: world.habitatLimitingFactor.data,
+    oceanCells: world.oceanCells,
+  });
+  notebookChrome.setState({
+    open: true,
+    question: notebookQuestion,
+    answer: answerNotebook(notebookQuestion, snap),
+  });
+}
+
+notebookChrome.onQuestion((id) => {
+  notebookQuestion = id;
+  syncNotebookChrome();
+});
 
 scene.add(sitingCursor.group);
 scene.add(flowCue.object);
@@ -246,6 +286,15 @@ const ui = mountControls(
       scenarioSession = new ScenarioSession(livingHollowObjective());
       syncBriefChrome();
       ui.setHint("Brief accepted — same loop, finite objective (G-002)");
+    },
+    onToggleNotebook: () => {
+      notebookOpen = !notebookOpen;
+      syncNotebookChrome();
+      ui.setHint(
+        notebookOpen
+          ? "Notebook open — ask after you have noticed something (U-004 / U-006)"
+          : "Notebook closed — look at the place",
+      );
     },
     onSeaLevel: (id) => {
       seaLevelId = id;
