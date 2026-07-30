@@ -1,0 +1,13 @@
+{
+  "id": "A",
+  "title": "Audio scaffold — field-driven ambient",
+  "simLoop": "none new — audio is a pure observer of water.surfaceDepth (T-006)",
+  "gameLoop": "Ambient water gain rises with surface water and goes meaningfully silent when the hollow is dry (AUD-001 / AUD-002; C-014 hypothesis)",
+  "registerIds": ["AUD-001", "AUD-002", "AUD-003", "T-006", "T-001", "C-014"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/audio/audio.test.ts"],
+  "probes": [],
+  "fields": ["water.surfaceDepth"],
+  "notebookSeed": "The hollow went quiet when the water left.",
+  "tierO": "owner half of C-014 outstanding — does the silence read as the place going quiet, or as the sound breaking? (dossier only; not a playtest ask)"
+}
