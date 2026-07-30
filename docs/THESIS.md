@@ -176,7 +176,7 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-004** | Force control as an intervention axis distinct from spatial siting |
 | **C-005** | Branch-and-compare as a core instrument rather than a deferred tool |
 | **C-006** | Sculpting is abundant; scarcity lives in ecological time |
-| **C-007** | Arrival / colonization as the primary biological verb |
+| **C-007** | Arrival / colonization as the primary biological verb | **Locked** (Slice 12) |
 | **C-008** | Intervention → visible response budget (the RCT3 immediacy constraint) |
 | **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
 | **C-010** | Legacy substances (contaminant load) — the toxic-site scenario premise, and the missing substrate for S-007 / S-008 |

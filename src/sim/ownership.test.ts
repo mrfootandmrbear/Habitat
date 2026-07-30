@@ -9,6 +9,8 @@ import { groundwaterProcess } from "./process/groundwaterProcess";
 import { habitatProcess } from "./process/habitatProcess";
 import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
+import { dispersalProcess } from "./process/dispersalProcess";
+import { vegetationSeasonalProcess } from "./process/vegetationSeasonalProcess";
 import type { Process } from "./process/Process";
 
 const PROCESSES: Process[] = [
@@ -17,6 +19,8 @@ const PROCESSES: Process[] = [
   groundwaterProcess,
   habitatProcess,
   vegetationProcess,
+  vegetationSeasonalProcess,
+  dispersalProcess,
   geomorphologyProcess,
   fuelProcess,
   fireProcess,
@@ -77,5 +81,13 @@ describe("scheduler order (SIMULATION_MODEL §5.1)", () => {
     expect(soilWaterProcess.lagged).toContain("soil.infiltrationCapacity");
     const world = new WorldState(generateMountain(8, 8, 2, 1));
     expect(() => world.scheduler.orderedForBand("daily")).not.toThrow();
+  });
+
+  it("orders seasonal vegetation after habitat-readable seed bank exists", () => {
+    const world = new WorldState(generateMountain(8, 8, 2, 1));
+    const seasonal = world.scheduler.orderedForBand("seasonal").map((p) => p.id);
+    expect(seasonal).toContain("vegetation");
+    const annual = world.scheduler.orderedForBand("annual").map((p) => p.id);
+    expect(annual).toEqual(["dispersal"]);
   });
 });

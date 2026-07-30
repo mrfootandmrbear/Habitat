@@ -5,6 +5,7 @@ import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
 import { understoryLightRgb } from "../ui/lightEncoding";
 import { defaultTerrainRgb } from "../ui/terrainEncoding";
+import { herbBiomassRgb } from "../ui/occupantEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
 
 const BASE = new THREE.Color(0x8b7355);
@@ -223,6 +224,23 @@ export class TerrainMesh {
           world.getActualEt(x, z) / Math.max(config.etRate, 1e-6),
         );
         col.setRGB(0.25 + 0.2 * t, 0.35 + 0.4 * t, 0.55 + 0.2 * t);
+        break;
+      }
+      case "herbBiomass": {
+        const [r, g, b] = herbBiomassRgb(
+          world.getHerbBiomass(x, z),
+          config.herbBiomassMax,
+        );
+        col.setRGB(r, g, b);
+        break;
+      }
+      case "seedBank": {
+        const t = Math.min(
+          1,
+          world.getHerbSeedBank(x, z) /
+            Math.max(config.seedSourceStrength, 1e-6),
+        );
+        col.setRGB(0.45 + 0.2 * t, 0.35 + 0.45 * t, 0.15 + 0.1 * t);
         break;
       }
       default:

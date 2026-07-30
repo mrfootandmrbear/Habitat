@@ -122,13 +122,14 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
 | **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
-| **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 dossier partial |
+| **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 Locked via Slice 12 |
 | **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Done — Tier-M** (Tier-O deferred; authored ignition; **C-003** Open) |
 | **11** | Insolation / Beer–Lambert light → succession trajectory | North/south, burned/unburned, wet/dry as different futures | **Done — Tier-M + Tier-P** (Tier-O deferred) |
-| **12** | Arrival / first occupant (C-007 hypothesis) | Something appears because the place suits it | **Next** — BUILD_GUIDE §4.8 |
-| **13+** | Biology integration, scenarios… | Notebook, readiness, completion… | After Slice 12 |
+| **12** | Arrival / first occupant (**C-007** Locked) | Something appears because the place suits it | **Done** — BUILD_GUIDE §4.8; owner Pass |
+| **13** | Biology → physics integration | Living hollow meets the next storm differently | **Next** — BUILD_GUIDE §4.9 |
+| **14+** | Scenarios, notebook… | Notebook, readiness, completion… | After Slice 13 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival / first occupant **next** (§4.8); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival **done** (**C-007 Locked**) → Slice 13 biology→physics **next** (§4.9); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
 
 ---
 

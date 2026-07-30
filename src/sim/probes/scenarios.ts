@@ -932,6 +932,110 @@ export function probeDisturbanceRecovery(): ProbeResult {
   };
 }
 
+/**
+ * Slice 12: paired suitable / unsuitable patches under one seed schedule (C-007).
+ * Suitable wet hollow earns herb biomass; dry unsuitable patch does not.
+ * Same seed + forcing → identical hash (T-001). Continuous establishment (C-003).
+ */
+export function probeArrivalEarned(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const make = () => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(0);
+    world.groundwaterStorage.fill(0);
+    // Suitable wet hollow near the edge (high seed pressure + high HSI).
+    const sx = 1;
+    const sz = 8;
+    world.soilMoisture.set(sx, sz, config.soilPorosity);
+    world.groundwaterStorage.set(sx, sz, config.hsiGwRefMeters);
+    // Unsuitable dry interior cell (zero moisture / GW → HSI 0).
+    const ux = 8;
+    const uz = 8;
+    world.soilMoisture.set(ux, uz, 0);
+    world.groundwaterStorage.set(ux, uz, 0);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return { world, sx, sz, ux, uz };
+  };
+
+  const a = make();
+  const b = make();
+  const hashMatch = a.world.stateHash() === b.world.stateHash() ? 1 : 0;
+  if (hashMatch !== 1) {
+    throw new Error("arrival-earned: replay hash mismatch");
+  }
+
+  const suitableBiomass = a.world.getHerbBiomass(a.sx, a.sz);
+  const unsuitableBiomass = a.world.getHerbBiomass(a.ux, a.uz);
+  const suitableHsi = a.world.getHabitatSuitability(a.sx, a.sz);
+  const unsuitableHsi = a.world.getHabitatSuitability(a.ux, a.uz);
+  const suitableSeed = a.world.getHerbSeedBank(a.sx, a.sz);
+  const unsuitableSeed = a.world.getHerbSeedBank(a.ux, a.uz);
+  const suitableEst = a.world.getHerbEstablishment(a.sx, a.sz);
+  const unsuitableEst = a.world.getHerbEstablishment(a.ux, a.uz);
+  const biomassDelta = suitableBiomass - unsuitableBiomass;
+
+  if (!(suitableHsi > 0.5)) {
+    throw new Error(`arrival-earned: suitable HSI too low (${suitableHsi})`);
+  }
+  if (unsuitableHsi !== 0) {
+    throw new Error(`arrival-earned: unsuitable HSI expected 0 (got ${unsuitableHsi})`);
+  }
+  if (!(suitableBiomass > 0.1)) {
+    throw new Error(
+      `arrival-earned: suitable biomass too low (${suitableBiomass})`,
+    );
+  }
+  if (unsuitableBiomass !== 0) {
+    throw new Error(
+      `arrival-earned: unsuitable biomass expected 0 (got ${unsuitableBiomass})`,
+    );
+  }
+  if (!(biomassDelta > 0.1)) {
+    throw new Error(`arrival-earned: biomass delta too small (${biomassDelta})`);
+  }
+
+  let bounded = 1;
+  for (let i = 0; i < a.world.herbBiomass.data.length; i++) {
+    const v = a.world.herbBiomass.data[i]!;
+    if (!Number.isFinite(v) || v < 0 || v > config.herbBiomassMax + 1e-6) {
+      bounded = 0;
+      break;
+    }
+  }
+
+  return {
+    scenario: "arrival-earned",
+    records: [
+      {
+        label: "suitable",
+        hsi: suitableHsi,
+        seedBank: suitableSeed,
+        establishment: suitableEst,
+        biomass: suitableBiomass,
+      },
+      {
+        label: "unsuitable",
+        hsi: unsuitableHsi,
+        seedBank: unsuitableSeed,
+        establishment: unsuitableEst,
+        biomass: unsuitableBiomass,
+      },
+      {
+        label: "delta",
+        biomassDelta,
+        hashMatch,
+        bounded,
+        earned: biomassDelta > 0.1 && unsuitableBiomass === 0 ? 1 : 0,
+      },
+    ],
+  };
+}
+
 function meanGrid(data: Float32Array): number {
   return sumGrid(data) / data.length;
 }
@@ -973,6 +1077,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "succession-diverge": probeSuccessionDiverge,
   "drydown-feedback": probeDrydownFeedback,
   "disturbance-recovery": probeDisturbanceRecovery,
+  "arrival-earned": probeArrivalEarned,
 };
 
 export function runProbe(name: string): ProbeResult {

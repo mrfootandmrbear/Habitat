@@ -178,6 +178,20 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "pulse.relResidual": { abs: 1e-5 },
     "pulse.bounded": { abs: 0 },
   },
+  "arrival-earned": {
+    "suitable.hsi": { abs: 1e-6 },
+    "suitable.seedBank": { abs: 1e-5 },
+    "suitable.establishment": { abs: 1e-6 },
+    "suitable.biomass": { abs: 1e-5 },
+    "unsuitable.hsi": { abs: 0 },
+    "unsuitable.seedBank": { abs: 1e-5 },
+    "unsuitable.establishment": { abs: 1e-6 },
+    "unsuitable.biomass": { abs: 0 },
+    "delta.biomassDelta": { abs: 1e-5 },
+    "delta.hashMatch": { abs: 0 },
+    "delta.bounded": { abs: 0 },
+    "delta.earned": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

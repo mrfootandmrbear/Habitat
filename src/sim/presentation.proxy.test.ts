@@ -14,6 +14,7 @@ import {
 } from "./formMemory";
 import { lightEncodingDelta } from "../ui/lightEncoding";
 import { terrainEncodingDelta } from "../ui/terrainEncoding";
+import { occupantEncodingDelta } from "../ui/occupantEncoding";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("worldToGrid snaps world hits to integer cells", () => {
@@ -129,6 +130,11 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
       { moisture: 0.2, cover: 0.4, scar: 0.85 },
       config.soilPorosity,
     );
+    expect(delta).toBeGreaterThan(0.15);
+  });
+
+  it("herb occupant encoding clears the perceptual floor against pre-arrival", () => {
+    const delta = occupantEncodingDelta(0, 0.45, config.herbBiomassMax);
     expect(delta).toBeGreaterThan(0.15);
   });
 });

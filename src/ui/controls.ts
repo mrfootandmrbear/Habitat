@@ -29,6 +29,8 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "fuelLoad", label: "Inspect: fuel load" },
   { id: "potentialEt", label: "Inspect: potential ET" },
   { id: "actualEt", label: "Inspect: actual ET" },
+  { id: "herbBiomass", label: "Inspect: herb biomass" },
+  { id: "seedBank", label: "Inspect: herb seed bank" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */

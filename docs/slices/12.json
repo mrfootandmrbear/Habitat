@@ -1,0 +1,24 @@
+{
+  "id": "12",
+  "title": "Arrival / first occupant",
+  "simLoop": "Fixed preserve-perimeter seed source feeds an exponential seed bank; Liebig HSI gates continuous herb establishment into veg.biomass.herb without a player introduction action.",
+  "gameLoop": "Shape and wet a hollow, run time, and see first shoots appear where conditions earned them.",
+  "registerIds": ["C-007", "ES-006", "E-009", "W-003", "E-004", "T-001", "T-003", "T-005", "T-006", "N-001", "N-004", "C-003"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/arrival.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/save.test.ts"
+  ],
+  "probes": ["arrival-earned"],
+  "fields": [
+    "veg.seedBank.herb",
+    "veg.establishment.herb",
+    "veg.biomass.herb",
+    "clock.daysSinceSeasonal",
+    "clock.daysSinceAnnual"
+  ],
+  "notebookSeed": "The first shoots appeared in the hollow I kept wet.",
+  "tierO": "Pass — appearance of life should mimic real life; therefore through earned conditions (owner 2026-07-29); C-007 Locked"
+}

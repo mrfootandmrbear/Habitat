@@ -120,6 +120,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Promoted **P-005** (save states) from hypothesis-Current to Locked after the `deep-time` probe discharged its criterion: save → advance 100 compressed sim-years → reload → advance again yields an identical state hash, and legacy `soil.depth` from a save still drives divergent decadal production. Artifact: `docs/evidence/deep-time.baseline.json`, `src/sim/probes/deepTime.ts`.
 
+**v2.0.4 — C-007 Locked (Slice 12 owner Pass).**
+
+- Promoted **C-007** (arrival as the primary biological verb) from Open to Locked after the machine half (Liebig HSI gate, `arrival-earned` probe: suitable biomass = 2.5, unsuitable = 0, `earned = 1`, `hashMatch = 1`) and the owner verdict that appearance of life must mimic real life and therefore arrive through earned conditions. Introduction remains secondary and later; **RC-003** falls in §16 queue priority. Artifacts: `docs/slices/12-composition.md`, `docs/evidence/arrival-earned.baseline.json`, `docs/playtests/12-arrival-earned.md`, `docs/candidates/C-007-dossier.md`.
+
 **v2.0.3 — C-001 Locked (Slice 8b).**
 
 - Promoted **C-001** (cheap groundwater / baseflow store) from Open to Locked after Tier-M conservation including the GW compartment stayed within H-004 bounds and probe `baseflow-persist` showed channel wetness after wet→dry with GW strictly greater than the no-GW baseline (channel ≈ 0.011 vs 0; GW sum ≈ 30). Artifact: `docs/evidence/baseflow-persist.baseline.json`. Richards/MODFLOW remain banned in-browser.
@@ -1086,7 +1090,7 @@ Restored in v1.3. These are binding prohibitions, not summaries. They exist as a
 
 **Owner direction (2026-07-28).** Ecological consequence via the **Allee effect** (NATURAL_PROCESS_MATH §3.4): failure costs the founding population and the ecological time spent, the mechanism is inspectable, and no counter is introduced. Still Open — the criterion requires the strategy comparison, not a preference.
 
-**Priority note.** If **C-007** resolves toward arrival/colonization as the primary biological verb, deliberate introduction becomes a secondary mode and this entry falls in the §16 queue rather than being answered sooner. Decide C-007 first.
+**Priority note.** **C-007** is Locked: arrival is primary; deliberate introduction is secondary and later. This entry stays Open for when introduction ships, but it is not next on the queue.
 
 **Known weakness of the leading direction.** Ecological consequence scales with what is already present. In a degraded preserve — precisely where repeated attempts are most likely — there may be little left to damage, so the consequence approaches zero exactly when the limiting mechanism is most needed.
 
@@ -1231,7 +1235,7 @@ Ordered by how many other decisions depend on them.
 **Reordered 2026-07-28** after [THESIS.md](THESIS.md) was written. The thesis candidates lead because they decide what the remaining slices are *for*; introduction-shaped questions fall until C-007 settles whether introduction is even the primary verb.
 
 1. **C-004** — force control as an intervention axis (the post-build verb; no entry currently records it).
-2. **C-007** — arrival vs introduction as the primary biological verb (re-motivates the HSI spine; demotes RC-003 if it lands).
+2. ~~**C-007** — arrival vs introduction as the primary biological verb~~ **Locked** (Slice 12 / owner Pass — earned conditions).
 3. **C-005** — branch-and-compare as a core instrument rather than deferred tooling.
 4. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
 5. ~~**C-001** — cheap GW/baseflow store~~ **Locked** (Slice 8b / `baseflow-persist`).
@@ -1243,7 +1247,7 @@ Ordered by how many other decisions depend on them.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
-9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee), priority contingent on C-007.
+9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
 12. **U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions.
@@ -1322,13 +1326,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** Abundant sculpting, scarce time. Requires no register supersession — A-005 and RC-004 already permit it — but the tone should be stated so agents stop inferring rationing.
 
 ### C-007 — Arrival as the primary biological verb
-**Status:** Open
+**Status:** Locked
 
-**Question.** Is the primary biological mode **colonization / arrival** — you make conditions and something shows up if they suit — rather than deliberate introduction (E-007, E-008, RC-003)? THESIS §5.
+**Decision.** The primary biological mode is **colonization / arrival**: the player creates conditions; life appears when those conditions suit it. Deliberate introduction (E-007, E-008, RC-003) is secondary and later. The limiting-factor / HSI spine is the **arrival gate**, not an inspector layer. Appearance of life must mimic real life — earned by place, never an authored spawn.
 
-**Constraints.** D-001 favors arrival. E-007's attemptable-role framing and RC-003's failed-introduction consequence assume introduction is primary; if arrival leads, RC-003 falls in priority rather than being answered. ES-006 (capacity emerges) and E-009 (readiness inferred) both fit arrival naturally.
+**Why.** D-001: the player creates conditions; natural systems do the work. THESIS §5: you dig the moat and something moves in because the place suits it. Owner Pass (2026-07-29): appearance should mimic real life, therefore through earned conditions. Authored unlock checklists and random spawn tables fail N-004 and the thesis contract.
 
-**Leading direction.** Arrival primary, introduction secondary and later. This re-motivates the limiting-factor / HSI spine as the **arrival gate** rather than an inspector layer.
+**Implications.** No introduction/place-species tool is required for the first biological payoff. Establishment couples to inspectable suitability (monotone in the limiting input). Dispersal pressure is a real path — occupancy is never copied from HSI alone. RC-003's failed-introduction consequence is deferred until introduction is built as a secondary mode. E-009 readiness stays inferred from state.
+
+**Rejected alternatives.** Deliberate introduction as the primary biological verb. Occupancy painted from HSI with no dispersal. Hidden readiness unlock tables (Viva Piñata checklist form). Ambient or unsaved randomness as the arrival mechanism while C-003 remains Open for climate.
+
+**Evidence.** Slice 9 HSI gate + Slice 12 occupant. Probe `arrival-earned`: suitable biomass = 2.5, unsuitable = 0, `earned = 1`, `hashMatch = 1`. Tier-P `occupantEncodingDelta(0, 0.45) > 0.15`. Owner verdict: earned conditions. Artifacts: `docs/evidence/arrival-earned.baseline.json`, `docs/slices/12-composition.md`, `docs/playtests/12-arrival-earned.md`.
+
+**Constraints.** D-001, ES-006, E-009, W-003 / E-004, T-001, T-003, T-005, N-001, N-004.
 
 ### C-008 — Intervention → visible response budget
 **Status:** Open

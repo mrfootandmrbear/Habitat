@@ -81,7 +81,9 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
     const world = new WorldState(generateMountain(16, 16, 8, 2));
     const ids = world.registry.list().map((f) => f.id);
     expect(ids).toEqual([
+      "clock.daysSinceAnnual",
       "clock.daysSinceDecadal",
+      "clock.daysSinceSeasonal",
       "clock.eventStepsSinceDaily",
       "clock.simMinutes",
       "depression.depth",
@@ -110,9 +112,12 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "soil.moisture",
       "surface.roughness",
       "terrain.elevation",
+      "veg.biomass.herb",
       "veg.cover",
+      "veg.establishment.herb",
       "veg.infiltrationContribution",
       "veg.leafAreaIndex",
+      "veg.seedBank.herb",
       "water.surfaceDepth",
     ]);
 

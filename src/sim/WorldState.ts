@@ -6,13 +6,20 @@ import { SimScheduler } from "./process/scheduler";
 import { surfaceWaterProcess } from "./process/surfaceWaterProcess";
 import { soilWaterProcess } from "./process/soilWaterProcess";
 import { vegetationProcess } from "./process/vegetationProcess";
+import { vegetationSeasonalProcess } from "./process/vegetationSeasonalProcess";
 import { geomorphologyProcess } from "./process/geomorphologyProcess";
 import { groundwaterProcess } from "./process/groundwaterProcess";
 import { habitatProcess } from "./process/habitatProcess";
 import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
+import { dispersalProcess } from "./process/dispersalProcess";
 import { fluxStep } from "./hydrology/fluxStep";
 import { evaluateHsi } from "./habitat/hsiComposition";
+import {
+  establishmentProbability,
+  nextHerbBiomass,
+  seedPressureAt,
+} from "./habitat/arrivalComposition";
 import {
   computeD8Accumulation,
   computeD8FlowDirection,
@@ -98,6 +105,21 @@ export class WorldState {
    * Proportional to fuel consumed × spread rate proxy. Owner: fire, band: event.
    */
   readonly fireIntensity: Grid2D;
+  /**
+   * Herb seed bank (seeds·m⁻²) — Slice 12, fixed perimeter source (C-007).
+   * Owner: dispersal, band: annual. Legacy: colonization memory (T-003 / S-007).
+   */
+  readonly herbSeedBank: Grid2D;
+  /**
+   * Establishment probability [0,1] — Slice 12 inspectable arrival chance.
+   * Owner: dispersal; refreshed on annual commit from seed × HSI.
+   */
+  readonly herbEstablishment: Grid2D;
+  /**
+   * Herb biomass (kg DM·m⁻²) — Slice 12 first occupant.
+   * Owner: vegetation, band: seasonal. Not legacy (herbaceous).
+   */
+  readonly herbBiomass: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -130,6 +152,10 @@ export class WorldState {
   private readonly bandPhaseBox: ScalarBox = { value: 0 };
   /** Days since last decadal band (prototype ladder). */
   private readonly decadalPhaseBox: ScalarBox = { value: 0 };
+  /** Days since last seasonal band (Slice 12). */
+  private readonly seasonalPhaseBox: ScalarBox = { value: 0 };
+  /** Days since last annual band (Slice 12). */
+  private readonly annualPhaseBox: ScalarBox = { value: 0 };
   /** Integer sim-minute clock (SIMULATION_MODEL §6.1). */
   private readonly simMinutesBox: ScalarBox = { value: 0 };
 
@@ -193,6 +219,9 @@ export class WorldState {
     this.fuelLoad = new Grid2D(this.width, this.height);
     this.fireBurning = new Grid2D(this.width, this.height);
     this.fireIntensity = new Grid2D(this.width, this.height);
+    this.herbSeedBank = new Grid2D(this.width, this.height);
+    this.herbEstablishment = new Grid2D(this.width, this.height);
+    this.herbBiomass = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
@@ -215,12 +244,16 @@ export class WorldState {
       groundwaterProcess,
       habitatProcess,
       vegetationProcess,
+      vegetationSeasonalProcess,
+      dispersalProcess,
       geomorphologyProcess,
       fuelProcess,
       fireProcess,
     ]);
 
     this.recomputeFlowStructure();
+    // Fixed perimeter seed pressure available from t=0; annual band refreshes it.
+    this.runDispersalStep(1);
   }
 
   get hydrologyModel(): HydrologyModel {
@@ -297,6 +330,20 @@ export class WorldState {
     this.decadalPhaseBox.value = v;
   }
 
+  get daysSinceSeasonal(): number {
+    return this.seasonalPhaseBox.value;
+  }
+  private set daysSinceSeasonal(v: number) {
+    this.seasonalPhaseBox.value = v;
+  }
+
+  get daysSinceAnnual(): number {
+    return this.annualPhaseBox.value;
+  }
+  private set daysSinceAnnual(v: number) {
+    this.annualPhaseBox.value = v;
+  }
+
   get simMinutes(): number {
     return this.simMinutesBox.value;
   }
@@ -307,8 +354,8 @@ export class WorldState {
   /**
    * Advance one event band tick (config.eventDtMinutes sim-minutes).
    * `dt` is the flux integrator step within the event (defaults to eventFluxDt).
-   * Daily band receives dt in sim-days (1 = one full day); decadal receives
-   * band units (1 = one full compressed decadal commit) — rates scale by dt.
+   * Daily band receives dt in sim-days (1 = one full day); seasonal / annual /
+   * decadal receive band units (1 = one full compressed commit) — rates scale by dt.
    */
   stepEvent(dt: number = config.eventFluxDt): void {
     if (this.structureDirty) {
@@ -325,6 +372,20 @@ export class WorldState {
       this.scheduler.runBand("daily", this, 1);
       this.decayFireScar(1);
       this.registry.assertBounds("daily");
+
+      this.daysSinceSeasonal = this.daysSinceSeasonal + 1;
+      if (this.daysSinceSeasonal >= config.seasonalDailySteps) {
+        this.daysSinceSeasonal = 0;
+        this.scheduler.runBand("seasonal", this, 1);
+        this.registry.assertBounds("seasonal");
+      }
+
+      this.daysSinceAnnual = this.daysSinceAnnual + 1;
+      if (this.daysSinceAnnual >= config.annualDailySteps) {
+        this.daysSinceAnnual = 0;
+        this.scheduler.runBand("annual", this, 1);
+        this.registry.assertBounds("annual");
+      }
 
       this.daysSinceDecadal = this.daysSinceDecadal + 1;
       if (this.daysSinceDecadal >= config.decadalDailySteps) {
@@ -652,6 +713,61 @@ export class WorldState {
   }
 
   /**
+   * Annual seed bank from fixed preserve-perimeter source (Slice 12 / C-007).
+   * Also snapshots establishment probability from current Liebig HSI.
+   */
+  runDispersalStep(_dt: number): void {
+    const seed = this.herbSeedBank.data;
+    const est = this.herbEstablishment.data;
+    const hsi = this.habitatSuitability.data;
+    const strength = config.seedSourceStrength;
+    const mean = config.seedMeanDistanceCells;
+    const scale = config.herbEstablishmentScale;
+
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const pressure = seedPressureAt(
+          x,
+          z,
+          this.width,
+          this.height,
+          strength,
+          mean,
+        );
+        seed[i] = pressure;
+        est[i] = establishmentProbability(pressure, hsi[i]!, scale);
+      }
+    }
+  }
+
+  /**
+   * Seasonal herb establishment — continuous biomass from seed × HSI.
+   * Zero suitability blocks growth. Does not write veg.cover (Slice 13).
+   */
+  runHerbEstablishmentStep(dt: number): void {
+    const scale = Math.max(0, dt);
+    const seed = this.herbSeedBank.data;
+    const hsi = this.habitatSuitability.data;
+    const biomass = this.herbBiomass.data;
+    const estScale = config.herbEstablishmentScale;
+    const rate = config.herbEstablishmentRate;
+    const maxB = config.herbBiomassMax;
+
+    for (let i = 0; i < biomass.length; i++) {
+      biomass[i] = nextHerbBiomass({
+        biomass: biomass[i]!,
+        seedBank: seed[i]!,
+        habitatSuitability: hsi[i]!,
+        establishmentScale: estScale,
+        establishmentRate: rate,
+        biomassMax: maxB,
+        dt: scale,
+      });
+    }
+  }
+
+  /**
    * Olson litter model (NATURAL_PROCESS_MATH §3.5): dL/dt = I − k·L.
    * Input I proportional to veg.cover; runs on decadal band.
    * `dt` is band units (1 = one full compressed decadal commit).
@@ -943,6 +1059,21 @@ export class WorldState {
     return this.fireScar.get(x, z);
   }
 
+  getHerbBiomass(x: number, z: number): number {
+    if (!this.herbBiomass.inBounds(x, z)) return 0;
+    return this.herbBiomass.get(x, z);
+  }
+
+  getHerbSeedBank(x: number, z: number): number {
+    if (!this.herbSeedBank.inBounds(x, z)) return 0;
+    return this.herbSeedBank.get(x, z);
+  }
+
+  getHerbEstablishment(x: number, z: number): number {
+    if (!this.herbEstablishment.inBounds(x, z)) return 0;
+    return this.herbEstablishment.get(x, z);
+  }
+
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
     this.applyTerrainBrush(cx, cz, amount);
   }
@@ -1229,6 +1360,37 @@ export class WorldState {
         range: [0, 1] as const,
       },
       {
+        id: "veg.seedBank.herb",
+        units: "seeds/m²",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        // T-003: colonization memory — not reconstructible from current forcing.
+        legacy: true,
+        data: this.herbSeedBank.data,
+        range: [0, 1e5] as const,
+      },
+      {
+        id: "veg.establishment.herb",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.herbEstablishment.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "veg.biomass.herb",
+        units: "kg DM/m²",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "seasonal" as const,
+        legacy: false,
+        data: this.herbBiomass.data,
+        range: [0, config.herbBiomassMax] as const,
+      },
+      {
         id: "ledger.fuelConsumed",
         units: "kg/m²",
         shape: "scalar" as const,
@@ -1337,6 +1499,26 @@ export class WorldState {
         legacy: true,
         data: this.decadalPhaseBox,
         range: [0, config.decadalDailySteps] as const,
+      },
+      {
+        id: "clock.daysSinceSeasonal",
+        units: "days",
+        shape: "scalar" as const,
+        owner: "world",
+        band: "daily" as const,
+        legacy: true,
+        data: this.seasonalPhaseBox,
+        range: [0, config.seasonalDailySteps] as const,
+      },
+      {
+        id: "clock.daysSinceAnnual",
+        units: "days",
+        shape: "scalar" as const,
+        owner: "world",
+        band: "daily" as const,
+        legacy: true,
+        data: this.annualPhaseBox,
+        range: [0, config.annualDailySteps] as const,
       },
       {
         id: "clock.simMinutes",

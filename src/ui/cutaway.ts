@@ -14,6 +14,7 @@ export type CutawaySample = {
   elev: number;
   hsi?: number;
   limiting?: number;
+  herbBiomass?: number;
 };
 
 export function formatCutaway(sample: CutawaySample | null): string {
@@ -28,6 +29,9 @@ export function formatCutaway(sample: CutawaySample | null): string {
     const id = Math.round(sample.limiting) as LimitingFactorId;
     const label = LIMITING_LABELS[id] ?? "unknown";
     line += ` · HSI ${sample.hsi.toFixed(2)} · limiting ${label}`;
+  }
+  if (sample.herbBiomass !== undefined) {
+    line += ` · herb ${sample.herbBiomass.toFixed(2)}`;
   }
   return line;
 }

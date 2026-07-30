@@ -88,10 +88,11 @@ Summary only — do not reopen unless fixing regressions.
 | 11 | Slope/aspect + Beer–Lambert light | Same rules, different succession trajectories | `lightCompetition`, `succession-diverge` | Tier-M + Tier-P; Tier-O deferred |
 | drydown | Insolation × cover ET partitions | World dries unevenly after rain | `evapotranspiration`, `drydown-feedback` | Tier-M + Tier-P; audio wired |
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
+| 12 | Arrival / first occupant (C-007) | Shoots appear where conditions suit | `dispersalProcess`, `arrival-earned` | **Done** — C-007 Locked |
 
-**Current gate:** Dry-down ET coupling **Done** (agent) → **Slice 12** arrival / first occupant next (§4.8 specified under C-007). **Slice A** audio scaffold wired into the play loop (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
+**Current gate:** Slice 12 arrival / first occupant **Done** — **C-007 Locked** (owner Pass: earned conditions). **Next:** Slice 13 biology → physics integration (§4.9). **Slice A** audio scaffold wired (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -330,32 +331,59 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.8 Slice 12 — Arrival / first occupant *(specified; gate after dry-down)*
+### 4.8 Slice 12 — Arrival / first occupant *(Done — C-007 Locked)*
 
-**Why this exists.** [THESIS.md](THESIS.md) §5 names “life moves into it” as the missing payoff. Slice 9 built the inspectable suitability gate and Slice 11 made terrain/light produce different ecological futures; this slice tests **C-007** as a hypothesis by letting one real plant functional type arrive because a place became suitable, without a player introduction action.
+**Why this exists.** [THESIS.md](THESIS.md) §5 names “life moves into it” as the missing payoff. Slice 9 built the inspectable suitability gate and Slice 11 made terrain/light produce different ecological futures; this slice tests **C-007** by letting one real plant functional type arrive because a place became suitable, without a player introduction action.
 
 **Loops.** Sim: fixed preserve seed source → dispersal pressure × Liebig HSI → establishment / biomass for one plant functional type. Game: shape and wet the place, run time, and see an occupant appear where the conditions earned it.
 
-**Register / candidates.** **C-007** (Open; owner-judged — build the hypothesis, update its dossier, do not promote), **ES-006** (capacity from resources, no fixed `K`), **E-009** (readiness inferred), **W-003** / **E-004** (fixed preserve pool and functional type), **T-001** / **T-003** (seeded replay and saved RNG/state), **T-005** (arrival pressure / occupant inspectable), **N-001** / **N-004** (outcome is caused, never painted or arbitrary).
+**Register / candidates.** **C-007** (**Locked** — owner Pass 2026-07-29: appearance mimics real life via earned conditions), **ES-006**, **E-009**, **W-003** / **E-004**, **T-001** / **T-003**, **T-005**, **N-001** / **N-004**. Steal: Viva Piñata condition-earned arrival → `12-composition.md` (authored unlock checklists rejected).
 
 **Study.** NATURAL_PROCESS_MATH seed-dispersal kernel note (`p = 1 − e^{−Σ seeds}`) composed with §3.3 Liebig HSI; SIMULATION_MODEL §3.5 plant functional types. Write `docs/slices/12-composition.md` before code, including the fixed seed source, establishment equation, and why the chosen functional type belongs to Windward Basin.
 
-**Bans.** An introduction/place-species tool while C-007 is under test. Occupancy copied directly from HSI with no dispersal path. Unsaved or ambient randomness. A hidden readiness unlock. Invented species/material names. A second vegetation owner parallel to `vegetationProcess`.
+**Bans.** An introduction/place-species tool as the primary biological verb. Occupancy copied directly from HSI with no dispersal path. Unsaved or ambient randomness. A hidden readiness unlock. Invented species/material names. A second vegetation owner parallel to `vegetationProcess`.
 
-**Gate.** After Slice 11 (**Done**): inspectable light and divergent cover trajectories are available to the arrival gate. C-007 remains Open until its owner half reads as earned rather than spawned.
+**Gate.** After Slice 11 (**Done**). C-007 Locked after machine half + owner Pass.
 
-- [ ] Composition note names one real functional type, fixed preserve seed source, dispersal/establishment equation, and field ownership
-- [ ] Register seed pressure / establishment probability / occupant biomass (minimal set) with owner + annual/seasonal band; RNG or accumulated arrival state is save-safe (T-003)
-- [ ] Couple establishment to existing `habitat.suitability`; zero suitability prevents establishment
-- [ ] Tier-M: improving the limiting HSI input raises arrival probability; improving a non-limiting input does not
-- [ ] Tier-M: same seed + forcing → identical arrival hash; fields bounded / finite
-- [ ] Probe `arrival-earned`: paired suitable/unsuitable patches under one seed schedule, with baseline tolerances and measured arrival delta
-- [ ] Tier-P: occupant encoding clears perceptual floor against the pre-arrival state without requiring the inspector
-- [ ] Update `docs/candidates/C-007-dossier.md` with the completed machine half; owner-only question remains one sentence with no number
-- [ ] `docs/slices/12.json` manifest (DoD row 9)
-- [ ] Notebook seed: “The first shoots appeared in the hollow I kept wet.”
-- [ ] Tier-O (batch per ask gate): *when it appeared, did it feel earned by the place you made — or like a spawn?*
-- [ ] **Next-but-one:** specify Slice 13 biology → physics integration before Slice 12 closes (DoD row 10)
+- [x] Composition note names one real functional type, fixed preserve seed source, dispersal/establishment equation, and field ownership
+- [x] Register seed pressure / establishment probability / occupant biomass (minimal set) with owner + annual/seasonal band; RNG or accumulated arrival state is save-safe (T-003)
+- [x] Couple establishment to existing `habitat.suitability`; zero suitability prevents establishment
+- [x] Tier-M: improving the limiting HSI input raises arrival probability; improving a non-limiting input does not
+- [x] Tier-M: same seed + forcing → identical arrival hash; fields bounded / finite
+- [x] Probe `arrival-earned`: paired suitable/unsuitable patches under one seed schedule, with baseline tolerances and measured arrival delta (suitable biomass = 2.5, unsuitable = 0, `earned = 1`)
+- [x] Tier-P: occupant encoding clears perceptual floor against the pre-arrival state without requiring the inspector (`occupantEncodingDelta > 0.15`)
+- [x] Update `docs/candidates/C-007-dossier.md` with the completed machine half; owner-only question remains one sentence with no number
+- [x] `docs/slices/12.json` manifest (DoD row 9)
+- [x] Notebook seed: “The first shoots appeared in the hollow I kept wet.”
+- [x] Tier-O **Pass**: *when it appeared, did it feel earned by the place you made — or like a spawn?* — owner: earned conditions mimic real life; **C-007 Locked**
+- [x] **Next-but-one:** specify Slice 13 biology → physics integration before Slice 12 closes (DoD row 10) — §4.9
+
+---
+
+### 4.9 Slice 13 — Biology → physics integration *(specified; gate after Slice 12)*
+
+**Why this exists.** Slice 12 ships a first occupant that does not yet change how water moves. The thesis payoff is that a vegetated hollow meets the next storm differently than a bare one — Slice 6 already couples aggregate `veg.cover` to roughness/infiltration; this slice closes the loop from **earned herb biomass** into those physical properties (E-005) without inventing a second hydrology.
+
+**Loops.** Sim: `veg.biomass.herb` contributes to cover-equivalent roughness and infiltration (and optionally ET partitioning) so a colonized hollow retains more water / slows runoff versus an identical unsuitable patch. Game: keep a hollow wet until shoots appear, then run a storm and see the place answer differently.
+
+**Register / candidates.** **E-005** (biology changes physical properties), **F-001** (feedback loops visible), **ES-006**, **T-001**, **T-005**, **T-006**, **N-001**, **C-007** (Locked — arrival gate already closed).
+
+**Study.** SIMULATION_MODEL §11.3 integration test; existing `vegetationProcess` roughness/infiltration writes; Slice 6 `paired-storm` probe as the comparison pattern. Write `docs/slices/13-composition.md` before code: how herb biomass maps into cover contribution without dual-writing `veg.cover` authority, and which ledger/probe proves the storm divergence.
+
+**Bans.** Painting cover directly from HSI. A second process that owns `veg.cover`. Changing hydrology equations rather than contributing through existing vegetation physical properties. Stochastic weather (C-003 Open).
+
+**Gate.** After Slice 12 (**Done** agent half): herb biomass and arrival probe exist.
+
+- [ ] Composition note: herb biomass → physical contribution equation; field ownership; no dual cover authority
+- [ ] Wire `veg.biomass.herb` into roughness / infiltration (and ET if earned) via the existing vegetation owner or a declared contribute
+- [ ] Tier-M: colonized suitable patch vs bare unsuitable twin under one storm — runoff / infiltration delta in the earned direction
+- [ ] Tier-M: determinism + bounds; mass residual unchanged class
+- [ ] Probe `living-hollow` (or extend `paired-storm`): measured storm divergence from arrival
+- [ ] Tier-P: default view shows the living hollow answering the storm without inspector-required proof
+- [ ] `docs/slices/13.json` manifest (DoD row 9)
+- [ ] Notebook seed: “The hollow I kept wet held the next rain differently once shoots took.”
+- [ ] Tier-O (batch): *did the living hollow feel like it changed how the water moved — or like a separate green layer?*
+- [ ] **Next-but-one:** specify the following queue item to §4.3 depth before Slice 13 closes (DoD row 10)
 
 ---
 
@@ -364,11 +392,10 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | Slice | Focus | Register |
 |---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
-| 13 | Biology → physics integration test | E-005, F-001 |
 | — | Field Notebook UI | U-006 |
 | — | Scenarios | G-002, G-007 |
 
-Slice **11** is Done at §4.6. Slice **A** is Done (machine half) at §4.7. Slice **12** moved to §4.8 (specified under C-007). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slice **12** is Done (agent) at §4.8. Slice **13** is specified at §4.9. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

@@ -2,7 +2,7 @@
   "scenario": "regime-divergence",
   "metrics": {
     "light.hashN": {
-      "value": 3559440591,
+      "value": 880517504,
       "abs": 0
     },
     "light.precip": {
@@ -22,7 +22,7 @@
       "abs": 0
     },
     "heavy.hashN": {
-      "value": 1784891776,
+      "value": 2752887919,
       "abs": 0
     },
     "heavy.precip": {

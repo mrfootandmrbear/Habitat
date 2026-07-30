@@ -1,0 +1,53 @@
+{
+  "scenario": "arrival-earned",
+  "metrics": {
+    "suitable.hsi": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "suitable.seedBank": {
+      "value": 35.29987716674805,
+      "abs": 0.00001
+    },
+    "suitable.establishment": {
+      "value": 0.9406313896179199,
+      "abs": 0.000001
+    },
+    "suitable.biomass": {
+      "value": 2.5,
+      "abs": 0.00001
+    },
+    "unsuitable.hsi": {
+      "value": 0,
+      "abs": 0
+    },
+    "unsuitable.seedBank": {
+      "value": 16.674480438232422,
+      "abs": 0.00001
+    },
+    "unsuitable.establishment": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "unsuitable.biomass": {
+      "value": 0,
+      "abs": 0
+    },
+    "delta.biomassDelta": {
+      "value": 2.5,
+      "abs": 0.00001
+    },
+    "delta.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.bounded": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.earned": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

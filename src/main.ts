@@ -13,6 +13,7 @@ import { WaterMesh } from "./render/WaterMesh";
 import { createExtentCage } from "./render/ExtentCage";
 import { SitingCursor } from "./render/SitingCursor";
 import { FlowCueMesh } from "./render/FlowCueMesh";
+import { OccupantMesh } from "./render/OccupantMesh";
 import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
@@ -65,13 +66,16 @@ const waterMesh = new WaterMesh(n, n, config.worldSize);
 const extentCage = createExtentCage(config.worldSize, config.mountainPeak);
 const sitingCursor = new SitingCursor(n, n, config.worldSize);
 const flowCue = new FlowCueMesh(n, n, config.worldSize);
+const occupantMesh = new OccupantMesh(n, n, config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
 scene.add(extentCage);
 scene.add(sitingCursor.group);
 scene.add(flowCue.object);
+scene.add(occupantMesh.object);
 terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.updateFrom(model);
+occupantMesh.updateFrom(model, world);
 
 let rainRegime: RainRegimeId = "dry";
 let timeRate: TimeRate = "1x";
@@ -288,6 +292,7 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
     elev: model.getTerrainHeight(cell.x, cell.z),
     hsi: world.getHabitatSuitability(cell.x, cell.z),
     limiting: world.getLimitingFactor(cell.x, cell.z),
+    herbBiomass: world.getHerbBiomass(cell.x, cell.z),
   };
 }
 
@@ -315,6 +320,7 @@ function syncMeshes(): void {
   );
   waterMesh.updateFrom(model);
   flowCue.updateFrom(model, world);
+  occupantMesh.updateFrom(model, world);
   syncAudio();
 }
 

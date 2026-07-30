@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Dry-down ET **Done** (`drydown-feedback`, `disturbance-recovery`). Next: **Slice 12** arrival / first occupant (§4.8, C-007 hypothesis). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
+Slice 12 arrival / first occupant **Done** (**C-007 Locked** — owner Pass: earned conditions). Next: **Slice 13** biology → physics integration (§4.9). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
 
 ## Cursor Cloud specific instructions
 

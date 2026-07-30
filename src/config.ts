@@ -151,6 +151,23 @@ export const config = {
   fireVegMortality: 0.9,
   /** Max fire.fuelLoad (kg/m²) — bounds check. */
   fuelLoadMax: 20,
+
+  /**
+   * Slice 12 — Arrival / first occupant (C-007).
+   * Days between seasonal / annual band commits (prototype compression).
+   */
+  seasonalDailySteps: 10,
+  annualDailySteps: 36,
+  /** Perimeter seed source strength (seeds·m⁻² equivalent). */
+  seedSourceStrength: 40,
+  /** Exponential kernel mean distance (cells). */
+  seedMeanDistanceCells: 8,
+  /** Scales seedBank × HSI inside 1 − exp(−·). */
+  herbEstablishmentScale: 0.08,
+  /** Biomass increment per seasonal band at p = 1 (kg DM·m⁻² / band). */
+  herbEstablishmentRate: 0.35,
+  /** Resource-derived capacity at HSI = 1 (kg DM·m⁻²) — not fixed K (ES-006). */
+  herbBiomassMax: 2.5,
 } as const;
 
 export type InspectorLayer =
@@ -168,7 +185,9 @@ export type InspectorLayer =
   | "understoryLight"
   | "fuelLoad"
   | "potentialEt"
-  | "actualEt";
+  | "actualEt"
+  | "herbBiomass"
+  | "seedBank";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";
