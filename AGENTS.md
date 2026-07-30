@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **9** **Done** (Liebig HSI / `limiting-shift`). Next: **Slice 10** fire/fuel. Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
+Slice **10** **Done** (fire/fuel / `burn-recover`). Next: **Slice 11** light/succession (§4.6). Slice **A** audio scaffold **Done** (agent; C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
 
 ## Cursor Cloud specific instructions
 

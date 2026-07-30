@@ -84,8 +84,10 @@ Summary only — do not reopen unless fixing regressions.
 | 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
 | 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | Agent Done / Tier-O ready |
 | 9 | Liebig HSI / limiting factor | Inspect what holds a patch back | `hsiComposition`, `limiting-shift` | Tier-M; Tier-O deferred |
+| 10 | Fire / fuel (Olson + BFS) | Authored ignition; wet resists | `fireProcess`, `burn-recover` | Tier-M; Tier-O deferred |
+| A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 
-**Current gate:** Slice 9 **Done** (agent) → **Slice 10** fire/fuel next; next-but-one remains presentation / later stubs. Slice 8c Tier-O still batched.
+**Current gate:** Slice **10** fire/fuel **Done** (agent) → **Slice 11** light/succession next (§4.6 specified). **Slice A** audio scaffold **Done** (machine half; C-014 owner half outstanding). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -230,7 +232,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.5 Slice 10 — Fire / fuel
+### 4.5 Slice 10 — Fire / fuel *(Done — agent)*
 
 **Loops.** Sim: vegetation → fuel load → fire disturbance → cleared cover → succession restart (ES-002 — disturbance is necessary, not a failure state). Game: a pulse intervention with real semantics — the player sites a burn as a *cause* and lives with the result (A-002, A-006, A-005).  
 **Register / candidates.** ES-002, ES-001 (succession emergent), A-002, A-006, A-005, RC-004 (ecological time constrains repetition), N-005. Fire ignition timing touches **C-003** — authored ignition only until C-003 closes; no stochastic arrivals.  
@@ -238,14 +240,71 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Bans.** Fire as a scripted event or scenario trigger (N-004). Fire as pure penalty (ES-002 — it is a process, not a punishment). Stochastic ignition while C-003 is Open. A second disturbance engine parallel to the sim step.  
 **Gate.** After Slice 9, so readiness / limiting factors exist to disturb and recovery is measurable.
 
-- [ ] `fuel` field accumulating from vegetation, depleted by fire; registered with owner + band  
-- [ ] Authored ignition only (C-003); spread rule cited and deterministic under T-001  
-- [ ] Moisture couples to spread — wet ground resists burning, closing fire back onto the hydrology spine  
-- [ ] Tier-M: conservation/accounting across a burn (fuel consumed vs. cover lost); determinism hash across the disturbance  
-- [ ] Tier-M: post-fire recovery trajectory differs by pre-fire moisture (probe `burn-recover`)  
-- [ ] `docs/slices/10.json` manifest (DoD row 9)  
-- [ ] Notebook seed: e.g. “The burn ran to the wet ground and stopped.”  
-- [ ] Tier-O candidate (batch): *did the burn read as something you did, or as something that happened to you?* (A-005 / N-001)
+- [x] `fuel` field accumulating from vegetation, depleted by fire; registered with owner + band (`fire.fuelLoad`, decadal)
+- [x] Authored ignition only (C-003); BFS spread cited and deterministic under T-001 (`ignite` tool + `igniteCell`)
+- [x] Moisture couples to spread — wet ground resists burning, closing fire back onto the hydrology spine
+- [x] Tier-M: conservation/accounting across a burn (fuel consumed vs. cover lost); determinism hash across the disturbance (`fire.test.ts`)
+- [x] Tier-M: post-fire recovery trajectory differs by pre-fire moisture (probe `burn-recover` — wet recover ≈ 0.85 vs dry ≈ 0.07; accountingError ≈ 6e-6; determinismMatch = 1)
+- [x] `docs/slices/10.json` manifest (DoD row 9)
+- [x] Notebook seed: “The burn ran to the wet ground and stopped.”
+- [x] Tier-O candidate (batch): *did the burn read as something you did, or as something that happened to you?* (A-005 / N-001) — deferred
+- [x] **Next-but-one:** Slice 11 specified to §4.3 depth (§4.6) before this slice closes (DoD row 10)
+
+---
+
+### 4.6 Slice 11 — Light / succession *(specified; gate after Slice 10)*
+
+**Why this exists.** [THESIS.md](THESIS.md) §2.1 / §5: the castle comes alive when life takes the form you built — and different aspects, burns, and moisture histories must produce different futures from the *same* rules, never from authored stages. Slice 9 already named water/depth/GW as limiting; Slice 10 clears cover. This slice adds the light dial so succession is a consequence of insolation × canopy, not a timer.
+
+**Loops.** Sim: insolation / canopy light (Beer–Lambert) → light competition / succession trajectory without authored stages (ES-001). Game: north vs south / burned vs unburned / wet vs dry read as different futures from the same rules — not painted stages.
+
+**Thesis role.** Force dial on the ladder (BUILD_GUIDE §3): after fire, *light and succession*. Under **C-007**, trajectories remain conditions for arrival, not introduction scripts — stage labels may describe state but cannot drive it (ES-001).
+
+**Register / candidates.** **ES-001** (Locked — succession emergent; stage labels describe, do not drive). **ART-001** (Current — scientific impressionism; NATURAL_PROCESS_MATH §1.9 ties insolation readability here). Touchpoints: **ES-006** (capacity emerges — light may join Liebig inputs once registered, never a fixed `K`); **E-009** (readiness inferred — light must stay an inspectable field, not an unlock); **C-007** (Open — arrival verb; do not implement introduction machinery here). Field registration cites **T-005**.
+
+**Study.** NATURAL_PROCESS_MATH §3.2 (Tilman R* + Beer–Lambert light competition) and §1.9 (insolation from slope/aspect + horizon shading); seasonal band on the timescale ladder (§7 — light competition ~10 days). Composition choice written before code as `docs/slices/11-composition.md` (same pattern as Slice 9's `9-composition.md`).
+
+**Bans.** Authored succession stages as authority (ES-001 rejected alternatives). Light as a free-floating "health" scalar (N-002; NATURAL_PROCESS_MATH §6). A second vegetation engine parallel to existing `vegetationProcess` — extend cover/light coupling in-process, do not fork a rival owner of `veg.cover` (T-006 / GEO-002 earn-its-cost).
+
+**Gate.** After Slice 10 (fire/fuel **Done**). Burn→cover restart is available for burned-vs-unburned trajectory contrast.
+
+- [ ] Register insolation / LAI / understory light fields (or derive from elev + `veg.cover`) with owner + band (T-005)
+- [ ] Beer–Lambert (or reduced form) cited before code — composition note `docs/slices/11-composition.md` (NATURAL_PROCESS_MATH §3.2, §1.9)
+- [ ] Couple to existing `veg.cover` via `vegetationProcess` (extend, do not replace); burned cells restart succession differently once Slice 10 clears cover
+- [ ] Tier-M: monotonicity / bounds — more canopy → less understory light; fields stay in range, no NaN
+- [ ] Tier-M: paired divergence — north–south and/or burned–unburned trajectories diverge under identical forcing (same seed, same rules)
+- [ ] Probe `succession-diverge`: paired aspect or burn contrast with baseline tolerances
+- [ ] `docs/slices/11.json` manifest (DoD row 9) — create at implementation (conformance rejects planned-only probes/fields)
+- [ ] Notebook seed: e.g. “The south slope stayed open; the north filled in.”
+- [ ] Tier-O candidate (batch, do not ask alone): *do the slopes feel like different futures, or like the same place with different tint?*
+
+---
+
+### 4.7 Slice A — Audio scaffold *(Done — agent machine half; C-014 Open)*
+
+**Why this exists.** AUD-001 / AUD-002 / AUD-003 are **Locked** and had never appeared in a slice or a line of code. Silence is a *signal* (AUD-002), not an absence of assets, and THESIS §8's clip test cannot pass in silence. Open sub-question **C-014** (how audio derives from simulation state) — leading direction: sampled/mixed sources from field values; silence first-class.
+
+**Loops.** Sim: none new — audio is a pure observer of an existing registry field (T-006). Game: ambient water gain rises with surface water and goes meaningfully silent when the hollow is dry (AUD-001 / AUD-002).
+
+**Register / candidates.** AUD-001, AUD-002, AUD-003 (Locked intent); **C-014** Open (owner-judged promotion — dossier only, do not flip); T-006 (observer), T-001 (no sim RNG).
+
+**Study.** No third-party audio engine steal required for the scaffold; EXTERNAL_REFERENCES peers remain study-not-ship for presentation. Mapping lives in `src/audio/AudioBus.ts`.
+
+**Bans.** Writing WorldState from audio. A second sim RNG for mix decisions. Invented wildlife presence fields — drive from an existing field (`water.surfaceDepth`). Web Audio required for CI / Tier-M. Conflicting with Slice 10 fire/fuel process ownership.
+
+**Gate.** Parallel to Slice 10 (does not own WorldState process order). Machine half closed here; owner half of C-014 stays Open.
+
+- [x] Audio observer module (`src/audio/AudioBus.ts`) — reads `water.surfaceDepth`, maps mean → `ambient.water` gain
+- [x] Zero / absent field → `silent === true`, `level === 0` (true silence as signal, AUD-002)
+- [x] Raising the field raises mapped level (monotonic; saturate at 0.25 m mean)
+- [x] Tier-M: write isolation — `audioObserver.writes === []`; snapshot sample does not change `stateHash`
+- [x] Tier-M: RNG isolation — no `Math.random` / sim RNG in audio path; same depths → identical mix
+- [x] Optional Web Audio apply hook is a no-op without a gain target (`webAudioHook.ts`) — CI does not need AudioContext
+- [x] `docs/slices/A.json` manifest (DoD row 9)
+- [x] Notebook seed: “The hollow went quiet when the water left.”
+- [x] `docs/candidates/C-014-dossier.md` — machine half numbers; owner-only question (no playtest ask)
+- [ ] **Tier-O / C-014 owner half** (batch only): *When the water left, did the quiet feel like the place going still — or like the sound broke?* — do not promote C-014
+- [x] **Next-but-one:** main ladder Slice 11 already specified (§4.6); next audio follow-on remains AUD-003 recovery bed (later stub — not expanded)
 
 ---
 
@@ -253,14 +312,13 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 | Slice | Focus | Register |
 |---|---|---|
-| **A** | **Audio — the only Locked entries never planned.** AUD-001/002/003 are all Locked and have never appeared in a slice or a line of code. Silence is a *signal* (AUD-002), not an absence of assets, and THESIS §8's clip test cannot pass in silence. Open sub-question: **C-014** | AUD-001, AUD-002, AUD-003, T-006 |
-| 11 | Light / succession | ES-001 |
+| A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
 | 12 | Roles / introductions → informs RC-003 | E-*, ES-006 |
 | 13 | Biology → physics integration test | E-005, F-001 |
 | — | Field Notebook UI | U-006 |
 | — | Scenarios | G-002, G-007 |
 
-Do not expand these until Slice 8b–9 DoD holds. Presentation (§4.2) may run in parallel — it does not add sim systems.
+Slice **11** moved to §4.6 (specified). Slice **A** expanded to §4.7 (machine half Done). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

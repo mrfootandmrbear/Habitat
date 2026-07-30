@@ -123,10 +123,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
 | **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
 | **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 dossier partial |
-| **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Next** — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
-| **11+** | Succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 10 |
+| **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Done — Tier-M** (Tier-O deferred; authored ignition; **C-003** Open) |
+| **11** | Insolation / Beer–Lambert light → succession trajectory | North/south, burned/unburned, wet/dry as different futures | **Next** — BUILD_GUIDE §4.6 (ES-001) |
+| **12+** | Roles, scenarios… | Notebook, readiness, completion… | After Slice 11 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **next** (§4.6); Slice A audio scaffold **Done** (agent machine half; C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7).
 
 ---
 
