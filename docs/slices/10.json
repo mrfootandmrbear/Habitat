@@ -1,0 +1,20 @@
+{
+  "id": "10",
+  "title": "Fire / fuel",
+  "simLoop": "Vegetation cover drives Olson litter accumulation; authored ignition triggers deterministic BFS spread gated by fuel load, soil moisture, and slope; fire consumes fuel and kills cover, restarting succession.",
+  "gameLoop": "A pulse intervention with real semantics — the player sites a burn as a cause and lives with the result (A-002, A-006, A-005).",
+  "registerIds": ["ES-002", "ES-001", "A-002", "A-006", "A-005", "RC-004", "N-005", "N-004", "T-001", "T-006", "C-003"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/fire.test.ts"
+  ],
+  "probes": ["burn-recover"],
+  "fields": [
+    "fire.fuelLoad",
+    "fire.burning",
+    "fire.intensity",
+    "ledger.fuelConsumed"
+  ],
+  "notebookSeed": "The burn ran to the wet ground and stopped.",
+  "tierO": "no owner-only question; deferred — did the burn read as something you did, or as something that happened to you? (batch with §4.0 step 6, A-005 / N-001)"
+}

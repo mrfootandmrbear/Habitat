@@ -33,6 +33,7 @@ const SITING: { id: SitingTool; label: string }[] = [
   { id: "predict", label: "Tool: predict wet" },
   { id: "berm", label: "Tool: raise berm" },
   { id: "dig", label: "Tool: dig channel" },
+  { id: "ignite", label: "Tool: ignite (authored)" },
 ];
 
 export function mountControls(

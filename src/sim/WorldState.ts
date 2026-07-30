@@ -9,6 +9,8 @@ import { vegetationProcess } from "./process/vegetationProcess";
 import { geomorphologyProcess } from "./process/geomorphologyProcess";
 import { groundwaterProcess } from "./process/groundwaterProcess";
 import { habitatProcess } from "./process/habitatProcess";
+import { fuelProcess } from "./process/fuelProcess";
+import { fireProcess } from "./process/fireProcess";
 import { fluxStep } from "./hydrology/fluxStep";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
@@ -61,6 +63,21 @@ export class WorldState {
   readonly infiltrationCapacity: Grid2D;
   /** Veg inbox contribution toward infiltration capacity. */
   readonly vegInfiltrationContribution: Grid2D;
+  /**
+   * Fuel load (kg/m²) — Slice 10, Olson litter model (NATURAL_PROCESS_MATH §3.5).
+   * Accumulates from veg.cover; depleted by fire. Owner: fire, band: decadal.
+   */
+  readonly fuelLoad: Grid2D;
+  /**
+   * Active burning flag [0,1] — set by authored ignition, cleared after spread.
+   * Owner: fire, band: event.
+   */
+  readonly fireBurning: Grid2D;
+  /**
+   * Fire intensity [0, 10] — energy release during burn (relative units).
+   * Proportional to fuel consumed × spread rate proxy. Owner: fire, band: event.
+   */
+  readonly fireIntensity: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -84,6 +101,8 @@ export class WorldState {
   private readonly outflowBox: ScalarBox = { value: 0 };
   private readonly infilBox: ScalarBox = { value: 0 };
   private readonly etBox: ScalarBox = { value: 0 };
+  /** Cumulative fuel consumed by fire (kg/m² summed over cells). */
+  private readonly fuelConsumedBox: ScalarBox = { value: 0 };
   /** Band phase — event steps since last daily (§12). */
   private readonly bandPhaseBox: ScalarBox = { value: 0 };
   /** Days since last decadal band (prototype ladder). */
@@ -142,6 +161,9 @@ export class WorldState {
       config.infiltrationRate,
     );
     this.vegInfiltrationContribution = new Grid2D(this.width, this.height);
+    this.fuelLoad = new Grid2D(this.width, this.height);
+    this.fireBurning = new Grid2D(this.width, this.height);
+    this.fireIntensity = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
@@ -165,6 +187,8 @@ export class WorldState {
       habitatProcess,
       vegetationProcess,
       geomorphologyProcess,
+      fuelProcess,
+      fireProcess,
     ]);
 
     this.recomputeFlowStructure();
@@ -200,6 +224,13 @@ export class WorldState {
   }
   set etLedger(v: number) {
     this.etBox.value = v;
+  }
+
+  get fuelConsumedLedger(): number {
+    return this.fuelConsumedBox.value;
+  }
+  set fuelConsumedLedger(v: number) {
+    this.fuelConsumedBox.value = v;
   }
 
   get eventStepsSinceDaily(): number {
@@ -497,6 +528,134 @@ export class WorldState {
       c[i] = cover;
       rough[i] = config.baseRoughness + cover * config.vegRoughnessBonus;
       infilContrib[i] = cover * config.vegInfiltrationBonus;
+    }
+  }
+
+  /**
+   * Olson litter model (NATURAL_PROCESS_MATH §3.5): dL/dt = I − k·L.
+   * Input I proportional to veg.cover; runs on decadal band.
+   */
+  runFuelAccumulationStep(_dt: number): void {
+    const fuel = this.fuelLoad.data;
+    const cover = this.vegCover.data;
+    const iMax = config.fuelInputMax;
+    const k = config.fuelDecayK;
+    const maxFuel = config.fuelLoadMax;
+
+    for (let i = 0; i < fuel.length; i++) {
+      const input = cover[i]! * iMax;
+      const decay = k * fuel[i]!;
+      fuel[i] = Math.min(maxFuel, Math.max(0, fuel[i]! + input - decay));
+    }
+  }
+
+  /**
+   * BFS fire spread from burning cells (NATURAL_PROCESS_MATH §3.5).
+   * Deterministic: sorted queue by index for fixed iteration order (T-001).
+   * Gated on fuel load, fuel moisture (from soil.moisture), and slope factor.
+   */
+  runFireStep(_dt: number): void {
+    const burning = this.fireBurning.data;
+    const fuel = this.fuelLoad.data;
+    const moisture = this.soilMoisture.data;
+    const cover = this.vegCover.data;
+    const intensity = this.fireIntensity.data;
+    const elev = this.terrain.data;
+    const w = this.width;
+    const h = this.height;
+    const threshold = config.fuelSpreadThreshold;
+    const extinction = config.fuelMoistureExtinction;
+    const slopeA = config.fireSlopeFactorA;
+    const consumption = config.fireFuelConsumption;
+    const mortality = config.fireVegMortality;
+    const dx = config.cellSizeMeters;
+
+    // Collect currently-burning cells as ignition sources (sorted for determinism).
+    const sources: number[] = [];
+    for (let i = 0; i < burning.length; i++) {
+      if (burning[i]! > 0.5) sources.push(i);
+    }
+    if (sources.length === 0) return;
+
+    // BFS spread — each burning cell attempts to ignite 4-neighbors once.
+    const visited = new Uint8Array(w * h);
+    const queue: number[] = [];
+    for (const s of sources) {
+      visited[s] = 1;
+      queue.push(s);
+    }
+
+    let head = 0;
+    while (head < queue.length) {
+      const ci = queue[head++]!;
+      const cx = ci % w;
+      const cz = (ci - cx) / w;
+      const cElev = elev[ci]!;
+
+      const neighbors = [
+        cz > 0 ? ci - w : -1,
+        cz + 1 < h ? ci + w : -1,
+        cx > 0 ? ci - 1 : -1,
+        cx + 1 < w ? ci + 1 : -1,
+      ];
+
+      for (const ni of neighbors) {
+        if (ni < 0 || visited[ni]!) continue;
+        visited[ni] = 1;
+
+        if (fuel[ni]! < threshold) continue;
+        if (moisture[ni]! >= extinction) continue;
+
+        // Slope factor: fire runs uphill.
+        const nElev = elev[ni]!;
+        const dz = nElev - cElev;
+        const tanPhi = dz / dx;
+        const slopeFactor = Math.exp(slopeA * tanPhi);
+
+        // Spread probability proportional to fuel availability and slope.
+        const fuelFraction = Math.min(1, fuel[ni]! / (threshold * 3));
+        const moistureFactor = 1 - moisture[ni]! / extinction;
+        const spreadStrength = fuelFraction * moistureFactor * slopeFactor;
+
+        if (spreadStrength > 0.15) {
+          burning[ni] = 1;
+          queue.push(ni);
+        }
+      }
+    }
+
+    // Post-fire effects: consume fuel, kill vegetation, record intensity.
+    for (let i = 0; i < burning.length; i++) {
+      if (burning[i]! < 0.5) {
+        intensity[i] = 0;
+        continue;
+      }
+      const consumed = fuel[i]! * consumption;
+      intensity[i] = Math.min(10, consumed);
+      fuel[i] = Math.max(0, fuel[i]! - consumed);
+      cover[i] = Math.max(0, cover[i]! * (1 - mortality));
+      this.fuelConsumedLedger += consumed;
+      // Clear the burn flag after effects applied.
+      burning[i] = 0;
+    }
+  }
+
+  /**
+   * Authored ignition — player sites a burn point (C-003 / A-002 / A-006).
+   * Marks cells within brush radius as burning; spread runs on next event step.
+   */
+  igniteCell(cx: number, cz: number): void {
+    const r = config.sitingBrushRadius;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!this.fireBurning.inBounds(x, z)) continue;
+        const dist = Math.hypot(x - cx, z - cz);
+        if (dist > r + 0.01) continue;
+        const i = z * this.width + x;
+        if (this.fuelLoad.data[i]! >= config.fuelSpreadThreshold) {
+          this.fireBurning.data[i] = 1;
+        }
+      }
     }
   }
 
@@ -817,6 +976,46 @@ export class WorldState {
         legacy: true,
         data: this.infiltrationCapacity.data,
         range: [0, 1] as const,
+      },
+      {
+        id: "fire.fuelLoad",
+        units: "kg/m²",
+        shape: "cell" as const,
+        owner: "fire",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.fuelLoad.data,
+        range: [0, config.fuelLoadMax] as const,
+      },
+      {
+        id: "fire.burning",
+        units: "flag",
+        shape: "cell" as const,
+        owner: "fire",
+        band: "event" as const,
+        legacy: false,
+        data: this.fireBurning.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "fire.intensity",
+        units: "relative",
+        shape: "cell" as const,
+        owner: "fire",
+        band: "event" as const,
+        legacy: false,
+        data: this.fireIntensity.data,
+        range: [0, 10] as const,
+      },
+      {
+        id: "ledger.fuelConsumed",
+        units: "kg/m²",
+        shape: "scalar" as const,
+        owner: "fire",
+        band: "event" as const,
+        legacy: false,
+        data: this.fuelConsumedBox,
+        range: [0, 1e12] as const,
       },
       {
         id: "ledger.precipitation",

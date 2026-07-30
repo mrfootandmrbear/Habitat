@@ -260,6 +260,9 @@ canvas.addEventListener("pointerup", (e) => {
     editUndo.pushCheckpoint(world);
     world.digChannel(cell.x, cell.z);
     ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "ignite") {
+    // Authored ignition only (C-003 Open) — pulse cause, not stochastic (A-002 / A-005).
+    world.igniteCell(cell.x, cell.z);
   }
   syncMeshes();
 });
@@ -371,7 +374,9 @@ function frame(now: number): void {
         ? "raise berm"
         : sitingTool === "dig"
           ? "dig channel"
-          : "predict";
+          : sitingTool === "ignite"
+            ? "ignite"
+            : "predict";
   ui.setStatus(
     `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +

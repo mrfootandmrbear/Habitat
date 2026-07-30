@@ -510,6 +510,155 @@ export function probeLimitingShift(): ProbeResult {
   };
 }
 
+/**
+ * Slice 10: post-fire recovery trajectory differs by pre-fire moisture.
+ * Wet patch recovers veg.cover faster after identical burn (ES-002, NATURAL_PROCESS_MATH §3.5).
+ * Also asserts determinism (T-001) and fuel accounting conservation.
+ */
+export function probeBurnRecover(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const world = new WorldState(new Grid2D(w, h, 3));
+  world.vegCover.fill(0.7);
+  world.soilMoisture.fill(0.15);
+
+  // Accumulate fuel (several decadal steps)
+  for (let i = 0; i < 8; i++) world.runFuelAccumulationStep(1);
+
+  const fuelBefore = sumGrid(world.fuelLoad.data);
+
+  // Set up moisture zones: left half wet, right half dry
+  for (let z = 0; z < h; z++) {
+    for (let x = 0; x < w; x++) {
+      const i = z * w + x;
+      world.soilMoisture.data[i] = x < w / 2 ? 0.08 : 0.03;
+    }
+  }
+
+  // Ignite center — only right-half (dry) should burn fully
+  world.igniteCell(w / 2, h / 2);
+
+  // Run second identical world for determinism check
+  const world2 = new WorldState(new Grid2D(w, h, 3));
+  world2.vegCover.fill(0.7);
+  world2.soilMoisture.fill(0.15);
+  for (let i = 0; i < 8; i++) world2.runFuelAccumulationStep(1);
+  for (let z = 0; z < h; z++) {
+    for (let x = 0; x < w; x++) {
+      const i = z * w + x;
+      world2.soilMoisture.data[i] = x < w / 2 ? 0.08 : 0.03;
+    }
+  }
+  world2.igniteCell(w / 2, h / 2);
+
+  // Fire spread
+  world.runFireStep(1);
+  world2.runFireStep(1);
+
+  const hashAfter1 = world.stateHash();
+  const hashAfter2 = world2.stateHash();
+
+  if (hashAfter1 !== hashAfter2) {
+    throw new Error(
+      `burn-recover: determinism failed (T-001) — ${hashAfter1} vs ${hashAfter2}`,
+    );
+  }
+
+  const fuelAfter = sumGrid(world.fuelLoad.data);
+  const consumed = world.fuelConsumedLedger;
+  const accountingError = Math.abs((fuelBefore - fuelAfter) - consumed);
+  if (accountingError > 0.01) {
+    throw new Error(
+      `burn-recover: fuel accounting error=${accountingError} (consumed=${consumed}, delta=${fuelBefore - fuelAfter})`,
+    );
+  }
+
+  // Count burned cells (fuel was consumed)
+  let burnedCells = 0;
+  for (let i = 0; i < world.fuelLoad.data.length; i++) {
+    if (world.fireIntensity.data[i]! > 0) burnedCells++;
+  }
+
+  // Record cover after burn
+  const wetCoverAfterBurn = sectorMean(world.vegCover.data, w, 0, w / 2, 0, h);
+  const dryCoverAfterBurn = sectorMean(world.vegCover.data, w, w / 2, w, 0, h);
+
+  // Now set moisture for recovery and run vegetation growth
+  for (let z = 0; z < h; z++) {
+    for (let x = 0; x < w; x++) {
+      const i = z * w + x;
+      world.soilMoisture.data[i] = x < w / 2 ? 0.30 : 0.04;
+    }
+  }
+
+  for (let i = 0; i < 50; i++) world.runVegetationStep(1);
+
+  const wetCoverRecovered = sectorMean(world.vegCover.data, w, 0, w / 2, 0, h);
+  const dryCoverRecovered = sectorMean(world.vegCover.data, w, w / 2, w, 0, h);
+
+  if (!(wetCoverRecovered > dryCoverRecovered)) {
+    throw new Error(
+      `burn-recover: expected wet recovery (${wetCoverRecovered}) > dry (${dryCoverRecovered})`,
+    );
+  }
+
+  return {
+    scenario: "burn-recover",
+    records: [
+      {
+        label: "fire",
+        burnedCells,
+        fuelBefore,
+        fuelAfter,
+        consumed,
+        accountingError,
+        determinismMatch: 1,
+        hashN: Number.parseInt(hashAfter1.slice(0, 8), 16),
+      },
+      {
+        label: "wetSector",
+        coverAfterBurn: wetCoverAfterBurn,
+        coverRecovered: wetCoverRecovered,
+      },
+      {
+        label: "drySector",
+        coverAfterBurn: dryCoverAfterBurn,
+        coverRecovered: dryCoverRecovered,
+      },
+      {
+        label: "delta",
+        recoveryGap: wetCoverRecovered - dryCoverRecovered,
+        wetVsDry: wetCoverRecovered / Math.max(dryCoverRecovered, 1e-12),
+      },
+    ],
+  };
+}
+
+function sumGrid(data: Float32Array): number {
+  let s = 0;
+  for (let i = 0; i < data.length; i++) s += data[i]!;
+  return s;
+}
+
+function sectorMean(
+  data: Float32Array,
+  stride: number,
+  x0: number,
+  x1: number,
+  z0: number,
+  z1: number,
+): number {
+  let sum = 0;
+  let n = 0;
+  for (let z = z0; z < z1; z++) {
+    for (let x = x0; x < x1; x++) {
+      sum += data[z * stride + x]!;
+      n++;
+    }
+  }
+  return n > 0 ? sum / n : 0;
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -518,6 +667,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "baseflow-persist": probeBaseflowPersist,
   "regime-divergence": probeRegimeDivergence,
   "limiting-shift": probeLimitingShift,
+  "burn-recover": probeBurnRecover,
 };
 
 export function runProbe(name: string): ProbeResult {

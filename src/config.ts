@@ -112,6 +112,28 @@ export const config = {
   hsiDepthRefMeters: 1,
   /** Slice 9 HSI — GW storage depth at which f_groundwater saturates (m). */
   hsiGwRefMeters: 0.25,
+
+  /**
+   * Slice 10 — Fire / Fuel (NATURAL_PROCESS_MATH §3.5, ES-002).
+   * Olson litter model: L(t) = (I/k)(1 − e^{−kt}).
+   * Fuel load in kg/m²; max input from full cover.
+   */
+  /** Max litter input rate (kg/m²/band) at cover=1. */
+  fuelInputMax: 0.8,
+  /** First-order decomposition rate (1/band) — Olson k per decadal step. */
+  fuelDecayK: 0.08,
+  /** Fuel load threshold for fire spread (kg/m²). Below this, fire cannot carry. */
+  fuelSpreadThreshold: 0.3,
+  /** Fuel moisture extinction — soil.moisture fraction above which fire cannot spread. */
+  fuelMoistureExtinction: 0.25,
+  /** Slope factor exponent a in e^{a·tanφ} (fire runs uphill). */
+  fireSlopeFactorA: 0.8,
+  /** Fraction of fuel consumed per burn event [0,1]. */
+  fireFuelConsumption: 0.85,
+  /** Fraction of veg.cover killed by fire [0,1]. */
+  fireVegMortality: 0.9,
+  /** Max fire.fuelLoad (kg/m²) — bounds check. */
+  fuelLoadMax: 20,
 } as const;
 
 export type InspectorLayer =
@@ -125,7 +147,8 @@ export type InspectorLayer =
   | "depression"
   | "groundwater"
   | "limitingFactor"
-  | "suitability";
+  | "suitability"
+  | "fuelLoad";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
-export type SitingTool = "none" | "berm" | "dig" | "predict";
+export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

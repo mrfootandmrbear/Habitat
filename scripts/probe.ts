@@ -122,6 +122,21 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "shift.identityChanged": { abs: 0 },
     "shift.hsiDrop": { abs: 1e-6 },
   },
+  "burn-recover": {
+    "fire.burnedCells": { abs: 0 },
+    "fire.fuelBefore": { abs: 1e-4 },
+    "fire.fuelAfter": { abs: 1e-4 },
+    "fire.consumed": { abs: 1e-3 },
+    "fire.accountingError": { abs: 1e-3 },
+    "fire.determinismMatch": { abs: 0 },
+    "fire.hashN": { abs: 0 },
+    "wetSector.coverAfterBurn": { abs: 1e-6 },
+    "wetSector.coverRecovered": { abs: 1e-5 },
+    "drySector.coverAfterBurn": { abs: 1e-6 },
+    "drySector.coverRecovered": { abs: 1e-5 },
+    "delta.recoveryGap": { abs: 1e-4 },
+    "delta.wetVsDry": { abs: 0.1 },
+  },
 };
 
 const args = process.argv.slice(2);
