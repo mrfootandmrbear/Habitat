@@ -89,6 +89,11 @@ export const config = {
   shoreErosionK: 0.08,
   /** Max fetch length (cells) for shore exposure saturate(fetch/max). */
   shoreFetchMaxCells: 12,
+  /**
+   * Fraction of coastal erosion retained for lee deposit (Slice 19 / C-017).
+   * Remainder leaves to ledger.shoreErosion (ocean). Geomorphology integrates.
+   */
+  longshoreRetainFraction: 0.7,
   /** Per sim-day (soil/veg/GW steps scale by dt in days). */
   infiltrationRate: 0.08,
   /**
@@ -202,7 +207,8 @@ export type InspectorLayer =
   | "herbBiomass"
   | "seedBank"
   | "intertidal"
-  | "shoreExposure";
+  | "shoreExposure"
+  | "shoreLongshore";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

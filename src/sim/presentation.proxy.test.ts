@@ -249,6 +249,44 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(westLoss / nW).toBeGreaterThan(eastLoss / nE);
   });
 
+  it("lee shore elev rises vs calm under one wind (Slice 19 / C-017)", () => {
+    const size = 40;
+    const sea = 2;
+    const seed = 19;
+    const run = (windId: "west" | "calm") => {
+      const wind = windById(windId);
+      const world = new WorldState(generateIsland(size, size, 10, seed), {
+        seaLevel: sea,
+        windUx: wind.ux,
+        windUz: wind.uz,
+      });
+      world.soilDepth.fill(1.2);
+      world.vegCover.fill(0);
+      const elev0 = world.terrain.data.slice();
+      for (let n = 0; n < 12; n++) world.runGeomorphologyStep(1);
+      const mid = (size / 2) | 0;
+      let eastDelta = 0;
+      let nE = 0;
+      for (let i = 0; i < elev0.length; i++) {
+        if (elev0[i]! < sea) continue;
+        const x = i % size;
+        if (x < mid) continue;
+        const z = (i / size) | 0;
+        const nbs = [
+          z > 0 ? i - size : -1,
+          z < size - 1 ? i + size : -1,
+          x > 0 ? i - 1 : -1,
+          x < size - 1 ? i + 1 : -1,
+        ];
+        if (!nbs.some((ni) => ni >= 0 && elev0[ni]! < sea)) continue;
+        eastDelta += world.terrain.data[i]! - elev0[i]!;
+        nE++;
+      }
+      return nE > 0 ? eastDelta / nE : 0;
+    };
+    expect(run("west")).toBeGreaterThan(run("calm"));
+  });
+
   it("orographic wet/dry sides encode in soil darkening without inspector (Slice F)", () => {
     const w = 32;
     const h = 16;

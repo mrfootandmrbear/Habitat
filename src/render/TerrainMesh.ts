@@ -247,6 +247,14 @@ export class TerrainMesh {
         col.setRGB(0.25 + 0.55 * t, 0.35 - 0.15 * t, 0.55 - 0.35 * t);
         break;
       }
+      case "shoreLongshore": {
+        // Signed tendency: magenta = +Q, cyan = −Q, neutral mid-gray.
+        const q = world.shoreLongshore.data[idx] ?? 0;
+        const a = Math.min(1, Math.abs(q));
+        if (q >= 0) col.setRGB(0.35 + 0.45 * a, 0.3, 0.4 + 0.35 * a);
+        else col.setRGB(0.25, 0.4 + 0.35 * a, 0.45 + 0.3 * a);
+        break;
+      }
       case "seedBank": {
         const t = Math.min(
           1,

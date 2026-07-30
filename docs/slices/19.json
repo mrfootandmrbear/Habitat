@@ -1,0 +1,17 @@
+{
+  "id": "19",
+  "title": "Beaches / longshore deposition",
+  "simLoop": "Signed shore.longshore tendency (wind × tangent) feeds a lee deposit budget inside geomorphology; ocean share stays on ledger.shoreErosion (C-017 — no SWE, no second sediment writer).",
+  "gameLoop": "One wind regime scours the windward flank and builds the lee beach.",
+  "registerIds": ["C-017", "C-015", "C-004", "GEO-002", "T-001", "T-006"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/longshore.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/geomorphology.test.ts"
+  ],
+  "probes": ["longshore-drift"],
+  "fields": ["shore.longshore", "ledger.shoreErosion"],
+  "notebookSeed": "The windward cove wore back; the lee spit grew.",
+  "tierO": "no owner-only question this closeout; shore-legibility batched — see docs/candidates/C-017-dossier.md"
+}

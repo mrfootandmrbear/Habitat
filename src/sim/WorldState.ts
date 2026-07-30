@@ -21,6 +21,10 @@ import {
   meanLowWater,
 } from "./climate/tidalEnvelope";
 import { fillShoreExposure } from "./climate/shoreExposure";
+import {
+  fillLongshoreTendency,
+  leeDepositWeight,
+} from "./climate/longshoreTendency";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   establishmentProbability,
@@ -157,6 +161,11 @@ export class WorldState {
    * retreat is applied only inside geomorphology (no second sediment writer).
    */
   readonly shoreExposure: Grid2D;
+  /**
+   * Signed longshore tendency — exposure × (û · shore tangent) (C-017 / Slice 19).
+   * Derived; lee deposit integrates inside geomorphology only.
+   */
+  readonly shoreLongshore: Grid2D;
   private readonly closedBoundary: boolean;
   /** Global sea datum (m). Undefined = legacy closed / perimeter mode. */
   private seaLevelMeters: number | undefined;
@@ -269,6 +278,7 @@ export class WorldState {
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
     this.shoreExposure = new Grid2D(this.width, this.height);
+    this.shoreLongshore = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -403,7 +413,7 @@ export class WorldState {
   }
 
   /**
-   * Set global wind (C-004 / C-017). Refreshes shore exposure; does not target cells.
+   * Set global wind (C-004 / C-017). Refreshes shore fields; does not target cells.
    */
   setWind(ux: number, uz: number): void {
     this.windUx = Number.isFinite(ux) ? ux : 0;
@@ -579,21 +589,32 @@ export class WorldState {
   }
 
   /**
-   * Derived shore.exposure from fetch × wind (C-017). Not a sediment writer.
+   * Derived shore.exposure + shore.longshore from fetch × wind (C-017).
+   * Not a sediment writer — geomorphology integrates retreat / lee deposit.
    */
   recomputeShoreExposure(): void {
     if (this.oceanCells.size === 0) {
       this.shoreExposure.data.fill(0);
+      this.shoreLongshore.data.fill(0);
       return;
     }
+    const wind = { ux: this.windUx, uz: this.windUz };
     fillShoreExposure(
       this.shoreExposure.data,
       this.width,
       this.height,
       this.terrain.data,
       this.oceanCells,
-      { ux: this.windUx, uz: this.windUz },
+      wind,
       config.shoreFetchMaxCells,
+    );
+    fillLongshoreTendency(
+      this.shoreLongshore.data,
+      this.width,
+      this.height,
+      this.oceanCells,
+      this.shoreExposure.data,
+      wind,
     );
   }
 
@@ -783,10 +804,10 @@ export class WorldState {
   /**
    * Decadal soil production + GEO-002 erosion + coastal wave work (C-017).
    * Production everywhere; channel erosion where accumulation earns cost;
-   * coastal retreat on exposed shoreline only — still this owner (no SWE,
-   * no second sediment writer). Elev and depth move together so bedrock
-   * = elev − depth is invariant.
-   * `dt` is band units (1 = one full compressed decadal commit).
+   * coastal retreat on exposed shoreline; Slice 19 lee deposit from the
+   * retained longshore budget — still this owner (no SWE, no second
+   * sediment writer). Elev and depth move together so bedrock = elev − depth
+   * is invariant. `dt` is band units (1 = one full compressed decadal commit).
    */
   runGeomorphologyStep(dt: number): void {
     this.ensureStructureFresh();
@@ -803,10 +824,13 @@ export class WorldState {
     const h0 = config.soilProductionH0;
     const kE = config.soilErosionK * scale;
     const kCoast = config.shoreErosionK * scale;
+    const retain = Math.min(1, Math.max(0, config.longshoreRetainFraction));
     const aMin = config.erosionMinAccumulation;
     const minDepth = 1e-3;
+    const nCell = this.width * this.height;
+    const coastRemoved = new Float32Array(nCell);
     let dirty = false;
-    let shoreRemoved = 0;
+    let shoreOcean = 0;
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
@@ -846,15 +870,68 @@ export class WorldState {
           depth[i]! = nextH;
           elev[i]! = elev[i]! + actualDh;
           if (actualDh < 0 && coast > 0 && erode > 0) {
-            // Attribute a coast-proportional share of soil loss (mass closes).
-            shoreRemoved += -actualDh * (coast / erode);
+            coastRemoved[i]! = -actualDh * (coast / erode);
           }
           dirty = true;
         }
       }
     }
 
-    if (shoreRemoved > 0) this.shoreErosionLedger += shoreRemoved;
+    // Slice 19: retained coastal mass → lee shore deposit; rest → ocean ledger.
+    let mobile = 0;
+    for (let i = 0; i < nCell; i++) {
+      const c = coastRemoved[i]!;
+      if (c <= 0) continue;
+      mobile += c * retain;
+      shoreOcean += c * (1 - retain);
+    }
+
+    if (mobile > 0) {
+      const wind = { ux: this.windUx, uz: this.windUz };
+      let weightSum = 0;
+      const weights = new Float32Array(nCell);
+      for (let i = 0; i < nCell; i++) {
+        if (this.oceanCells.has(i)) continue;
+        const w = leeDepositWeight(
+          i,
+          this.width,
+          this.height,
+          this.oceanCells,
+          exposure,
+          wind,
+        );
+        if (w <= 0) continue;
+        weights[i]! = w;
+        weightSum += w;
+      }
+      if (weightSum > 0) {
+        for (let i = 0; i < nCell; i++) {
+          const w = weights[i]!;
+          if (w <= 0) continue;
+          const add = (mobile * w) / weightSum;
+          if (add <= 0) continue;
+          const h = depth[i]!;
+          const nextH = Math.min(5, h + add);
+          const actual = nextH - h;
+          if (actual <= 0) {
+            shoreOcean += add;
+            continue;
+          }
+          // Cap at soil.depth max — leftover of this cell's share → ocean.
+          shoreOcean += add - actual;
+          const oldH = Math.max(h, minDepth);
+          const newH = Math.max(nextH, minDepth);
+          this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
+          depth[i]! = nextH;
+          elev[i]! = elev[i]! + actual;
+          dirty = true;
+        }
+      } else {
+        shoreOcean += mobile;
+      }
+    }
+
+    if (shoreOcean > 0) this.shoreErosionLedger += shoreOcean;
     if (dirty) this.markStructureDirty();
   }
 
@@ -1794,6 +1871,16 @@ export class WorldState {
         legacy: false,
         data: this.shoreExposure.data,
         range: [0, 1] as const,
+      },
+      {
+        id: "shore.longshore",
+        units: "signed",
+        shape: "cell" as const,
+        owner: "flowStructure",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.shoreLongshore.data,
+        range: [-1, 1] as const,
       },
       {
         id: "clock.eventStepsSinceDaily",

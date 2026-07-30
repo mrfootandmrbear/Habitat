@@ -507,6 +507,8 @@ Dispersal is absorbing rather than reflecting because reflection manufactures pr
 
 **Shore exposure (C-017 Open).** Derived `shore.exposure` from fetch × onshore wind at the coastline. Coastal retreat (Δelev = Δdepth) integrates inside the geomorphology owner only — no SWE solver, no second sediment writer. Wind is a global force dial.
 
+**Longshore / beaches (C-017 Open, Slice 19).** Derived signed `shore.longshore` = exposure × (û · shore tangent). Retained coastal erosion redeposits on lee shore weighted by max(0, û · n̂)·(1 − exposure); ocean share → `ledger.shoreErosion`. Same sole sediment writer.
+
 **Legacy authored outlets.** A watershed pour point with location and rating curve remains a valid *closed-island-absent* design:
 
 ```

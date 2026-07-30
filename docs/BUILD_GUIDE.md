@@ -96,10 +96,11 @@ Summary only — do not reopen unless fixing regressions.
 | **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt island · set forces · watch the place | `FORCE_PANEL`, `orographicPrecip`, `orographic-wind` | **Done** — agent (no Tier-O) |
 | **17** | Tidal envelope / intertidal (**C-016**) | Widen tide → shore band grows | `tidalEnvelope`, `shore.intertidal`, `tidal-envelope` | **Done** — agent; Tier-O metaphor batched |
 | **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore retreats via geomorphology | `shoreExposure`, `shore-exposure` | **Done** — agent; Tier-O shore-legibility batched |
+| **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — agent; Tier-O shore-legibility batched |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** Done (agent). Next: Slice **19** beaches / longshore (stub) or Slice **20** salinity. Island is the default playable world. C-016 / C-017 Open pending owner halves. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** Done (agent). Next: Slice **20** salinity (§4.15 stub). Island is the default playable world. C-016 / C-017 Open pending owner halves. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); 19–21 beaches, salt, overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); 20–21 salt, overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked.
 
@@ -540,7 +541,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.14 Slice 19 — Beaches / longshore deposition *(stub; after Slice 18)*
+### 4.14 Slice 19 — Beaches / longshore deposition *(after Slice 18)*
 
 **Why this exists.** Exposure alone retreats the windward shore; longshore transport is what builds the lee beach and closes the coastal sediment story under **C-017**.
 
@@ -552,10 +553,29 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 18.
 
-- [ ] Composition note; longshore tendency → geomorphology deposit path
-- [ ] Tier-M: windward loss ↔ leeward gain couples under one wind; mass closes
-- [ ] Probe `longshore-drift`; `docs/slices/19.json`
-- [ ] **Next-but-one:** Slice 20 salinity (C-018)
+- [x] Composition note; longshore tendency → geomorphology deposit path
+- [x] Tier-M: windward loss ↔ leeward gain couples under one wind; mass closes
+- [x] Probe `longshore-drift`; `docs/slices/19.json`
+- [x] **Next-but-one:** Slice 20 salinity (§4.15 stub)
+
+---
+
+### 4.15 Slice 20 — Salinity *(stub; after Slice 19)*
+
+**Why this exists.** Salt is the everyday **C-010** legacy load on an island — the first mobile soil-column substance that gates habitat near the shore and gives S-008 something to taste (**C-018**).
+
+**Loops.** Sim: ocean-sourced `soil.salinity` dilutes with freshwater; HSI / arrival read it. Game: a freshened hollow earns differently than a salty twin under one seed schedule.
+
+**Register / candidates.** **C-018** Open; C-010; C-007; H-004; T-003; N-001.
+
+**Bans.** Player cleanup tool. Separate salt mass-balance ledger fighting H-004. Scoring biota (N-002).
+
+**Gate.** After Slice 19 (may follow C-009 material table if that lands first; may proceed with a single salt field while C-009 stays Open).
+
+- [ ] Composition note; salinity field + ocean source / freshwater dilution
+- [ ] Tier-M: paired freshened-vs-salty hollow divergent arrival; save-legacy round-trip
+- [ ] Probe `salinity-arrival` (name TBD); `docs/slices/20.json`
+- [ ] **Next-but-one:** Slice 21 island biogeography (C-019)
 
 ---
 
@@ -563,13 +583,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 | Slice | Focus | Register |
 |---|---|---|
-| 20 | Salinity (first C-010 instance) | C-018, C-010 |
 | 21 | Island biogeography arrival | C-019, C-007 |
 | A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** Done. Next: Slice **19** beaches / longshore (§4.14 stub) or Slice **20** salinity. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** Done. Next: Slice **20** salinity (§4.15 stub). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

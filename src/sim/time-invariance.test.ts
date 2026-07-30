@@ -111,6 +111,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "light.understory",
       "shore.exposure",
       "shore.intertidal",
+      "shore.longshore",
       "soil.depth",
       "soil.infiltrationCapacity",
       "soil.moisture",

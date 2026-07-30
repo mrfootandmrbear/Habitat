@@ -6,7 +6,7 @@
       "abs": 0.0001
     },
     "west.eastLoss": {
-      "value": 0.003517836332321167,
+      "value": -0.33821623772382736,
       "abs": 0.0001
     },
     "west.meanExpWest": {
@@ -18,7 +18,7 @@
       "abs": 0.0001
     },
     "west.shoreErosion": {
-      "value": 15.67491311081102,
+      "value": 4.702473936975006,
       "abs": 0.001
     },
     "west.bedrockOk": {
@@ -30,11 +30,11 @@
       "abs": 0
     },
     "west.hashN": {
-      "value": 4001475796,
+      "value": 945622860,
       "abs": 0
     },
     "east.westLoss": {
-      "value": 0.0034903213381767273,
+      "value": -0.33660420775413513,
       "abs": 0.0001
     },
     "east.eastLoss": {
@@ -50,11 +50,11 @@
       "abs": 0.0001
     },
     "east.shoreErosion": {
-      "value": 15.599528033468196,
+      "value": 4.679858417809014,
       "abs": 0.001
     },
     "east.hashN": {
-      "value": 263289701,
+      "value": 4050762720,
       "abs": 0
     },
     "delta.hashDiverged": {
@@ -62,11 +62,11 @@
       "abs": 0
     },
     "delta.westWindwardBias": {
-      "value": 0.12162450328469276,
+      "value": 0.4633585773408413,
       "abs": 0.0001
     },
     "delta.eastWindwardBias": {
-      "value": 0.13708175346255302,
+      "value": 0.4771762825548649,
       "abs": 0.0001
     },
     "delta.bedrockClosed": {

@@ -1458,7 +1458,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** T-006 / GEO-002: one sediment authority. Ban shallow-water equations in-browser the way C-001 banned Richards. Exposure is directional and derived, not painted. C-015 required.
 
-**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Not Locked until a paired sheltered-vs-exposed shore diverges under one wind regime without a second sediment writer.
+**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Slice 18 ships exposure + retreat; Slice 19 ships signed longshore tendency + lee deposit budget. Not Locked until owner shore-legibility (A-005 / C-004) lands.
 
 ### C-018 — Salinity as the first mobile legacy substance
 **Status:** Open

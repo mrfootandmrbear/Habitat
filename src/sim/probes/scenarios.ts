@@ -1592,6 +1592,146 @@ export function probeShoreExposure(): ProbeResult {
 }
 
 /**
+ * Slice 19 / C-017 — longshore lee deposit: windward scours, lee receives
+ * under one wind; mass closes via bedrock + ocean ledger. No SWE / no second writer.
+ */
+export function probeLongshoreDrift(): ProbeResult {
+  const size = 40;
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const seed = 19;
+  const bands = 12;
+
+  const run = (windId: WindId) => {
+    const wind = windById(windId);
+    const world = new WorldState(generateIsland(size, size, 10, seed), {
+      seaLevel: sea,
+      windUx: wind.ux,
+      windUz: wind.uz,
+    });
+    world.soilDepth.fill(1.2);
+    world.vegCover.fill(0);
+    const elev0 = world.terrain.data.slice();
+    const depth0 = world.soilDepth.data.slice();
+    const mid = (size / 2) | 0;
+    const westShore: number[] = [];
+    const eastShore: number[] = [];
+    for (let i = 0; i < elev0.length; i++) {
+      if (world.oceanCells.has(i)) continue;
+      const x = i % size;
+      const z = (i / size) | 0;
+      const nbs = [
+        z > 0 ? i - size : -1,
+        z < size - 1 ? i + size : -1,
+        x > 0 ? i - 1 : -1,
+        x < size - 1 ? i + 1 : -1,
+      ];
+      if (!nbs.some((ni) => ni >= 0 && world.oceanCells.has(ni))) continue;
+      if (x < mid) westShore.push(i);
+      else eastShore.push(i);
+    }
+    for (let n = 0; n < bands; n++) world.runGeomorphologyStep(1);
+    const meanDelta = (cells: number[]) => {
+      if (cells.length === 0) return 0;
+      let s = 0;
+      for (const i of cells) s += world.terrain.data[i]! - elev0[i]!;
+      return s / cells.length;
+    };
+    let bedrockOk = 1;
+    let soil0 = 0;
+    let soil1 = 0;
+    for (let i = 0; i < elev0.length; i++) {
+      if (elev0[i]! < sea) continue;
+      soil0 += depth0[i]!;
+      soil1 += world.soilDepth.data[i]!;
+      const dElev = world.terrain.data[i]! - elev0[i]!;
+      const dDepth = world.soilDepth.data[i]! - depth0[i]!;
+      if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = 0;
+    }
+    return {
+      hash: world.stateHash(),
+      westDelta: meanDelta(westShore),
+      eastDelta: meanDelta(eastShore),
+      shoreErosion: world.shoreErosionLedger,
+      bedrockOk,
+      soilDelta: soil1 - soil0,
+    };
+  };
+
+  const west = run("west");
+  const east = run("east");
+  const calm = run("calm");
+  const westB = run("west");
+
+  if (west.hash !== westB.hash) {
+    throw new Error(
+      `longshore-drift: replay hash mismatch (T-001) ${west.hash} vs ${westB.hash}`,
+    );
+  }
+  if (west.hash === east.hash) {
+    throw new Error("longshore-drift: opposite winds produced identical hashes");
+  }
+  if (!(west.westDelta < calm.westDelta)) {
+    throw new Error(
+      `longshore-drift: west wind should scour west vs calm (W=${west.westDelta} calm=${calm.westDelta})`,
+    );
+  }
+  if (!(west.eastDelta > calm.eastDelta)) {
+    throw new Error(
+      `longshore-drift: west wind should feed east vs calm (E=${west.eastDelta} calm=${calm.eastDelta})`,
+    );
+  }
+  if (!(east.westDelta > calm.westDelta)) {
+    throw new Error(
+      `longshore-drift: east wind should feed west vs calm (W=${east.westDelta} calm=${calm.westDelta})`,
+    );
+  }
+  if (west.bedrockOk !== 1) {
+    throw new Error("longshore-drift: bedrock invariant failed (Δelev ≠ Δdepth)");
+  }
+  if (!(west.shoreErosion > 0)) {
+    throw new Error("longshore-drift: expected positive ocean share in shore ledger");
+  }
+
+  return {
+    scenario: "longshore-drift",
+    records: [
+      {
+        label: "west",
+        westDelta: west.westDelta,
+        eastDelta: west.eastDelta,
+        shoreErosion: west.shoreErosion,
+        bedrockOk: west.bedrockOk,
+        soilDelta: west.soilDelta,
+        replayMatch: 1,
+        hashN: Number.parseInt(west.hash.slice(0, 8), 16),
+      },
+      {
+        label: "east",
+        westDelta: east.westDelta,
+        eastDelta: east.eastDelta,
+        shoreErosion: east.shoreErosion,
+        hashN: Number.parseInt(east.hash.slice(0, 8), 16),
+      },
+      {
+        label: "calm",
+        westDelta: calm.westDelta,
+        eastDelta: calm.eastDelta,
+        shoreErosion: calm.shoreErosion,
+      },
+      {
+        label: "delta",
+        hashDiverged: west.hash !== east.hash ? 1 : 0,
+        westLeeGain: west.eastDelta - calm.eastDelta,
+        eastLeeGain: east.westDelta - calm.westDelta,
+        westWindwardLoss: calm.westDelta - west.westDelta,
+        bedrockClosed: west.bedrockOk,
+        noSwe: 1,
+      },
+    ],
+  };
+}
+
+/**
  * Slice F / C-020 lite — climate-mean rain + opposite winds → divergent
  * wet/dry sides; mean precip tracks regime; mass closes. No cell targeting.
  */
@@ -1878,6 +2018,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "island-drainage": probeIslandDrainage,
   "tidal-envelope": probeTidalEnvelope,
   "shore-exposure": probeShoreExposure,
+  "longshore-drift": probeLongshoreDrift,
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
 };

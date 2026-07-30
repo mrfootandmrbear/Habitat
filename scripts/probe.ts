@@ -307,6 +307,28 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.bedrockClosed": { abs: 0 },
     "delta.noSwe": { abs: 0 },
   },
+  "longshore-drift": {
+    "west.westDelta": { abs: 1e-4 },
+    "west.eastDelta": { abs: 1e-4 },
+    "west.shoreErosion": { abs: 1e-3 },
+    "west.bedrockOk": { abs: 0 },
+    "west.soilDelta": { abs: 1e-3 },
+    "west.replayMatch": { abs: 0 },
+    "west.hashN": { abs: 0 },
+    "east.westDelta": { abs: 1e-4 },
+    "east.eastDelta": { abs: 1e-4 },
+    "east.shoreErosion": { abs: 1e-3 },
+    "east.hashN": { abs: 0 },
+    "calm.westDelta": { abs: 1e-4 },
+    "calm.eastDelta": { abs: 1e-4 },
+    "calm.shoreErosion": { abs: 1e-3 },
+    "delta.hashDiverged": { abs: 0 },
+    "delta.westLeeGain": { abs: 1e-4 },
+    "delta.eastLeeGain": { abs: 1e-4 },
+    "delta.westWindwardLoss": { abs: 1e-4 },
+    "delta.bedrockClosed": { abs: 0 },
+    "delta.noSwe": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);
