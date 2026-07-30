@@ -132,9 +132,10 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **Done** — Tier-O Pass ([batch-island-brief.md](playtests/batch-island-brief.md)) |
 | **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt → set climate forces → watch the place | **Done** — BUILD_GUIDE §4.11b (agent; no Tier-O) |
 | **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | **Done** — agent; C-016 Open (owner metaphor batched) |
-| **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | **Next** — BUILD_GUIDE §4.13 |
+| **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | **Done** — agent; C-017 Open (owner shore-legibility batched) |
+| **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | **Next** — BUILD_GUIDE §4.14 stub |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** Done; **Slice 17** Done (tidal envelope); next **Slice 18** wave exposure; Slice A audio wired (C-014 Open); full **C-020** clouds/phase later.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17** / **18** Done; next **Slice 19** beaches / longshore (or **20** salinity); Slice A audio wired (C-014 Open); full **C-020** clouds/phase later.
 
 ---
 

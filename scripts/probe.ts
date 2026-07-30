@@ -286,6 +286,27 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.oceanUnchanged": { abs: 0 },
     "delta.encodingFloor": { abs: 0 },
   },
+  "shore-exposure": {
+    "west.westLoss": { abs: 1e-4 },
+    "west.eastLoss": { abs: 1e-4 },
+    "west.meanExpWest": { abs: 1e-4 },
+    "west.meanExpEast": { abs: 1e-4 },
+    "west.shoreErosion": { abs: 1e-3 },
+    "west.bedrockOk": { abs: 0 },
+    "west.replayMatch": { abs: 0 },
+    "west.hashN": { abs: 0 },
+    "east.westLoss": { abs: 1e-4 },
+    "east.eastLoss": { abs: 1e-4 },
+    "east.meanExpWest": { abs: 1e-4 },
+    "east.meanExpEast": { abs: 1e-4 },
+    "east.shoreErosion": { abs: 1e-3 },
+    "east.hashN": { abs: 0 },
+    "delta.hashDiverged": { abs: 0 },
+    "delta.westWindwardBias": { abs: 1e-4 },
+    "delta.eastWindwardBias": { abs: 1e-4 },
+    "delta.bedrockClosed": { abs: 0 },
+    "delta.noSwe": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

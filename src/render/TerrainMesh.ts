@@ -242,6 +242,11 @@ export class TerrainMesh {
         else col.setRGB(0.35, 0.4, 0.32);
         break;
       }
+      case "shoreExposure": {
+        const t = world.shoreExposure.data[idx] ?? 0;
+        col.setRGB(0.25 + 0.55 * t, 0.35 - 0.15 * t, 0.55 - 0.35 * t);
+        break;
+      }
       case "seedBank": {
         const t = Math.min(
           1,

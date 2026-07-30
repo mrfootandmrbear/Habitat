@@ -204,6 +204,51 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     ).toBeGreaterThan(0.08);
   });
 
+  it("windward shore elev loss diverges from leeward under one wind (Slice 18 / C-017)", () => {
+    const size = 40;
+    const wind = windById("west");
+    const world = new WorldState(generateIsland(size, size, 10, 19), {
+      seaLevel: 2,
+      windUx: wind.ux,
+      windUz: wind.uz,
+    });
+    world.soilDepth.fill(1.2);
+    world.vegCover.fill(0);
+    const elev0 = world.terrain.data.slice();
+    for (let n = 0; n < 12; n++) world.runGeomorphologyStep(1);
+    const mid = (size / 2) | 0;
+    let westLoss = 0;
+    let eastLoss = 0;
+    let nW = 0;
+    let nE = 0;
+    for (let i = 0; i < elev0.length; i++) {
+      if (elev0[i]! < 2) continue;
+      const x = i % size;
+      const z = (i / size) | 0;
+      const nbs = [
+        z > 0 ? i - size : -1,
+        z < size - 1 ? i + size : -1,
+        x > 0 ? i - 1 : -1,
+        x < size - 1 ? i + 1 : -1,
+      ];
+      const shore = nbs.some(
+        (ni) => ni >= 0 && elev0[ni]! < 2,
+      );
+      if (!shore) continue;
+      const loss = elev0[i]! - world.terrain.data[i]!;
+      if (x < mid) {
+        westLoss += loss;
+        nW++;
+      } else {
+        eastLoss += loss;
+        nE++;
+      }
+    }
+    expect(nW).toBeGreaterThan(0);
+    expect(nE).toBeGreaterThan(0);
+    expect(westLoss / nW).toBeGreaterThan(eastLoss / nE);
+  });
+
   it("orographic wet/dry sides encode in soil darkening without inspector (Slice F)", () => {
     const w = 32;
     const h = 16;

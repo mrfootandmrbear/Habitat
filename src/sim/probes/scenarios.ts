@@ -11,6 +11,7 @@ import {
 } from "../climate/rainRegime";
 import { fillOrographicRainDepths } from "../climate/orographicPrecip";
 import { windById, type WindId } from "../climate/windRegime";
+import { meanExposure } from "../climate/shoreExposure";
 import {
   LIMITING_DEPTH,
   LIMITING_MOISTURE,
@@ -1455,6 +1456,142 @@ export function probeTidalEnvelope(): ProbeResult {
 }
 
 /**
+ * Slice 18 / C-017 — fetch × wind exposure; coastal retreat inside geomorphology
+ * only (no SWE / no second sediment writer). Windward vs leeward diverge.
+ */
+export function probeShoreExposure(): ProbeResult {
+  const size = 40;
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const seed = 19;
+  const bands = 12;
+
+  const run = (windId: WindId) => {
+    const wind = windById(windId);
+    const world = new WorldState(generateIsland(size, size, 10, seed), {
+      seaLevel: sea,
+      windUx: wind.ux,
+      windUz: wind.uz,
+    });
+    world.soilDepth.fill(1.2);
+    world.vegCover.fill(0);
+    const elev0 = world.terrain.data.slice();
+    const depth0 = world.soilDepth.data.slice();
+    const mid = (size / 2) | 0;
+    const westShore: number[] = [];
+    const eastShore: number[] = [];
+    for (let i = 0; i < elev0.length; i++) {
+      if (world.oceanCells.has(i)) continue;
+      const x = i % size;
+      const z = (i / size) | 0;
+      const nbs = [
+        z > 0 ? i - size : -1,
+        z < size - 1 ? i + size : -1,
+        x > 0 ? i - 1 : -1,
+        x < size - 1 ? i + 1 : -1,
+      ];
+      if (!nbs.some((ni) => ni >= 0 && world.oceanCells.has(ni))) continue;
+      if (x < mid) westShore.push(i);
+      else eastShore.push(i);
+    }
+    const meanExpWest = meanExposure(world.shoreExposure.data, (i) =>
+      westShore.includes(i),
+    );
+    const meanExpEast = meanExposure(world.shoreExposure.data, (i) =>
+      eastShore.includes(i),
+    );
+    for (let n = 0; n < bands; n++) world.runGeomorphologyStep(1);
+    const meanLoss = (cells: number[]) => {
+      if (cells.length === 0) return 0;
+      let s = 0;
+      for (const i of cells) s += elev0[i]! - world.terrain.data[i]!;
+      return s / cells.length;
+    };
+    let bedrockOk = 1;
+    for (let i = 0; i < elev0.length; i++) {
+      if (elev0[i]! < sea) continue;
+      const dElev = elev0[i]! - world.terrain.data[i]!;
+      const dDepth = depth0[i]! - world.soilDepth.data[i]!;
+      if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = 0;
+    }
+    return {
+      hash: world.stateHash(),
+      westLoss: meanLoss(westShore),
+      eastLoss: meanLoss(eastShore),
+      meanExpWest,
+      meanExpEast,
+      shoreErosion: world.shoreErosionLedger,
+      bedrockOk,
+    };
+  };
+
+  const west = run("west");
+  const east = run("east");
+  const westB = run("west");
+
+  if (west.hash !== westB.hash) {
+    throw new Error(
+      `shore-exposure: replay hash mismatch (T-001) ${west.hash} vs ${westB.hash}`,
+    );
+  }
+  if (west.hash === east.hash) {
+    throw new Error("shore-exposure: opposite winds produced identical hashes");
+  }
+  if (!(west.westLoss > west.eastLoss)) {
+    throw new Error(
+      `shore-exposure: west wind should cut west shore more (W=${west.westLoss} E=${west.eastLoss})`,
+    );
+  }
+  if (!(east.eastLoss > east.westLoss)) {
+    throw new Error(
+      `shore-exposure: east wind should cut east shore more (W=${east.westLoss} E=${east.eastLoss})`,
+    );
+  }
+  if (!(west.meanExpWest > west.meanExpEast)) {
+    throw new Error("shore-exposure: west wind should expose west shore more");
+  }
+  if (west.bedrockOk !== 1) {
+    throw new Error("shore-exposure: bedrock invariant failed (Δelev ≠ Δdepth)");
+  }
+  if (!(west.shoreErosion > 0)) {
+    throw new Error("shore-exposure: expected positive shore erosion ledger");
+  }
+
+  return {
+    scenario: "shore-exposure",
+    records: [
+      {
+        label: "west",
+        westLoss: west.westLoss,
+        eastLoss: west.eastLoss,
+        meanExpWest: west.meanExpWest,
+        meanExpEast: west.meanExpEast,
+        shoreErosion: west.shoreErosion,
+        bedrockOk: west.bedrockOk,
+        replayMatch: 1,
+        hashN: Number.parseInt(west.hash.slice(0, 8), 16),
+      },
+      {
+        label: "east",
+        westLoss: east.westLoss,
+        eastLoss: east.eastLoss,
+        meanExpWest: east.meanExpWest,
+        meanExpEast: east.meanExpEast,
+        shoreErosion: east.shoreErosion,
+        hashN: Number.parseInt(east.hash.slice(0, 8), 16),
+      },
+      {
+        label: "delta",
+        hashDiverged: west.hash !== east.hash ? 1 : 0,
+        westWindwardBias: west.westLoss - west.eastLoss,
+        eastWindwardBias: east.eastLoss - east.westLoss,
+        bedrockClosed: west.bedrockOk,
+        noSwe: 1,
+      },
+    ],
+  };
+}
+
+/**
  * Slice F / C-020 lite — climate-mean rain + opposite winds → divergent
  * wet/dry sides; mean precip tracks regime; mass closes. No cell targeting.
  */
@@ -1740,6 +1877,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "living-hollow": probeLivingHollow,
   "island-drainage": probeIslandDrainage,
   "tidal-envelope": probeTidalEnvelope,
+  "shore-exposure": probeShoreExposure,
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
 };

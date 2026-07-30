@@ -505,6 +505,8 @@ Dispersal is absorbing rather than reflecting because reflection manufactures pr
 
 **Tidal envelope (C-016 Open).** Optional half-range amplitude around sea level yields `MLW = sea − amp`, `MHW = sea + amp`. Derived mask `shore.intertidal` marks cells with `MLW ≤ elevation < MHW`. No per-event tidal phase (S-009). Ocean outlet stays at `seaLevel` — the envelope is habitat geometry, not a second hydrology.
 
+**Shore exposure (C-017 Open).** Derived `shore.exposure` from fetch × onshore wind at the coastline. Coastal retreat (Δelev = Δdepth) integrates inside the geomorphology owner only — no SWE solver, no second sediment writer. Wind is a global force dial.
+
 **Legacy authored outlets.** A watershed pour point with location and rating curve remains a valid *closed-island-absent* design:
 
 ```

@@ -20,6 +20,7 @@ import {
   meanHighWater,
   meanLowWater,
 } from "./climate/tidalEnvelope";
+import { fillShoreExposure } from "./climate/shoreExposure";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   establishmentProbability,
@@ -151,16 +152,25 @@ export class WorldState {
    * amplitude 0. Derived only; not a second hydrology.
    */
   readonly intertidal: Grid2D;
+  /**
+   * Shore exposure 0/1 — fetch × onshore wind (C-017). Derived; coastal
+   * retreat is applied only inside geomorphology (no second sediment writer).
+   */
+  readonly shoreExposure: Grid2D;
   private readonly closedBoundary: boolean;
   /** Global sea datum (m). Undefined = legacy closed / perimeter mode. */
   private seaLevelMeters: number | undefined;
   /** Half-range tidal amplitude (m) around sea level — C-016 envelope. */
   private tidalAmplitudeMeters = 0;
+  /** Global wind components (unit-ish) — C-004 / C-017 force dial. */
+  private windUx = 0;
+  private windUz = 0;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
   private readonly outflowBox: ScalarBox = { value: 0 };
   private readonly oceanExchangeBox: ScalarBox = { value: 0 };
+  private readonly shoreErosionBox: ScalarBox = { value: 0 };
   private readonly infilBox: ScalarBox = { value: 0 };
   private readonly etBox: ScalarBox = { value: 0 };
   private readonly transpirationBox: ScalarBox = { value: 0 };
@@ -213,6 +223,9 @@ export class WorldState {
        * Requires seaLevel; 0 or absent → empty intertidal envelope.
        */
       tidalAmplitude?: number;
+      /** Global wind (C-004 / C-017) — no cell targeting. */
+      windUx?: number;
+      windUz?: number;
     },
   ) {
     this.width = terrain.width;
@@ -255,6 +268,7 @@ export class WorldState {
     this.herbBiomass = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
+    this.shoreExposure = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -274,6 +288,14 @@ export class WorldState {
       Number.isFinite(options.tidalAmplitude) &&
       options.tidalAmplitude > 0
         ? options.tidalAmplitude
+        : 0;
+    this.windUx =
+      options?.windUx !== undefined && Number.isFinite(options.windUx)
+        ? options.windUx
+        : 0;
+    this.windUz =
+      options?.windUz !== undefined && Number.isFinite(options.windUz)
+        ? options.windUz
         : 0;
 
     this.registry = new FieldRegistry();
@@ -323,6 +345,14 @@ export class WorldState {
     this.oceanExchangeBox.value = v;
   }
 
+  /** Cumulative soil depth·cell removed by coastal wave work (C-017). */
+  get shoreErosionLedger(): number {
+    return this.shoreErosionBox.value;
+  }
+  set shoreErosionLedger(v: number) {
+    this.shoreErosionBox.value = v;
+  }
+
   /** Current sea level (m), or undefined when legacy boundary mode. */
   get seaLevel(): number | undefined {
     return this.seaLevelMeters;
@@ -365,6 +395,20 @@ export class WorldState {
       Number.isFinite(amplitude) && amplitude > 0 ? amplitude : 0;
     this.markStructureDirty();
     this.ensureStructureFresh();
+  }
+
+  /** Current wind components (force dial — no cell targeting). */
+  get wind(): { ux: number; uz: number } {
+    return { ux: this.windUx, uz: this.windUz };
+  }
+
+  /**
+   * Set global wind (C-004 / C-017). Refreshes shore exposure; does not target cells.
+   */
+  setWind(ux: number, uz: number): void {
+    this.windUx = Number.isFinite(ux) ? ux : 0;
+    this.windUz = Number.isFinite(uz) ? uz : 0;
+    this.recomputeShoreExposure();
   }
 
   get infiltrationLedger(): number {
@@ -505,6 +549,7 @@ export class WorldState {
       this.oceanCells = new Set();
       this.intertidal.data.fill(0);
     }
+    this.recomputeShoreExposure();
     const { filled, depressionDepth } = priorityFloodFill(
       this.width,
       this.height,
@@ -531,6 +576,25 @@ export class WorldState {
         ? new Set()
         : computePerimeterOutlets(this.width, this.height, elev);
     }
+  }
+
+  /**
+   * Derived shore.exposure from fetch × wind (C-017). Not a sediment writer.
+   */
+  recomputeShoreExposure(): void {
+    if (this.oceanCells.size === 0) {
+      this.shoreExposure.data.fill(0);
+      return;
+    }
+    fillShoreExposure(
+      this.shoreExposure.data,
+      this.width,
+      this.height,
+      this.terrain.data,
+      this.oceanCells,
+      { ux: this.windUx, uz: this.windUz },
+      config.shoreFetchMaxCells,
+    );
   }
 
   /** Mark structure dirty; recompute at next event step or ensureStructureFresh (§7.2). */
@@ -717,9 +781,11 @@ export class WorldState {
   }
 
   /**
-   * Decadal soil production + GEO-002 erosion (NATURAL_PROCESS_MATH §3.8).
-   * Production everywhere; channel erosion where accumulation earns cost.
-   * Elev and depth move together so bedrock = elev − depth is invariant.
+   * Decadal soil production + GEO-002 erosion + coastal wave work (C-017).
+   * Production everywhere; channel erosion where accumulation earns cost;
+   * coastal retreat on exposed shoreline only — still this owner (no SWE,
+   * no second sediment writer). Elev and depth move together so bedrock
+   * = elev − depth is invariant.
    * `dt` is band units (1 = one full compressed decadal commit).
    */
   runGeomorphologyStep(dt: number): void {
@@ -728,6 +794,7 @@ export class WorldState {
     const elev = this.terrain.data;
     const depth = this.soilDepth.data;
     const cover = this.vegCover.data;
+    const exposure = this.shoreExposure.data;
     const acc = this.flowAccumulation;
     const filled = this.filledElevation ?? elev;
     const dx = config.cellSizeMeters;
@@ -735,13 +802,16 @@ export class WorldState {
     const p0 = config.soilProductionP0 * scale;
     const h0 = config.soilProductionH0;
     const kE = config.soilErosionK * scale;
+    const kCoast = config.shoreErosionK * scale;
     const aMin = config.erosionMinAccumulation;
     const minDepth = 1e-3;
     let dirty = false;
+    let shoreRemoved = 0;
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const i = z * this.width + x;
+        if (this.oceanCells.has(i)) continue;
         const h = depth[i]!;
         const prod = p0 * Math.exp(-h / h0);
 
@@ -753,6 +823,10 @@ export class WorldState {
           const cFactor = 1 - cover[i]! * 0.85;
           erode = kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
         }
+
+        // C-017: fetch×wind exposure contributes here — geomorphology integrates.
+        const coast = kCoast * exposure[i]!;
+        erode += coast;
 
         let dh = prod - erode;
         let nextH = Math.min(5, Math.max(0, h + dh));
@@ -771,11 +845,16 @@ export class WorldState {
           this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
           depth[i]! = nextH;
           elev[i]! = elev[i]! + actualDh;
+          if (actualDh < 0 && coast > 0 && erode > 0) {
+            // Attribute a coast-proportional share of soil loss (mass closes).
+            shoreRemoved += -actualDh * (coast / erode);
+          }
           dirty = true;
         }
       }
     }
 
+    if (shoreRemoved > 0) this.shoreErosionLedger += shoreRemoved;
     if (dirty) this.markStructureDirty();
   }
 
@@ -1113,6 +1192,7 @@ export class WorldState {
     this.precipitationLedger = 0;
     this.boundaryOutflowLedger = 0;
     this.oceanExchangeLedger = 0;
+    this.shoreErosionLedger = 0;
     this.infiltrationLedger = 0;
     this.etLedger = 0;
     this.transpirationLedger = 0;
@@ -1626,6 +1706,16 @@ export class WorldState {
         range: [0, 1e12] as const,
       },
       {
+        id: "ledger.shoreErosion",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "geomorphology",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.shoreErosionBox,
+        range: [0, 1e12] as const,
+      },
+      {
         id: "ledger.infiltration",
         units: "m",
         shape: "scalar" as const,
@@ -1693,6 +1783,16 @@ export class WorldState {
         band: "decadal" as const,
         legacy: false,
         data: this.intertidal.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "shore.exposure",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "flowStructure",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.shoreExposure.data,
         range: [0, 1] as const,
       },
       {

@@ -1,0 +1,17 @@
+{
+  "id": "18",
+  "title": "Wave exposure + coastal erosion",
+  "simLoop": "Fetch × wind derives shore.exposure; coastal retreat integrates inside geomorphology only (C-017 — no SWE, no second sediment writer).",
+  "gameLoop": "Set wind and watch the windward shore retreat differently from the leeward under one regime.",
+  "registerIds": ["C-017", "C-015", "C-004", "GEO-002", "T-001", "T-006"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/shoreExposure.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/geomorphology.test.ts"
+  ],
+  "probes": ["shore-exposure"],
+  "fields": ["shore.exposure", "ledger.shoreErosion"],
+  "notebookSeed": "The windward cove wore back; the lee side held.",
+  "tierO": "no owner-only question this closeout; shore-legibility batched — see docs/candidates/C-017-dossier.md"
+}

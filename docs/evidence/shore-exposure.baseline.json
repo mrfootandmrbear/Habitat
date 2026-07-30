@@ -1,0 +1,81 @@
+{
+  "scenario": "shore-exposure",
+  "metrics": {
+    "west.westLoss": {
+      "value": 0.12514233961701393,
+      "abs": 0.0001
+    },
+    "west.eastLoss": {
+      "value": 0.003517836332321167,
+      "abs": 0.0001
+    },
+    "west.meanExpWest": {
+      "value": 0.47952365316450596,
+      "abs": 0.0001
+    },
+    "west.meanExpEast": {
+      "value": 0,
+      "abs": 0.0001
+    },
+    "west.shoreErosion": {
+      "value": 15.67491311081102,
+      "abs": 0.001
+    },
+    "west.bedrockOk": {
+      "value": 1,
+      "abs": 0
+    },
+    "west.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "west.hashN": {
+      "value": 4001475796,
+      "abs": 0
+    },
+    "east.westLoss": {
+      "value": 0.0034903213381767273,
+      "abs": 0.0001
+    },
+    "east.eastLoss": {
+      "value": 0.14057207480072975,
+      "abs": 0.0001
+    },
+    "east.meanExpWest": {
+      "value": 0,
+      "abs": 0.0001
+    },
+    "east.meanExpEast": {
+      "value": 0.4717111550271511,
+      "abs": 0.0001
+    },
+    "east.shoreErosion": {
+      "value": 15.599528033468196,
+      "abs": 0.001
+    },
+    "east.hashN": {
+      "value": 263289701,
+      "abs": 0
+    },
+    "delta.hashDiverged": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.westWindwardBias": {
+      "value": 0.12162450328469276,
+      "abs": 0.0001
+    },
+    "delta.eastWindwardBias": {
+      "value": 0.13708175346255302,
+      "abs": 0.0001
+    },
+    "delta.bedrockClosed": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.noSwe": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

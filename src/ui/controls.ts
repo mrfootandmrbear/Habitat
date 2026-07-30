@@ -44,6 +44,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "herbBiomass", label: "Inspect: herb biomass" },
   { id: "seedBank", label: "Inspect: herb seed bank" },
   { id: "intertidal", label: "Inspect: intertidal" },
+  { id: "shoreExposure", label: "Inspect: shore exposure" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */

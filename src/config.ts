@@ -82,6 +82,13 @@ export const config = {
   soilErosionK: 0.003,
   /** Min D8 accumulation (cells) before channel-style erosion applies. */
   erosionMinAccumulation: 6,
+  /**
+   * Coastal wave erosion scale (m / decadal band) at full exposure (C-017).
+   * Applied only inside geomorphology — no second sediment writer / no SWE.
+   */
+  shoreErosionK: 0.08,
+  /** Max fetch length (cells) for shore exposure saturate(fetch/max). */
+  shoreFetchMaxCells: 12,
   /** Per sim-day (soil/veg/GW steps scale by dt in days). */
   infiltrationRate: 0.08,
   /**
@@ -194,7 +201,8 @@ export type InspectorLayer =
   | "actualEt"
   | "herbBiomass"
   | "seedBank"
-  | "intertidal";
+  | "intertidal"
+  | "shoreExposure";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

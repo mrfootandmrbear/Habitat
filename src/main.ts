@@ -71,6 +71,8 @@ const terrain = generateIsland(
 const initialSea: SeaLevelId = "mid";
 const world = new WorldState(terrain, {
   seaLevel: seaLevelById(initialSea).meters,
+  windUx: windById("west").ux,
+  windUz: windById("west").uz,
 });
 const model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
@@ -188,10 +190,13 @@ const ui = mountControls(
     },
     onWind: (id) => {
       windId = id;
+      const w = windById(id);
+      world.setWind(w.ux, w.uz);
       ui.setWind(id);
       ui.setHint(
-        `${windById(id).label} — watch which slopes stay wetter`,
+        `${w.label} — watch which slopes stay wetter and which shores retreat`,
       );
+      syncMeshes();
     },
     onTide: (id) => {
       tideId = id;

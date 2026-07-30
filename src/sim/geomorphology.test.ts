@@ -10,6 +10,7 @@ describe("geomorphology (Slice 8, S-006, GEO-002)", () => {
     expect(geomorphologyProcess.writes).toEqual([
       "terrain.elevation",
       "soil.depth",
+      "ledger.shoreErosion",
     ]);
     expect(geomorphologyProcess.band).toBe("decadal");
     const world = new WorldState(new Grid2D(4, 4, 2));
