@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slices **16** (island / sea) + **15** (brief chrome) agent **Done**. Tier-O batch: [docs/playtests/batch-island-brief.md](docs/playtests/batch-island-brief.md). Next: **Slice 17** tidal envelope. Slice **A** audio wired (C-014 Open).
+**Post-MVP:** Slices **14** / **16** / **15** Tier-O **Pass** ([docs/playtests/batch-island-brief.md](docs/playtests/batch-island-brief.md)). Next: **Slice 17** tidal envelope. Slice **A** audio wired (C-014 Open). **C-020** atmospheric precip (later).
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

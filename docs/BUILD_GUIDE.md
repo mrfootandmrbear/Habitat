@@ -90,11 +90,11 @@ Summary only — do not reopen unless fixing regressions.
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 | 12 | Arrival / first occupant (C-007) | Shoots appear where conditions suit | `dispersalProcess`, `arrival-earned` | **Done** — C-007 Locked |
 | 13 | Biology → physics (E-005) | Living hollow blunts the next storm | `physicalCover`, `living-hollow` | **Done** — Tier-O Pass (batch 2026-07-30) |
-| 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **Done** — agent Tier-M; Tier-O batched |
-| **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet | `generateIsland`, `ledger.oceanExchange` | **Done** — agent; Tier-O batched |
-| **15** | Scenario brief chrome | Accept a brief on the island world | Scenario UI observer | **Done** — agent; Tier-O batched |
+| 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **Done** — Tier-O Pass (batch 2026-07-30) |
+| **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet | `generateIsland`, `ledger.oceanExchange` | **Done** — Tier-O Pass (batch 2026-07-30) |
+| **15** | Scenario brief chrome | Accept a brief on the island world | Scenario UI observer | **Done** — Tier-O Pass (batch 2026-07-30) |
 
-**Current gate:** Slices **16** + **15** agent **Done** (§4.10b / §4.11). Tier-O batch ready: [playtests/batch-island-brief.md](playtests/batch-island-brief.md). Slice **14** agent Tier-M done. Next sim: Slice **17** tidal envelope (§4.12). Slice 13 + 8c Tier-O **Pass** (owner 2026-07-30). **Slice A** audio scaffold wired (C-014 still Open — next batch). C-004 stewardship reading still Open (dossier).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass** ([playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30). Next sim: Slice **17** tidal envelope (§4.12). Island place reading discharged for C-015; **W-001** supersession still an owner register act. **C-020** filed (atmospheric precip delivery — later). **Slice A** audio scaffold wired (C-014 still Open). C-004 stewardship reading still Open (dossier; rain dial “works for now,” not natural).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); 17–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -391,7 +391,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.10 Slice 14 — Scenario objective scaffold *(Done — agent; Tier-O batched)*
+### 4.10 Slice 14 — Scenario objective scaffold *(Done — Tier-O Pass)*
 
 **Why this exists.** Sandbox already runs the living-sand-castle loop (THESIS §4). **G-002** (Locked) says scenarios provide finite objectives under that same loop — not a second game. Without a scenario scaffold, G-005 / G-006 / G-007 stay unexercised and the toxic-site premise (C-010 / THESIS §7) has nowhere to land. This slice builds the **minimum objective container**, not a campaign or a win-condition resolution of Open **G-007**.
 
@@ -412,12 +412,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Probe `scenario-window`: paired meeting / failing preserve states under one authored criterion
 - [x] `docs/slices/14.json` manifest (DoD row 9)
 - [x] Notebook seed: “The brief asked me to keep the hollow wet long enough for life to hold the next storm.”
-- [ ] Tier-O (batch): *did the objective feel like a reason to run the same loop — or like a different game?*
+- [x] Tier-O **Pass** ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30): *did the objective feel like a reason to run the same loop — or like a different game?*
 - [x] **Next-but-one:** Slice **16** island / sea level specified at §4.10b (DoD row 10) — precedes Slice 15 so Tier-O fires on a readable world
 
 ---
 
-### 4.10b Slice 16 — Sea level + island *(Done — agent; Tier-O batched)*
+### 4.10b Slice 16 — Sea level + island *(Done — Tier-O Pass)*
 
 **Why this exists.** The map edge is still an artifact (SIM §10.1); perimeter pour points are a provisional workaround. An island makes the ocean the outlet, supplies C-012's mosaic as geometry, and gives C-004 a second global force dial. Slice 16 alone is the best available shot at THESIS §8's clip test. Full maritime depth is C-016…C-019 — this slice is only the base level.
 
@@ -441,12 +441,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-P: shoreline reads without inspector (proxy floor)
 - [x] `docs/slices/16.json` manifest
 - [x] Notebook seed: “I raised the sea and the hollow I dug became a cove.”
-- [ ] Tier-O batched with Slice 15 ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md))
+- [x] Tier-O **Pass** with Slice 15 ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30)
 - [x] **Next-but-one:** Slice 15 brief chrome (§4.11) and Slice 17 tidal envelope (§4.12) specified to §4.3 depth
 
 ---
 
-### 4.11 Slice 15 — Scenario brief chrome *(Done — agent; Tier-O batched)*
+### 4.11 Slice 15 — Scenario brief chrome *(Done — Tier-O Pass)*
 
 **Why this exists.** Slice 14’s evaluator and `scenario-window` probe prove the objective container machine-side. Tier-O cannot answer “same loop or different game?” until the player can **accept a brief** and see window satisfaction without an inspector — preferably on the island world from Slice 16. This is presentation + load chrome over the existing observer — not a campaign and not G-007 resolution.
 
@@ -465,7 +465,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-P proxy: brief + satisfaction affordance present when scenario active
 - [x] Wire `observe` on event step when scenario loaded (write isolation retained)
 - [x] `docs/slices/15.json` manifest; notebook seed from Slice 14 brief
-- [ ] Fire Slice 14 Tier-O from this chrome ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md))
+- [x] Tier-O **Pass** ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30)
 - [x] **Next-but-one:** Slice 17 tidal envelope (§4.12)
 
 ---
@@ -520,7 +520,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **16** + **15** agent Done (§4.10b / §4.11); Tier-O batched. Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). Next: Slice **17** tidal envelope (§4.12). Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

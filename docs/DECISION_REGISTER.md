@@ -120,6 +120,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Promoted **P-005** (save states) from hypothesis-Current to Locked after the `deep-time` probe discharged its criterion: save → advance 100 compressed sim-years → reload → advance again yields an identical state hash, and legacy `soil.depth` from a save still drives divergent decadal production. Artifact: `docs/evidence/deep-time.baseline.json`, `src/sim/probes/deepTime.ts`.
 
+**v2.0.5 — C-020 filed; island brief Tier-O Pass.**
+
+- Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
+
 **v2.0.4 — C-007 Locked (Slice 12 owner Pass).**
 
 - Promoted **C-007** (arrival as the primary biological verb) from Open to Locked after the machine half (Liebig HSI gate, `arrival-earned` probe: suitable biomass = 2.5, unsuitable = 0, `earned = 1`, `hashMatch = 1`) and the owner verdict that appearance of life must mimic real life and therefore arrive through earned conditions. Introduction remains secondary and later; **RC-003** falls in §16 queue priority. Artifacts: `docs/slices/12-composition.md`, `docs/evidence/arrival-earned.baseline.json`, `docs/playtests/12-arrival-earned.md`, `docs/candidates/C-007-dossier.md`.
@@ -1247,7 +1251,8 @@ Ordered by how many other decisions depend on them.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
-8g. **C-015**…**C-019** — island maritime direction (sea as base level; tidal envelope; wave exposure; salinity; island biogeography). Filed 2026-07-30. C-015 reframes **W-001** (Current) as an owner call.
+8g. **C-015**…**C-019** — island maritime direction (sea as base level; tidal envelope; wave exposure; salinity; island biogeography). Filed 2026-07-30. C-015 place reading Pass (2026-07-30); **W-001** supersession still an owner call.
+8h. **C-020** — atmospheric precip delivery (clouds → rain/snow/sleet from wind, moisture, heat). Filed 2026-07-30 from island-brief Pass notes; later — keep C-004 rain dial until then.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1472,6 +1477,17 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** W-003 is Locked — this reframes how the pool is *sized and sourced*, not whether a pool exists. T-001: overseas arrivals stay seeded/authored (C-003). No random spawn table (N-004). C-015 required.
 
 **Leading direction.** Fixed functional-type catalogue still curated; which types are *eligible* and how hard seed pressure arrives depends on island area / isolation parameters. Not Locked until perimeter seed rain is replaced by an over-water kernel and a smaller island earns fewer occupants under identical regimes.
+
+### C-020 — Atmospheric precip delivery (clouds from wind, moisture, heat)
+**Status:** Open
+
+**Question.** Should precipitation eventually arrive as **weather the atmosphere makes** — clouds that deliver rain, snow, or sleet from wind, moisture, and heat — rather than as a global rain-regime dial that dumps water everywhere at once?
+
+**Why now.** Owner Pass on the island brief batch (2026-07-30): the rain dial **works for now** but does not feel natural. THESIS §2 / C-011 want everyday weather intuition as the instrument; uniform regime rain fails that test even when mass balance and force-dial mechanics are correct.
+
+**Constraints.** Must not become cell-targeted smiting (C-004 / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until a slice demonstrates atmospheric delivery without collapsing stewardship into a cloud painter.
+
+**Leading direction.** Yes, later — after the maritime ladder (C-015…C-019) and while C-004 remains the post-build verb. Not Locked until one build shows precip phase and placement attributable to atmospheric state (not to a place the player clicked), with mass balance closed and no cell targeting.
 
 ---
 

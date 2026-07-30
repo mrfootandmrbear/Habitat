@@ -17,6 +17,8 @@
 
 **2026-07-30** batch playtest ([docs/playtests/batch-living-return.md](../playtests/batch-living-return.md)): owner Pass on *living hollow changed how water moved — enough to want another storm*. That discharges the 8c “want another run” taste question and supports the force-dial loop, but it is **not** yet the verbatim C-004 owner half (*world did it vs something you placed*). Leave **Open**; ask the stewardship reading in a later sitting if still needed.
 
+**2026-07-30** island brief batch ([docs/playtests/batch-island-brief.md](../playtests/batch-island-brief.md)): rain regime dial **works for now** but does **not** feel natural. Owner direction for later: clouds that deliver rain/snow/sleet from wind, moisture, and heat — filed as **C-020**. Does not close the stewardship half; keep the dial until C-020 has a slice.
+
 ## Owner-only question (verbatim criterion)
 
 After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed?

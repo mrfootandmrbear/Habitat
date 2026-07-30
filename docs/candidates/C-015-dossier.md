@@ -1,6 +1,6 @@
 # C-015 — The world is an island; sea level is global base level
 
-**Status:** Open (owner-judged half outstanding — W-001 supersession)  
+**Status:** Open (W-001 supersession still owner)  
 **Criterion (verbatim).** With `seaLevel` set, surface water leaves through ocean cells into `ledger.oceanExchange` (not perimeter-minima outlets); mass balance closes (H-004); same seed + same sea level → identical hash; different sea level → divergent shoreline / wet fraction. Sea-level API has no cell/place arguments. Priority-Flood seeds from ocean cells. Existing probes without `seaLevel` keep prior baselines and golden hashes.
 
 ## Machine half (discharged — Slice 16)
@@ -19,12 +19,12 @@
 
 **Baseline note.** Adding `ledger.oceanExchange` to the registry changed full `stateHash` fingerprints for worlds that never set sea level. Depth golden hash unchanged. `deep-time`, `regime-divergence`, and `burn-recover` baselines refreshed for `hashN` / `p005.hashFirstN` only — reason: new registry ledger field at zero; physics unchanged.
 
-## Owner half (outstanding)
+## Owner half (partial — 2026-07-30)
 
-**W-001** (Windward Basin, Current) supersession is a register act. Also: does the island read as a place worth tending (THESIS §8 / C-012)?
+**Place reading:** Pass ([docs/playtests/batch-island-brief.md](../playtests/batch-island-brief.md)) — island + brief felt like the same sculpt–forces–time loop on a place that reads as an island.
 
-## Owner-only question
+**W-001** (Windward Basin, Current) supersession remains an explicit owner register act — not discharged by this Pass alone.
 
-On the island, did accepting a brief feel like a reason to run the same sculpt–forces–time loop — or like a different game?
+## Remaining owner question
 
-*(Batched in [docs/playtests/batch-island-brief.md](../playtests/batch-island-brief.md).)*
+Should **W-001** be superseded so the island + sea datum is the canonical preserve reference?

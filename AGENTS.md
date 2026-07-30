@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **16** + **15** agent **Done**. Tier-O batch: [docs/playtests/batch-island-brief.md](docs/playtests/batch-island-brief.md). Next: **Slice 17** tidal envelope (§4.12). Maritime candidates C-015…C-019 Open.
+Slices **14** / **16** / **15** Tier-O **Pass**. Next: **Slice 17** tidal envelope (§4.12). Maritime candidates C-015…C-019 Open; **C-020** atmospheric precip (later). W-001 supersession still owner.
 
 ## Cursor Cloud specific instructions
 

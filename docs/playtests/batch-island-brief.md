@@ -24,6 +24,8 @@
 - **Pass** — the brief felt like a reason to run the same loop on a place that reads as an island
 - **Hold** — the brief felt like a different game, or the island did not read as a place
 
+**Owner 2026-07-30: Pass.** Brief on the island felt like the same sculpt–forces–time loop. Rain dial works for now but does not feel natural; later want clouds that deliver rain/snow/sleet from wind, moisture, and heat (**C-020**). C-014 silence reading not settled this sitting. C-004 stewardship half still Open.
+
 **If Hold, the agent will:** retune brief chrome copy / shoreline contrast / default sea level, re-measure proxies, and only then ask again — not add a new sim system.
 
 Notebook seed: "The brief asked me to keep the hollow wet long enough for life to hold the next storm."
