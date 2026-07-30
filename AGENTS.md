@@ -20,6 +20,8 @@ Intentional probe baseline refresh: `npm run probe -- <scenario> --write-baselin
 - **Unexplained** `GOLDEN_*` or probe-baseline moves are defects, not updates.
 - **Blocked ≠ idle.** §4.0.1 → `docs/blocked/<date>-<slice>.md`, name next queue item, take it.
 - **CI-judged candidates:** promote yourself in the evidence commit (DECISION_CONFORMANCE §3.0). Owner-judged → dossier only.
+- **Clip gate before a new system (D-007, Locked).** A slice registering a new `Process` records a twenty-second clip verdict (THESIS §8) in its BUILD_GUIDE entry first. While the clip does not exist, the next slice is legibility / encoding / presentation, **not** another system. Not a playtest — no ask gate, no batching, no owner session. Slices registering no process are exempt.
+- **Numbers that live in `config.ts` are generated, not typed.** Cite DECISION_CONFORMANCE §5 world facts; never restate grid, Δx, or extent in prose. `conformance:check` fails on drift — this is how the 20× C-012 units error is prevented from recurring.
 
 ## Project skills (slash or auto)
 
@@ -36,7 +38,9 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** lite via F (full clouds later — rain still reads as spigot). W-001 supersession still owner.
+Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** lite via F (full clouds later — rain still reads as spigot). W-001 supersession still owner.
+
+**Next is constrained by D-007.** The clip does not yet exist — rain has read as a spigot across three sittings — so the next slice is the one that moves the twenty-second clip closest to existing, not a new system. That points at **C-020** rain delivery / **C-004** force feel, or **C-009** substrate differentiation (the thesis's central noun, still one undifferentiated soil, and the highest clip yield per unit work). Later stubs (AUD-003 / Field Notebook / scenario campaign) register new processes and are gated behind a clip verdict. **C-012** is live again with corrected units: 960 m at 10 m cells, and Δx — not extent — is the suspect value.
 
 ## Cursor Cloud specific instructions
 
