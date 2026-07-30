@@ -16,6 +16,21 @@ describe("edit undo (Slice 8c / C-013, S-007)", () => {
     expect(world.terrain.get(6, 6)).toBeCloseTo(before, 5);
   });
 
+  it("repeated sculpt-and-undo is bit-identical to never sculpting (C-013)", () => {
+    const untouched = new WorldState(generateMountain(12, 12, 4, 2));
+    const world = new WorldState(generateMountain(12, 12, 4, 2));
+    const undo = new EditUndoStack();
+    expect(world.stateHash()).toBe(untouched.stateHash());
+    undo.pushCheckpoint(world);
+    world.raiseBerm(6, 6);
+    undo.pushCheckpoint(world);
+    world.digChannel(4, 4);
+    expect(world.stateHash()).not.toBe(untouched.stateHash());
+    expect(undo.undo(world)).toBe(true);
+    expect(undo.undo(world)).toBe(true);
+    expect(world.stateHash()).toBe(untouched.stateHash());
+  });
+
   it("clears undo after time advances (no ecological rewind)", () => {
     const world = new WorldState(generateMountain(8, 8, 3, 1));
     const undo = new EditUndoStack();
