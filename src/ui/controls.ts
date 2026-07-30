@@ -8,6 +8,10 @@ import {
   type SeaLevelId,
 } from "../sim/climate/seaLevel";
 import {
+  TIDE_REGIMES,
+  type TideId,
+} from "../sim/climate/tidalEnvelope";
+import {
   WIND_REGIMES,
   type WindId,
 } from "../sim/climate/windRegime";
@@ -39,6 +43,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "actualEt", label: "Inspect: actual ET" },
   { id: "herbBiomass", label: "Inspect: herb biomass" },
   { id: "seedBank", label: "Inspect: herb seed bank" },
+  { id: "intertidal", label: "Inspect: intertidal" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */
@@ -55,6 +60,7 @@ export function mountControls(
   initial: {
     rainRegime: RainRegimeId;
     seaLevel: SeaLevelId;
+    tide: TideId;
     wind: WindId;
     timeRate: TimeRate;
     inspector: InspectorLayer;
@@ -63,6 +69,7 @@ export function mountControls(
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
     onSeaLevel: (id: SeaLevelId) => void;
+    onTide: (id: TideId) => void;
     onWind: (id: WindId) => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
@@ -80,6 +87,7 @@ export function mountControls(
 ): {
   setRainRegime: (id: RainRegimeId) => void;
   setSeaLevel: (id: SeaLevelId) => void;
+  setTide: (id: TideId) => void;
   setWind: (id: WindId) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
@@ -133,6 +141,23 @@ export function mountControls(
     handlers.onSeaLevel(seaSelect.value as SeaLevelId);
   });
 
+  const tideSelect = document.createElement("select");
+  tideSelect.id = "tide-envelope";
+  tideSelect.setAttribute(
+    "aria-label",
+    "Tide envelope (C-016 — MHW/MLW globals, no phase)",
+  );
+  for (const regime of TIDE_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    tideSelect.appendChild(opt);
+  }
+  tideSelect.value = initial.tide;
+  tideSelect.addEventListener("change", () => {
+    handlers.onTide(tideSelect.value as TideId);
+  });
+
   const windSelect = document.createElement("select");
   windSelect.id = "wind-regime";
   windSelect.setAttribute(
@@ -150,7 +175,7 @@ export function mountControls(
     handlers.onWind(windSelect.value as WindId);
   });
 
-  forcePanel.append(rainSelect, seaSelect, windSelect);
+  forcePanel.append(rainSelect, seaSelect, tideSelect, windSelect);
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
@@ -306,6 +331,9 @@ export function mountControls(
     },
     setSeaLevel: (id) => {
       seaSelect.value = id;
+    },
+    setTide: (id) => {
+      tideSelect.value = id;
     },
     setWind: (id) => {
       windSelect.value = id;

@@ -23,13 +23,13 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 |---|---|---|
 | **Rainfall** | arid / light / moderate / wet | **Mean climate precip intensity** — average depth the world lives under (every event when intensity > 0). Not a storm-duty on/off switch. Multiplier on `rainDepthPerEvent`; orography redistributes without changing the regime’s mean. |
 | **Sea** | off / low / mid / high | Global sea datum (**C-015**). |
+| **Tide** | off / neap / mean / spring | MHW/MLW envelope half-range around sea (**C-016**). No per-event phase. |
 | **Wind** | calm / from west / east / south / north | Global wind vector; drives orographic modulation of the rainfall mean (**C-020** lite). |
 
 Chrome: one **Forces** group containing these selects (exact labels in `src/ui/controls.ts`). No cell arguments on any handler.
 
 ## Stubs (empty slots — do not invent policy)
 
-- Tide envelope (Slice 17)
 - Season (unfiled)
 
 ## Geography as modulator
@@ -44,7 +44,7 @@ then normalize over land so ΣP ≈ N_land · P₀ (mean tracks the dial; placem
 
 ## Targeting ban
 
-APIs: `rainDepthForRegime(regime, base)`, `windById(id)`, `setSeaLevel(level)` — no `(x,z)` / cell index parameters. Conformance: cite **C-004**.
+APIs: `rainDepthForRegime(regime, base)`, `windById(id)`, `setSeaLevel(level)`, `setTidalAmplitude(amp)` / `tideById(id)` — no `(x,z)` / cell index parameters. Conformance: cite **C-004**.
 
 ## Full C-020
 

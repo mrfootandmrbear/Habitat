@@ -29,11 +29,16 @@ import {
 } from "../terrain/generateIsland";
 import { shorelineEncodingDelta } from "../climate/seaLevel";
 import {
+  foreshoreEncodingFrac,
+  tideById,
+} from "../climate/tidalEnvelope";
+import {
   ScenarioSession,
   criterionReaderFromWorld,
   livingHollowObjective,
 } from "../scenario/ScenarioSession";
 import { soilEncodingDelta } from "../../ui/cutaway";
+import { intertidalEncodingDelta } from "../../ui/terrainEncoding";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -1336,6 +1341,120 @@ export function probeIslandDrainage(): ProbeResult {
 }
 
 /**
+ * Slice 17 / C-016 — MHW/MLW envelope grows intertidal monotonically;
+ * same envelope → identical hash; no per-event tidal phase. Sea hydrology unchanged.
+ */
+export function probeTidalEnvelope(): ProbeResult {
+  const size = 48;
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const seed = 31;
+
+  const run = (amplitude: number) => {
+    const world = new WorldState(generateIsland(size, size, 10, seed), {
+      seaLevel: sea,
+      tidalAmplitude: amplitude,
+    });
+    const before = world.intertidalCellCount();
+    for (let i = 0; i < 8; i++) world.stepEvent();
+    if (world.intertidalCellCount() !== before) {
+      throw new Error("tidal-envelope: intertidal changed across stepEvent (phase leak)");
+    }
+    const mhw = world.meanHighWater!;
+    const mlw = world.meanLowWater!;
+    return {
+      hash: world.stateHash(),
+      intertidalCells: before,
+      mhw,
+      mlw,
+      amplitude,
+      foreshoreFrac: foreshoreEncodingFrac(world.terrain.data, sea, mhw),
+      oceanCells: world.oceanCellCount(),
+      encodingDelta: intertidalEncodingDelta(config.soilPorosity),
+    };
+  };
+
+  const off = run(0);
+  const neap = run(tideById("neap").amplitudeMeters);
+  const mean = run(tideById("mean").amplitudeMeters);
+  const spring = run(tideById("spring").amplitudeMeters);
+  const meanB = run(tideById("mean").amplitudeMeters);
+
+  if (mean.hash !== meanB.hash) {
+    throw new Error(
+      `tidal-envelope: replay hash mismatch (T-001) ${mean.hash} vs ${meanB.hash}`,
+    );
+  }
+  if (off.intertidalCells !== 0) {
+    throw new Error(
+      `tidal-envelope: tide off should have 0 intertidal (got ${off.intertidalCells})`,
+    );
+  }
+  if (!(neap.intertidalCells < mean.intertidalCells)) {
+    throw new Error(
+      `tidal-envelope: neap (${neap.intertidalCells}) should be < mean (${mean.intertidalCells})`,
+    );
+  }
+  if (!(mean.intertidalCells < spring.intertidalCells)) {
+    throw new Error(
+      `tidal-envelope: mean (${mean.intertidalCells}) should be < spring (${spring.intertidalCells})`,
+    );
+  }
+  if (!(spring.foreshoreFrac > neap.foreshoreFrac)) {
+    throw new Error("tidal-envelope: foreshore fraction should grow with amplitude");
+  }
+  if (!(spring.encodingDelta > 0.08)) {
+    throw new Error(
+      `tidal-envelope: Tier-P intertidal tint too weak (${spring.encodingDelta})`,
+    );
+  }
+  // Ocean outlet unchanged by tide envelope (C-015).
+  if (off.oceanCells !== spring.oceanCells) {
+    throw new Error("tidal-envelope: tide must not change ocean cell count");
+  }
+
+  return {
+    scenario: "tidal-envelope",
+    records: [
+      {
+        label: "off",
+        intertidalCells: off.intertidalCells,
+        oceanCells: off.oceanCells,
+      },
+      {
+        label: "neap",
+        intertidalCells: neap.intertidalCells,
+        foreshoreFrac: neap.foreshoreFrac,
+        mhw: neap.mhw,
+        mlw: neap.mlw,
+      },
+      {
+        label: "mean",
+        intertidalCells: mean.intertidalCells,
+        foreshoreFrac: mean.foreshoreFrac,
+        replayMatch: 1,
+        hashN: Number.parseInt(mean.hash.slice(0, 8), 16),
+        encodingDelta: mean.encodingDelta,
+      },
+      {
+        label: "spring",
+        intertidalCells: spring.intertidalCells,
+        foreshoreFrac: spring.foreshoreFrac,
+        mhw: spring.mhw,
+        mlw: spring.mlw,
+      },
+      {
+        label: "delta",
+        neapToMean: mean.intertidalCells - neap.intertidalCells,
+        meanToSpring: spring.intertidalCells - mean.intertidalCells,
+        foreshoreGrew: spring.foreshoreFrac > neap.foreshoreFrac ? 1 : 0,
+        oceanUnchanged: off.oceanCells === spring.oceanCells ? 1 : 0,
+        encodingFloor: mean.encodingDelta > 0.08 ? 1 : 0,
+      },
+    ],
+  };
+}
+
+/**
  * Slice F / C-020 lite — climate-mean rain + opposite winds → divergent
  * wet/dry sides; mean precip tracks regime; mass closes. No cell targeting.
  */
@@ -1620,6 +1739,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "arrival-earned": probeArrivalEarned,
   "living-hollow": probeLivingHollow,
   "island-drainage": probeIslandDrainage,
+  "tidal-envelope": probeTidalEnvelope,
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
 };

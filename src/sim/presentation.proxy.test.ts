@@ -17,7 +17,7 @@ import {
   FormMemory,
 } from "./formMemory";
 import { lightEncodingDelta } from "../ui/lightEncoding";
-import { terrainEncodingDelta, defaultTerrainRgb } from "../ui/terrainEncoding";
+import { terrainEncodingDelta, defaultTerrainRgb, intertidalEncodingDelta } from "../ui/terrainEncoding";
 import { occupantEncodingDelta } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
@@ -193,6 +193,15 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       shorelineEncodingDelta(48, 48, terrain.data, 3.5),
     ).toBeGreaterThan(shoreFrac);
+  });
+
+  it("intertidal foreshore tint clears the perceptual floor (Slice 17 / C-016)", () => {
+    expect(intertidalEncodingDelta(config.soilPorosity)).toBeGreaterThan(0.08);
+    const dry = { moisture: 0.1, cover: 0.05 };
+    const foreshore = { moisture: 0.1, cover: 0.05, intertidal: true };
+    expect(
+      terrainEncodingDelta(dry, foreshore, config.soilPorosity),
+    ).toBeGreaterThan(0.08);
   });
 
   it("orographic wet/dry sides encode in soil darkening without inspector (Slice F)", () => {

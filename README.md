@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done (climate-mean Force panel + orographic wind). Next: **Slice 17** tidal envelope. Island is the default playable world. Slice **A** audio wired (C-014 Open). Full **C-020** clouds/phase later.
+**Post-MVP:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done; **Slice 17** Done (tidal envelope / intertidal). Next: **Slice 18** wave exposure. Island is the default playable world. Slice **A** audio wired (C-014 Open). Full **C-020** clouds/phase later.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)
@@ -46,6 +46,6 @@ npm run conformance
 npm run dev
 ```
 
-Playable loop: shape the island, set climate forces (rainfall mean, sea, wind), run time, watch the place answer. No charts — the world is the readout.
+Playable loop: shape the island, set climate forces (rainfall mean, sea, tide, wind), run time, watch the place answer. No charts — the world is the readout.
 
 `habitat-water-poc` remains a separate reference prototype; this app is a fresh scaffold.

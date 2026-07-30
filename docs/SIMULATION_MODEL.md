@@ -503,6 +503,8 @@ Dispersal is absorbing rather than reflecting because reflection manufactures pr
 
 **Ocean outlet (C-015).** Preserve option `seaLevel: number` (metres on the elevation datum). Ocean mask = `elevation < seaLevel`. Flux into ocean cells (or holding ocean cells at sea stage) removes water from the terrestrial surface store and adds the same depth·cell to `ledger.oceanExchange` in the same operation so mass balance (§8.2) closes. `flow.watershedLabel` may label cells by the ocean reach their path drains to.
 
+**Tidal envelope (C-016 Open).** Optional half-range amplitude around sea level yields `MLW = sea − amp`, `MHW = sea + amp`. Derived mask `shore.intertidal` marks cells with `MLW ≤ elevation < MHW`. No per-event tidal phase (S-009). Ocean outlet stays at `seaLevel` — the envelope is habitat geometry, not a second hydrology.
+
 **Legacy authored outlets.** A watershed pour point with location and rating curve remains a valid *closed-island-absent* design:
 
 ```

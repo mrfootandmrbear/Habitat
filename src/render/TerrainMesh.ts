@@ -91,6 +91,7 @@ export class TerrainMesh {
             config.soilPorosity,
             world.getVegCover(x, z),
             world.getFireScar(x, z),
+            world.isForeshore(x, z),
           );
           col.setRGB(r, g, b);
           if (elevDelta) {
@@ -232,6 +233,13 @@ export class TerrainMesh {
           config.herbBiomassMax,
         );
         col.setRGB(r, g, b);
+        break;
+      }
+      case "intertidal": {
+        const t = world.intertidal.data[idx] ?? 0;
+        if (t > 0) col.setRGB(0.72, 0.58, 0.38);
+        else if (world.oceanCells.has(idx)) col.setRGB(0.1, 0.29, 0.43);
+        else col.setRGB(0.35, 0.4, 0.32);
         break;
       }
       case "seedBank": {

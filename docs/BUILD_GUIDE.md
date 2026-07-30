@@ -94,10 +94,11 @@ Summary only — do not reopen unless fixing regressions.
 | **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet | `generateIsland`, `ledger.oceanExchange` | **Done** — Tier-O Pass (batch 2026-07-30) |
 | **15** | Scenario brief chrome | Accept a brief on the island world | Scenario UI observer | **Done** — Tier-O Pass (batch 2026-07-30) |
 | **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt island · set forces · watch the place | `FORCE_PANEL`, `orographicPrecip`, `orographic-wind` | **Done** — agent (no Tier-O) |
+| **17** | Tidal envelope / intertidal (**C-016**) | Widen tide → shore band grows | `tidalEnvelope`, `shore.intertidal`, `tidal-envelope` | **Done** — agent; Tier-O metaphor batched |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done (agent — climate-mean Force panel + orographic lite). Next: Slice **17** tidal envelope (§4.12). Island is the default playable world (C-015 place Pass; **W-001** supersession still owner). Rainfall dial is a **climate mean** (not storm on/off). Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done; **Slice 17** Done (agent — MHW/MLW envelope + intertidal mask; C-016 Open pending owner metaphor). Next: Slice **18** wave exposure (§4.13). Island is the default playable world (C-015 place Pass; **W-001** supersession still owner). Rainfall dial is a **climate mean**. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); 17–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); 18–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked.
 
@@ -498,7 +499,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.12 Slice 17 — Tidal envelope / intertidal *(specified; after Slice F / 16)*
+### 4.12 Slice 17 — Tidal envelope / intertidal *(Done — agent)*
 
 **Why this exists.** C-016: tides as mean high / mean low water envelope, not instantaneous phase. Intertidal zone is the band between them — a real habitat the island form earns.
 
@@ -510,15 +511,15 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 16.
 
-- [ ] Composition note; MHW/MLW options; intertidal derived field or mask
-- [ ] Tier-M: envelope widening → more intertidal cells; determinism
-- [ ] Probe `tidal-envelope`; `docs/slices/17.json`
-- [ ] Tier-O batched (metaphor conflict is owner)
-- [ ] **Next-but-one:** Slice 18 wave exposure (§4.13)
+- [x] Composition note; MHW/MLW options; intertidal derived field or mask
+- [x] Tier-M: envelope widening → more intertidal cells; determinism
+- [x] Probe `tidal-envelope`; `docs/slices/17.json`
+- [x] Tier-O batched (metaphor conflict is owner) — dossier `docs/candidates/C-016-dossier.md`
+- [x] **Next-but-one:** Slice 18 wave exposure (§4.13)
 
 ---
 
-### 4.13 Slice 18 — Wave exposure + coastal erosion *(specified; after Slice 17 or 16)*
+### 4.13 Slice 18 — Wave exposure + coastal erosion *(specified; after Slice 17)*
 
 **Why this exists.** C-017: fetch × wind → exposure; contribute shoreline change through geomorphology owner only. Honors the island's implied promise without SWE.
 
@@ -548,7 +549,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** Done (§4.11b). Next: Slice **17** tidal envelope (§4.12). Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** Done (§4.11b). **Slice 17** Done (§4.12). Next: Slice **18** wave exposure (§4.13). Slice **18** specified (§4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

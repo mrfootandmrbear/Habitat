@@ -193,7 +193,8 @@ export type InspectorLayer =
   | "potentialEt"
   | "actualEt"
   | "herbBiomass"
-  | "seedBank";
+  | "seedBank"
+  | "intertidal";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

@@ -1,0 +1,17 @@
+{
+  "id": "17",
+  "title": "Tidal envelope / intertidal",
+  "simLoop": "MHW/MLW globals derive an intertidal mask from elevation; no per-event tidal phase (C-016 / S-009).",
+  "gameLoop": "Widen the tide range on the Force panel and watch the shore band grow on the island.",
+  "registerIds": ["C-016", "C-015", "C-004", "S-009", "T-001", "T-005", "T-006"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/tidal.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/time-invariance.test.ts"
+  ],
+  "probes": ["tidal-envelope"],
+  "fields": ["shore.intertidal"],
+  "notebookSeed": "I widened the tide and the shore band climbed the beach.",
+  "tierO": "no owner-only question this closeout; metaphor conflict batched — see docs/candidates/C-016-dossier.md"
+}

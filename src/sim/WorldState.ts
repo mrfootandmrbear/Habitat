@@ -14,6 +14,12 @@ import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
 import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
+import {
+  countIntertidal,
+  fillIntertidalMask,
+  meanHighWater,
+  meanLowWater,
+} from "./climate/tidalEnvelope";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   establishmentProbability,
@@ -140,9 +146,16 @@ export class WorldState {
   outletCells: ReadonlySet<number> = new Set();
   /** Ocean cells (elev < seaLevel) — C-015. Empty when sea level absent. */
   oceanCells: ReadonlySet<number> = new Set();
+  /**
+   * Intertidal mask 0/1 — MLW ≤ elev < MHW (C-016). Empty when sea absent or
+   * amplitude 0. Derived only; not a second hydrology.
+   */
+  readonly intertidal: Grid2D;
   private readonly closedBoundary: boolean;
   /** Global sea datum (m). Undefined = legacy closed / perimeter mode. */
   private seaLevelMeters: number | undefined;
+  /** Half-range tidal amplitude (m) around sea level — C-016 envelope. */
+  private tidalAmplitudeMeters = 0;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
@@ -195,6 +208,11 @@ export class WorldState {
        * Opt-in: absent preserves legacy perimeter / closed behavior and baselines.
        */
       seaLevel?: number;
+      /**
+       * Tidal half-range amplitude in metres around sea level (C-016).
+       * Requires seaLevel; 0 or absent → empty intertidal envelope.
+       */
+      tidalAmplitude?: number;
     },
   ) {
     this.width = terrain.width;
@@ -236,6 +254,7 @@ export class WorldState {
     this.herbEstablishment = new Grid2D(this.width, this.height);
     this.herbBiomass = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
+    this.intertidal = new Grid2D(this.width, this.height);
     this.delta = new Float32Array(this.width * this.height);
     this.flowRate = options?.flowRate ?? config.flowRate;
     this.maxOutflowFraction =
@@ -250,6 +269,12 @@ export class WorldState {
       options?.seaLevel !== undefined && Number.isFinite(options.seaLevel)
         ? options.seaLevel
         : undefined;
+    this.tidalAmplitudeMeters =
+      options?.tidalAmplitude !== undefined &&
+      Number.isFinite(options.tidalAmplitude) &&
+      options.tidalAmplitude > 0
+        ? options.tidalAmplitude
+        : 0;
 
     this.registry = new FieldRegistry();
     this.registerFields();
@@ -310,6 +335,34 @@ export class WorldState {
   setSeaLevel(level: number | undefined): void {
     this.seaLevelMeters =
       level !== undefined && Number.isFinite(level) ? level : undefined;
+    this.markStructureDirty();
+    this.ensureStructureFresh();
+  }
+
+  /** Current tidal half-range amplitude (m). 0 when envelope is off. */
+  get tidalAmplitude(): number {
+    return this.tidalAmplitudeMeters;
+  }
+
+  /** Mean high water (m), or undefined when sea level absent. */
+  get meanHighWater(): number | undefined {
+    if (this.seaLevelMeters === undefined) return undefined;
+    return meanHighWater(this.seaLevelMeters, this.tidalAmplitudeMeters);
+  }
+
+  /** Mean low water (m), or undefined when sea level absent. */
+  get meanLowWater(): number | undefined {
+    if (this.seaLevelMeters === undefined) return undefined;
+    return meanLowWater(this.seaLevelMeters, this.tidalAmplitudeMeters);
+  }
+
+  /**
+   * Set tidal envelope half-range (C-016 — no cell targeting, no phase).
+   * Amplitude ≤ 0 clears the intertidal mask. No-op effect without sea level.
+   */
+  setTidalAmplitude(amplitude: number): void {
+    this.tidalAmplitudeMeters =
+      Number.isFinite(amplitude) && amplitude > 0 ? amplitude : 0;
     this.markStructureDirty();
     this.ensureStructureFresh();
   }
@@ -441,8 +494,16 @@ export class WorldState {
     if (this.seaLevelMeters !== undefined) {
       this.oceanCells = computeOceanCells(elev, this.seaLevelMeters);
       this.outletCells = new Set();
+      if (this.tidalAmplitudeMeters > 0) {
+        const mlw = meanLowWater(this.seaLevelMeters, this.tidalAmplitudeMeters);
+        const mhw = meanHighWater(this.seaLevelMeters, this.tidalAmplitudeMeters);
+        fillIntertidalMask(this.intertidal.data, elev, mlw, mhw);
+      } else {
+        this.intertidal.data.fill(0);
+      }
     } else {
       this.oceanCells = new Set();
+      this.intertidal.data.fill(0);
     }
     const { filled, depressionDepth } = priorityFloodFill(
       this.width,
@@ -1112,6 +1173,31 @@ export class WorldState {
     return computeShorelineCells(this.width, this.height, this.oceanCells).size;
   }
 
+  /** Intertidal cell count under current MHW/MLW envelope (C-016). */
+  intertidalCellCount(): number {
+    return countIntertidal(this.intertidal.data);
+  }
+
+  /** True when cell is in the intertidal band (land foreshore or submerged). */
+  isIntertidal(x: number, z: number): boolean {
+    if (!this.intertidal.inBounds(x, z)) return false;
+    return this.intertidal.get(x, z) > 0;
+  }
+
+  /**
+   * Land foreshore under the envelope (sea ≤ elev < MHW) — default-view tint band.
+   */
+  isForeshore(x: number, z: number): boolean {
+    if (this.seaLevelMeters === undefined || this.tidalAmplitudeMeters <= 0) {
+      return false;
+    }
+    if (!this.terrain.inBounds(x, z)) return false;
+    const elev = this.terrain.get(x, z);
+    const sea = this.seaLevelMeters;
+    const mhw = meanHighWater(sea, this.tidalAmplitudeMeters);
+    return elev >= sea && elev < mhw;
+  }
+
   getSoilMoisture(x: number, z: number): number {
     if (!this.soilMoisture.inBounds(x, z)) return 0;
     return this.soilMoisture.get(x, z);
@@ -1598,6 +1684,16 @@ export class WorldState {
         legacy: false,
         data: this.depressionDepth.data,
         range: [0, 500] as const,
+      },
+      {
+        id: "shore.intertidal",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "flowStructure",
+        band: "decadal" as const,
+        legacy: false,
+        data: this.intertidal.data,
+        range: [0, 1] as const,
       },
       {
         id: "clock.eventStepsSinceDaily",

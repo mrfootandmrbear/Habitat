@@ -264,6 +264,28 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.encodingFloor": { abs: 0 },
     "delta.calmPrecip": { abs: 1e-2 },
   },
+  "tidal-envelope": {
+    "off.intertidalCells": { abs: 0 },
+    "off.oceanCells": { abs: 0 },
+    "neap.intertidalCells": { abs: 0 },
+    "neap.foreshoreFrac": { abs: 1e-4 },
+    "neap.mhw": { abs: 1e-6 },
+    "neap.mlw": { abs: 1e-6 },
+    "mean.intertidalCells": { abs: 0 },
+    "mean.foreshoreFrac": { abs: 1e-4 },
+    "mean.replayMatch": { abs: 0 },
+    "mean.hashN": { abs: 0 },
+    "mean.encodingDelta": { abs: 1e-4 },
+    "spring.intertidalCells": { abs: 0 },
+    "spring.foreshoreFrac": { abs: 1e-4 },
+    "spring.mhw": { abs: 1e-6 },
+    "spring.mlw": { abs: 1e-6 },
+    "delta.neapToMean": { abs: 0 },
+    "delta.meanToSpring": { abs: 0 },
+    "delta.foreshoreGrew": { abs: 0 },
+    "delta.oceanUnchanged": { abs: 0 },
+    "delta.encodingFloor": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

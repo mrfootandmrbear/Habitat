@@ -12,7 +12,7 @@
 | Wind vector | **Dial** (Slice F) | Global direction/strength; modulates *where* mean rain lands via orography — never paints cells. |
 | Orographic precip | **Derived** (Slice F lite) | `P = P₀(1 + γ·u·∇z)` ([NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §4). Windward wet / leeward dry under one climate mean. |
 | Sea level | **Dial** (Slice 16) | Global base level; ocean outlet (**C-015**). |
-| Tidal envelope (MHW/MLW) | **Dial** (Slice 17) | Envelope, not phase-every-step (**C-016**). |
+| Tidal envelope (MHW/MLW) | **Dial** (shipped; Slice 17) | Envelope, not phase-every-step (**C-016**). Intertidal = MLW ≤ elev < MHW. |
 | Wave exposure / fetch | **Derived** then dial wind (18) | Exposure from fetch × wind; shoreline change via geomorphology only (**C-017**). |
 | Longshore / beaches | **Deferred** (19) | After exposure path exists. |
 | Salinity / salt spray | **Deferred** (20) | First everyday **C-010** instance (**C-018**). |

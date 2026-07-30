@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done (§4.11b). Next: **Slice 17** tidal envelope (§4.12). Maritime candidates C-015…C-019 Open; **C-020** lite via F (full clouds later). W-001 supersession still owner.
+Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done; **Slice 17** Done (§4.12). Next: **Slice 18** wave exposure (§4.13). Maritime candidates C-015…C-019 Open; **C-020** lite via F (full clouds later). W-001 supersession still owner.
 
 ## Cursor Cloud specific instructions
 

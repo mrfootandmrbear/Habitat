@@ -1,0 +1,85 @@
+{
+  "scenario": "tidal-envelope",
+  "metrics": {
+    "off.intertidalCells": {
+      "value": 0,
+      "abs": 0
+    },
+    "off.oceanCells": {
+      "value": 1658,
+      "abs": 0
+    },
+    "neap.intertidalCells": {
+      "value": 294,
+      "abs": 0
+    },
+    "neap.foreshoreFrac": {
+      "value": 0.2043343653250774,
+      "abs": 0.0001
+    },
+    "neap.mhw": {
+      "value": 2.35,
+      "abs": 0.000001
+    },
+    "neap.mlw": {
+      "value": 1.65,
+      "abs": 0.000001
+    },
+    "mean.intertidalCells": {
+      "value": 630,
+      "abs": 0
+    },
+    "mean.foreshoreFrac": {
+      "value": 0.3993808049535604,
+      "abs": 0.0001
+    },
+    "mean.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "mean.hashN": {
+      "value": 2189705187,
+      "abs": 0
+    },
+    "mean.encodingDelta": {
+      "value": 0.12891021979432976,
+      "abs": 0.0001
+    },
+    "spring.intertidalCells": {
+      "value": 1206,
+      "abs": 0
+    },
+    "spring.foreshoreFrac": {
+      "value": 0.6625386996904025,
+      "abs": 0.0001
+    },
+    "spring.mhw": {
+      "value": 3.4,
+      "abs": 0.000001
+    },
+    "spring.mlw": {
+      "value": 0.6000000000000001,
+      "abs": 0.000001
+    },
+    "delta.neapToMean": {
+      "value": 336,
+      "abs": 0
+    },
+    "delta.meanToSpring": {
+      "value": 576,
+      "abs": 0
+    },
+    "delta.foreshoreGrew": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.oceanUnchanged": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.encodingFloor": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

@@ -36,6 +36,7 @@ import {
   seaLevelById,
   type SeaLevelId,
 } from "./sim/climate/seaLevel";
+import { tideById, type TideId } from "./sim/climate/tidalEnvelope";
 import { windById, type WindId } from "./sim/climate/windRegime";
 import { fillOrographicRainDepths } from "./sim/climate/orographicPrecip";
 import { FormMemory } from "./sim/formMemory";
@@ -128,6 +129,7 @@ occupantMesh.updateFrom(model, world);
 let rainRegime: RainRegimeId = "dry";
 let windId: WindId = "west";
 let seaLevelId: SeaLevelId = initialSea;
+let tideId: TideId = "off";
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
@@ -170,6 +172,7 @@ const ui = mountControls(
   {
     rainRegime,
     seaLevel: seaLevelId,
+    tide: tideId,
     wind: windId,
     timeRate,
     inspector,
@@ -189,6 +192,20 @@ const ui = mountControls(
       ui.setHint(
         `${windById(id).label} — watch which slopes stay wetter`,
       );
+    },
+    onTide: (id) => {
+      tideId = id;
+      const amp = tideById(id).amplitudeMeters;
+      world.setTidalAmplitude(amp);
+      ui.setTide(id);
+      const mhw = world.meanHighWater;
+      const mlw = world.meanLowWater;
+      ui.setHint(
+        amp <= 0 || mhw === undefined || mlw === undefined
+          ? "Tide off — no intertidal band"
+          : `${tideById(id).label} · shore band ${world.intertidalCellCount()} cells`,
+      );
+      syncMeshes();
     },
     onToggleBrief: () => {
       if (scenarioSession) {
