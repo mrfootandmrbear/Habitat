@@ -213,7 +213,15 @@ function main(): void {
     const onDisk = conformanceText.match(
       /<!-- GENERATED: conformance-ledger -->\n\n([\s\S]*?)\n\n<!-- END GENERATED -->/,
     )?.[1];
-    if (onDisk?.trim() !== table.trim()) {
+    // Verified column is git HEAD at generation time; after commit it lags by one
+    // hash. Compare content ignoring that column so clean checkouts stay green.
+    const stripVerified = (t: string) =>
+      t
+        .trim()
+        .split("\n")
+        .map((line) => line.replace(/\s*\|\s*[0-9a-f]{7,40}\s*\|$/, " |"))
+        .join("\n");
+    if (!onDisk || stripVerified(onDisk) !== stripVerified(table)) {
       console.error(
         "Conformance ledger is out of date. Run: npm run conformance",
       );
