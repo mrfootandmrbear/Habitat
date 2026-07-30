@@ -1,7 +1,7 @@
 # Slice R — Rain-feel mid-path (C-020 / C-004)
 
-**Status:** Done (machine) — retuned after owner “pulsing faucet” Hold  
-**Register:** **C-020** Open. No new `Process` (D-007).
+**Status:** Done — machine + D-007 clip Pass (2026-07-30)  
+**Register:** **C-020** Open (full clouds later). No new `Process` (D-007).
 
 ## Archetypes
 
@@ -20,6 +20,6 @@ Storms are **one contiguous chunk** of the wet day (`stormFraction`), not a flas
 - Shallow surface sheet muted during the event (`WaterMesh` stormActive)
 - Pools after the spell still read as water
 
-## Clip remainder
+## Clip remainder (D-007)
 
-Did the spell feel like weather — or still a faucet?
+**Pass (2026-07-30).** Owner: weather the world made. Clouds later under full C-020 — not this slice.

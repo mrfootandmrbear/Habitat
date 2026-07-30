@@ -26,3 +26,5 @@
 ## Owner-only question (clip remainder)
 
 When a spell hit, did it feel like weather — or still like a faucet?
+
+**2026-07-30 D-007 clip Pass.** Owner: reads as weather the world made. Full visible clouds / precip phase still wanted later — does not Lock C-020; Slice F / R mid-path stay the shipping path until a clouds slice registers.

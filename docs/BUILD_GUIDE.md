@@ -100,11 +100,11 @@ Summary only — do not reopen unless fixing regressions.
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner legibility Pass 2026-07-30; deposit+rock machine green (Lock still owner) |
-| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — agent (full C-020 Open) |
+| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** audio wired (C-014 Open). C-004 stewardship reading still Open.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30).
 
-**Next constrained by D-007.** **Slice S** owner legibility **Pass**; geological **deposit** tool + rock table machine green. **Slice R** machine green. Remaining clip question is rain-feel (weather vs faucet) — one sentence, no ask gate. Later stubs remain **gated** until the full clip exists. Full C-020 clouds/phase still later. C-009 Lock still owner.
+**Next:** **Slice A+** — AUD-003 recovery ambient bed (§4.19). Full C-020 clouds/phase stays later (owner: mid-path reads as weather; clouds still wanted). Field Notebook / scenario campaign remain available after. C-009 Lock still owner. C-016…C-019 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -633,7 +633,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Why this exists.** Owner: rain dial still reads as a spigot (island-brief, salt-overseas). Full atmospheric clouds/phase would register a new `Process` and is **gated by D-007** until a clip exists. This slice changes regime **temporal shape** + observer precip cues only.
 
-**Clip verdict (D-007).** After this slice: when rain falls / stops, does it read as weather the world made rather than a faucet? One sentence in the closeout body.
+**Clip verdict (D-007).** **Pass (2026-07-30).** Owner: when rain falls / stops, it reads as weather the world made rather than a faucet. Full clouds remain later under C-020.
 
 **Gate.** After Slice S machine half green (may overlap presentation work).
 
@@ -641,7 +641,28 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Observer-only wind-aligned precip presentation (T-006)
 - [x] Arid dry-down encoding retune if needed; Tier-P proxy — shower off + existing moisture darkening; no new Process
 - [x] Update `docs/candidates/C-020-dossier.md`; FORCE_PANEL.md mid-path note
-- [x] **Next-but-one:** clip re-check — if Pass, later stubs may open; if Hold, retune presentation (not a new Process)
+- [x] **Next-but-one:** D-007 clip **Pass** → Slice A+ AUD-003 (§4.19); full C-020 clouds still later
+
+---
+
+### 4.19 Slice A+ — Recovery audible (**AUD-003**)
+
+**Why this exists.** Slice A wired water ambience (AUD-001 / AUD-002). **AUD-003** (Locked) still has no second bed: recovery / life should enrich the soundscape from actual state, not a victory sting. Clip gate is clear (D-007 Pass 2026-07-30); this slice registers **no** new `Process`.
+
+**Loops.** Sim: none — pure observer (T-006). Game: after life has earned a foothold, ambient richness rises with a visible recovery field; dry / bare stays quieter (AUD-002 still holds).
+
+**Register / candidates.** AUD-003 Locked; **C-014** Open (do not promote); T-006, T-001.
+
+**Bans.** Writing WorldState from audio. Canned “restored” one-shot mix. Inventing wildlife presence fields — drive from an existing registry field (cover / biomass / arrival occupancy — pick one in composition note). Web Audio required for CI. Cloud / precip-phase `Process` (that is full C-020, later).
+
+**Gate.** After D-007 rain-feel clip Pass.
+
+- [ ] Composition note `docs/slices/A-plus-composition.md` — which existing field drives the recovery bed
+- [ ] Second ambient bed in `AudioBus` (or sibling) — monotonic with chosen field; silence when field absent
+- [ ] Tier-M: write isolation + determinism (same field → identical mix); no sim RNG
+- [ ] Probe or unit evidence with numbers in closeout
+- [ ] `docs/slices/A-plus.json`; refresh C-014 dossier machine note if mapping changes
+- [ ] **Next-but-one:** Field Notebook UI (U-006) or full C-020 clouds — choose at closeout; scenario campaign still gated on C-009/C-010 framing
 
 ---
 
@@ -649,11 +670,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 | Slice | Focus | Register | Gate |
 |---|---|---|---|
-| A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 | **Blocked by D-007** until clip exists |
-| — | Field Notebook UI | U-006 | **Blocked by D-007** |
-| — | Scenario campaign / toxic-site premise | G-002, C-010 | **Blocked by D-007** (+ C-009 for C-010) |
+| A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 | **Next** (§4.19) |
+| — | Field Notebook UI | U-006 | After A+ (or parallel if no Process) |
+| — | Full C-020 clouds / precip phase | C-020 | Later — owner wants; new `Process` needs its own clip line |
+| — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** (deposit + rock) / **Slice R** Done (machine). C-018 / C-019 Tier-O **Pass**. **Next: D-007 clip self-check** — if Pass, later stubs may open; if Hold, retune presentation (not a new Process).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. C-018 / C-019 Tier-O **Pass**. **Next: Slice A+** (§4.19). Full C-020 clouds later.
 
 ---
 

@@ -136,8 +136,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | **Done** — agent; Tier-O shore-legibility batched |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow earns differently | **Done** — Tier-O Pass (batch-salt-overseas) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | **Done** — Tier-O Pass (batch-salt-overseas) |
+| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | **Done** — owner legibility Pass; Lock still owner |
+| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | **Done** — D-007 clip Pass 2026-07-30 (full clouds later) |
+| **A+** | Recovery audible (**AUD-003**) | Second ambient bed from life/recovery field | **Next** — BUILD_GUIDE §4.19 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** (deposit + rock) / **Slice R** Done (machine). **D-007:** next is the owner clip self-check; later stubs (AUD-003 / Field Notebook / scenario campaign) blocked until the twenty-second clip exists.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**. **Next:** Slice **A+** (AUD-003). Full C-020 clouds later; Field Notebook / scenario campaign after.
 
 ---
 

@@ -52,4 +52,4 @@ Regimes are **weather archetypes**, not a faucet: multi-day wet/dry cycles with 
 
 ## Full C-020
 
-Visible clouds and precip phase (rain/snow/sleet) remain later. Slice F / Slice R do not claim **C-020** Locked.
+Visible clouds and precip phase (rain/snow/sleet) remain later (owner 2026-07-30: mid-path reads as weather; clouds still wanted). Slice F / Slice R do not claim **C-020** Locked.
