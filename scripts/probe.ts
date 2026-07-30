@@ -112,6 +112,16 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.soilDelta": { abs: 1e-4 },
     "delta.hashDiverged": { abs: 0 },
   },
+  "limiting-shift": {
+    "wet.limiting": { abs: 0 },
+    "wet.hsi": { abs: 1e-6 },
+    "wet.depthLimited": { abs: 0 },
+    "dry.limiting": { abs: 0 },
+    "dry.hsi": { abs: 1e-6 },
+    "dry.moistureLimited": { abs: 0 },
+    "shift.identityChanged": { abs: 0 },
+    "shift.hsiDrop": { abs: 1e-6 },
+  },
 };
 
 const args = process.argv.slice(2);

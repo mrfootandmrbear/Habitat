@@ -122,11 +122,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
 | **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
-| **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | Post-MVP after 8c — BUILD_GUIDE §4.4 |
-| **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | After Slice 9 — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
+| **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 dossier partial |
+| **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Next** — BUILD_GUIDE §4.5 (authored ignition only; **C-003** Open) |
 | **11+** | Succession, roles, scenarios… | Notebook, readiness, completion… | After Slice 10 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → Slice 8b GW/baseflow **done** → Slice 8c return visit → Slice 9 Liebig/HSI → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4. Slices 9 and 10 are specified to executable depth so an autonomous session always has two items ahead of it (BUILD_GUIDE §2 row 10).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel; presentation track parallel — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.
 
 ---
 

@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **8c** agent DoD **complete**; **Tier-O batch ready** (`docs/playtests/8c-return-visit.md`). Next-but-one **Slice 9** HSI. C-004 dossier filed (owner half).
+Slice **9** **Done** (Liebig HSI / `limiting-shift`). Next: **Slice 10** fire/fuel. Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
 
 ## Cursor Cloud specific instructions
 

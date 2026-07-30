@@ -1,0 +1,19 @@
+{
+  "id": "9",
+  "title": "Limiting factors / HSI spine",
+  "simLoop": "Daily Liebig HSI from moisture, soil depth, and groundwater names the limiting factor (argmin of factor curves).",
+  "gameLoop": "Inspect why a patch is held back — moisture, depth, or groundwater — without painting populations.",
+  "registerIds": ["ES-006", "E-009", "S-008", "U-001", "N-002", "N-004", "C-007", "T-005"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/habitat/hsi.test.ts"
+  ],
+  "probes": ["limiting-shift"],
+  "fields": [
+    "habitat.suitability",
+    "habitat.limitingFactor",
+    "habitat.limitingGap"
+  ],
+  "notebookSeed": "Water — not light — is limiting here.",
+  "tierO": "no owner-only question; deferred — does the world tell you what it needs without the inspector? (batch with §4.0 step 6)"
+}

@@ -182,6 +182,19 @@ export class TerrainMesh {
         col.setRGB(0.12 + 0.15 * t, 0.28 + 0.35 * t, 0.4 + 0.45 * t);
         break;
       }
+      case "limitingFactor": {
+        // Distinct hues per factor — not a scalar health rainbow (N-002).
+        const id = Math.round(world.getLimitingFactor(x, z));
+        if (id === 0) col.setRGB(0.2, 0.45, 0.85); // moisture — blue
+        else if (id === 1) col.setRGB(0.65, 0.4, 0.2); // depth — brown
+        else col.setRGB(0.15, 0.55, 0.5); // groundwater — teal
+        break;
+      }
+      case "suitability": {
+        const t = world.getHabitatSuitability(x, z);
+        col.setRGB(0.55 - 0.35 * t, 0.25 + 0.5 * t, 0.2 + 0.15 * t);
+        break;
+      }
       default:
         col.copy(BASE);
     }

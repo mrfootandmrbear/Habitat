@@ -82,8 +82,10 @@ Summary only — do not reopen unless fixing regressions.
 | P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 | 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
+| 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | Agent Done / Tier-O ready |
+| 9 | Liebig HSI / limiting factor | Inspect what holds a patch back | `hsiComposition`, `limiting-shift` | Tier-M; Tier-O deferred |
 
-**Current gate:** Slice 8c return visit — agent DoD **complete**; **Tier-O batch ready** (ask gate). Next-but-one **Slice 9** limiting factors / HSI.
+**Current gate:** Slice 9 **Done** (agent) → **Slice 10** fire/fuel next; next-but-one remains presentation / later stubs. Slice 8c Tier-O still batched.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -207,24 +209,24 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.4 Slice 9 — Limiting factors / HSI spine *(the arrival gate)*
+### 4.4 Slice 9 — Limiting factors / HSI spine *(Done — agent)*
 
 **Loops.** Sim: hydrological state → Liebig-style limiting factor / HSI fields (NATURAL_PROCESS_MATH §3.3, §8.2) — the first field whose *meaning* is "what is holding this patch back". Game: inspect *why* a patch is ready or not (E-009 / S-008 direction) without populations yet.
 
 **Thesis role (C-007).** This is the **arrival gate**, not an inspector layer. THESIS §5: you dig the moat and something moves in *because the conditions suit it*. HSI is the mechanism that decides what shows up — which is why it outranks introduction machinery (E-007, E-008, RC-003) rather than serving it.  
 **Register / candidates.** ES-006 (capacity emerges — no fixed `K`), E-009 (readiness inferred from state), S-008 (hysteresis legible), U-001 layered inspect, N-004 (no hidden rules — the limiting factor must be inspectable, never a magic gate).  
-**Study.** NATURAL_PROCESS_MATH §3.3 Liebig minimum and §8.2 HSI composition; no external steal required — if one is used, cite it per §4.0 step 7.  
+**Study.** NATURAL_PROCESS_MATH §3.3 Liebig minimum and §8.2 HSI composition; composition choice in `docs/slices/9-composition.md`.  
 **Bans.** No scalar "health" score standing in for the limiting factor (N-002). No fixed carrying capacity (ES-006). No readiness value that the player cannot trace to a field (N-004, S-004).
 
-- [ ] Limiting-factor field: per cell, which input is minimum and by how much — derived from moisture / soil depth / GW once 8b lands; registered with owner + band (T-005)  
-- [ ] Composition rule written down before code (minimum vs. product), cited to NATURAL_PROCESS_MATH §8.2  
-- [ ] Inspector layer showing the limiting input, not just a score  
-- [ ] Tier-M: monotonicity — improving the limiting input raises HSI; improving a non-limiting input does not (that asymmetry *is* Liebig, and it is the test that catches a disguised average)  
-- [ ] Tier-M: bounds — HSI stays in range, no NaN where an input is zero  
-- [ ] Probe `limiting-shift`: a patch whose limiting factor changes identity across a wet→dry schedule  
-- [ ] `docs/slices/9.json` manifest (DoD row 9)  
-- [ ] Notebook seed: e.g. “Water — not light — is limiting here.”  
-- [ ] Tier-O candidate (batch, do not ask alone): *does the world tell you what it needs without the inspector?* — holds for the §4.0 step 6 firing rule  
+- [x] Limiting-factor field: per cell, which input is minimum and by how much — derived from moisture / soil depth / GW; registered with owner + band (T-005)  
+- [x] Composition rule written down before code (minimum vs. product), cited to NATURAL_PROCESS_MATH §3.3 — `docs/slices/9-composition.md`  
+- [x] Inspector layer showing the limiting input, not just a score  
+- [x] Tier-M: monotonicity — improving the limiting input raises HSI; improving a non-limiting input does not  
+- [x] Tier-M: bounds — HSI stays in range, no NaN where an input is zero  
+- [x] Probe `limiting-shift`: a patch whose limiting factor changes identity across a wet→dry schedule  
+- [x] `docs/slices/9.json` manifest (DoD row 9)  
+- [x] Notebook seed: “Water — not light — is limiting here.”  
+- [x] Tier-O candidate (batch, do not ask alone): *does the world tell you what it needs without the inspector?* — deferred; C-007 dossier notes arrival still missing  
 
 ---
 

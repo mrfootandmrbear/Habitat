@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slice **8c** agent DoD complete — **Tier-O batch ready** (`docs/playtests/8c-return-visit.md`). Next-but-one **Slice 9** HSI.
+**Post-MVP:** Slice **9** HSI / limiting factors **Done** (agent). Next: **Slice 10** fire/fuel. Slice 8c Tier-O still batched.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

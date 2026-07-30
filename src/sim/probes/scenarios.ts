@@ -9,6 +9,10 @@ import {
   type RainRegimeId,
 } from "../climate/rainRegime";
 import {
+  LIMITING_DEPTH,
+  LIMITING_MOISTURE,
+} from "../habitat/hsiComposition";
+import {
   DEEP_TIME_SIM_YEARS,
   decadalBandsForYears,
   makeDeepTimeWorld,
@@ -439,6 +443,69 @@ export function probeRegimeDivergence(): ProbeResult {
   };
 }
 
+/**
+ * Slice 9: a patch whose limiting factor identity flips across wet→dry
+ * (Liebig argmin — NATURAL_PROCESS_MATH §3.3 / docs/slices/9-composition.md).
+ */
+export function probeLimitingShift(): ProbeResult {
+  const world = new WorldState(new Grid2D(12, 12, 2));
+  const cx = 6;
+  const cz = 6;
+  // Thin soil, wet moisture, ample GW → depth limits.
+  world.soilDepth.fill(1.2);
+  world.soilDepth.set(cx, cz, 0.12);
+  world.soilMoisture.fill(config.soilPorosity * 0.9);
+  world.groundwaterStorage.fill(0.4);
+  world.runHabitatStep(1);
+  const wetLim = world.getLimitingFactor(cx, cz);
+  const wetHsi = world.getHabitatSuitability(cx, cz);
+  if (wetLim !== LIMITING_DEPTH) {
+    throw new Error(
+      `limiting-shift: expected depth-limited when wet (got ${wetLim})`,
+    );
+  }
+
+  // Drought the patch: collapse moisture below GW suitability → moisture limits.
+  world.soilMoisture.set(cx, cz, 0.02);
+  world.groundwaterStorage.set(cx, cz, 0.05);
+  world.runHabitatStep(1);
+  const dryLim = world.getLimitingFactor(cx, cz);
+  const dryHsi = world.getHabitatSuitability(cx, cz);
+  if (dryLim !== LIMITING_MOISTURE) {
+    throw new Error(
+      `limiting-shift: expected moisture-limited when dry (got ${dryLim})`,
+    );
+  }
+  if (!(dryHsi < wetHsi)) {
+    throw new Error(
+      `limiting-shift: expected dry HSI (${dryHsi}) < wet HSI (${wetHsi})`,
+    );
+  }
+
+  return {
+    scenario: "limiting-shift",
+    records: [
+      {
+        label: "wet",
+        limiting: wetLim,
+        hsi: wetHsi,
+        depthLimited: wetLim === LIMITING_DEPTH ? 1 : 0,
+      },
+      {
+        label: "dry",
+        limiting: dryLim,
+        hsi: dryHsi,
+        moistureLimited: dryLim === LIMITING_MOISTURE ? 1 : 0,
+      },
+      {
+        label: "shift",
+        identityChanged: 1,
+        hsiDrop: wetHsi - dryHsi,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -446,6 +513,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "deep-time": probeDeepTime,
   "baseflow-persist": probeBaseflowPersist,
   "regime-divergence": probeRegimeDivergence,
+  "limiting-shift": probeLimitingShift,
 };
 
 export function runProbe(name: string): ProbeResult {

@@ -1,0 +1,37 @@
+{
+  "scenario": "limiting-shift",
+  "metrics": {
+    "wet.limiting": {
+      "value": 1,
+      "abs": 0
+    },
+    "wet.hsi": {
+      "value": 0.11999999731779099,
+      "abs": 0.000001
+    },
+    "wet.depthLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "dry.limiting": {
+      "value": 0,
+      "abs": 0
+    },
+    "dry.hsi": {
+      "value": 0.04444444179534912,
+      "abs": 0.000001
+    },
+    "dry.moistureLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "shift.identityChanged": {
+      "value": 1,
+      "abs": 0
+    },
+    "shift.hsiDrop": {
+      "value": 0.07555555552244186,
+      "abs": 0.000001
+    }
+  }
+}

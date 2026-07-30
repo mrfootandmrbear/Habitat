@@ -104,6 +104,11 @@ export const config = {
   gwRecessionAlpha: 0.12,
   /** Extra recession multiplier at max accumulation (channel preference). */
   gwChannelBoost: 3,
+
+  /** Slice 9 HSI — soil depth at which f_depth saturates (m). */
+  hsiDepthRefMeters: 1,
+  /** Slice 9 HSI — GW storage depth at which f_groundwater saturates (m). */
+  hsiGwRefMeters: 0.25,
 } as const;
 
 export type InspectorLayer =
@@ -115,7 +120,9 @@ export type InspectorLayer =
   | "soilDepth"
   | "vegetation"
   | "depression"
-  | "groundwater";
+  | "groundwater"
+  | "limitingFactor"
+  | "suitability";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict";

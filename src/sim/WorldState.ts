@@ -8,7 +8,9 @@ import { soilWaterProcess } from "./process/soilWaterProcess";
 import { vegetationProcess } from "./process/vegetationProcess";
 import { geomorphologyProcess } from "./process/geomorphologyProcess";
 import { groundwaterProcess } from "./process/groundwaterProcess";
+import { habitatProcess } from "./process/habitatProcess";
 import { fluxStep } from "./hydrology/fluxStep";
+import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   computeD8Accumulation,
   computeD8FlowDirection,
@@ -41,6 +43,15 @@ export class WorldState {
    * Legacy: slow storage memory, not reconstructible from current rain (T-003).
    */
   readonly groundwaterStorage: Grid2D;
+  /**
+   * Liebig HSI [0,1] — Slice 9 (NATURAL_PROCESS_MATH §3.3).
+   * Derived each daily band from moisture / depth / GW — not legacy.
+   */
+  readonly habitatSuitability: Grid2D;
+  /** Limiting factor id: 0 moisture, 1 depth, 2 groundwater. */
+  readonly habitatLimitingFactor: Grid2D;
+  /** Gap from HSI to the second-smallest factor (≥ 0). */
+  readonly habitatLimitingGap: Grid2D;
   /** Fractional cover [0,1] — Slice 5; unit bound, not ecological K (ES-006). */
   readonly vegCover: Grid2D;
   /** Manning-like n — owned by vegetation (Slice 6 / E-005). */
@@ -104,6 +115,9 @@ export class WorldState {
       config.defaultSoilDepthMeters,
     );
     this.groundwaterStorage = new Grid2D(this.width, this.height);
+    this.habitatSuitability = new Grid2D(this.width, this.height);
+    this.habitatLimitingFactor = new Grid2D(this.width, this.height);
+    this.habitatLimitingGap = new Grid2D(this.width, this.height);
     this.vegCover = new Grid2D(this.width, this.height);
     this.surfaceRoughness = new Grid2D(
       this.width,
@@ -135,6 +149,7 @@ export class WorldState {
       surfaceWaterProcess,
       soilWaterProcess,
       groundwaterProcess,
+      habitatProcess,
       vegetationProcess,
       geomorphologyProcess,
     ]);
@@ -355,6 +370,36 @@ export class WorldState {
   }
 
   /**
+   * Liebig HSI + limiting factor (Slice 9 / NATURAL_PROCESS_MATH §3.3).
+   * Composition: docs/slices/9-composition.md — min, not product.
+   */
+  runHabitatStep(_dt: number): void {
+    const m = this.soilMoisture.data;
+    const depth = this.soilDepth.data;
+    const gw = this.groundwaterStorage.data;
+    const hsi = this.habitatSuitability.data;
+    const lim = this.habitatLimitingFactor.data;
+    const gap = this.habitatLimitingGap.data;
+    const porosity = config.soilPorosity;
+    const depthRef = config.hsiDepthRefMeters;
+    const gwRef = config.hsiGwRefMeters;
+
+    for (let i = 0; i < hsi.length; i++) {
+      const sample = evaluateHsi({
+        moisture: m[i]!,
+        soilDepth: depth[i]!,
+        groundwater: gw[i]!,
+        porosity,
+        depthRef,
+        gwRef,
+      });
+      hsi[i] = sample.hsi;
+      lim[i] = sample.limiting;
+      gap[i] = sample.limitingGap;
+    }
+  }
+
+  /**
    * Decadal soil production + GEO-002 erosion (NATURAL_PROCESS_MATH §3.8).
    * Production everywhere; channel erosion where accumulation earns cost.
    * Elev and depth move together so bedrock = elev − depth is invariant.
@@ -509,6 +554,16 @@ export class WorldState {
     return this.groundwaterStorage.get(x, z);
   }
 
+  getHabitatSuitability(x: number, z: number): number {
+    if (!this.habitatSuitability.inBounds(x, z)) return 0;
+    return this.habitatSuitability.get(x, z);
+  }
+
+  getLimitingFactor(x: number, z: number): number {
+    if (!this.habitatLimitingFactor.inBounds(x, z)) return 0;
+    return this.habitatLimitingFactor.get(x, z);
+  }
+
   getSoilDepth(x: number, z: number): number {
     if (!this.soilDepth.inBounds(x, z)) return 0;
     return this.soilDepth.get(x, z);
@@ -652,6 +707,36 @@ export class WorldState {
         legacy: true,
         data: this.groundwaterStorage.data,
         range: [0, 20] as const,
+      },
+      {
+        id: "habitat.suitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "habitat",
+        band: "daily" as const,
+        legacy: false,
+        data: this.habitatSuitability.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "habitat.limitingFactor",
+        units: "id",
+        shape: "cell" as const,
+        owner: "habitat",
+        band: "daily" as const,
+        legacy: false,
+        data: this.habitatLimitingFactor.data,
+        range: [0, 2] as const,
+      },
+      {
+        id: "habitat.limitingGap",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "habitat",
+        band: "daily" as const,
+        legacy: false,
+        data: this.habitatLimitingGap.data,
+        range: [0, 1] as const,
       },
       {
         id: "veg.cover",

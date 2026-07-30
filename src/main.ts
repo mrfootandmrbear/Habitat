@@ -274,6 +274,8 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
     water: model.getWaterDepth(cell.x, cell.z),
     veg: world.getVegCover(cell.x, cell.z),
     elev: model.getTerrainHeight(cell.x, cell.z),
+    hsi: world.getHabitatSuitability(cell.x, cell.z),
+    limiting: world.getLimitingFactor(cell.x, cell.z),
   };
 }
 
