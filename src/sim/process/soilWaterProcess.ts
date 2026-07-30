@@ -1,6 +1,10 @@
 import type { Process } from "./Process";
 
-/** Daily soil moisture: infiltration uses capacity (Slice 6); ET (H-001, H-003). */
+/**
+ * Daily soil moisture: infiltration uses lagged capacity (Slice 6);
+ * insolation- and cover-dependent ET (dry-down / NATURAL_PROCESS_MATH §1.6–1.7).
+ * Cover is lagged so soil runs before vegetation (cycle break).
+ */
 export const soilWaterProcess: Process = {
   id: "soilWater",
   band: "daily",
@@ -8,10 +12,21 @@ export const soilWaterProcess: Process = {
     "water.surfaceDepth",
     "soil.moisture",
     "soil.infiltrationCapacity",
+    "terrain.elevation",
+    "veg.cover",
   ],
-  /** Capacity integrated from prior vegetation contribution (cycle break). */
-  lagged: ["soil.infiltrationCapacity"],
-  writes: ["soil.moisture", "soil.infiltrationCapacity", "ledger.et"],
+  /** Capacity + cover from prior vegetation contribution (cycle break). */
+  lagged: ["soil.infiltrationCapacity", "veg.cover"],
+  writes: [
+    "soil.moisture",
+    "soil.infiltrationCapacity",
+    "et.potential",
+    "et.actual",
+    "ledger.et",
+    "ledger.transpiration",
+    "ledger.soilEvaporation",
+    "ledger.openWaterEvaporation",
+  ],
   /** Infiltration removes surface water owned by surfaceWater (§11 contribute). */
   contributes: ["water.surfaceDepth"],
   step(world, dt) {

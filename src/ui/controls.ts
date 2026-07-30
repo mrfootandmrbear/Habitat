@@ -26,6 +26,9 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "limitingFactor", label: "Inspect: limiting factor" },
   { id: "suitability", label: "Inspect: habitat suitability" },
   { id: "understoryLight", label: "Inspect: understory light" },
+  { id: "fuelLoad", label: "Inspect: fuel load" },
+  { id: "potentialEt", label: "Inspect: potential ET" },
+  { id: "actualEt", label: "Inspect: actual ET" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */

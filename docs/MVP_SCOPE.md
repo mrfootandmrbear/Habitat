@@ -128,7 +128,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **12** | Arrival / first occupant (C-007 hypothesis) | Something appears because the place suits it | **Next** — BUILD_GUIDE §4.8 |
 | **13+** | Biology integration, scenarios… | Notebook, readiness, completion… | After Slice 12 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → Slice 12 arrival / first occupant **next** (§4.8); Slice A audio scaffold **Done** (agent machine half; C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival / first occupant **next** (§4.8); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
 
 ---
 

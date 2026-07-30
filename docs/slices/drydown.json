@@ -1,0 +1,25 @@
+{
+  "id": "drydown",
+  "title": "Hydroclimate dry-down / ET coupling",
+  "simLoop": "Insolation and lagged cover drive moisture-limited ET partitions; vegetation captures more water but also transpires more; south aspects dry faster than north under identical rain.",
+  "gameLoop": "After rain stops, the world dries unevenly — wet hollows and vegetated patches read differently from bare south slopes without an inspector.",
+  "registerIds": ["H-001", "H-003", "H-004", "ES-003", "ES-005", "S-009", "T-001", "T-005", "T-006", "C-008", "C-014"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/drydown.test.ts",
+    "src/sim/band-refinement.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["drydown-feedback", "disturbance-recovery"],
+  "fields": [
+    "et.potential",
+    "et.actual",
+    "fire.scar",
+    "ledger.transpiration",
+    "ledger.soilEvaporation",
+    "ledger.openWaterEvaporation"
+  ],
+  "notebookSeed": "The south slope dried first; the vegetated hollow kept drinking after the rain stopped.",
+  "tierO": "no owner-only question; deferred — after the rain stopped, did the place feel like it was drying itself, or like a slider was turned down? (batch with §4.0 step 6)"
+}

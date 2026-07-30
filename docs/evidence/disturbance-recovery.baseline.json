@@ -1,0 +1,45 @@
+{
+  "scenario": "disturbance-recovery",
+  "metrics": {
+    "pulse.baseline": {
+      "value": 0.10193750432517845,
+      "abs": 0.00001
+    },
+    "pulse.peak": {
+      "value": 0.21909406008489896,
+      "abs": 0.00001
+    },
+    "pulse.halfTarget": {
+      "value": 0.1605157822050387,
+      "abs": 0.00001
+    },
+    "pulse.finalMoisture": {
+      "value": 0.10039657596280449,
+      "abs": 0.00001
+    },
+    "pulse.recoveredDay": {
+      "value": 8,
+      "abs": 0
+    },
+    "pulse.earlyDrop": {
+      "value": 0.0022371358136297204,
+      "abs": 0.00001
+    },
+    "pulse.lateDrop": {
+      "value": 0.006431932997656986,
+      "abs": 0.00001
+    },
+    "pulse.risingDays": {
+      "value": 1,
+      "abs": 0
+    },
+    "pulse.relResidual": {
+      "value": 1.5225885126775831e-7,
+      "abs": 0.00001
+    },
+    "pulse.bounded": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

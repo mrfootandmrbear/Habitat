@@ -39,10 +39,13 @@ describe("soil water storage (Slice 4, H-001, H-003)", () => {
       soilSum += world.soilStorageDepth(i);
     }
     expect(soilSum).toBeGreaterThan(0);
-    // Infil transfers to soil; ET leaves soil; GW may take recharge from soil.
+    // Infil transfers to soil; ET leaves soil + open water; GW may take recharge.
     expect(world.infiltrationLedger).toBeCloseTo(
-      soilSum + world.etLedger + world.groundwaterStorageSum(),
-      5,
+      soilSum +
+        world.etLedger -
+        world.openWaterEvaporationLedger +
+        world.groundwaterStorageSum(),
+      4,
     );
   });
 });

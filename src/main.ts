@@ -29,6 +29,11 @@ import {
   type RainRegimeId,
 } from "./sim/climate/rainRegime";
 import { FormMemory } from "./sim/formMemory";
+import {
+  sampleAudioMix,
+  snapshotSurfaceDepthReader,
+} from "./audio/AudioBus";
+import { applyMixToGain, type GainTarget } from "./audio/webAudioHook";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -75,6 +80,9 @@ let sitingTool: SitingTool = "none";
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
 let cutawayCell: { x: number; z: number } | null = null;
+/** Optional Web Audio gain — null until unlocked; mix still computed (C-014). */
+let waterGainTarget: GainTarget | null = null;
+let lastAudioSilent: boolean | null = null;
 
 const clock = new SimClock({
   simDt: config.simDt,
@@ -283,6 +291,19 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
   };
 }
 
+function syncAudio(): void {
+  // Observer only — snapshot so the bus cannot alias live buffers (T-006).
+  const reader = snapshotSurfaceDepthReader(n, n, world.water.data);
+  const mix = sampleAudioMix(reader);
+  applyMixToGain(mix, waterGainTarget);
+  if (lastAudioSilent !== mix.silent) {
+    lastAudioSilent = mix.silent;
+    if (mix.silent && rainRegime === "dry") {
+      ui.setHint("The hollow went quiet when the water left.");
+    }
+  }
+}
+
 function syncMeshes(): void {
   world.ensureStructureFresh();
   terrainMesh.updateFrom(
@@ -294,6 +315,7 @@ function syncMeshes(): void {
   );
   waterMesh.updateFrom(model);
   flowCue.updateFrom(model, world);
+  syncAudio();
 }
 
 function predictionStatus(): string {

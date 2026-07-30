@@ -707,14 +707,239 @@ export function probeSuccessionDiverge(): ProbeResult {
   };
 }
 
-function sumGrid(data: Float32Array): number {
-  let s = 0;
-  for (let i = 0; i < data.length; i++) s += data[i]!;
-  return s;
+/**
+ * Dry-down feedback: after the same wetting pulse, south aspects dry faster
+ * than north, and vegetated cells transpire while bare cells evaporate —
+ * insolation × cover ET (NATURAL_PROCESS_MATH §1.6–1.7). Mass residual closes.
+ */
+export function probeDrydownFeedback(): ProbeResult {
+  const size = 16;
+  const wetDays = 3;
+  const dryDays = 8;
+
+  const runAspect = (risePerCell: number, cover: number) => {
+    const terrain = new Grid2D(size, size);
+    const offset = Math.abs(risePerCell) * size;
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        terrain.set(x, z, offset + z * risePerCell);
+      }
+    }
+    const world = new WorldState(terrain);
+    world.vegCover.fill(cover);
+    world.runVegetationStep(1);
+    for (let d = 0; d < wetDays; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.addRain(config.rainDepthPerEvent * 2);
+        world.stepEvent();
+      }
+    }
+    const moistureAfterWet = meanGrid(world.soilMoisture.data);
+    for (let d = 0; d < dryDays; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.stepEvent();
+      }
+    }
+    return {
+      moistureAfterWet,
+      moistureAfterDry: meanGrid(world.soilMoisture.data),
+      meanPet: meanGrid(world.potentialEt.data),
+      meanAet: meanGrid(world.actualEt.data),
+      transpiration: world.transpirationLedger,
+      soilEvaporation: world.soilEvaporationLedger,
+      openWater: world.openWaterEvaporationLedger,
+      etTotal: world.etLedger,
+      massResidual: world.waterBalanceResidual(),
+      precip: world.precipitationLedger,
+      hash: world.stateHash(),
+    };
+  };
+
+  const southBare = runAspect(-4, 0);
+  const southVeg = runAspect(-4, 0.8);
+  const northBare = runAspect(4, 0);
+  const southReplay = runAspect(-4, 0);
+
+  if (southBare.hash !== southReplay.hash) {
+    throw new Error(
+      `drydown-feedback: south bare must replay (T-001) ${southBare.hash} vs ${southReplay.hash}`,
+    );
+  }
+  if (!(southBare.meanPet > northBare.meanPet)) {
+    throw new Error(
+      `drydown-feedback: expected south PET (${southBare.meanPet}) > north (${northBare.meanPet})`,
+    );
+  }
+  if (!(southBare.moistureAfterDry < northBare.moistureAfterDry)) {
+    throw new Error(
+      `drydown-feedback: expected south drier (${southBare.moistureAfterDry}) than north (${northBare.moistureAfterDry})`,
+    );
+  }
+  if (!(southVeg.transpiration > southBare.transpiration)) {
+    throw new Error(
+      `drydown-feedback: vegetated should transpire more (${southVeg.transpiration} vs ${southBare.transpiration})`,
+    );
+  }
+  const parts =
+    southBare.transpiration + southBare.soilEvaporation + southBare.openWater;
+  if (Math.abs(parts - southBare.etTotal) > 1e-6) {
+    throw new Error(
+      `drydown-feedback: ET partitions ${parts} ≠ total ${southBare.etTotal}`,
+    );
+  }
+  const relResidual =
+    Math.abs(southBare.massResidual) / Math.max(1, southBare.precip);
+  if (relResidual >= 1e-4) {
+    throw new Error(
+      `drydown-feedback: H-004 residual too large (${southBare.massResidual}, rel=${relResidual})`,
+    );
+  }
+
+  return {
+    scenario: "drydown-feedback",
+    records: [
+      {
+        label: "southBare",
+        moistureAfterDry: southBare.moistureAfterDry,
+        meanPet: southBare.meanPet,
+        etTotal: southBare.etTotal,
+        transpiration: southBare.transpiration,
+        soilEvaporation: southBare.soilEvaporation,
+        massResidual: southBare.massResidual,
+        replayMatch: 1,
+      },
+      {
+        label: "southVeg",
+        moistureAfterDry: southVeg.moistureAfterDry,
+        transpiration: southVeg.transpiration,
+        soilEvaporation: southVeg.soilEvaporation,
+      },
+      {
+        label: "northBare",
+        moistureAfterDry: northBare.moistureAfterDry,
+        meanPet: northBare.meanPet,
+      },
+      {
+        label: "delta",
+        petGap: southBare.meanPet - northBare.meanPet,
+        moistureGap: northBare.moistureAfterDry - southBare.moistureAfterDry,
+        transpirationGap: southVeg.transpiration - southBare.transpiration,
+        relResidual,
+      },
+    ],
+  };
+}
+
+/**
+ * Disturbance recovery: after a wetting pulse, moisture declines toward the
+ * pre-pulse dry baseline without growing oscillation (ES-003).
+ */
+export function probeDisturbanceRecovery(): ProbeResult {
+  const world = new WorldState(generateMountain(16, 16, 5, 7));
+  // Mild wet-up then long dry settle → dry baseline the pulse must leave and return toward.
+  for (let d = 0; d < 4; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      world.addRain(config.rainDepthPerEvent);
+      world.stepEvent();
+    }
+  }
+  for (let d = 0; d < 12; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      world.stepEvent();
+    }
+  }
+  const baseline = meanGrid(world.soilMoisture.data);
+
+  for (let d = 0; d < 2; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      world.addRain(config.rainDepthPerEvent * 3);
+      world.stepEvent();
+    }
+  }
+  const peak = meanGrid(world.soilMoisture.data);
+  if (!(peak > baseline * 1.2)) {
+    throw new Error(
+      `disturbance-recovery: expected clear pulse (peak=${peak}, baseline=${baseline})`,
+    );
+  }
+
+  // Recovery target: halfway from peak back to baseline (half-life style).
+  const halfTarget = baseline + 0.5 * (peak - baseline);
+  let recoveredDay = -1;
+  const trajectory: number[] = [peak];
+  for (let d = 0; d < 30; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      world.stepEvent();
+    }
+    const m = meanGrid(world.soilMoisture.data);
+    trajectory.push(m);
+    if (recoveredDay < 0 && m <= halfTarget) {
+      recoveredDay = d + 1;
+    }
+  }
+  const finalM = trajectory[trajectory.length - 1]!;
+  if (recoveredDay < 0) {
+    throw new Error(
+      `disturbance-recovery: never reached half-recovery target ${halfTarget} (final=${finalM})`,
+    );
+  }
+  // Monotone dry-down: each day ≤ previous + tiny noise.
+  let risingDays = 0;
+  for (let i = 1; i < trajectory.length; i++) {
+    if (trajectory[i]! > trajectory[i - 1]! + 1e-4) risingDays++;
+  }
+  if (risingDays > 2) {
+    throw new Error(
+      `disturbance-recovery: moisture rose on ${risingDays} days — oscillation risk`,
+    );
+  }
+  const earlyDrop = trajectory[0]! - trajectory[Math.min(3, trajectory.length - 1)]!;
+  const lateDrop =
+    trajectory[Math.max(0, trajectory.length - 4)]! -
+    trajectory[trajectory.length - 1]!;
+  // Late drop should not reverse into growth; allow slowing.
+  if (lateDrop < -0.01) {
+    throw new Error(
+      `disturbance-recovery: late moisture increased (lateDrop=${lateDrop})`,
+    );
+  }
+  const relResidual =
+    Math.abs(world.waterBalanceResidual()) /
+    Math.max(1, world.precipitationLedger);
+  if (relResidual >= 1e-4) {
+    throw new Error(
+      `disturbance-recovery: residual too large (rel=${relResidual})`,
+    );
+  }
+
+  return {
+    scenario: "disturbance-recovery",
+    records: [
+      {
+        label: "pulse",
+        baseline,
+        peak,
+        halfTarget,
+        finalMoisture: finalM,
+        recoveredDay,
+        earlyDrop,
+        lateDrop,
+        risingDays,
+        relResidual,
+        bounded: risingDays <= 2 ? 1 : 0,
+      },
+    ],
+  };
 }
 
 function meanGrid(data: Float32Array): number {
   return sumGrid(data) / data.length;
+}
+
+function sumGrid(data: Float32Array): number {
+  let s = 0;
+  for (let i = 0; i < data.length; i++) s += data[i]!;
+  return s;
 }
 
 function sectorMean(
@@ -746,6 +971,8 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "limiting-shift": probeLimitingShift,
   "burn-recover": probeBurnRecover,
   "succession-diverge": probeSuccessionDiverge,
+  "drydown-feedback": probeDrydownFeedback,
+  "disturbance-recovery": probeDisturbanceRecovery,
 };
 
 export function runProbe(name: string): ProbeResult {

@@ -27,6 +27,7 @@ import {
   evaluateLight,
   terrainInsolation,
 } from "./vegetation/lightCompetition";
+import { evaluateEt } from "./hydrology/evapotranspiration";
 
 /**
  * Owns authoritative world fields and the field registry.
@@ -73,9 +74,18 @@ export class WorldState {
   readonly leafAreaIndex: Grid2D;
   /** Beer–Lambert light below canopy [0,1] — Slice 11. */
   readonly understoryLight: Grid2D;
+  /** Potential ET depth (m) this daily step — dry-down inspectable. */
+  readonly potentialEt: Grid2D;
+  /** Actual ET depth (m) this daily step — dry-down inspectable. */
+  readonly actualEt: Grid2D;
+  /**
+   * Burn scar intensity [0,1] — set on burn, decays daily (presentation memory).
+   * Owner: fire.
+   */
+  readonly fireScar: Grid2D;
   /**
    * Fuel load (kg/m²) — Slice 10, Olson litter model (NATURAL_PROCESS_MATH §3.5).
-   * Accumulates from veg.cover; depleted by fire. Owner: fire, band: decadal.
+   * Accumulates from veg.cover; depleted by fire. Owner: fuel, band: decadal.
    */
   readonly fuelLoad: Grid2D;
   /**
@@ -111,6 +121,9 @@ export class WorldState {
   private readonly outflowBox: ScalarBox = { value: 0 };
   private readonly infilBox: ScalarBox = { value: 0 };
   private readonly etBox: ScalarBox = { value: 0 };
+  private readonly transpirationBox: ScalarBox = { value: 0 };
+  private readonly soilEvaporationBox: ScalarBox = { value: 0 };
+  private readonly openWaterEvaporationBox: ScalarBox = { value: 0 };
   /** Cumulative fuel consumed by fire (kg/m² summed over cells). */
   private readonly fuelConsumedBox: ScalarBox = { value: 0 };
   /** Band phase — event steps since last daily (§12). */
@@ -174,6 +187,9 @@ export class WorldState {
     this.insolation = new Grid2D(this.width, this.height);
     this.leafAreaIndex = new Grid2D(this.width, this.height);
     this.understoryLight = new Grid2D(this.width, this.height);
+    this.potentialEt = new Grid2D(this.width, this.height);
+    this.actualEt = new Grid2D(this.width, this.height);
+    this.fireScar = new Grid2D(this.width, this.height);
     this.fuelLoad = new Grid2D(this.width, this.height);
     this.fireBurning = new Grid2D(this.width, this.height);
     this.fireIntensity = new Grid2D(this.width, this.height);
@@ -239,6 +255,27 @@ export class WorldState {
     this.etBox.value = v;
   }
 
+  get transpirationLedger(): number {
+    return this.transpirationBox.value;
+  }
+  set transpirationLedger(v: number) {
+    this.transpirationBox.value = v;
+  }
+
+  get soilEvaporationLedger(): number {
+    return this.soilEvaporationBox.value;
+  }
+  set soilEvaporationLedger(v: number) {
+    this.soilEvaporationBox.value = v;
+  }
+
+  get openWaterEvaporationLedger(): number {
+    return this.openWaterEvaporationBox.value;
+  }
+  set openWaterEvaporationLedger(v: number) {
+    this.openWaterEvaporationBox.value = v;
+  }
+
   get fuelConsumedLedger(): number {
     return this.fuelConsumedBox.value;
   }
@@ -270,6 +307,8 @@ export class WorldState {
   /**
    * Advance one event band tick (config.eventDtMinutes sim-minutes).
    * `dt` is the flux integrator step within the event (defaults to eventFluxDt).
+   * Daily band receives dt in sim-days (1 = one full day); decadal receives
+   * band units (1 = one full compressed decadal commit) — rates scale by dt.
    */
   stepEvent(dt: number = config.eventFluxDt): void {
     if (this.structureDirty) {
@@ -283,13 +322,14 @@ export class WorldState {
     this.eventStepsSinceDaily = this.eventStepsSinceDaily + 1;
     if (this.eventStepsSinceDaily >= config.dailyEventSteps) {
       this.eventStepsSinceDaily = 0;
-      this.scheduler.runBand("daily", this, config.minutesPerDay);
+      this.scheduler.runBand("daily", this, 1);
+      this.decayFireScar(1);
       this.registry.assertBounds("daily");
 
       this.daysSinceDecadal = this.daysSinceDecadal + 1;
       if (this.daysSinceDecadal >= config.decadalDailySteps) {
         this.daysSinceDecadal = 0;
-        this.scheduler.runBand("decadal", this, config.decadalDailySteps);
+        this.scheduler.runBand("decadal", this, 1);
         this.registry.assertBounds("decadal");
       }
     }
@@ -351,36 +391,78 @@ export class WorldState {
     this.boundaryOutflowLedger += result.boundaryOutflow;
   }
 
-  runSoilWaterStep(_dt: number): void {
+  /** Daily soil water. `dt` is sim-days (1 = one full daily band). */
+  runSoilWaterStep(dt: number): void {
+    const scale = Math.max(0, dt);
     const w = this.water.data;
     const m = this.soilMoisture.data;
     const depth = this.soilDepth.data;
     const cap = this.infiltrationCapacity.data;
     const contrib = this.vegInfiltrationContribution.data;
+    const cover = this.vegCover.data;
+    const elev = this.terrain.data;
+    const petField = this.potentialEt.data;
+    const aetField = this.actualEt.data;
     const porosity = config.soilPorosity;
-    const et = config.etRate;
+    const infilCap = config.infiltrationRate * scale;
+    const petAtFullSun = config.etRate * scale;
+    const openWaterPet = config.openWaterEtRate * scale;
     const minDepth = 1e-3;
 
     for (let i = 0; i < cap.length; i++) {
-      cap[i] = config.infiltrationRate + contrib[i]!;
+      cap[i] = infilCap + contrib[i]! * scale;
     }
 
-    for (let i = 0; i < w.length; i++) {
-      const h = Math.max(depth[i]!, minDepth);
-      const surface = w[i]!;
-      // soil.moisture is volumetric fraction; storage depth = m · h (§8 / §8.2).
-      const room = Math.max(0, (porosity - m[i]!) * h);
-      const infiltrate = Math.min(surface, cap[i]!, room);
-      if (infiltrate > 0) {
-        w[i]! -= infiltrate;
-        m[i]! += infiltrate / h;
-        this.infiltrationLedger += infiltrate;
-      }
-      const storage = m[i]! * h;
-      if (storage > 0) {
-        const evap = Math.min(storage, et);
-        m[i]! = (storage - evap) / h;
-        this.etLedger += evap;
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const h = Math.max(depth[i]!, minDepth);
+        const room = Math.max(0, (porosity - m[i]!) * h);
+        const infiltrate = Math.min(w[i]!, cap[i]!, room);
+        if (infiltrate > 0) {
+          w[i]! -= infiltrate;
+          m[i]! += infiltrate / h;
+          this.infiltrationLedger += infiltrate;
+        }
+
+        const insolation = terrainInsolation(
+          elev,
+          this.width,
+          this.height,
+          x,
+          z,
+        );
+        const sample = evaluateEt({
+          insolation,
+          moisture: m[i]!,
+          soilPorosity: porosity,
+          wiltingFraction: config.etWiltingFraction,
+          fieldCapacityFraction: config.etFieldCapacityFraction,
+          cover: cover[i]!,
+          surfaceDepth: w[i]!,
+          petAtFullSun,
+          openWaterPet,
+        });
+
+        const openTake = Math.min(w[i]!, sample.openWaterEvaporation);
+        w[i]! -= openTake;
+
+        const soilDemand = sample.transpiration + sample.soilEvaporation;
+        const storage = m[i]! * h;
+        const soilTake = Math.min(storage, soilDemand);
+        m[i]! = (storage - soilTake) / h;
+
+        const soilScale = soilDemand > 0 ? soilTake / soilDemand : 0;
+        const transpiration = sample.transpiration * soilScale;
+        const soilEvaporation = sample.soilEvaporation * soilScale;
+        const aet = openTake + transpiration + soilEvaporation;
+
+        petField[i] = sample.pet;
+        aetField[i] = aet;
+        this.openWaterEvaporationLedger += openTake;
+        this.transpirationLedger += transpiration;
+        this.soilEvaporationLedger += soilEvaporation;
+        this.etLedger += aet;
       }
     }
   }
@@ -388,9 +470,11 @@ export class WorldState {
   /**
    * Cheap GW recharge + channel-preferential baseflow (C-001 / H-001 / H-004).
    * Linear reservoir — not Darcy iterative solve / Richards (EXTERNAL_REFERENCES).
+   * `dt` is sim-days (1 = one full daily band).
    */
-  runGroundwaterStep(_dt: number): void {
+  runGroundwaterStep(dt: number): void {
     if (this.gwRechargeRate === 0 && this.gwRecessionAlpha === 0) return;
+    const scale = Math.max(0, dt);
 
     this.ensureStructureFresh();
     const m = this.soilMoisture.data;
@@ -402,27 +486,27 @@ export class WorldState {
     const fc = porosity * this.gwFieldCapacityFraction;
     const minDepth = 1e-3;
     const nCells = this.width * this.height;
+    const rechargeCap = this.gwRechargeRate * scale;
+    // Linear reservoir: 1 − (1−α)^dt ≈ α·dt for small α·dt; clamp fraction ≤ 1.
+    const recessionFrac = Math.min(1, this.gwRecessionAlpha * scale);
 
     for (let i = 0; i < gw.length; i++) {
       const h = Math.max(depth[i]!, minDepth);
 
-      if (this.gwRechargeRate > 0 && m[i]! > fc) {
+      if (rechargeCap > 0 && m[i]! > fc) {
         const excess = (m[i]! - fc) * h;
-        const recharge = Math.min(excess, this.gwRechargeRate);
+        const recharge = Math.min(excess, rechargeCap);
         if (recharge > 0) {
           m[i]! -= recharge / h;
           gw[i]! += recharge;
         }
       }
 
-      if (this.gwRecessionAlpha > 0 && gw[i]! > 0) {
+      if (recessionFrac > 0 && gw[i]! > 0) {
         const a = acc ? acc[i]! : 1;
         const aNorm = Math.min(1, a / nCells);
         const channelFactor = 1 + this.gwChannelBoost * aNorm;
-        const q = Math.min(
-          gw[i]!,
-          gw[i]! * this.gwRecessionAlpha * channelFactor,
-        );
+        const q = Math.min(gw[i]!, gw[i]! * recessionFrac * channelFactor);
         gw[i]! -= q;
         w[i]! += q;
       }
@@ -463,9 +547,11 @@ export class WorldState {
    * Decadal soil production + GEO-002 erosion (NATURAL_PROCESS_MATH §3.8).
    * Production everywhere; channel erosion where accumulation earns cost.
    * Elev and depth move together so bedrock = elev − depth is invariant.
+   * `dt` is band units (1 = one full compressed decadal commit).
    */
-  runGeomorphologyStep(_dt: number): void {
+  runGeomorphologyStep(dt: number): void {
     this.ensureStructureFresh();
+    const scale = Math.max(0, dt);
     const elev = this.terrain.data;
     const depth = this.soilDepth.data;
     const cover = this.vegCover.data;
@@ -473,9 +559,9 @@ export class WorldState {
     const filled = this.filledElevation ?? elev;
     const dx = config.cellSizeMeters;
     const zFloor = config.elevationFloor;
-    const p0 = config.soilProductionP0;
+    const p0 = config.soilProductionP0 * scale;
     const h0 = config.soilProductionH0;
-    const kE = config.soilErosionK;
+    const kE = config.soilErosionK * scale;
     const aMin = config.erosionMinAccumulation;
     const minDepth = 1e-3;
     let dirty = false;
@@ -520,7 +606,9 @@ export class WorldState {
     if (dirty) this.markStructureDirty();
   }
 
-  runVegetationStep(_dt: number): void {
+  /** Daily vegetation. `dt` is sim-days (1 = one full daily band). */
+  runVegetationStep(dt: number): void {
+    const scale = Math.max(0, dt);
     const m = this.soilMoisture.data;
     const c = this.vegCover.data;
     const rough = this.surfaceRoughness.data;
@@ -529,8 +617,8 @@ export class WorldState {
     const lai = this.leafAreaIndex.data;
     const understory = this.understoryLight.data;
     const elevation = this.terrain.data;
-    const growth = config.vegGrowthRate;
-    const decay = config.vegDecayRate;
+    const growth = config.vegGrowthRate * scale;
+    const decay = config.vegDecayRate * scale;
     const thresh = config.vegMoistureThreshold;
 
     for (let z = 0; z < this.height; z++) {
@@ -566,12 +654,14 @@ export class WorldState {
   /**
    * Olson litter model (NATURAL_PROCESS_MATH §3.5): dL/dt = I − k·L.
    * Input I proportional to veg.cover; runs on decadal band.
+   * `dt` is band units (1 = one full compressed decadal commit).
    */
-  runFuelAccumulationStep(_dt: number): void {
+  runFuelAccumulationStep(dt: number): void {
+    const scale = Math.max(0, dt);
     const fuel = this.fuelLoad.data;
     const cover = this.vegCover.data;
-    const iMax = config.fuelInputMax;
-    const k = config.fuelDecayK;
+    const iMax = config.fuelInputMax * scale;
+    const k = Math.min(1, config.fuelDecayK * scale);
     const maxFuel = config.fuelLoadMax;
 
     for (let i = 0; i < fuel.length; i++) {
@@ -666,9 +756,25 @@ export class WorldState {
       intensity[i] = Math.min(10, consumed);
       fuel[i] = Math.max(0, fuel[i]! - consumed);
       cover[i] = Math.max(0, cover[i]! * (1 - mortality));
+      // Persistent scar for presentation — decays on daily band.
+      this.fireScar.data[i] = Math.min(
+        1,
+        Math.max(this.fireScar.data[i]!, Math.min(1, consumed / 2)),
+      );
       this.fuelConsumedLedger += consumed;
       // Clear the burn flag after effects applied.
       burning[i] = 0;
+    }
+  }
+
+  /** Daily exponential fade of burn scar (presentation + recovery memory). */
+  decayFireScar(dt: number): void {
+    const scale = Math.max(0, dt);
+    const decay = Math.min(1, 0.08 * scale);
+    const scar = this.fireScar.data;
+    for (let i = 0; i < scar.length; i++) {
+      scar[i] = Math.max(0, scar[i]! * (1 - decay));
+      if (scar[i]! < 1e-4) scar[i] = 0;
     }
   }
 
@@ -739,6 +845,9 @@ export class WorldState {
     this.boundaryOutflowLedger = 0;
     this.infiltrationLedger = 0;
     this.etLedger = 0;
+    this.transpirationLedger = 0;
+    this.soilEvaporationLedger = 0;
+    this.openWaterEvaporationLedger = 0;
     this.eventStepsSinceDaily = 0;
     this.daysSinceDecadal = 0;
     this.simMinutes = 0;
@@ -817,6 +926,21 @@ export class WorldState {
   getUnderstoryLight(x: number, z: number): number {
     if (!this.understoryLight.inBounds(x, z)) return 0;
     return this.understoryLight.get(x, z);
+  }
+
+  getPotentialEt(x: number, z: number): number {
+    if (!this.potentialEt.inBounds(x, z)) return 0;
+    return this.potentialEt.get(x, z);
+  }
+
+  getActualEt(x: number, z: number): number {
+    if (!this.actualEt.inBounds(x, z)) return 0;
+    return this.actualEt.get(x, z);
+  }
+
+  getFireScar(x: number, z: number): number {
+    if (!this.fireScar.inBounds(x, z)) return 0;
+    return this.fireScar.get(x, z);
   }
 
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
@@ -1035,6 +1159,26 @@ export class WorldState {
         range: [0, 1] as const,
       },
       {
+        id: "et.potential",
+        units: "m",
+        shape: "cell" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: false,
+        data: this.potentialEt.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "et.actual",
+        units: "m",
+        shape: "cell" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: false,
+        data: this.actualEt.data,
+        range: [0, 1] as const,
+      },
+      {
         id: "soil.infiltrationCapacity",
         units: "m/step",
         shape: "cell" as const,
@@ -1048,7 +1192,7 @@ export class WorldState {
         id: "fire.fuelLoad",
         units: "kg/m²",
         shape: "cell" as const,
-        owner: "fire",
+        owner: "fuel",
         band: "decadal" as const,
         legacy: false,
         data: this.fuelLoad.data,
@@ -1073,6 +1217,16 @@ export class WorldState {
         legacy: false,
         data: this.fireIntensity.data,
         range: [0, 10] as const,
+      },
+      {
+        id: "fire.scar",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "fire",
+        band: "event" as const,
+        legacy: true,
+        data: this.fireScar.data,
+        range: [0, 1] as const,
       },
       {
         id: "ledger.fuelConsumed",
@@ -1122,6 +1276,36 @@ export class WorldState {
         band: "daily" as const,
         legacy: true,
         data: this.etBox,
+        range: [0, 1e12] as const,
+      },
+      {
+        id: "ledger.transpiration",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: true,
+        data: this.transpirationBox,
+        range: [0, 1e12] as const,
+      },
+      {
+        id: "ledger.soilEvaporation",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: true,
+        data: this.soilEvaporationBox,
+        range: [0, 1e12] as const,
+      },
+      {
+        id: "ledger.openWaterEvaporation",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        legacy: true,
+        data: this.openWaterEvaporationBox,
         range: [0, 1e12] as const,
       },
       {

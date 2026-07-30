@@ -76,9 +76,19 @@ export const config = {
   soilErosionK: 0.003,
   /** Min D8 accumulation (cells) before channel-style erosion applies. */
   erosionMinAccumulation: 6,
-  /** Per daily band (absolute; soil step ignores integrator dt). */
+  /** Per sim-day (soil/veg/GW steps scale by dt in days). */
   infiltrationRate: 0.08,
+  /**
+   * Reference PET depth (m/day) at insolation = 1 (NATURAL_PROCESS_MATH §1.7).
+   * Actual demand = etRate · insolation · moisture stress.
+   */
   etRate: 0.012,
+  /** Open-water PET depth (m/day) at insolation = 1. */
+  openWaterEtRate: 0.02,
+  /** Wilting point as fraction of porosity — AET → 0 below. */
+  etWiltingFraction: 0.15,
+  /** Field capacity as fraction of porosity — AET → PET at/above. */
+  etFieldCapacityFraction: 0.55,
   vegGrowthRate: 0.12,
   vegDecayRate: 0.03,
   vegMoistureThreshold: 0.04,
@@ -156,7 +166,9 @@ export type InspectorLayer =
   | "limitingFactor"
   | "suitability"
   | "understoryLight"
-  | "fuelLoad";
+  | "fuelLoad"
+  | "potentialEt"
+  | "actualEt";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

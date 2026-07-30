@@ -13,6 +13,7 @@ import {
   FormMemory,
 } from "./formMemory";
 import { lightEncodingDelta } from "../ui/lightEncoding";
+import { terrainEncodingDelta } from "../ui/terrainEncoding";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("worldToGrid snaps world hits to integer cells", () => {
@@ -111,5 +112,23 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     const northLight = 0.13348884880542755;
     const southLight = 0.20132742822170258;
     expect(lightEncodingDelta(northLight, southLight)).toBeGreaterThan(0.15);
+  });
+
+  it("default terrain keeps wet-vs-dry legible under vegetation", () => {
+    const delta = terrainEncodingDelta(
+      { moisture: 0.05, cover: 0.7 },
+      { moisture: 0.35, cover: 0.7 },
+      config.soilPorosity,
+    );
+    expect(delta).toBeGreaterThan(0.15);
+  });
+
+  it("burn scar encoding clears the perceptual floor against unburned cover", () => {
+    const delta = terrainEncodingDelta(
+      { moisture: 0.2, cover: 0.4, scar: 0 },
+      { moisture: 0.2, cover: 0.4, scar: 0.85 },
+      config.soilPorosity,
+    );
+    expect(delta).toBeGreaterThan(0.15);
   });
 });

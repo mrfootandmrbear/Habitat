@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **11** **Done** (light/succession / `succession-diverge`). Next: **Slice 12** arrival / first occupant (§4.8, C-007 hypothesis). Slice **A** audio scaffold **Done** (agent; C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
+Dry-down ET **Done** (`drydown-feedback`, `disturbance-recovery`). Next: **Slice 12** arrival / first occupant (§4.8, C-007 hypothesis). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
 
 ## Cursor Cloud specific instructions
 

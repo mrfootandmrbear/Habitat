@@ -7,10 +7,10 @@ import { fireProcess } from "./process/fireProcess";
 
 describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
   describe("field registration", () => {
-    it("registers fire.fuelLoad owned by fire", () => {
+    it("registers fire.fuelLoad owned by fuel", () => {
       const world = new WorldState(new Grid2D(8, 8, 2));
       const field = world.registry.get("fire.fuelLoad");
-      expect(field.owner).toBe("fire");
+      expect(field.owner).toBe("fuel");
       expect(field.band).toBe("decadal");
       expect(field.shape).toBe("cell");
     });
@@ -44,11 +44,17 @@ describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
       expect(fuelProcess.band).toBe("decadal");
     });
 
-    it("fireProcess reads fuel + moisture + elevation", () => {
+    it("fireProcess contributes veg.cover kill; owns burning/intensity/fuel", () => {
       expect(fireProcess.reads).toContain("fire.fuelLoad");
       expect(fireProcess.reads).toContain("soil.moisture");
       expect(fireProcess.reads).toContain("terrain.elevation");
       expect(fireProcess.band).toBe("event");
+      expect(fireProcess.writes).toContain("fire.burning");
+      expect(fireProcess.writes).toContain("fire.intensity");
+      expect(fireProcess.writes).not.toContain("veg.cover");
+      expect(fireProcess.writes).not.toContain("fire.fuelLoad");
+      expect(fireProcess.contributes).toContain("veg.cover");
+      expect(fireProcess.contributes).toContain("fire.fuelLoad");
     });
   });
 

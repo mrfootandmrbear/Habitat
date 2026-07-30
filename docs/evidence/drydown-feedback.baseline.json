@@ -1,0 +1,69 @@
+{
+  "scenario": "drydown-feedback",
+  "metrics": {
+    "southBare.moistureAfterDry": {
+      "value": 0.10192932550853584,
+      "abs": 0.00001
+    },
+    "southBare.meanPet": {
+      "value": 0.0110297495375562,
+      "abs": 0.000001
+    },
+    "southBare.etTotal": {
+      "value": 10.27585010286295,
+      "abs": 0.0001
+    },
+    "southBare.transpiration": {
+      "value": 0.7035570189178397,
+      "abs": 0.0001
+    },
+    "southBare.soilEvaporation": {
+      "value": 8.689913855127829,
+      "abs": 0.0001
+    },
+    "southBare.massResidual": {
+      "value": 0.00001897402313488783,
+      "abs": 0.001
+    },
+    "southBare.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "southVeg.moistureAfterDry": {
+      "value": 0.10385404340922832,
+      "abs": 0.00001
+    },
+    "southVeg.transpiration": {
+      "value": 7.383982805293679,
+      "abs": 0.0001
+    },
+    "southVeg.soilEvaporation": {
+      "value": 2.180209243966652,
+      "abs": 0.0001
+    },
+    "northBare.moistureAfterDry": {
+      "value": 0.1236022793018492,
+      "abs": 0.00001
+    },
+    "northBare.meanPet": {
+      "value": 0.004727008950794698,
+      "abs": 0.000001
+    },
+    "delta.petGap": {
+      "value": 0.006302740586761502,
+      "abs": 0.000001
+    },
+    "delta.moistureGap": {
+      "value": 0.021672953793313354,
+      "abs": 0.00001
+    },
+    "delta.transpirationGap": {
+      "value": 6.68042578637584,
+      "abs": 0.0001
+    },
+    "delta.relResidual": {
+      "value": 1.0294066370924457e-7,
+      "abs": 0.00001
+    }
+  }
+}

@@ -86,11 +86,12 @@ Summary only — do not reopen unless fixing regressions.
 | 9 | Liebig HSI / limiting factor | Inspect what holds a patch back | `hsiComposition`, `limiting-shift` | Tier-M; Tier-O deferred |
 | 10 | Fire / fuel (Olson + BFS) | Authored ignition; wet resists | `fireProcess`, `burn-recover` | Tier-M; Tier-O deferred |
 | 11 | Slope/aspect + Beer–Lambert light | Same rules, different succession trajectories | `lightCompetition`, `succession-diverge` | Tier-M + Tier-P; Tier-O deferred |
+| drydown | Insolation × cover ET partitions | World dries unevenly after rain | `evapotranspiration`, `drydown-feedback` | Tier-M + Tier-P; audio wired |
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 
-**Current gate:** Slice **11** light/succession **Done** (agent) → **Slice 12** arrival / first occupant next (§4.8 specified under C-007). **Slice A** audio scaffold **Done** (machine half; C-014 owner half outstanding). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
+**Current gate:** Dry-down ET coupling **Done** (agent) → **Slice 12** arrival / first occupant next (§4.8 specified under C-007). **Slice A** audio scaffold wired into the play loop (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -253,6 +254,24 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.6b Dry-down ET coupling *(Done — agent)*
+
+**Why this exists.** Flat `etRate` made vegetation a one-way ratchet: cover improved infiltration with no transpiration cost, and aspect did not dry differently. NATURAL_PROCESS_MATH §1.6–1.7 + Slice 11 insolation close the balancing edge.
+
+**Loops.** Sim: insolation × lagged cover → moisture-limited PET/AET partitions (soil evaporation, transpiration, open water) with H-004 ledger closeout. Game: after rain, south slopes and bare ground dry faster; vegetated hollows keep drinking — readable in default terrain tint + wired water audio.
+
+**Register / candidates.** H-001, H-003, H-004, ES-003, ES-005, S-009, T-001, T-005, T-006, C-008, C-014 (audio wire; still Open for owner half).
+
+- [x] Composition note `docs/slices/drydown-composition.md`
+- [x] Process hardening: topo scheduler, dt-scaled daily/decadal rates, fire contributes `veg.cover` / `fire.fuelLoad`
+- [x] `et.potential` / `et.actual` + partition ledgers; `fire.scar` persistent fade
+- [x] Default-view encoding keeps wet-vs-dry under cover; scar tint; audio observer in `main.ts`
+- [x] Probes `drydown-feedback` (PET gap ≈ 0.0063; moisture gap ≈ 0.022; transpiration gap ≈ 6.68; rel residual ≈ 1e-7) and `disturbance-recovery` (half-recovery, bounded)
+- [x] `docs/slices/drydown.json` manifest
+- [x] Tier-O deferred (batch): *after the rain stopped, did the place feel like it was drying itself?*
+
+---
+
 ### 4.6 Slice 11 — Light / succession *(Done — agent)*
 
 **Why this exists.** [THESIS.md](THESIS.md) §2.1 / §5: the castle comes alive when life takes the form you built — and different aspects, burns, and moisture histories must produce different futures from the *same* rules, never from authored stages. Slice 9 already named water/depth/GW as limiting; Slice 10 clears cover. This slice adds the light dial so succession is a consequence of insolation × canopy, not a timer.
@@ -311,7 +330,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.8 Slice 12 — Arrival / first occupant *(specified; gate after Slice 11)*
+### 4.8 Slice 12 — Arrival / first occupant *(specified; gate after dry-down)*
 
 **Why this exists.** [THESIS.md](THESIS.md) §5 names “life moves into it” as the missing payoff. Slice 9 built the inspectable suitability gate and Slice 11 made terrain/light produce different ecological futures; this slice tests **C-007** as a hypothesis by letting one real plant functional type arrive because a place became suitable, without a player introduction action.
 

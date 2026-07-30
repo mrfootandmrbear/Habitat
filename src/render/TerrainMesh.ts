@@ -4,6 +4,7 @@ import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
 import { understoryLightRgb } from "../ui/lightEncoding";
+import { defaultTerrainRgb } from "../ui/terrainEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
 
 const BASE = new THREE.Color(0x8b7355);
@@ -63,7 +64,6 @@ export class TerrainMesh {
   ): void {
     const pos = this.geometry.attributes.position as THREE.BufferAttribute;
     const cellW = this.worldSize / (this.width - 1);
-    const cellH = this.worldSize / (this.height - 1);
     const ox = -this.worldSize / 2;
     const oz = -this.worldSize / 2;
 
@@ -79,18 +79,19 @@ export class TerrainMesh {
     let i = 0;
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
-        pos.setXYZ(i, ox + x * cellW, model.getTerrainHeight(x, z), oz + z * cellH);
+        pos.setXYZ(i, ox + x * cellW, model.getTerrainHeight(x, z), oz + z * cellW);
 
         const col = new THREE.Color();
         if (world && overlay !== "none") {
           this.applyOverlay(col, world, x, z, overlay, maxAcc);
         } else if (world) {
-          const soilT = Math.min(
-            1,
-            world.getSoilMoisture(x, z) / config.soilPorosity,
+          const [r, g, b] = defaultTerrainRgb(
+            world.getSoilMoisture(x, z),
+            config.soilPorosity,
+            world.getVegCover(x, z),
+            world.getFireScar(x, z),
           );
-          const cover = world.getVegCover(x, z);
-          col.copy(BASE).lerp(WET, soilT).lerp(VEG, cover);
+          col.setRGB(r, g, b);
           if (elevDelta) {
             const d = elevDelta[i] ?? 0;
             const strength = elevChangeEncodingStrength(d);
@@ -184,11 +185,10 @@ export class TerrainMesh {
         break;
       }
       case "limitingFactor": {
-        // Distinct hues per factor — not a scalar health rainbow (N-002).
         const id = Math.round(world.getLimitingFactor(x, z));
-        if (id === 0) col.setRGB(0.2, 0.45, 0.85); // moisture — blue
-        else if (id === 1) col.setRGB(0.65, 0.4, 0.2); // depth — brown
-        else col.setRGB(0.15, 0.55, 0.5); // groundwater — teal
+        if (id === 0) col.setRGB(0.2, 0.45, 0.85);
+        else if (id === 1) col.setRGB(0.65, 0.4, 0.2);
+        else col.setRGB(0.15, 0.55, 0.5);
         break;
       }
       case "suitability": {
@@ -199,6 +199,30 @@ export class TerrainMesh {
       case "understoryLight": {
         const [r, g, b] = understoryLightRgb(world.getUnderstoryLight(x, z));
         col.setRGB(r, g, b);
+        break;
+      }
+      case "fuelLoad": {
+        const t = Math.min(
+          1,
+          world.fuelLoad.get(x, z) / Math.max(config.fuelLoadMax, 1e-6),
+        );
+        col.setRGB(0.35 + 0.4 * t, 0.25 + 0.1 * t, 0.15);
+        break;
+      }
+      case "potentialEt": {
+        const t = Math.min(
+          1,
+          world.getPotentialEt(x, z) / Math.max(config.etRate, 1e-6),
+        );
+        col.setRGB(0.55 + 0.35 * t, 0.45 - 0.2 * t, 0.2);
+        break;
+      }
+      case "actualEt": {
+        const t = Math.min(
+          1,
+          world.getActualEt(x, z) / Math.max(config.etRate, 1e-6),
+        );
+        col.setRGB(0.25 + 0.2 * t, 0.35 + 0.4 * t, 0.55 + 0.2 * t);
         break;
       }
       default:
