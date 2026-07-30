@@ -1,0 +1,13 @@
+{
+  "id": "A+",
+  "title": "Recovery audible — second ambient bed from veg.cover",
+  "simLoop": "none new — audio is a pure observer of veg.cover + water.surfaceDepth (T-006)",
+  "gameLoop": "As cover returns, ambient.life rises; bare stays silent on that bed while water ambience stays independent (AUD-003)",
+  "registerIds": ["AUD-003", "AUD-001", "AUD-002", "T-006", "T-001", "C-014", "D-007"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/audio/audio.test.ts"],
+  "probes": [],
+  "fields": ["veg.cover", "water.surfaceDepth"],
+  "notebookSeed": "The green came back, and the place sounded fuller.",
+  "tierO": "no new owner-only question — C-014 owner half still outstanding (water silence); AUD-003 machine discharged; do not promote C-014"
+}

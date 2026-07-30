@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; **Slice S** owner legibility **Pass** + geological deposit; **Slice R** Done — rain-feel clip **Pass** (weather the world made). C-009 / C-016…C-019 Lock still owner. Full C-020 clouds later. **Next:** Slice **A+** (AUD-003 recovery ambient). Island is the default playable world.
+**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; **Slice S** / **Slice R** Done — rain-feel clip **Pass**; **Slice A+** Done (AUD-003 recovery ambient from `veg.cover`). C-009 / C-016…C-019 Lock still owner. Full C-020 clouds later. **Next:** Field Notebook UI (U-006). Island is the default playable world.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

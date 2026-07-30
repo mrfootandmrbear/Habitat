@@ -18,6 +18,10 @@
 
 **Slice.** A — Audio scaffold (`docs/slices/A.json`). C-014 remains **Open**; do not promote.
 
+## AUD-003 recovery bed (Slice A+ — machine)
+
+Second bed, same contract: `veg.cover` mean → `ambient.life`. Bare → silent; 0.25 → 0.25; 0.5 → 0.5; ≥1 → 1. Independent of the water bed. Composition: `docs/slices/A-plus-composition.md`. Does **not** close C-014 owner half.
+
 ## Owner-only question
 
 When the water left, did the quiet feel like the place going still — or like the sound broke?

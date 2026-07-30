@@ -44,7 +44,8 @@ import { windById, type WindId } from "./sim/climate/windRegime";
 import { fillOrographicRainDepths } from "./sim/climate/orographicPrecip";
 import { FormMemory } from "./sim/formMemory";
 import {
-  sampleAudioMix,
+  sampleSoundscape,
+  snapshotCoverReader,
   snapshotSurfaceDepthReader,
 } from "./audio/AudioBus";
 import { applyMixToGain, type GainTarget } from "./audio/webAudioHook";
@@ -156,7 +157,9 @@ let pointerDown: { x: number; y: number } | null = null;
 let cutawayCell: { x: number; z: number } | null = null;
 /** Optional Web Audio gain — null until unlocked; mix still computed (C-014). */
 let waterGainTarget: GainTarget | null = null;
+let lifeGainTarget: GainTarget | null = null;
 let lastAudioSilent: boolean | null = null;
+let lastLifeSilent: boolean | null = null;
 const rainDepthScratch = new Float32Array(n * n);
 
 const clock = new SimClock({
@@ -449,13 +452,22 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
 
 function syncAudio(): void {
   // Observer only — snapshot so the bus cannot alias live buffers (T-006).
-  const reader = snapshotSurfaceDepthReader(n, n, world.water.data);
-  const mix = sampleAudioMix(reader);
-  applyMixToGain(mix, waterGainTarget);
-  if (lastAudioSilent !== mix.silent) {
-    lastAudioSilent = mix.silent;
-    if (mix.silent && rainRegime === "dry") {
+  const scape = sampleSoundscape(
+    snapshotSurfaceDepthReader(n, n, world.water.data),
+    snapshotCoverReader(n, n, world.vegCover.data),
+  );
+  applyMixToGain(scape.water, waterGainTarget);
+  applyMixToGain(scape.life, lifeGainTarget);
+  if (lastAudioSilent !== scape.water.silent) {
+    lastAudioSilent = scape.water.silent;
+    if (scape.water.silent && rainRegime === "dry") {
       ui.setHint("The hollow went quiet when the water left.");
+    }
+  }
+  if (lastLifeSilent !== scape.life.silent) {
+    lastLifeSilent = scape.life.silent;
+    if (!scape.life.silent && scape.life.level >= 0.2) {
+      ui.setHint("The green came back, and the place sounded fuller.");
     }
   }
 }
