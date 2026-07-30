@@ -15,6 +15,7 @@ import { meanExposure } from "../climate/shoreExposure";
 import {
   LIMITING_DEPTH,
   LIMITING_MOISTURE,
+  LIMITING_SALINITY,
 } from "../habitat/hsiComposition";
 import {
   DEEP_TIME_SIM_YEARS,
@@ -2001,6 +2002,109 @@ function sectorMean(
   return n > 0 ? sum / n : 0;
 }
 
+/**
+ * Slice 20 / C-018 — paired freshened vs salty hollow under one seed schedule.
+ * Salty twin is salt-limited and earns less herb biomass; water residual
+ * stays finite (no separate salt ledger). Save-legacy covered in unit tests.
+ */
+export function probeSalinityArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 1;
+  const sz = 8;
+
+  const make = (salinity: number) => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(salinity);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const freshA = make(0);
+  const freshB = make(0);
+  const salty = make(0.85);
+
+  const replayMatch =
+    freshA.stateHash() === freshB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("salinity-arrival: freshened replay hash mismatch");
+  }
+
+  const freshHsi = freshA.getHabitatSuitability(sx, sz);
+  const saltyHsi = salty.getHabitatSuitability(sx, sz);
+  const freshBiomass = freshA.getHerbBiomass(sx, sz);
+  const saltyBiomass = salty.getHerbBiomass(sx, sz);
+  const freshLim = freshA.getLimitingFactor(sx, sz);
+  const saltyLim = salty.getLimitingFactor(sx, sz);
+  const biomassDelta = freshBiomass - saltyBiomass;
+  // Residual class: salinity must not invent a salt mass term — twins match.
+  const residualFresh = freshA.waterBalanceResidual();
+  const residualSalty = salty.waterBalanceResidual();
+  const residualMatch =
+    Math.abs(residualFresh - residualSalty) < 1e-9 ? 1 : 0;
+
+  if (!(freshHsi > saltyHsi)) {
+    throw new Error(
+      `salinity-arrival: expected fresh HSI (${freshHsi}) > salty (${saltyHsi})`,
+    );
+  }
+  if (saltyLim !== LIMITING_SALINITY) {
+    throw new Error(
+      `salinity-arrival: expected salty limiting=salinity (got ${saltyLim})`,
+    );
+  }
+  if (!(freshBiomass > 0.1)) {
+    throw new Error(
+      `salinity-arrival: freshened biomass too low (${freshBiomass})`,
+    );
+  }
+  if (!(biomassDelta > 0.05)) {
+    throw new Error(
+      `salinity-arrival: biomass delta too small (${biomassDelta})`,
+    );
+  }
+  if (residualMatch !== 1) {
+    throw new Error(
+      `salinity-arrival: residual diverged fresh=${residualFresh} salty=${residualSalty}`,
+    );
+  }
+
+  return {
+    scenario: "salinity-arrival",
+    records: [
+      {
+        label: "freshened",
+        hsi: freshHsi,
+        biomass: freshBiomass,
+        limiting: freshLim,
+        salinity: 0,
+      },
+      {
+        label: "salty",
+        hsi: saltyHsi,
+        biomass: saltyBiomass,
+        limiting: saltyLim,
+        salinity: 0.85,
+        saltLimited: saltyLim === LIMITING_SALINITY ? 1 : 0,
+      },
+      {
+        label: "delta",
+        biomassDelta,
+        hsiDelta: freshHsi - saltyHsi,
+        replayMatch,
+        residualMatch,
+        hashN: Number.parseInt(freshA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -2021,6 +2125,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "longshore-drift": probeLongshoreDrift,
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
+  "salinity-arrival": probeSalinityArrival,
 };
 
 export function runProbe(name: string): ProbeResult {

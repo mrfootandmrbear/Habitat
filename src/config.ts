@@ -186,6 +186,14 @@ export const config = {
   herbEstablishmentRate: 0.35,
   /** Resource-derived capacity at HSI = 1 (kg DM·m⁻²) — not fixed K (ES-006). */
   herbBiomassMax: 2.5,
+
+  /**
+   * Slice 20 / C-018 — soil porewater salinity.
+   * Shoreline land mixes toward seawater each daily band (fraction of gap closed).
+   */
+  salinityOceanMixPerDay: 0.2,
+  /** Seawater-equivalent concentration on the [0,1] salinity field. */
+  salinitySeawater: 1,
 } as const;
 
 export type InspectorLayer =
@@ -208,7 +216,8 @@ export type InspectorLayer =
   | "seedBank"
   | "intertidal"
   | "shoreExposure"
-  | "shoreLongshore";
+  | "shoreLongshore"
+  | "salinity";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */
 export type SitingTool = "none" | "berm" | "dig" | "predict" | "ignite";

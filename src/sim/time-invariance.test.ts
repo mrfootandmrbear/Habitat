@@ -115,6 +115,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "soil.depth",
       "soil.infiltrationCapacity",
       "soil.moisture",
+      "soil.salinity",
       "surface.roughness",
       "terrain.elevation",
       "veg.biomass.herb",

@@ -255,6 +255,12 @@ export class TerrainMesh {
         else col.setRGB(0.25, 0.4 + 0.35 * a, 0.45 + 0.3 * a);
         break;
       }
+      case "salinity": {
+        const t = world.soilSalinity.data[idx] ?? 0;
+        // Fresh green-gray → salty pale crust.
+        col.setRGB(0.35 + 0.45 * t, 0.42 - 0.12 * t, 0.28 + 0.25 * t);
+        break;
+      }
       case "seedBank": {
         const t = Math.min(
           1,

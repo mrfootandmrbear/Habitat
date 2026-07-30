@@ -2,7 +2,7 @@ import type { Process } from "./Process";
 
 /**
  * Slice 9 — Liebig HSI / limiting factor (NATURAL_PROCESS_MATH §3.3).
- * Derived daily from moisture, soil depth, and GW — not legacy (T-003).
+ * Slice 20: also reads soil.salinity (C-018). Derived daily — not legacy (T-003).
  */
 export const habitatProcess: Process = {
   id: "habitat",
@@ -10,6 +10,7 @@ export const habitatProcess: Process = {
   reads: [
     "soil.moisture",
     "soil.depth",
+    "soil.salinity",
     "groundwater.storage",
   ],
   writes: [

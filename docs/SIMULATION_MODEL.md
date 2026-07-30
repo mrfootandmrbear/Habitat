@@ -102,7 +102,7 @@ Bedrock elevation is **not stored**. It is `terrain.elevation − soil.depth`, d
 > **Two fields are expected here and are not yet designed.** [THESIS.md](THESIS.md) calls Habitat a living sand castle where the "sand" is every substrate nature works with, which this table currently represents as one undifferentiated soil.
 >
 > - **C-009 — material class.** A per-cell substrate identity (sand, clay, loam, gravel, rock, organic) plus a **data-driven** property table read by existing processes — infiltration rate, erodibility, cohesion, water retention — rather than a second erosion or infiltration law per material (GEO-002, T-004). Owned by `geomorphology`, decadal, legacy.
-> - **C-010 — legacy substances.** A mobile, transformable quantity (contaminant load is the motivating case) that travels on the *existing* water mass balance, is drawn down by a vegetation-mediated pathway over decades, and gates arrival. Legacy by §12's definition, therefore save-invalidating (T-003). It is the missing substrate for S-007 and S-008, which today have only `soil.porosity`'s compaction memory to stand on.
+> - **C-010 — legacy substances.** A mobile, transformable quantity (contaminant load is the motivating case) that travels on the *existing* water mass balance, is drawn down by a vegetation-mediated pathway over decades, and gates arrival. Legacy by §12's definition, therefore save-invalidating (T-003). It is the missing substrate for S-007 and S-008, which today have only `soil.porosity`'s compaction memory to stand on. **First instance:** `soil.salinity` under Open **C-018** (Slice 20) — salt, not yet contaminant.
 >
 > Both are **Open candidates** — design under them as hypotheses, not as settled schema. The binding constraint on anyone touching this table meanwhile: **whatever material representation lands must be able to carry a mobile quantity per cell.** A material table that cannot would have to be rebuilt when C-010 arrives.
 
@@ -127,7 +127,10 @@ The ledgers are `f64` scalars. They are legacy not because ecology depends on th
 | Field | Units | Range | Owner | Band | Legacy |
 |---|---|---|---|---|---|
 | `soil.moisture` | m³/m³ | [0, `soil.porosity`] | `soilWater` | daily | no |
+| `soil.salinity` | fraction (0 = fresh, 1 = seawater) | [0, 1] | `soilWater` | daily | **yes** |
 | `soil.infiltrationCapacity` | mm/h | [0, 500] | `soilSurface` | daily | **yes** |
+
+`soil.salinity` is the first shipped instance of **C-010**'s mobile legacy substance, under Open **C-018**: ocean-sourced at shoreline cells, diluted by freshwater infiltrate, concentrated by ET, save-legacy (T-003). It rides moisture volumes — **no separate salt mass ledger** (H-004 residual class unchanged). Liebig HSI reads it as `f_salinity = 1 − S` (Slice 20). Spray and tidal inundation remain derived until a retune needs them as separate HSI inputs.
 | `surface.roughness` | Manning n, s·m^(−1/3) | [0.010, 0.300] | `vegetation` | seasonal | no |
 
 `soil.infiltrationCapacity` is the most consequential field in this table. It is the state variable that makes S-007 mechanical rather than punitive: vegetation raises it, compaction and crusting lower it, and it changes on a slower schedule than the vegetation that produced it. That lag is the fold in the Klausmeier-type feedback (survey §3.1) and it is why restoring rainfall does not restore the vegetated state. It is also the field S-008 names to the player: "infiltration capacity is too low for vegetation to capture this rainfall" is a statement about a registered, inspectable number, not a mood.

@@ -25,8 +25,9 @@ limitingGap = secondMin − HSI
 | moisture | `soil.moisture` | `m / porosity` clamped to [0, 1] |
 | depth | `soil.depth` | `depth / hsiDepthRef` clamped to [0, 1] |
 | groundwater | `groundwater.storage` | `gw / hsiGwRef` clamped to [0, 1] |
+| salinity | `soil.salinity` | `1 − S` clamped to [0, 1] (Slice 20 / C-018) |
 
-No light or nutrient factors until those stores exist. Zero on any factor zeroes HSI (correct for arrival).
+No light or nutrient factors until those stores exist. Zero on any factor zeroes HSI (correct for arrival). Salinity is the non-halophyte herb gate; pan/halophyte guilds are later catalogue roles on the same field.
 
 ## Banned
 

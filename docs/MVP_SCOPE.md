@@ -134,9 +134,10 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | **Done** — agent; C-016 Open (owner metaphor batched) |
 | **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | **Done** — agent; C-017 Open (owner shore-legibility batched) |
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | **Done** — agent; Tier-O shore-legibility batched |
-| **20** | Salinity (**C-018**) | Freshened vs salty hollow | **Next** — BUILD_GUIDE §4.15 stub |
+| **20** | Salinity (**C-018**) | Freshened vs salty hollow earns differently | **Done** — agent; C-018 Open (owner S-008 batched) |
+| **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | **Next** — BUILD_GUIDE §4.16 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17** / **18** / **19** Done; next **Slice 20** salinity; Slice A audio wired (C-014 Open); full **C-020** clouds/phase later.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** Done; next **Slice 21** island biogeography; Slice A audio wired (C-014 Open); full **C-020** clouds/phase later.
 
 ---
 

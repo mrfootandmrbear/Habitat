@@ -329,6 +329,22 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.bedrockClosed": { abs: 0 },
     "delta.noSwe": { abs: 0 },
   },
+  "salinity-arrival": {
+    "freshened.hsi": { abs: 1e-6 },
+    "freshened.biomass": { abs: 1e-6 },
+    "freshened.limiting": { abs: 0 },
+    "freshened.salinity": { abs: 0 },
+    "salty.hsi": { abs: 1e-6 },
+    "salty.biomass": { abs: 1e-6 },
+    "salty.limiting": { abs: 0 },
+    "salty.salinity": { abs: 0 },
+    "salty.saltLimited": { abs: 0 },
+    "delta.biomassDelta": { abs: 1e-6 },
+    "delta.hsiDelta": { abs: 1e-6 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.residualMatch": { abs: 0 },
+    "delta.hashN": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

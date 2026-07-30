@@ -1,0 +1,17 @@
+{
+  "id": "20",
+  "title": "Salinity as first mobile legacy substance",
+  "simLoop": "Ocean-sourced soil.salinity dilutes with freshwater infiltrate and concentrates under ET; Liebig HSI / arrival read it (C-018).",
+  "gameLoop": "A freshened hollow earns differently than a salty twin under one seed schedule.",
+  "registerIds": ["C-018", "C-010", "C-007", "H-004", "T-003", "N-001", "N-002"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/salinity.test.ts",
+    "src/sim/habitat/hsi.test.ts",
+    "src/sim/save.test.ts"
+  ],
+  "probes": ["salinity-arrival"],
+  "fields": ["soil.salinity"],
+  "notebookSeed": "The hollow still tasted of the sea; the freshened twin took green first.",
+  "tierO": "no owner-only question this closeout; S-008 salt-legibility batched — see docs/candidates/C-018-dossier.md"
+}

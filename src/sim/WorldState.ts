@@ -27,6 +27,11 @@ import {
 } from "./climate/longshoreTendency";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
+  concentrateSalinity,
+  diluteSalinity,
+  mixTowardSeawater,
+} from "./habitat/salinityComposition";
+import {
   establishmentProbability,
   nextHerbBiomass,
   physicalCoverFrom,
@@ -60,6 +65,12 @@ export class WorldState {
   readonly water: Grid2D;
   readonly soilMoisture: Grid2D;
   /**
+   * Porewater salinity fraction [0,1] — Slice 20 / C-018.
+   * Legacy: hysteresis memory (T-003 / S-008). Owner soilWater.
+   * 1 = seawater-equivalent; rides water column (no separate salt ledger).
+   */
+  readonly soilSalinity: Grid2D;
+  /**
    * Mobile regolith depth (m) — Slice 8 (SIMULATION_MODEL §3).
    * Legacy: cannot be reconstructed from current forcing (T-003 / S-007).
    * Owner geomorphology (production / erosion).
@@ -75,7 +86,7 @@ export class WorldState {
    * Derived each daily band from moisture / depth / GW — not legacy.
    */
   readonly habitatSuitability: Grid2D;
-  /** Limiting factor id: 0 moisture, 1 depth, 2 groundwater. */
+  /** Limiting factor id: 0 moisture, 1 depth, 2 groundwater, 3 salinity. */
   readonly habitatLimitingFactor: Grid2D;
   /** Gap from HSI to the second-smallest factor (≥ 0). */
   readonly habitatLimitingGap: Grid2D;
@@ -242,6 +253,7 @@ export class WorldState {
     this.terrain = terrain;
     this.water = new Grid2D(this.width, this.height);
     this.soilMoisture = new Grid2D(this.width, this.height);
+    this.soilSalinity = new Grid2D(this.width, this.height);
     this.soilDepth = new Grid2D(
       this.width,
       this.height,
@@ -654,6 +666,7 @@ export class WorldState {
     const scale = Math.max(0, dt);
     const w = this.water.data;
     const m = this.soilMoisture.data;
+    const salt = this.soilSalinity.data;
     const depth = this.soilDepth.data;
     const cap = this.infiltrationCapacity.data;
     const contrib = this.vegInfiltrationContribution.data;
@@ -666,6 +679,12 @@ export class WorldState {
     const petAtFullSun = config.etRate * scale;
     const openWaterPet = config.openWaterEtRate * scale;
     const minDepth = 1e-3;
+    const oceanMix = Math.min(1, config.salinityOceanMixPerDay * scale);
+    const seawater = config.salinitySeawater;
+    const shoreline =
+      this.oceanCells.size > 0
+        ? computeShorelineCells(this.width, this.height, this.oceanCells)
+        : null;
 
     for (let i = 0; i < cap.length; i++) {
       cap[i] = infilCap + contrib[i]! * scale;
@@ -676,11 +695,18 @@ export class WorldState {
         const i = z * this.width + x;
         const h = Math.max(depth[i]!, minDepth);
         const room = Math.max(0, (porosity - m[i]!) * h);
+        const storageBefore = m[i]! * h;
         const infiltrate = Math.min(w[i]!, cap[i]!, room);
         if (infiltrate > 0) {
           w[i]! -= infiltrate;
           m[i]! += infiltrate / h;
+          salt[i] = diluteSalinity(salt[i]!, storageBefore, infiltrate);
           this.infiltrationLedger += infiltrate;
+        }
+
+        // Ocean-sourced salt on shoreline land (C-018) — not a salt mass ledger.
+        if (shoreline?.has(i) && oceanMix > 0) {
+          salt[i] = mixTowardSeawater(salt[i]!, oceanMix, seawater);
         }
 
         const insolation = terrainInsolation(
@@ -708,6 +734,9 @@ export class WorldState {
         const soilDemand = sample.transpiration + sample.soilEvaporation;
         const storage = m[i]! * h;
         const soilTake = Math.min(storage, soilDemand);
+        if (soilTake > 0) {
+          salt[i] = concentrateSalinity(salt[i]!, storage, soilTake);
+        }
         m[i]! = (storage - soilTake) / h;
 
         const soilScale = soilDemand > 0 ? soilTake / soilDemand : 0;
@@ -774,11 +803,13 @@ export class WorldState {
   /**
    * Liebig HSI + limiting factor (Slice 9 / NATURAL_PROCESS_MATH §3.3).
    * Composition: docs/slices/9-composition.md — min, not product.
+   * Slice 20: soil.salinity is a fourth Liebig arm (C-018).
    */
   runHabitatStep(_dt: number): void {
     const m = this.soilMoisture.data;
     const depth = this.soilDepth.data;
     const gw = this.groundwaterStorage.data;
+    const salt = this.soilSalinity.data;
     const hsi = this.habitatSuitability.data;
     const lim = this.habitatLimitingFactor.data;
     const gap = this.habitatLimitingGap.data;
@@ -794,6 +825,7 @@ export class WorldState {
         porosity,
         depthRef,
         gwRef,
+        salinity: salt[i]!,
       });
       hsi[i] = sample.hsi;
       lim[i] = sample.limiting;
@@ -1360,6 +1392,11 @@ export class WorldState {
     return this.soilMoisture.get(x, z);
   }
 
+  getSoilSalinity(x: number, z: number): number {
+    if (!this.soilSalinity.inBounds(x, z)) return 0;
+    return this.soilSalinity.get(x, z);
+  }
+
   getGroundwater(x: number, z: number): number {
     if (!this.groundwaterStorage.inBounds(x, z)) return 0;
     return this.groundwaterStorage.get(x, z);
@@ -1530,6 +1567,17 @@ export class WorldState {
         range: [0, config.soilPorosity] as const,
       },
       {
+        id: "soil.salinity",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "soilWater",
+        band: "daily" as const,
+        // T-003 / C-018: porewater salt memory — not reconstructible from rain alone.
+        legacy: true,
+        data: this.soilSalinity.data,
+        range: [0, 1] as const,
+      },
+      {
         id: "soil.depth",
         units: "m",
         shape: "cell" as const,
@@ -1569,7 +1617,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.habitatLimitingFactor.data,
-        range: [0, 2] as const,
+        range: [0, 3] as const,
       },
       {
         id: "habitat.limitingGap",

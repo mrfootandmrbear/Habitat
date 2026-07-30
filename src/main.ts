@@ -413,6 +413,7 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
     hsi: world.getHabitatSuitability(cell.x, cell.z),
     limiting: world.getLimitingFactor(cell.x, cell.z),
     herbBiomass: world.getHerbBiomass(cell.x, cell.z),
+    salinity: world.getSoilSalinity(cell.x, cell.z),
   };
 }
 

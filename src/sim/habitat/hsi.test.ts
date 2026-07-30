@@ -7,6 +7,7 @@ import {
   LIMITING_DEPTH,
   LIMITING_GROUNDWATER,
   LIMITING_MOISTURE,
+  LIMITING_SALINITY,
 } from "./hsiComposition";
 
 describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
@@ -76,6 +77,43 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       gwRef: config.hsiGwRefMeters,
     });
     expect(s.limiting).toBe(LIMITING_GROUNDWATER);
+  });
+
+  it("names salinity when salt is the minimum (C-018)", () => {
+    const s = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      salinity: 0.9,
+    });
+    expect(s.limiting).toBe(LIMITING_SALINITY);
+    expect(s.hsi).toBeCloseTo(0.1, 8);
+  });
+
+  it("improving a non-limiting factor does not raise salt-limited HSI", () => {
+    const base = evaluateHsi({
+      moisture: 0.2,
+      soilDepth: 1,
+      groundwater: 0.5,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      salinity: 0.8,
+    });
+    expect(base.limiting).toBe(LIMITING_SALINITY);
+    const wetter = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 1,
+      groundwater: 0.5,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      salinity: 0.8,
+    });
+    expect(wetter.hsi).toBeCloseTo(base.hsi, 8);
   });
 
   it("registers habitat fields owned by habitat on the daily band", () => {
