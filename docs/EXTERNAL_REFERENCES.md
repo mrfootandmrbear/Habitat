@@ -27,6 +27,7 @@ The tables below are a **reading list** — what might be worth studying. This s
 | **VIC** · **SHUD** · **CWatM** · **GSFLOW** · **H2MV** · **HMC** · others in *Helpful later* | Not yet — gated on a GW store existing | — | — | Nothing |
 | **Game references** — RCT3, From Dust, Terra Nil, Viva Piñata, SimEarth, Cities: Skylines, falling-sand toys, Townscaper | **Recalled, not replayed**, 2026-07-28. Mechanics-and-structure level only; tuning and version behavior unverified. RCT3 is owner-lived, and that account outranks the table | Conserved carried matter (From Dust) → the §4.1 displaced-mass closeout; arrival-by-conditions (Viva Piñata) → **C-007**; force dials (SimEarth) → **C-004**; drag-continuous brush + free undo (RCT3) → **C-006**; material personality learned by play (sand toys) → **C-009**; leave-and-it-persists (Terra Nil) → G-005, **C-010** | Arcade erosion timescales (From Dust); deterministic placement puzzles (Terra Nil); authored per-species unlock checklists (Viva Piñata); opaque untraceable dials (SimEarth); unstable non-conserving water (Cities: Skylines) | Survey artifact plus Slice 12 landing: Viva Piñata condition-earned arrival → `docs/slices/12-composition.md`, `dispersalProcess`, `veg.biomass.herb` (**C-007** Open hypothesis). Authored unlock checklists still rejected. Branch-and-compare (**C-005**) has **no prior art** in any of them |
 | **Viva Piñata** (arrival steal, Slice 12) | Recalled mechanics, 2026-07-29 — condition-meets-arrival loop only; no replay | Species appear because the place meets inspectable conditions; HSI gate × dispersal is the Habitat form (**C-007 Locked**) | Authored per-species unlock checklists; collection-game readiness; stochastic spawn tables while **C-003** is Open | `docs/slices/12-composition.md`; `src/sim/habitat/arrivalComposition.ts`; `src/sim/process/dispersalProcess.ts` |
+| **Coastal SWE / coastline / MacArthur–Wilson** | Ban narrowed + study rows filed 2026-07-30 (**C-015**…**C-019**); tools not run | Rule-shape only: sea as base level; one-line coastline / fetch exposure; island biogeography area–isolation | Shallow-water equations as WorldState authority (ANUGA / coastal SWE suites) | Register candidates; SIMULATION_MODEL §10 rewrite; Slice 16+ ladder in BUILD_GUIDE |
 
 **Standing correction (2026-07-28).** Docs previously called the priority-flood fixture a "RichDEM oracle." It is hand-derived from the published algorithm; RichDEM was never executed. VERIFICATION_POLICY §3 and MVP_SCOPE now say so. Either run the tool and regenerate, or keep the honest wording — do not restore the stronger claim.
 
@@ -63,6 +64,8 @@ The tables below are a **reading list** — what might be worth studying. This s
 | **WhiteboxTools** | https://github.com/jblindsay/whitebox-tools | Occasional offline GIS check: “does our stream overlay match a DEM toolbox?” Overkill for day-to-day. |
 | **hydro-sim** (Aperocky) | https://github.com/Aperocky/hydro-sim | Browser TS basins / lakes / overflow. Mild peer for pond fill UX; weak closed-loop soil/GW. |
 | **HydroLang** | https://github.com/uihilab/HydroLang | Browser hydro toolbox (lumped rainfall–runoff, stats). Analysis framework — not a preserve WorldState. |
+| **One-line coastline / shore-exposure models** | Papers / notebooks (e.g. simple fetch × wave-power → retreat rate; CEM-class one-line) — study via NATURAL_PROCESS_MATH citations, not a vendored engine | **C-017** / Slices 18–19: rule shape for exposure and longshore tendency. Contribute Δelev through geomorphology owner only. |
+| **MacArthur–Wilson island biogeography** | Classic theory + modern reviews (area / isolation → richness) | **C-019** / Slice 21: overseas arrival pressure and eligible pool sizing on an island preserve. Not a species simulator to ship. |
 
 ---
 
@@ -109,7 +112,7 @@ The tables below are a **reading list** — what might be worth studying. This s
 |---|---|---|
 | Ecosystem / evolution games | ecosim, evoli, similar | Wrong fantasy vs D-001, D-002, N-001. Pacing maybe; mechanics no. **Narrowed 2026-07-28:** this row previously dismissed commercial games as a category, which is how the reference surface ended up with zero entries about attention, tactility, or arrival. Rejecting a *fantasy* is not grounds for ignoring how a work holds a player's eye — see **Game references** above. |
 | AI pathfinding “flow fields” | flow-field-ts, tower-defense flow fields | Unrelated to hydrologic D8 routing. |
-| Heavy SWE / stormwater | SWMM, ANUGA, coastal shallow-water suites | Fidelity Habitat does not need (U-002, GEO-002). |
+| Heavy SWE / stormwater **as WorldState authority** | SWMM, ANUGA, coastal shallow-water equation suites run in-browser as the hydrology core | Fidelity Habitat does not need (U-002, GEO-002). **Narrowed 2026-07-30:** reject SWE *authority*; still study **rule shape** from one-line coastline / fetch-exposure models under **C-017** (never import ANUGA/SWMM). |
 | Richards / MODFLOW **as browser authority** | GWSWEX implicit Celia solver, GSFLOW MODFLOW core shipped in-client | Study equations offline; Habitat stays heightfield + stacked rasters (T-007, GEO-002). |
 | ML water-cycle **as sim core** | H2MV neural parameterizations treated as WorldState | Constrained ledgers yes; nondeterministic / opaque nets no (T-001, S-004). |
 | WebGPU mega-erosion demos | Hyperpoly, TerrainX-class projects | Conflict with T-001, T-006, and “earn its cost.” |
@@ -154,6 +157,6 @@ The tables below are a **reading list** — what might be worth studying. This s
 - What the build must prove → [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)  
 - Execution order + autonomous protocol → [BUILD_GUIDE.md](BUILD_GUIDE.md)  
 
-**Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**, **C-002**, **C-003**), and must add its row to the **Study log** in the same commit. Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.
+**Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**…**C-019**), and must add its row to the **Study log** in the same commit. Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.
 
 **Sourcing.** Where a reference has a published paper (NATURAL_PROCESS_MATH §10 lists one for nearly every algorithm here), implement from the paper. The repository is for reading and for oracles, not for transcription — which keeps the implementation ours, keeps it citable, and keeps the option open if this ever goes anywhere.

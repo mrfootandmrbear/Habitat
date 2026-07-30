@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slice **14** scenario objective scaffold **In progress** (BUILD_GUIDE §4.10). Next: **Slice 15** scenario brief chrome (§4.11). Slice 13 + 8c Tier-O Pass (2026-07-30). Slice **A** audio wired (C-014 Open).
+**Post-MVP:** Slice **16** island / sea level (**C-015**) is **Next** (BUILD_GUIDE §4.10b) — before Slice 15 brief chrome. Slice **14** agent Tier-M done; Tier-O batched. Slice 13 + 8c Tier-O Pass (2026-07-30). Slice **A** audio wired (C-014 Open).
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

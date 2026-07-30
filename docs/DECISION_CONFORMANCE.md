@@ -485,6 +485,86 @@ The **Judge** field of each entry below is authoritative about who settles it, a
 
 ---
 
+### C-015 — The world is an island; sea level is global base level *(Open)*
+
+**Criterion.** With `seaLevel` set, surface water leaves through ocean cells into `ledger.oceanExchange` (not perimeter-minima outlets); mass balance closes (H-004); same seed + same sea level → identical hash; different sea level → divergent shoreline / wet fraction. Sea-level API has no cell/place arguments. Priority-Flood seeds from ocean cells. Existing probes without `seaLevel` keep prior baselines and golden hashes.
+
+**Judge.** CI / agent probes for conservation, determinism, and no-targeting; owner for W-001 supersession and whether the island reads as a place (THESIS §8 / C-012 mosaic).
+
+**Promotion authority.** Owner (§3.0) — machine half may discharge in the Slice 16 evidence commit; W-001 remains an owner register act.
+
+**Artifact.** Probe `island-drainage` + `docs/evidence/island-drainage.baseline.json`; sea-level control surface; SIMULATION_MODEL §10 rewrite.
+
+**Failure means.** If ocean exchange is a silent leak, H-004 fails. If enabling sea level moves unrelated golden hashes, the option was not truly opt-in. If the silhouette does not read without inspector, encoding — not hydrology — is the defect.
+
+**Slice trigger.** Slice 16 (before Slice 15 brief chrome).
+
+---
+
+### C-016 — Tidal forcing as a band-appropriate envelope *(Open)*
+
+**Criterion.** Mean high / mean low water are global scalars; intertidal cells are those with elevation between them; no per-event tidal phase advances the sim. Same envelope → identical hash; widening the envelope grows the intertidal cell count monotonically.
+
+**Judge.** CI for determinism / monotonicity; owner for whether a literal tide muddies the thesis metaphor (THESIS §4 "tide" = fast-forward).
+
+**Promotion authority.** Owner (§3.0).
+
+**Artifact.** Intertidal field or derived mask + probe; composition note citing S-009 band fit.
+
+**Failure means.** If phase must run every event step to look right, the model is fighting the clock — keep the envelope or drop tides.
+
+**Slice trigger.** Slice 17, after C-015 machine half.
+
+---
+
+### C-017 — Wave exposure contributes to geomorphology *(Open)*
+
+**Criterion.** A derived exposure field (fetch × wind) changes shoreline elev/depth only by contributing into the geomorphology owner; no second sediment writer; no SWE solver in-tree. Sheltered vs exposed paired shores diverge under one wind regime; mass of displaced soil closes.
+
+**Judge.** CI for contribution protocol + paired divergence; owner for whether shore change reads as the sea's work (A-005 / C-004).
+
+**Promotion authority.** Owner (§3.0).
+
+**Artifact.** Exposure field + geomorphology contribution path; probe `shore-exposure`; EXTERNAL_REFERENCES ban on SWE authority cited in code.
+
+**Failure means.** If a coastal process writes `terrain.elevation` directly, T-006 / GEO-002 fail. If fidelity seems to require SWE, keep the entry Open and do not ship.
+
+**Slice trigger.** Slice 18, after C-016 or directly after C-015 if tides defer.
+
+---
+
+### C-018 — Salinity as the first mobile legacy substance *(Open)*
+
+**Criterion.** One salinity field sources at the ocean boundary, dilutes with freshwater, is save-legacy, and gates HSI / arrival so a salty hollow earns less (or different) occupancy than a freshened twin under one seed schedule. No player cleanup tool. Water-balance residual class unchanged.
+
+**Judge.** CI for transport / save / arrival gating; owner (or unfamiliar viewer) for S-008 "which history is blocking" legibility.
+
+**Promotion authority.** Owner (§3.0).
+
+**Artifact.** Salinity field + paired arrival probe; save round-trip.
+
+**Failure means.** If salt needs its own mass balance, coupling is wrong. If the viewer blames today's rain instead of legacy salt, S-008 stays unearned.
+
+**Slice trigger.** Slice 20 (may follow C-009 if substrate table lands first).
+
+---
+
+### C-019 — Island biogeography reframes the fixed species pool *(Open)*
+
+**Criterion.** Overseas seed pressure replaces mainland-perimeter rain on island worlds; smaller island area (or greater isolation) yields lower eligible richness / establishment under identical regimes; W-003's curated catalogue remains the universe of types. Deterministic under T-001.
+
+**Judge.** CI for area/isolation monotonicity + determinism; owner for whether sparse overseas arrival still feels earned (C-007).
+
+**Promotion authority.** Owner (§3.0).
+
+**Artifact.** Over-water dispersal kernel + paired small/large island probe; note reframing W-003 sourcing without striking the Locked entry.
+
+**Failure means.** If arrival becomes a random spawn table, N-004 / C-007 fail. If perimeter seed rain remains the only path on an island, C-015's boundary story is incomplete.
+
+**Slice trigger.** Slice 21, after C-015 and preferably after C-018.
+
+---
+
 ## 4. Locked-entry test backlog
 
 Highest-risk Locked entries without automated test citations today. Intent to automate vs defer:

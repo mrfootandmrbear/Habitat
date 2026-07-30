@@ -22,6 +22,11 @@ import {
   sampleHorizon,
 } from "./deepTime";
 import {
+  generateIsland,
+  DEFAULT_SEA_LEVEL_METERS,
+} from "../terrain/generateIsland";
+import { shorelineEncodingDelta } from "../climate/seaLevel";
+import {
   ScenarioSession,
   criterionReaderFromWorld,
   livingHollowObjective,
@@ -1205,6 +1210,128 @@ export function probeLivingHollow(): ProbeResult {
  * Slice 14 / G-002 — paired meeting vs failing preserve under one authored
  * criterion window. Evaluator is observer-only (T-006); G-007 shapes stored.
  */
+/**
+ * Slice 16 / C-015 — island drains to ocean; mass closes; shoreline + habitats readable.
+ * Opt-in seaLevel only — does not touch legacy golden hashes.
+ */
+export function probeIslandDrainage(): ProbeResult {
+  const size = 48;
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const seed = 29;
+
+  const run = (seaLevel: number) => {
+    const world = new WorldState(generateIsland(size, size, 10, seed), {
+      seaLevel,
+    });
+    const t0 = performance.now();
+    for (let d = 0; d < 4; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.addRain(config.rainDepthPerEvent * 2);
+        world.stepEvent();
+      }
+    }
+    const stepMsMean = (performance.now() - t0) / (4 * config.dailyEventSteps);
+    const relResidual =
+      Math.abs(world.waterBalanceResidual()) /
+      Math.max(1, world.precipitationLedger);
+    const shore = world.shorelineCellCount();
+    const ocean = world.oceanCellCount();
+    const land = size * size - ocean;
+    // Habitat zones proxy: wet hollow (high moisture land) vs dry ridge vs shore band.
+    let wetLand = 0;
+    let dryLand = 0;
+    for (let i = 0; i < world.soilMoisture.data.length; i++) {
+      if (world.oceanCells.has(i)) continue;
+      const m = world.soilMoisture.data[i]!;
+      if (m > 0.2) wetLand++;
+      else dryLand++;
+    }
+    const habitatZones =
+      (ocean > 0 ? 1 : 0) + (shore > 0 ? 1 : 0) + (wetLand > 0 ? 1 : 0) + (dryLand > 0 ? 1 : 0);
+    return {
+      hash: world.stateHash(),
+      precip: world.precipitationLedger,
+      oceanExchange: world.oceanExchangeLedger,
+      massResidual: world.waterBalanceResidual(),
+      relResidual,
+      oceanCells: ocean,
+      shorelineCells: shore,
+      landCells: land,
+      habitatZones,
+      stepMsMean,
+      shoreFrac: shorelineEncodingDelta(size, size, world.terrain.data, seaLevel),
+    };
+  };
+
+  const midA = run(sea);
+  const midB = run(sea);
+  const high = run(3.5);
+
+  if (midA.hash !== midB.hash) {
+    throw new Error(
+      `island-drainage: replay hash mismatch (T-001) ${midA.hash} vs ${midB.hash}`,
+    );
+  }
+  if (!(midA.oceanExchange > 0)) {
+    throw new Error("island-drainage: expected positive ocean exchange");
+  }
+  if (midA.relResidual >= 1e-4) {
+    throw new Error(
+      `island-drainage: H-004 residual too large (rel=${midA.relResidual})`,
+    );
+  }
+  if (!(high.oceanCells > midA.oceanCells)) {
+    throw new Error("island-drainage: higher sea should flood more cells");
+  }
+  if (midA.habitatZones < 3) {
+    throw new Error(
+      `island-drainage: expected ≥3 habitat zones (got ${midA.habitatZones})`,
+    );
+  }
+
+  // Optional larger grid timing sample (document, do not fail gate on wall clock).
+  const big = new WorldState(generateIsland(64, 64, 10, seed), { seaLevel: sea });
+  const tBig = performance.now();
+  for (let i = 0; i < 24; i++) {
+    big.addRain(config.rainDepthPerEvent);
+    big.stepEvent();
+  }
+  const stepMs64 = (performance.now() - tBig) / 24;
+
+  return {
+    scenario: "island-drainage",
+    records: [
+      {
+        label: "mid",
+        oceanExchange: midA.oceanExchange,
+        precip: midA.precip,
+        massResidual: midA.massResidual,
+        relResidual: midA.relResidual,
+        oceanCells: midA.oceanCells,
+        shorelineCells: midA.shorelineCells,
+        habitatZones: midA.habitatZones,
+        shoreFrac: midA.shoreFrac,
+        stepMsMean: midA.stepMsMean,
+        replayMatch: 1,
+        hashN: Number.parseInt(midA.hash.slice(0, 8), 16),
+      },
+      {
+        label: "high",
+        oceanCells: high.oceanCells,
+        shorelineCells: high.shorelineCells,
+        oceanExchange: high.oceanExchange,
+      },
+      {
+        label: "delta",
+        oceanCellDelta: high.oceanCells - midA.oceanCells,
+        conserved: midA.relResidual < 1e-4 ? 1 : 0,
+        habitatMosaic: midA.habitatZones >= 3 ? 1 : 0,
+        stepMs64,
+      },
+    ],
+  };
+}
+
 export function probeScenarioWindow(): ProbeResult {
   const def = livingHollowObjective({
     threshold: 0.5,
@@ -1335,6 +1462,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "disturbance-recovery": probeDisturbanceRecovery,
   "arrival-earned": probeArrivalEarned,
   "living-hollow": probeLivingHollow,
+  "island-drainage": probeIslandDrainage,
   "scenario-window": probeScenarioWindow,
 };
 

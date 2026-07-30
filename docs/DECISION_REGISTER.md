@@ -1247,6 +1247,7 @@ Ordered by how many other decisions depend on them.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
+8g. **C-015**…**C-019** — island maritime direction (sea as base level; tidal envelope; wave exposure; salinity; island biogeography). Filed 2026-07-30. C-015 reframes **W-001** (Current) as an owner call.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1416,6 +1417,61 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** T-006 — audio is an observer and must never write authoritative state; T-001 — anything stochastic in the audio layer must not touch sim streams. AUD-002 means quiet is a *signal*, so an ambient bed that never drops out breaches it. U-002 permits stylisation.
 
 **Leading direction.** Sampled sources selected and mixed **from field values**, with silence as a first-class state rather than an absence of assets. Audio remains a pure observer of the registry. Not Locked until one field audibly drives one source and dropping that field produces meaningful silence.
+
+### C-015 — The world is an island; sea level is global base level
+**Status:** Open
+
+**Question.** Is the preserve an **island** whose drainage exits through a global sea level (a force dial), rather than a closed map edge with heuristic perimeter pour points — and does that reframe supersede **W-001**'s Windward Basin reference?
+
+**Why now.** SIMULATION_MODEL §10.1 treats the map edge as an artifact; §10.2's authored outlets were never built; Slice 8c shipped provisional perimeter minima instead. An island supplies an honest outlet every player already understands (C-011), answers C-012 with geometry (shore → slope → ridge), and gives C-004 a second non-spatial dial. THESIS §8's clip test favors a silhouette against water.
+
+**Constraints.** Sea level is a **regime**, never aimed at a cell (THESIS §9 / C-004). Opt-in on WorldState so existing closed-basin probes and golden hashes stay untouched. Sea datum stays **above** `elevationFloor` so dig/soil clamps do not change. No waves, tides, salt, or coastal erosion under this entry alone — those are C-016…C-018. W-001 is Current, not Locked: supersession is an **owner call**.
+
+**Leading direction.** Yes. `seaLevel` as a global option; ocean cells absorb surface water into `ledger.oceanExchange`; Priority-Flood seeds from the ocean; `generateIsland` is the default playable terrain. Not Locked until `island-drainage` proves conservation and shoreline legibility without inspector, and the owner ratifies W-001.
+
+### C-016 — Tidal forcing as a band-appropriate envelope
+**Status:** Open
+
+**Question.** When tides enter, do they arrive as a **mean high / mean low water envelope** (and intertidal zone derived from it), rather than as an instantaneous tidal phase advanced every event step?
+
+**Why now.** A semidiurnal tide is ~50 event steps at 15 min/event: resolvable at 1×, invisible at 16×, meaningless at decadal. Phase-at-all-bands is not buildable under S-009. The thesis already uses "the tide" as a metaphor for fast-forward (THESIS §4) — a literal tide must not muddy that metaphor without an explicit owner call.
+
+**Constraints.** C-015 must land first. Envelope is authored / player-set (C-003 direction), deterministic (T-001), and a force dial with no cell targeting (C-004). Must not require a second hydrology engine.
+
+**Leading direction.** Envelope only — MHW / MLW as globals; intertidal cells are those between them. Instantaneous phase is rejected. Not Locked until one intertidal zone is inspectable and the owner settles the metaphor conflict.
+
+### C-017 — Wave exposure contributes to geomorphology; never a second sediment authority
+**Status:** Open
+
+**Question.** Is coastal wave work a **derived exposure field** (fetch × `climate.windVector`) that **contributes** erosion/deposition into the existing geomorphology owner, rather than a shallow-water-equations coastal engine?
+
+**Why now.** Full maritime direction needs beaches and shore change (Slices 18–19), and EXTERNAL_REFERENCES bans coastal SWE suites as fidelity Habitat does not need. `climate.windVector` is already registered (SIM §3.8) and unused — the hook exists.
+
+**Constraints.** T-006 / GEO-002: one sediment authority. Ban shallow-water equations in-browser the way C-001 banned Richards. Exposure is directional and derived, not painted. C-015 required.
+
+**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Not Locked until a paired sheltered-vs-exposed shore diverges under one wind regime without a second sediment writer.
+
+### C-018 — Salinity as the first mobile legacy substance
+**Status:** Open
+
+**Question.** Is **salinity** the first instance of C-010's mobile, transformable soil-column substance — gating habitat near the shore and providing the hysteresis substrate S-007 / S-008 need — before a contaminant scenario is built?
+
+**Why now.** C-010's motivating case is poison; an island makes salt the everyday legacy load. It unblocks S-008 legibility ("the ground still tastes of the sea") without waiting on the toxic-site campaign, and couples naturally to C-015 / C-016.
+
+**Constraints.** Same as C-010: rides the water ledger (H-004), save-legacy (T-003), no cleanup tool (N-001), gates arrival (C-007) rather than scoring (N-002). Prefer after C-009's material table if that lands first; may proceed with a single salt field if C-009 remains Open.
+
+**Leading direction.** Yes — one `soil.salinity` (or equivalent) field, ocean source at the shoreline, dilution by freshwater, suitability penalty. Not Locked until a paired freshened-vs-salty hollow shows divergent arrival under one seed schedule.
+
+### C-019 — Island biogeography reframes the fixed species pool
+**Status:** Open
+
+**Question.** On an island preserve, is pool richness **derived from area and isolation** (MacArthur–Wilson), with overseas dispersal as the arrival path, rather than W-003's fixed curated pool copied from a continental preserve?
+
+**Why now.** Slice 12's perimeter seed source (`seedSourceStrength: 40`) assumes an off-map mainland ring of seed rain. That is wrong on an island: seeds arrive over water, sparsely, and richness should track island size. C-007 Locked already prefers earned arrival; this entry asks what the *source* looks like when the world is surrounded by sea.
+
+**Constraints.** W-003 is Locked — this reframes how the pool is *sized and sourced*, not whether a pool exists. T-001: overseas arrivals stay seeded/authored (C-003). No random spawn table (N-004). C-015 required.
+
+**Leading direction.** Fixed functional-type catalogue still curated; which types are *eligible* and how hard seed pressure arrives depends on island area / isolation parameters. Not Locked until perimeter seed rain is replaced by an over-water kernel and a smaller island earns fewer occupants under identical regimes.
 
 ---
 

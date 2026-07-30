@@ -1,5 +1,7 @@
 # Playtest — Slice 8c, the return visit
 
+> **Superseded for the current batch fire.** Use [batch-living-return.md](batch-living-return.md) (8c + Slice 13). Keep this file as history of the original 8c ask.
+
 **Time box:** 15 minutes. Stop at 15 even if unfinished.
 **The one question:** Did you want to run it again with different weather?
 

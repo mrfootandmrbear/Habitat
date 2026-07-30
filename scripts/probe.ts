@@ -229,6 +229,26 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.writeIsolated": { abs: 0 },
     "delta.outcomeHashNum": { abs: 0 },
   },
+  "island-drainage": {
+    "mid.oceanExchange": { abs: 1e-2 },
+    "mid.precip": { abs: 1e-2 },
+    "mid.massResidual": { abs: 1e-3 },
+    "mid.relResidual": { abs: 1e-6 },
+    "mid.oceanCells": { abs: 0 },
+    "mid.shorelineCells": { abs: 0 },
+    "mid.habitatZones": { abs: 0 },
+    "mid.shoreFrac": { abs: 1e-4 },
+    "mid.stepMsMean": { abs: 1e9 },
+    "mid.replayMatch": { abs: 0 },
+    "mid.hashN": { abs: 0 },
+    "high.oceanCells": { abs: 0 },
+    "high.shorelineCells": { abs: 0 },
+    "high.oceanExchange": { abs: 1e-2 },
+    "delta.oceanCellDelta": { abs: 0 },
+    "delta.conserved": { abs: 0 },
+    "delta.habitatMosaic": { abs: 0 },
+    "delta.stepMs64": { abs: 1e9 },
+  },
 };
 
 const args = process.argv.slice(2);

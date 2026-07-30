@@ -3,6 +3,10 @@ import {
   RAIN_REGIMES,
   type RainRegimeId,
 } from "../sim/climate/rainRegime";
+import {
+  SEA_LEVEL_REGIMES,
+  type SeaLevelId,
+} from "../sim/climate/seaLevel";
 
 export type TimeRate = "pause" | "1x" | "4x" | "16x";
 
@@ -46,12 +50,14 @@ export function mountControls(
   parent: HTMLElement,
   initial: {
     rainRegime: RainRegimeId;
+    seaLevel: SeaLevelId;
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
   },
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
+    onSeaLevel: (id: SeaLevelId) => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
@@ -66,6 +72,7 @@ export function mountControls(
   },
 ): {
   setRainRegime: (id: RainRegimeId) => void;
+  setSeaLevel: (id: SeaLevelId) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
@@ -92,6 +99,23 @@ export function mountControls(
   rainSelect.value = initial.rainRegime;
   rainSelect.addEventListener("change", () => {
     handlers.onRainRegime(rainSelect.value as RainRegimeId);
+  });
+
+  const seaSelect = document.createElement("select");
+  seaSelect.id = "sea-level";
+  seaSelect.setAttribute(
+    "aria-label",
+    "Sea level (C-015 force dial — global, no place targeting)",
+  );
+  for (const regime of SEA_LEVEL_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    seaSelect.appendChild(opt);
+  }
+  seaSelect.value = initial.seaLevel;
+  seaSelect.addEventListener("change", () => {
+    handlers.onSeaLevel(seaSelect.value as SeaLevelId);
   });
 
   const resetBtn = document.createElement("button");
@@ -216,6 +240,7 @@ export function mountControls(
 
   bar.append(
     rainSelect,
+    seaSelect,
     resetBtn,
     rememberBtn,
     saveBtn,
@@ -234,6 +259,9 @@ export function mountControls(
   return {
     setRainRegime: (id) => {
       rainSelect.value = id;
+    },
+    setSeaLevel: (id) => {
+      seaSelect.value = id;
     },
     setTimeRate: syncTimeRate,
     setInspector: (layer) => {

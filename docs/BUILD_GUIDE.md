@@ -90,13 +90,15 @@ Summary only — do not reopen unless fixing regressions.
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 | 12 | Arrival / first occupant (C-007) | Shoots appear where conditions suit | `dispersalProcess`, `arrival-earned` | **Done** — C-007 Locked |
 | 13 | Biology → physics (E-005) | Living hollow blunts the next storm | `physicalCover`, `living-hollow` | **Done** — Tier-O Pass (batch 2026-07-30) |
-| 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **In progress** — agent Tier-M; Tier-O batched |
+| 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **In progress** — agent Tier-M; Tier-O batched pending island + brief |
+| **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet | `generateIsland`, `ledger.oceanExchange` | **Next** — before Slice 15 |
+| 15 | Scenario brief chrome | Accept a brief on the island world | Scenario UI observer | Specified; gate after Slice 16 |
 
-**Current gate:** Slice **14** scenario objective scaffold **In progress** (§4.10) — composition, observer session, `scenario-window` probe. Slice 13 + 8c Tier-O **Pass** (owner 2026-07-30). **Slice A** audio scaffold wired (C-014 still Open — next batch). C-004 stewardship reading still Open (dossier).
+**Current gate:** Slice **16** island / sea level (**C-015** Open) is next (§4.10b) — lands before Slice 15 so Tier-O asks fire on a world that reads. Slice **14** agent Tier-M done; Tier-O batched. Slice 13 + 8c Tier-O **Pass** (owner 2026-07-30). **Slice A** audio scaffold wired (C-014 still Open — next batch). C-004 stewardship reading still Open (dossier).
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002). Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); 17–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
-**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
+**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-019. Do not implement Open candidates as if Locked.
 
 ---
 
@@ -411,31 +413,99 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] `docs/slices/14.json` manifest (DoD row 9)
 - [x] Notebook seed: “The brief asked me to keep the hollow wet long enough for life to hold the next storm.”
 - [ ] Tier-O (batch): *did the objective feel like a reason to run the same loop — or like a different game?*
-- [x] **Next-but-one:** Slice 15 scenario brief chrome specified at §4.11 (DoD row 10)
+- [x] **Next-but-one:** Slice **16** island / sea level specified at §4.10b (DoD row 10) — precedes Slice 15 so Tier-O fires on a readable world
 
 ---
 
-### 4.11 Slice 15 — Scenario brief chrome *(specified; gate after Slice 14 agent)*
+### 4.10b Slice 16 — Sea level + island *(Next — before Slice 15)*
 
-**Why this exists.** Slice 14’s evaluator and `scenario-window` probe prove the objective container machine-side. Tier-O cannot answer “same loop or different game?” until the player can **accept a brief** and see window satisfaction without an inspector. This is presentation + load chrome over the existing observer — not a campaign and not G-007 resolution.
+**Why this exists.** The map edge is still an artifact (SIM §10.1); perimeter pour points are a provisional workaround. An island makes the ocean the outlet, supplies C-012's mosaic as geometry, and gives C-004 a second global force dial. Slice 16 alone is the best available shot at THESIS §8's clip test. Full maritime depth is C-016…C-019 — this slice is only the base level.
+
+**Loops.** Sim: terrain + global sea datum determine drainage; water leaves where land meets sea (`ledger.oceanExchange`). Game: shape an island, set how high the sea stands, run time, watch the shore answer.
+
+**Register / candidates.** **C-015** Open (hypothesis); C-004, C-011, C-012; H-002, H-004, W-002, W-004; **W-001** Current — supersession is owner call. T-001, T-006.
+
+**Study.** SIMULATION_MODEL §10 rewrite; EXTERNAL_REFERENCES narrowed coastal-SWE ban; generateMountain is already radial.
+
+**Bans.** Waves, tides, salt, coastal erosion (C-016…C-018). SWE as authority. Negative elevations (keep sea above `elevationFloor`). Making `seaLevel` a config global that moves existing golden hashes — must be opt-in on WorldState.
+
+**Gate.** After Slice 14 agent Tier-M. Before Slice 15 brief chrome.
+
+- [ ] Composition note `docs/slices/16-composition.md` (sea datum, ocean mask, ledger, Priority-Flood seed, no-targeting dial)
+- [ ] `seaLevel?: number` on WorldState; absent = legacy perimeter / closed behavior (baselines unchanged)
+- [ ] Ocean cells + `ledger.oceanExchange` in flux path; H-004 residual includes ocean term
+- [ ] Priority-Flood seeds from ocean cells when sea level set
+- [ ] `generateIsland` terrain generator; playable default uses island + sea level
+- [ ] Ocean plane / shoreline encoding; extent cage → horizon; sea-level select in controls (global, no cell args)
+- [ ] Tier-M: conservation + determinism; probe `island-drainage` (ocean exchange, shoreline length, habitat-zone proxy, step ms)
+- [ ] Tier-P: shoreline reads without inspector (proxy floor)
+- [ ] `docs/slices/16.json` manifest
+- [ ] Notebook seed: “I raised the sea and the hollow I dug became a cove.”
+- [ ] Tier-O batched with Slice 15 (do not ask alone)
+- [ ] **Next-but-one:** Slice 15 brief chrome (§4.11) and Slice 17 tidal envelope (§4.12) specified to §4.3 depth
+
+---
+
+### 4.11 Slice 15 — Scenario brief chrome *(specified; gate after Slice 16 agent)*
+
+**Why this exists.** Slice 14’s evaluator and `scenario-window` probe prove the objective container machine-side. Tier-O cannot answer “same loop or different game?” until the player can **accept a brief** and see window satisfaction without an inspector — preferably on the island world from Slice 16. This is presentation + load chrome over the existing observer — not a campaign and not G-007 resolution.
 
 **Loops.** Sim: none new (loads Slice 14 `ScenarioDefinition` + calls `ScenarioSession.observe`). Game: see the authored brief, run time, notice whether the hollow is holding the criterion — still the sculpt → forces → time loop.
 
 **Register / candidates.** **G-002**, G-001, G-005 (window legible), G-007 (Open — still store-only; no end-of-scenario victory screen that picks an alternative), T-006, U-003, D-006, N-002.
 
-**Study.** Slice 14 composition; PredictionSession chrome pattern; rain-regime control as a prior force dial.
+**Study.** Slice 14 composition; PredictionSession chrome pattern; rain-regime / sea-level controls as prior force dials.
 
 **Bans.** Victory screen that resolves G-007. Health meter / second score (N-002). Scripted cutscenes that bypass sim (N-004). Closing sandbox (G-001).
 
-**Gate.** After Slice 14 agent Tier-M green (`scenario-window` probe).
+**Gate.** After Slice 16 agent Tier-M green (`island-drainage` probe) so the brief sits on a readable island.
 
 - [ ] Load `livingHollowObjective` (or equivalent) as an optional scenario over sandbox
 - [ ] Brief visible without inspector; satisfied / not-yet encoding from `CompletionState` (no G-007 pick)
 - [ ] Tier-P proxy: brief + satisfaction affordance present when scenario active
 - [ ] Wire `observe` on event step when scenario loaded (write isolation retained)
 - [ ] `docs/slices/15.json` manifest; notebook seed from Slice 14 brief
-- [ ] Fire Slice 14 Tier-O from this chrome (batch with C-014 / presentation as needed)
-- [ ] **Next-but-one:** specify following item to §4.3 depth (likely Field Notebook U-006 or C-009 substrate — not inventing)
+- [ ] Fire Slice 14 Tier-O from this chrome (batch with C-014 / C-004 / presentation as needed)
+- [ ] **Next-but-one:** Slice 17 tidal envelope (§4.12)
+
+---
+
+### 4.12 Slice 17 — Tidal envelope / intertidal *(specified; after Slice 16)*
+
+**Why this exists.** C-016: tides as mean high / mean low water envelope, not instantaneous phase. Intertidal zone is the band between them — a real habitat the island form earns.
+
+**Loops.** Sim: MHW / MLW globals derive an intertidal mask; no per-event tidal phase. Game: widen the tide range and see the shore zone grow.
+
+**Register / candidates.** **C-016** Open; C-015; C-004; S-009; T-001.
+
+**Bans.** Semidiurnal phase advanced every event step. A second hydrology.
+
+**Gate.** After Slice 16.
+
+- [ ] Composition note; MHW/MLW options; intertidal derived field or mask
+- [ ] Tier-M: envelope widening → more intertidal cells; determinism
+- [ ] Probe `tidal-envelope`; `docs/slices/17.json`
+- [ ] Tier-O batched (metaphor conflict is owner)
+- [ ] **Next-but-one:** Slice 18 wave exposure (§4.13)
+
+---
+
+### 4.13 Slice 18 — Wave exposure + coastal erosion *(specified; after Slice 17 or 16)*
+
+**Why this exists.** C-017: fetch × wind → exposure; contribute shoreline change through geomorphology owner only. Honors the island's implied promise without SWE.
+
+**Loops.** Sim: derived exposure field contributes Δelev/Δdepth into geomorphology. Game: windward shore retreats differently than leeward under one wind regime.
+
+**Register / candidates.** **C-017** Open; C-015; GEO-002; T-006; `climate.windVector` (SIM §3.8).
+
+**Bans.** Shallow-water equations as authority (EXTERNAL_REFERENCES). Second sediment writer.
+
+**Gate.** After Slice 16 (tides optional).
+
+- [ ] Composition note; exposure from fetch × wind; geomorphology contribution path
+- [ ] Tier-M: sheltered vs exposed paired divergence; soil mass closes
+- [ ] Probe `shore-exposure`; `docs/slices/18.json`
+- [ ] **Next-but-one:** Slice 19 beaches / longshore (stub) or Slice 20 salinity
 
 ---
 
@@ -443,11 +513,14 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 | Slice | Focus | Register |
 |---|---|---|
+| 19 | Beaches / longshore deposition | C-017 |
+| 20 | Salinity (first C-010 instance) | C-018, C-010 |
+| 21 | Island biogeography arrival | C-019, C-007 |
 | A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slice **14** is In progress at §4.10 (agent Tier-M landed; Tier-O batched pending brief chrome). Slice **15** specified at §4.11. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slice **16** is Next (§4.10b). Slice **15** waits on 16 (§4.11). Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

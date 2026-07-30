@@ -184,6 +184,15 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — n
 | **C-012** | Preserve extent and resolution follow the habitat-mosaic criterion — several habitats readable in one window |
 | **C-013** | Undo as an affordance of abundant sculpting — edits yes, elapsed ecological time no |
 | **C-014** | How audio derives from simulation state — three Locked entries with no plan |
+| **C-015** | The world is an island; sea level is global base level and a force dial (may reframe W-001) |
+| **C-016** | Tidal forcing as a band-appropriate envelope (MHW / MLW), not instantaneous phase |
+| **C-017** | Wave exposure contributes to geomorphology; never a second sediment / SWE authority |
+| **C-018** | Salinity as the first mobile legacy substance (C-010 instance that is not poison) |
+| **C-019** | Island biogeography — pool richness from area / isolation; overseas arrival |
+
+### 10.1 Island reframe (2026-07-30)
+
+Owner direction: full maritime ladder, sea level before Slice 15 brief chrome. The sand-castle analogy stays; the *form* of the world becomes an island so the tide (literal and metaphorical) has a shore to meet. Slice 16 alone should pass the clip test; tides, waves, salt, and biogeography deepen rather than enable. **W-001** (Windward Basin, Current) supersession remains an owner register act — implement under **C-015** as Open hypothesis.
 
 ---
 

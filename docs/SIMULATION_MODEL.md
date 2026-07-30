@@ -45,10 +45,10 @@ The world is a regular square grid of cells, uniform in extent, addressed row-ma
 
 | Quantity | Definition |
 |---|---|
-| `Δx` | Cell edge length in metres. A per-preserve constant declared in preserve data, not a global. Working default for Windward Basin: **10 m**. |
-| `width`, `height` | Cell counts, per-preserve. Working default: **256 × 256** (2.56 km square). |
+| `Δx` | Cell edge length in metres. A per-preserve constant declared in preserve data, not a global. Working default for Windward Basin / island prototype: **10 m**. |
+| `width`, `height` | Cell counts, per-preserve. Documented working default: **256 × 256** (2.56 km square). Playable scaffold today: `config.gridSize = 96` (~0.96 km at 10 m). **C-012** / **C-015**: island form may set extent from shore-to-peak mosaic rather than a square kilometre target — measure step time before committing 256². |
 | Cell area | `Δx²` m². All volumetric accounting multiplies by this; no field stores a volume per cell where a depth will do. |
-| Datum | Elevations are metres above a per-preserve datum. The datum is a label, never a physical boundary (§10). |
+| Datum | Elevations are metres above a per-preserve datum. Under **C-015** (Open), a global **sea level** (metres on the same datum) is the physical base level for drainage; the numeric floor `elevationFloor` remains a clamp, not a drainage law. Without sea level, the datum is a label only (§10 legacy closed-edge mode). |
 
 Vertical structure is a stack of per-column rasters, not a volumetric representation. Soil horizons, a water table, and multi-pool carbon are all "six to ten floats deep at the same 2-D index" (review §3). T-007 governs the backend question; nothing in this model presumes a heightfield beyond the fact that every field named in §3 is addressable per column, which is equally true of any denser representation later.
 
@@ -479,27 +479,31 @@ Silence would be the violation. A declared, checked, visible boundary is not.
 
 The map edge and a watershed outlet are different things, and conflating them lets the terrain datum silently govern drainage (review §1.3, report §7.4).
 
-The scaffold previously assigned off-map neighbors `neighborSurface = 0`. Slice 2 uses **no-flow mirroring** at map edges (`src/sim/hydrology/fluxStep.ts`). Authored outlets (§10.2) are not yet implemented.
+**Leading direction (C-015 Open).** When a preserve declares a global **sea level**, the ocean *is* the outlet: every cell with `terrain.elevation < seaLevel` is an ocean cell, surface water there exchanges with `ledger.oceanExchange`, and Priority-Flood seeds from the ocean set. The map edge of the *grid* remains no-flow among land cells; water leaves the island where land meets sea, not where the array ends. Sea level is a force dial (no cell targeting — C-004). Sea level sits **above** `elevationFloor` so dig/soil clamps stay unchanged.
 
-### 10.1 The edge is closed
+**Legacy / probe mode.** Without `seaLevel`, the scaffold keeps **no-flow mirroring** at map edges (`src/sim/hydrology/fluxStep.ts`) and optional provisional perimeter minima (`computePerimeterOutlets`) so closed-basin tests and pre-island baselines remain valid. Authored pour-point rating curves (§10.2 historical design) are not the island path.
 
-The map edge is **no-flow** (Neumann). An off-map neighbor's surface mirrors the cell's own surface, so the computed gradient is zero and nothing crosses. A map edge is an artifact of the map, not a feature of the world, and under W-002 and W-006 the preserve is the world — there is no off-map catchment contributing to it and no off-map floodplain receiving from it.
+### 10.1 The edge is closed (grid artifact)
+
+The map edge is **no-flow** (Neumann) for land↔land flux across array bounds. An off-map neighbor's surface mirrors the cell's own surface, so the computed gradient is zero and nothing crosses *the array*. Under W-002 and W-006 the preserve is the world of interest; under C-015 the *ocean* — not the array edge — is the physical boundary that receives runoff.
 
 Per-field boundary rules:
 
-| Quantity | Edge rule |
+| Quantity | Edge / ocean rule |
 |---|---|
-| Surface water, soil water, sediment | No-flow (mirror), except at authored outlets |
+| Surface water, soil water, sediment | No-flow at array edge; **ocean cells** (elev < seaLevel) absorb/exchange via `ledger.oceanExchange` when sea level is set; else optional perimeter outlets (§10.2 legacy) |
 | Heat, light, wind | No-flow (mirror) |
-| Seeds, dispersing individuals | **Absorbing** — flux off-map is lost and accumulated into `ledger.dispersalLoss` |
-| Fire | No-flow; fire reaching the edge stops there |
-| Flow routing | Every edge cell that is not an outlet routes inward; edge cells with no inward downhill neighbor are depressions |
+| Seeds, dispersing individuals | **Absorbing** at array edge → `ledger.dispersalLoss`; island overseas arrival is a separate kernel (**C-019**) |
+| Fire | No-flow; fire reaching the edge or ocean stops there |
+| Flow routing | Ocean cells are open boundary seeds for Priority-Flood when sea level is set; otherwise edge cells that are not outlets route inward |
 
 Dispersal is absorbing rather than reflecting because reflection manufactures propagule pressure at the edge, which produces a bright ring of establishment along the perimeter that looks like an ecological pattern and is not.
 
-### 10.2 Outlets are authored
+### 10.2 Outlets: ocean (leading) or authored / provisional (legacy)
 
-A watershed has a pour point, and under W-005 that is a generated or authored place with a location and a rating, not a side effect of array bounds. Each preserve declares a list of outlets:
+**Ocean outlet (C-015).** Preserve option `seaLevel: number` (metres on the elevation datum). Ocean mask = `elevation < seaLevel`. Flux into ocean cells (or holding ocean cells at sea stage) removes water from the terrestrial surface store and adds the same depth·cell to `ledger.oceanExchange` in the same operation so mass balance (§8.2) closes. `flow.watershedLabel` may label cells by the ocean reach their path drains to.
+
+**Legacy authored outlets.** A watershed pour point with location and rating curve remains a valid *closed-island-absent* design:
 
 ```
 outlet = {
@@ -507,13 +511,13 @@ outlet = {
 }
 ```
 
-Water leaving through an outlet is removed from `water.surfaceDepth` and added to `ledger.outflow[outlet]` in the same operation, so mass balance (§8.2) closes at the moment of loss rather than being reconstructed. `flow.watershedLabel` labels each cell by the outlet its flow path reaches, which is W-002's emergent regions falling out of the routing pass rather than being painted.
+**Provisional perimeter minima** (Slice 8c) exist only so non-island mountains are not closed bathtubs until C-015 lands in the playable default; they are not the long-term model.
 
-A preserve with no declared outlet is legal and is a closed basin. Its water leaves only through evapotranspiration and deep drainage, which is a real landform and a good teaching case, not a configuration error.
+A preserve with no sea level and no declared outlet is legal and is a closed basin. Its water leaves only through evapotranspiration and deep drainage / GW paths.
 
 ### 10.3 Deep drainage
 
-Vertical loss below the soil column goes to `ledger.deepDrainage` at a rate set by the substrate. Until a groundwater model exists (survey §4), this is a sink rather than a store, and it is registered as a ledger precisely so that the day it becomes a store, the invariant that currently balances against it is the thing that verifies the change.
+Vertical loss below the soil column goes to `ledger.deepDrainage` at a rate set by the substrate, or into the groundwater store when that compartment is enabled (C-001 Locked). The ledger remains so mass balance stays auditable when the sink becomes a store.
 
 ---
 

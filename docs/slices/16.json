@@ -1,0 +1,17 @@
+{
+  "id": "16",
+  "title": "Sea level + island",
+  "simLoop": "Terrain plus a global sea datum determine drainage; water leaves where land meets sea via ledger.oceanExchange (C-015).",
+  "gameLoop": "Shape an island, set how high the sea stands, run time, and watch the shore answer.",
+  "registerIds": ["C-015", "C-004", "C-011", "C-012", "H-002", "H-004", "W-002", "W-004", "T-001", "T-006"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/island.test.ts",
+    "src/sim/presentation.proxy.test.ts",
+    "src/sim/hydrology.determinism.test.ts"
+  ],
+  "probes": ["island-drainage"],
+  "fields": ["ledger.oceanExchange"],
+  "notebookSeed": "I raised the sea and the hollow I dug became a cove.",
+  "tierO": "Batched with Slice 15 — did the island-and-sea feel like a place you could tend, or like a new game?"
+}

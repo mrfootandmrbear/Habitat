@@ -17,6 +17,8 @@ export function priorityFloodFill(
   width: number,
   height: number,
   elevation: Float32Array,
+  /** When set (C-015), seed open boundary from ocean cells instead of the perimeter ring. */
+  oceanCells?: ReadonlySet<number>,
 ): { filled: Float32Array; depressionDepth: Float32Array } {
   const n = width * height;
   const filled = new Float32Array(n);
@@ -67,13 +69,20 @@ export function priorityFloodFill(
     return top;
   };
 
-  // Seed open boundary (edge cells drain off-map / spill).
-  for (let z = 0; z < height; z++) {
-    for (let x = 0; x < width; x++) {
-      if (x === 0 || z === 0 || x === width - 1 || z === height - 1) {
-        const i = z * width + x;
-        visited[i] = 1;
-        push({ i, h: elevation[i]! });
+  if (oceanCells && oceanCells.size > 0) {
+    for (const i of oceanCells) {
+      visited[i] = 1;
+      push({ i, h: elevation[i]! });
+    }
+  } else {
+    // Seed open boundary (edge cells drain off-map / spill).
+    for (let z = 0; z < height; z++) {
+      for (let x = 0; x < width; x++) {
+        if (x === 0 || z === 0 || x === width - 1 || z === height - 1) {
+          const i = z * width + x;
+          visited[i] = 1;
+          push({ i, h: elevation[i]! });
+        }
       }
     }
   }

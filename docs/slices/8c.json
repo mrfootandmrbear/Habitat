@@ -13,5 +13,5 @@
   "probes": ["regime-divergence"],
   "fields": ["terrain.elevation", "water.surfaceDepth"],
   "notebookSeed": "The berm I built is a low ridge now, and the channel moved.",
-  "tierO": "Did you want to run it again with different weather?"
+  "tierO": "Pass — living hollow answered the storm; wanted another run (owner 2026-07-30); docs/playtests/batch-living-return.md"
 }

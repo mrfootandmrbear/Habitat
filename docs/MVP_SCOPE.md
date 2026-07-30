@@ -128,9 +128,12 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **12** | Arrival / first occupant (**C-007** Locked) | Something appears because the place suits it | **Done** — BUILD_GUIDE §4.8; owner Pass |
 | **13** | Biology → physics integration | Living hollow meets the next storm differently | **Done** — BUILD_GUIDE §4.9; Tier-O Pass ([batch-living-return.md](playtests/batch-living-return.md)) |
 | **14** | Scenario objective scaffold (G-002) | Finite objective over the same sculpt → forces → time loop | **In progress** — BUILD_GUIDE §4.10 (agent Tier-M; Tier-O batched) |
-| **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **Next** — BUILD_GUIDE §4.11 |
+| **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet / force dial | **Next** — BUILD_GUIDE §4.10b (before Slice 15) |
+| **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **After 16** — BUILD_GUIDE §4.11 |
+| **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | Specified — BUILD_GUIDE §4.12 |
+| **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | Specified — BUILD_GUIDE §4.13 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c **done** (Tier-O Pass 2026-07-30) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival **done** (**C-007 Locked**) → Slice 13 biology→physics **done** (Tier-O Pass 2026-07-30) → Slice 14 scenario scaffold **in progress** (§4.10); Slice 15 brief chrome **next** (§4.11); Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c **done** (Tier-O Pass 2026-07-30) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → dry-down ET **done** → Slice 12 arrival **done** (**C-007 Locked**) → Slice 13 biology→physics **done** (Tier-O Pass 2026-07-30) → Slice 14 scenario scaffold **in progress** (§4.10); **Slice 16 island / sea level next** (§4.10b) before Slice 15 brief chrome; Slices 17–18 specified; Slice A audio wired (C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7 / §4.6b).
 
 ---
 

@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice **14** scenario scaffold **In progress** (agent Tier-M + `scenario-window` probe). Tier-O batched pending Slice 15 brief chrome (§4.11). Slice 13 + 8c Pass (2026-07-30). Slice **A** audio wired (C-014 Open — next batch).
+Slice **16** island / sea level (**C-015** Open) is **Next** (§4.10b) — before Slice 15. Slice 14 agent Tier-M done; Tier-O batched. Slice 13 + 8c Pass (2026-07-30). Slice **A** audio wired (C-014 Open — next batch). Maritime ladder: C-015…C-019 filed.
 
 ## Cursor Cloud specific instructions
 

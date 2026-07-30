@@ -13,7 +13,7 @@ import { habitatProcess } from "./process/habitatProcess";
 import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
-import { fluxStep } from "./hydrology/fluxStep";
+import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   establishmentProbability,
@@ -135,13 +135,19 @@ export class WorldState {
   /**
    * Absorbing outlet cells (SIM §10.2). Default: perimeter edge-minima so the
    * preserve is not a closed bathtub. Tests may pass `closedBoundary: true`.
+   * When seaLevel is set, perimeter outlets are unused — ocean cells drain.
    */
   outletCells: ReadonlySet<number> = new Set();
+  /** Ocean cells (elev < seaLevel) — C-015. Empty when sea level absent. */
+  oceanCells: ReadonlySet<number> = new Set();
   private readonly closedBoundary: boolean;
+  /** Global sea datum (m). Undefined = legacy closed / perimeter mode. */
+  private seaLevelMeters: number | undefined;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
   private readonly outflowBox: ScalarBox = { value: 0 };
+  private readonly oceanExchangeBox: ScalarBox = { value: 0 };
   private readonly infilBox: ScalarBox = { value: 0 };
   private readonly etBox: ScalarBox = { value: 0 };
   private readonly transpirationBox: ScalarBox = { value: 0 };
@@ -181,8 +187,14 @@ export class WorldState {
       /**
        * When true, map edges are no-flow with no outlets (closed basin).
        * Default false — perimeter pour points drain (SIM §10.2 provisional).
+       * Ignored when `seaLevel` is set (ocean is the outlet — C-015).
        */
       closedBoundary?: boolean;
+      /**
+       * Global sea level in metres on the elevation datum (C-015).
+       * Opt-in: absent preserves legacy perimeter / closed behavior and baselines.
+       */
+      seaLevel?: number;
     },
   ) {
     this.width = terrain.width;
@@ -234,6 +246,10 @@ export class WorldState {
     this.gwFieldCapacityFraction = config.gwFieldCapacityFraction;
     this.gwChannelBoost = config.gwChannelBoost;
     this.closedBoundary = options?.closedBoundary === true;
+    this.seaLevelMeters =
+      options?.seaLevel !== undefined && Number.isFinite(options.seaLevel)
+        ? options.seaLevel
+        : undefined;
 
     this.registry = new FieldRegistry();
     this.registerFields();
@@ -273,6 +289,29 @@ export class WorldState {
   }
   set boundaryOutflowLedger(v: number) {
     this.outflowBox.value = v;
+  }
+
+  get oceanExchangeLedger(): number {
+    return this.oceanExchangeBox.value;
+  }
+  set oceanExchangeLedger(v: number) {
+    this.oceanExchangeBox.value = v;
+  }
+
+  /** Current sea level (m), or undefined when legacy boundary mode. */
+  get seaLevel(): number | undefined {
+    return this.seaLevelMeters;
+  }
+
+  /**
+   * Set global sea level (C-015 force dial — no cell targeting).
+   * Pass `undefined` to clear and restore legacy perimeter outlets.
+   */
+  setSeaLevel(level: number | undefined): void {
+    this.seaLevelMeters =
+      level !== undefined && Number.isFinite(level) ? level : undefined;
+    this.markStructureDirty();
+    this.ensureStructureFresh();
   }
 
   get infiltrationLedger(): number {
@@ -399,10 +438,17 @@ export class WorldState {
 
   recomputeFlowStructure(): void {
     const elev = this.terrain.data;
+    if (this.seaLevelMeters !== undefined) {
+      this.oceanCells = computeOceanCells(elev, this.seaLevelMeters);
+      this.outletCells = new Set();
+    } else {
+      this.oceanCells = new Set();
+    }
     const { filled, depressionDepth } = priorityFloodFill(
       this.width,
       this.height,
       elev,
+      this.oceanCells.size > 0 ? this.oceanCells : undefined,
     );
     this.filledElevation = filled;
     this.depressionDepth.data.set(depressionDepth);
@@ -419,9 +465,11 @@ export class WorldState {
       this.height,
       this.flowDirection,
     );
-    this.outletCells = this.closedBoundary
-      ? new Set()
-      : computePerimeterOutlets(this.width, this.height, elev);
+    if (this.seaLevelMeters === undefined) {
+      this.outletCells = this.closedBoundary
+        ? new Set()
+        : computePerimeterOutlets(this.width, this.height, elev);
+    }
   }
 
   /** Mark structure dirty; recompute at next event step or ensureStructureFresh (§7.2). */
@@ -449,8 +497,10 @@ export class WorldState {
       this.outletCells,
       this.surfaceRoughness.data,
       config.baseRoughness,
+      this.oceanCells.size > 0 ? this.oceanCells : undefined,
     );
     this.boundaryOutflowLedger += result.boundaryOutflow;
+    this.oceanExchangeLedger += result.oceanExchange;
   }
 
   /** Daily soil water. `dt` is sim-days (1 = one full daily band). */
@@ -926,7 +976,14 @@ export class WorldState {
     if (amountPerCell === 0) return;
     const data = this.water.data;
     let added = 0;
+    const ocean = this.oceanCells;
     for (let i = 0; i < data.length; i++) {
+      if (ocean.has(i)) {
+        // Rain on ocean goes straight to exchange (not a terrestrial store).
+        this.oceanExchangeLedger += amountPerCell;
+        added += amountPerCell;
+        continue;
+      }
       data[i]! += amountPerCell;
       added += amountPerCell;
     }
@@ -968,6 +1025,7 @@ export class WorldState {
     this.groundwaterStorage.fill(0);
     this.precipitationLedger = 0;
     this.boundaryOutflowLedger = 0;
+    this.oceanExchangeLedger = 0;
     this.infiltrationLedger = 0;
     this.etLedger = 0;
     this.transpirationLedger = 0;
@@ -1008,8 +1066,24 @@ export class WorldState {
       gw += this.groundwaterStorage.data[i]!;
     }
     const accounted =
-      surface + soil + gw + this.etLedger + this.boundaryOutflowLedger;
+      surface +
+      soil +
+      gw +
+      this.etLedger +
+      this.boundaryOutflowLedger +
+      this.oceanExchangeLedger;
     return this.precipitationLedger - accounted;
+  }
+
+  /** Count of ocean cells under current sea level (0 if unset). */
+  oceanCellCount(): number {
+    return this.oceanCells.size;
+  }
+
+  /** Land cells adjacent to ocean — shoreline length proxy (C-015 / C-012). */
+  shorelineCellCount(): number {
+    if (this.oceanCells.size === 0) return 0;
+    return computeShorelineCells(this.width, this.height, this.oceanCells).size;
   }
 
   getSoilMoisture(x: number, z: number): number {
@@ -1427,6 +1501,16 @@ export class WorldState {
         band: "event" as const,
         legacy: true,
         data: this.outflowBox,
+        range: [0, 1e12] as const,
+      },
+      {
+        id: "ledger.oceanExchange",
+        units: "m",
+        shape: "scalar" as const,
+        owner: "surfaceWater",
+        band: "event" as const,
+        legacy: true,
+        data: this.oceanExchangeBox,
         range: [0, 1e12] as const,
       },
       {

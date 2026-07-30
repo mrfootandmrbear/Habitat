@@ -101,6 +101,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "ledger.et",
       "ledger.fuelConsumed",
       "ledger.infiltration",
+      "ledger.oceanExchange",
       "ledger.openWaterEvaporation",
       "ledger.precipitation",
       "ledger.soilEvaporation",

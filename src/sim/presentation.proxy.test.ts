@@ -8,12 +8,14 @@ import { Grid2D } from "./Grid2D";
 import { WorldState } from "./WorldState";
 import { FlowCueMesh } from "../render/FlowCueMesh";
 import { generateMountain } from "./terrain/generateMountain";
+import { generateIsland } from "./terrain/generateIsland";
+import { shorelineEncodingDelta } from "./climate/seaLevel";
 import {
   elevChangeEncodingStrength,
   FormMemory,
 } from "./formMemory";
 import { lightEncodingDelta } from "../ui/lightEncoding";
-import { terrainEncodingDelta } from "../ui/terrainEncoding";
+import { terrainEncodingDelta, defaultTerrainRgb } from "../ui/terrainEncoding";
 import { occupantEncodingDelta } from "../ui/occupantEncoding";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
@@ -163,5 +165,29 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     colonizedSoil /= colonized.soilMoisture.data.length;
     const delta = soilEncodingDelta(bareSoil, colonizedSoil, config.soilPorosity);
     expect(delta).toBeGreaterThan(0.15);
+  });
+
+  it("island shoreline encoding clears the perceptual floor (Slice 16 / C-015)", () => {
+    const terrain = generateIsland(48, 48, 10, 21);
+    const sea = 2;
+    const shoreFrac = shorelineEncodingDelta(48, 48, terrain.data, sea);
+    expect(shoreFrac).toBeGreaterThan(0.05);
+    // Ocean plane vs default land tint — silhouette readable without inspector.
+    const ocean: readonly [number, number, number] = [
+      0x1a / 255,
+      0x4a / 255,
+      0x6e / 255,
+    ];
+    const land = defaultTerrainRgb(0.1, config.soilPorosity, 0.05, 0);
+    const delta = Math.hypot(
+      ocean[0] - land[0],
+      ocean[1] - land[1],
+      ocean[2] - land[2],
+    );
+    expect(delta).toBeGreaterThan(0.15);
+    // Higher sea → more shoreline cells on this radial island.
+    expect(
+      shorelineEncodingDelta(48, 48, terrain.data, 3.5),
+    ).toBeGreaterThan(shoreFrac);
   });
 });

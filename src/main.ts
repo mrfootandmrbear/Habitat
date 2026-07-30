@@ -2,7 +2,9 @@ import "./style.css";
 import { config, type InspectorLayer, type SitingTool } from "./config";
 import { SimClock } from "./sim/SimClock";
 import { WorldState } from "./sim/WorldState";
-import { generateMountain } from "./sim/terrain/generateMountain";
+import {
+  generateIsland,
+} from "./sim/terrain/generateIsland";
 import {
   PredictionSession,
   snapshotWaterReader,
@@ -11,6 +13,7 @@ import { createScene } from "./render/Scene";
 import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
 import { createExtentCage } from "./render/ExtentCage";
+import { OceanMesh } from "./render/OceanMesh";
 import { SitingCursor } from "./render/SitingCursor";
 import { FlowCueMesh } from "./render/FlowCueMesh";
 import { OccupantMesh } from "./render/OccupantMesh";
@@ -29,6 +32,10 @@ import {
   regimeRainsThisEvent,
   type RainRegimeId,
 } from "./sim/climate/rainRegime";
+import {
+  seaLevelById,
+  type SeaLevelId,
+} from "./sim/climate/seaLevel";
 import { FormMemory } from "./sim/formMemory";
 import {
   sampleAudioMix,
@@ -46,14 +53,17 @@ viewport.id = "viewport";
 app.appendChild(viewport);
 
 const n = config.gridSize;
-const terrain = generateMountain(
+const terrain = generateIsland(
   n,
   n,
   config.mountainPeak,
   config.terrainSeed,
 );
 
-const world = new WorldState(terrain);
+const initialSea: SeaLevelId = "mid";
+const world = new WorldState(terrain, {
+  seaLevel: seaLevelById(initialSea).meters,
+});
 const model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
 const editUndo = new EditUndoStack();
@@ -63,12 +73,17 @@ const elevDeltaScratch = new Float32Array(n * n);
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
-const extentCage = createExtentCage(config.worldSize, config.mountainPeak);
+let extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
+  seaLevel: world.seaLevel,
+});
+const oceanMesh = new OceanMesh(config.worldSize);
+oceanMesh.setSeaLevel(world.seaLevel);
 const sitingCursor = new SitingCursor(n, n, config.worldSize);
 const flowCue = new FlowCueMesh(n, n, config.worldSize);
 const occupantMesh = new OccupantMesh(n, n, config.worldSize);
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
+scene.add(oceanMesh.mesh);
 scene.add(extentCage);
 scene.add(sitingCursor.group);
 scene.add(flowCue.object);
@@ -78,6 +93,7 @@ waterMesh.updateFrom(model);
 occupantMesh.updateFrom(model, world);
 
 let rainRegime: RainRegimeId = "dry";
+let seaLevelId: SeaLevelId = initialSea;
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
@@ -116,12 +132,32 @@ function fillElevDelta(): Float32Array | null {
 
 const ui = mountControls(
   app,
-  { rainRegime, timeRate, inspector, sitingTool },
+  { rainRegime, seaLevel: seaLevelId, timeRate, inspector, sitingTool },
   {
     onRainRegime: (id) => {
       rainRegime = id;
       ui.setRainRegime(id);
       ui.setHint(`Force: ${rainRegimeById(id).label} (whole preserve)`);
+    },
+    onSeaLevel: (id) => {
+      seaLevelId = id;
+      const meters = seaLevelById(id).meters;
+      world.setSeaLevel(meters);
+      oceanMesh.setSeaLevel(meters);
+      scene.remove(extentCage);
+      extentCage.geometry.dispose();
+      (extentCage.material as import("three").Material).dispose();
+      extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
+        seaLevel: meters,
+      });
+      scene.add(extentCage);
+      syncMeshes();
+      ui.setSeaLevel(id);
+      ui.setHint(
+        meters === undefined
+          ? "Sea off — legacy perimeter drainage"
+          : `Sea level ${meters.toFixed(1)} m · shore ${world.shorelineCellCount()} cells`,
+      );
     },
     onReset: () => {
       model.resetWater();
@@ -347,10 +383,12 @@ function conservationLine(): string {
   }
   const surface = totalWaterVolume(world.water.data);
   const residual = world.waterBalanceResidual();
+  const ocean = world.oceanExchangeLedger;
   return (
     `H₂O precip ${world.precipitationLedger.toFixed(1)} · ` +
     `surf ${surface.toFixed(1)} · soil ${soil.toFixed(1)} · ` +
-    `ET ${world.etLedger.toFixed(1)} · residual ${residual.toFixed(3)}`
+    `ET ${world.etLedger.toFixed(1)} · ocean ${ocean.toFixed(1)} · ` +
+    `residual ${residual.toFixed(3)}`
   );
 }
 
