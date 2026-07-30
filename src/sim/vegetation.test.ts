@@ -7,10 +7,11 @@ import { WorldState } from "./WorldState";
 import { vegetationProcess } from "./process/vegetationProcess";
 
 describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
-  it("declares soil→veg only for moisture — no water writes", () => {
+  it("declares soil→veg reads including herb biomass for physicalCover — no water writes", () => {
     expect(vegetationProcess.reads).toEqual([
       "soil.moisture",
       "terrain.elevation",
+      "veg.biomass.herb",
     ]);
     expect(vegetationProcess.writes).toContain("veg.cover");
     expect(vegetationProcess.writes).not.toContain("water.surfaceDepth");

@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slice 12 arrival / first occupant **Done** (**C-007 Locked** — owner Pass: earned conditions). Next: **Slice 13** biology → physics integration (§4.9). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
+Slice 13 biology → physics **Done** (agent; Tier-O batched) — `living-hollow` probe. Next: **Slice 14** scenario objective scaffold (§4.10). Slice **A** audio wired (C-014 Open). Slice 8c Tier-O still batched (`docs/playtests/8c-return-visit.md`).
 
 ## Cursor Cloud specific instructions
 

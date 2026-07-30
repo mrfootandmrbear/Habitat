@@ -166,7 +166,7 @@ Tier M and Tier P need a home for scenario-scale measurement that is coarser tha
 - `npm run probe -- <scenario>` rewrites `docs/evidence/<scenario>.md` as **this run vs. baseline, with deltas** — that table, not a hand-written one, is what the *Already proven* block is pasted from.
 - `npm run probe -- --all --check` runs every scenario, writes nothing, and exits non-zero on any out-of-tolerance metric. It joins `npm test`, `npm run build`, and `npm run conformance:check` as `npm run gate`, and CI runs `gate`.
 - Intentional baseline refresh: `npm run probe -- <scenario> --write-baseline`, with the reason in the commit body — exactly like `GOLDEN_*` hashes (T-001). An *unexplained* baseline move is a defect to diagnose, never a baseline to accept ([BUILD_GUIDE.md](BUILD_GUIDE.md) §4.0.1).
-- Next scenarios: (none queued after Slice 12). Live: `paired-storm`, `berm-reroute`, `basin-fill`, `deep-time`, `baseflow-persist`, `regime-divergence`, `limiting-shift`, `burn-recover`, `succession-diverge`, `drydown-feedback`, `disturbance-recovery`, `arrival-earned`. Next planned: `living-hollow` (Slice 13).
+- Next scenarios: (none queued after Slice 13). Live: `paired-storm`, `berm-reroute`, `basin-fill`, `deep-time`, `baseflow-persist`, `regime-divergence`, `limiting-shift`, `burn-recover`, `succession-diverge`, `drydown-feedback`, `disturbance-recovery`, `arrival-earned`, `living-hollow`. Next planned: `scenario-window` (Slice 14).
 
 ---
 

@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slice 12 arrival / first occupant **Done** — **C-007 Locked** (owner: earned conditions mimic real life). Next: **Slice 13** biology → physics integration (BUILD_GUIDE §4.9). Slice **A** audio wired into the play loop (C-014 Open). Slice 8c Tier-O still batched.
+**Post-MVP:** Slice 13 biology → physics **Done** (agent) — living hollow blunts the next storm via earned herb biomass. Next: **Slice 14** scenario objective scaffold (BUILD_GUIDE §4.10). Slice **A** audio wired into the play loop (C-014 Open). Slice 8c Tier-O still batched.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

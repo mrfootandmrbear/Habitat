@@ -1036,6 +1036,166 @@ export function probeArrivalEarned(): ProbeResult {
   };
 }
 
+/**
+ * Slice 13 / E-005: earned herb biomass changes storm response with veg.cover held at 0.
+ * Twins share geometry (matched seed field); only HSI / biomass differ.
+ */
+export function probeLivingHollow(): ProbeResult {
+  const establishThenIsolate = (
+    terrain: Grid2D,
+    suitable: boolean,
+    closedBoundary: boolean,
+  ): WorldState => {
+    const world = new WorldState(terrain.clone(), { closedBoundary });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    if (suitable) {
+      world.soilMoisture.fill(config.soilPorosity);
+      world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    } else {
+      world.soilMoisture.fill(0);
+      world.groundwaterStorage.fill(0);
+    }
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    // Isolate herb → physics from daily cover growth (docs/slices/13-composition.md).
+    world.soilMoisture.fill(0);
+    world.vegCover.fill(0);
+    world.runVegetationStep(1);
+    world.runSoilWaterStep(1);
+    return world;
+  };
+
+  const w = 16;
+  const h = 8;
+  const ramp = new Grid2D(w, h);
+  for (let z = 0; z < h; z++) {
+    for (let x = 0; x < w; x++) {
+      ramp.set(x, z, (w - 1 - x) * 0.4);
+    }
+  }
+
+  const colonizedFlux = establishThenIsolate(ramp, true, true);
+  const bareFlux = establishThenIsolate(ramp, false, true);
+  const colonizedReplay = establishThenIsolate(ramp, true, true);
+  const hashMatch =
+    colonizedFlux.stateHash() === colonizedReplay.stateHash() ? 1 : 0;
+  if (hashMatch !== 1) {
+    throw new Error("living-hollow: replay hash mismatch");
+  }
+
+  const meanBiomass = (world: WorldState): number => {
+    let s = 0;
+    for (let i = 0; i < world.herbBiomass.data.length; i++) {
+      s += world.herbBiomass.data[i]!;
+    }
+    return s / world.herbBiomass.data.length;
+  };
+
+  const colonizedBiomass = meanBiomass(colonizedFlux);
+  const bareBiomass = meanBiomass(bareFlux);
+  if (!(colonizedBiomass > 0.1)) {
+    throw new Error(
+      `living-hollow: colonized biomass too low (${colonizedBiomass})`,
+    );
+  }
+  if (bareBiomass !== 0) {
+    throw new Error(
+      `living-hollow: bare biomass expected 0 (got ${bareBiomass})`,
+    );
+  }
+
+  const runFlux = (world: WorldState): ProbeRecord => {
+    world.water.fill(0);
+    for (let z = 0; z < h; z++) {
+      world.water.set(0, z, 0.5);
+    }
+    for (let i = 0; i < 40; i++) {
+      world.runSurfaceWaterStep(config.eventFluxDt);
+    }
+    return {
+      cover: world.vegCover.get(0, 0),
+      biomass: meanBiomass(world),
+      downslope: world.water.get(w - 1, (h / 2) | 0),
+      roughness: world.surfaceRoughness.get(0, 0),
+    };
+  };
+
+  const colonizedFluxRec = runFlux(colonizedFlux);
+  const bareFluxRec = runFlux(bareFlux);
+  const bareDown = Number(bareFluxRec.downslope);
+  const colonizedDown = Number(colonizedFluxRec.downslope);
+  if (!(bareDown > colonizedDown)) {
+    throw new Error(
+      `living-hollow: expected bare downslope (${bareDown}) > colonized (${colonizedDown})`,
+    );
+  }
+
+  const flat = new Grid2D(12, 12, 1);
+  const colonizedSoil = establishThenIsolate(flat, true, false);
+  const bareSoil = establishThenIsolate(flat, false, false);
+  colonizedSoil.water.fill(0.4);
+  bareSoil.water.fill(0.4);
+  colonizedSoil.infiltrationLedger = 0;
+  bareSoil.infiltrationLedger = 0;
+  colonizedSoil.runSoilWaterStep(1);
+  bareSoil.runSoilWaterStep(1);
+  const colonizedInfil = colonizedSoil.infiltrationLedger;
+  const bareInfil = bareSoil.infiltrationLedger;
+  if (!(colonizedInfil > bareInfil)) {
+    throw new Error(
+      `living-hollow: expected colonized infil (${colonizedInfil}) > bare (${bareInfil})`,
+    );
+  }
+
+  let bounded = 1;
+  for (let i = 0; i < colonizedFlux.herbBiomass.data.length; i++) {
+    const v = colonizedFlux.herbBiomass.data[i]!;
+    if (!Number.isFinite(v) || v < 0 || v > config.herbBiomassMax + 1e-6) {
+      bounded = 0;
+      break;
+    }
+  }
+
+  const coverHeld =
+    Number(colonizedFluxRec.cover) === 0 && Number(bareFluxRec.cover) === 0
+      ? 1
+      : 0;
+
+  return {
+    scenario: "living-hollow",
+    records: [
+      {
+        label: "colonized",
+        ...colonizedFluxRec,
+        infiltrated: colonizedInfil,
+      },
+      {
+        label: "bare",
+        ...bareFluxRec,
+        infiltrated: bareInfil,
+      },
+      {
+        label: "delta",
+        biomassDelta: colonizedBiomass - bareBiomass,
+        downslopeDelta: bareDown - colonizedDown,
+        infilDelta: colonizedInfil - bareInfil,
+        hashMatch,
+        bounded,
+        coverHeld,
+        earned:
+          colonizedBiomass > 0.1 &&
+          bareBiomass === 0 &&
+          bareDown > colonizedDown &&
+          colonizedInfil > bareInfil
+            ? 1
+            : 0,
+      },
+    ],
+  };
+}
+
 function meanGrid(data: Float32Array): number {
   return sumGrid(data) / data.length;
 }
@@ -1078,6 +1238,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "drydown-feedback": probeDrydownFeedback,
   "disturbance-recovery": probeDisturbanceRecovery,
   "arrival-earned": probeArrivalEarned,
+  "living-hollow": probeLivingHollow,
 };
 
 export function runProbe(name: string): ProbeResult {

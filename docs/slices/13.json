@@ -1,0 +1,23 @@
+{
+  "id": "13",
+  "title": "Biology → physics integration",
+  "simLoop": "Earned veg.biomass.herb stacks into local physicalCover for roughness and infiltration contribution without dual-writing veg.cover, so a colonized hollow meets the next storm differently than a bare twin.",
+  "gameLoop": "Keep a hollow wet until shoots appear, then run a storm and see the place answer differently.",
+  "registerIds": ["E-005", "F-001", "ES-006", "T-001", "T-005", "T-006", "N-001", "C-007"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/living-hollow.test.ts",
+    "src/sim/veg-water.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["living-hollow"],
+  "fields": [
+    "veg.biomass.herb",
+    "veg.cover",
+    "surface.roughness",
+    "veg.infiltrationContribution"
+  ],
+  "notebookSeed": "The hollow I kept wet held the next rain differently once shoots took.",
+  "tierO": "Batch: did the living hollow feel like it changed how the water moved — or like a separate green layer?"
+}

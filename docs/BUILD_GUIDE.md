@@ -89,10 +89,11 @@ Summary only — do not reopen unless fixing regressions.
 | drydown | Insolation × cover ET partitions | World dries unevenly after rain | `evapotranspiration`, `drydown-feedback` | Tier-M + Tier-P; audio wired |
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 | 12 | Arrival / first occupant (C-007) | Shoots appear where conditions suit | `dispersalProcess`, `arrival-earned` | **Done** — C-007 Locked |
+| 13 | Biology → physics (E-005) | Living hollow blunts the next storm | `physicalCover`, `living-hollow` | **Done** — agent; Tier-O batched |
 
-**Current gate:** Slice 12 arrival / first occupant **Done** — **C-007 Locked** (owner Pass: earned conditions). **Next:** Slice 13 biology → physics integration (§4.9). **Slice A** audio scaffold wired (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
+**Current gate:** Slice 13 biology → physics **Done** (agent) — earned herb biomass stacks into roughness/infiltration (`living-hollow`: downslope 0.152 vs 0.423; infil 25.83 vs 11.52). **Next:** Slice 14 scenario objective scaffold (§4.10). **Slice A** audio scaffold wired (C-014 still Open). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-003. Do not implement Open candidates as if Locked.
 
@@ -360,30 +361,56 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.9 Slice 13 — Biology → physics integration *(specified; gate after Slice 12)*
+### 4.9 Slice 13 — Biology → physics integration *(Done — agent; Tier-O batched)*
 
 **Why this exists.** Slice 12 ships a first occupant that does not yet change how water moves. The thesis payoff is that a vegetated hollow meets the next storm differently than a bare one — Slice 6 already couples aggregate `veg.cover` to roughness/infiltration; this slice closes the loop from **earned herb biomass** into those physical properties (E-005) without inventing a second hydrology.
 
-**Loops.** Sim: `veg.biomass.herb` contributes to cover-equivalent roughness and infiltration (and optionally ET partitioning) so a colonized hollow retains more water / slows runoff versus an identical unsuitable patch. Game: keep a hollow wet until shoots appear, then run a storm and see the place answer differently.
+**Loops.** Sim: `veg.biomass.herb` contributes to cover-equivalent roughness and infiltration so a colonized hollow retains more water / slows runoff versus an identical unsuitable patch. Game: keep a hollow wet until shoots appear, then run a storm and see the place answer differently.
 
 **Register / candidates.** **E-005** (biology changes physical properties), **F-001** (feedback loops visible), **ES-006**, **T-001**, **T-005**, **T-006**, **N-001**, **C-007** (Locked — arrival gate already closed).
 
-**Study.** SIMULATION_MODEL §11.3 integration test; existing `vegetationProcess` roughness/infiltration writes; Slice 6 `paired-storm` probe as the comparison pattern. Write `docs/slices/13-composition.md` before code: how herb biomass maps into cover contribution without dual-writing `veg.cover` authority, and which ledger/probe proves the storm divergence.
+**Study.** SIMULATION_MODEL §11.1; composition in `docs/slices/13-composition.md`; Slice 6 `paired-storm` as comparison. ET partition stays on `veg.cover` alone this slice (storm path is the Tier-M criterion).
 
 **Bans.** Painting cover directly from HSI. A second process that owns `veg.cover`. Changing hydrology equations rather than contributing through existing vegetation physical properties. Stochastic weather (C-003 Open).
 
-**Gate.** After Slice 12 (**Done** agent half): herb biomass and arrival probe exist.
+**Gate.** After Slice 12 (**Done**): herb biomass and arrival probe exist.
 
-- [ ] Composition note: herb biomass → physical contribution equation; field ownership; no dual cover authority
-- [ ] Wire `veg.biomass.herb` into roughness / infiltration (and ET if earned) via the existing vegetation owner or a declared contribute
-- [ ] Tier-M: colonized suitable patch vs bare unsuitable twin under one storm — runoff / infiltration delta in the earned direction
-- [ ] Tier-M: determinism + bounds; mass residual unchanged class
-- [ ] Probe `living-hollow` (or extend `paired-storm`): measured storm divergence from arrival
-- [ ] Tier-P: default view shows the living hollow answering the storm without inspector-required proof
-- [ ] `docs/slices/13.json` manifest (DoD row 9)
-- [ ] Notebook seed: “The hollow I kept wet held the next rain differently once shoots took.”
+- [x] Composition note: herb biomass → physical contribution equation; field ownership; no dual cover authority — `docs/slices/13-composition.md`
+- [x] Wire `veg.biomass.herb` into roughness / infiltration via local `physicalCover` in the existing vegetation owner (ET deferred)
+- [x] Tier-M: colonized suitable patch vs bare unsuitable twin under one storm — runoff / infiltration delta in the earned direction (`living-hollow.test.ts`)
+- [x] Tier-M: determinism + bounds; mass residual unchanged class
+- [x] Probe `living-hollow`: colonized downslope ≈ 0.152 vs bare ≈ 0.423; infil ≈ 25.83 vs 11.52; `coverHeld = 1`, `earned = 1`
+- [x] Tier-P: soil-soak encoding delta after herb-driven infiltration clears perceptual floor `> 0.15`
+- [x] `docs/slices/13.json` manifest (DoD row 9)
+- [x] Notebook seed: “The hollow I kept wet held the next rain differently once shoots took.”
 - [ ] Tier-O (batch): *did the living hollow feel like it changed how the water moved — or like a separate green layer?*
-- [ ] **Next-but-one:** specify the following queue item to §4.3 depth before Slice 13 closes (DoD row 10)
+- [x] **Next-but-one:** specify Slice 14 scenario objective scaffold to §4.3 depth before Slice 13 closes (DoD row 10) — §4.10
+
+---
+
+### 4.10 Slice 14 — Scenario objective scaffold *(specified; gate after Slice 13)*
+
+**Why this exists.** Sandbox already runs the living-sand-castle loop (THESIS §4). **G-002** (Locked) says scenarios provide finite objectives under that same loop — not a second game. Without a scenario scaffold, G-005 / G-006 / G-007 stay unexercised and the toxic-site premise (C-010 / THESIS §7) has nowhere to land. This slice builds the **minimum objective container**, not a campaign or a win-condition resolution of Open **G-007**.
+
+**Loops.** Sim: none new — scenarios are authored schedules + evaluation observers over existing WorldState (T-006). Game: accept a finite objective, run the same sculpt → forces → time loop, and see whether the preserve meets the authored criterion window.
+
+**Register / candidates.** **G-002** (Locked — finite objectives), **G-001** (sandbox stays open — scenarios are additive), **G-005** / **G-006** / **G-007** (Open — coupling note; store all three completion shapes per SIM §12 without resolving), **G-008** (mixed-objective model), **C-010** (legacy substances — depends on scenario frame), T-006, N-001, N-004.
+
+**Study.** SIMULATION_MODEL §12 scenario completion structure; MVP_SCOPE §5 (what MVP is not); THESIS §7 sandbox vs scenarios. Write `docs/slices/14-composition.md` before code: objective schema, evaluation cadence, how Open G-007 alternatives are stored without picking one.
+
+**Bans.** Resolving Open G-007 by shipping only one completion shape. A cleanup tool that removes poison directly (C-010 / N-001). Scenario scripting that bypasses the sim (N-004). Closing sandbox or gating sculpting behind scenario progress (G-001, C-006). Inventing a second win meter unrelated to preserve state (N-002).
+
+**Gate.** After Slice 13 (**Done** agent): biology→physics feedback exists so a scenario can ask the player to earn a living hollow that blunts a storm.
+
+- [ ] Composition note: objective schema; evaluation window; G-007 three-shape storage; no register invention
+- [ ] Scenario container loads an authored objective + schedule over sandbox WorldState (observer evaluation only)
+- [ ] Tier-M: same seed + schedule → identical evaluation outcome hash; write isolation (evaluator does not mutate sim)
+- [ ] Tier-M: objective window uses hysteresis / rolling interval shape compatible with G-005 without locking its tuning
+- [ ] Probe `scenario-window` (name TBD): paired meeting / failing preserve states under one authored criterion
+- [ ] `docs/slices/14.json` manifest (DoD row 9)
+- [ ] Notebook seed: “The brief asked me to keep the hollow wet long enough for life to hold the next storm.”
+- [ ] Tier-O (batch): *did the objective feel like a reason to run the same loop — or like a different game?*
+- [ ] **Next-but-one:** specify the following queue item to §4.3 depth before Slice 14 closes (DoD row 10)
 
 ---
 
@@ -393,9 +420,9 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 |---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
 | — | Field Notebook UI | U-006 |
-| — | Scenarios | G-002, G-007 |
+| — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slice **12** is Done (agent) at §4.8. Slice **13** is specified at §4.9. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slice **13** is Done (agent) at §4.9. Slice **14** is specified at §4.10. Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

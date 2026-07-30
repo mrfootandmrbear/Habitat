@@ -1,0 +1,73 @@
+{
+  "scenario": "living-hollow",
+  "metrics": {
+    "colonized.cover": {
+      "value": 0,
+      "abs": 0
+    },
+    "colonized.biomass": {
+      "value": 2.4983659386634827,
+      "abs": 0.00001
+    },
+    "colonized.downslope": {
+      "value": 0.15206634998321533,
+      "abs": 0.00001
+    },
+    "colonized.roughness": {
+      "value": 0.15000000596046448,
+      "abs": 0.000001
+    },
+    "colonized.infiltrated": {
+      "value": 25.829871475696564,
+      "abs": 0.0001
+    },
+    "bare.cover": {
+      "value": 0,
+      "abs": 0
+    },
+    "bare.biomass": {
+      "value": 0,
+      "abs": 0
+    },
+    "bare.downslope": {
+      "value": 0.42301928997039795,
+      "abs": 0.00001
+    },
+    "bare.roughness": {
+      "value": 0.029999999329447746,
+      "abs": 0.000001
+    },
+    "bare.infiltrated": {
+      "value": 11.519999742507935,
+      "abs": 0.0001
+    },
+    "delta.biomassDelta": {
+      "value": 2.4983659386634827,
+      "abs": 0.00001
+    },
+    "delta.downslopeDelta": {
+      "value": 0.2709529399871826,
+      "abs": 0.00001
+    },
+    "delta.infilDelta": {
+      "value": 14.30987173318863,
+      "abs": 0.0001
+    },
+    "delta.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.bounded": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.coverHeld": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.earned": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

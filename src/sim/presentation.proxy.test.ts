@@ -137,4 +137,31 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     const delta = occupantEncodingDelta(0, 0.45, config.herbBiomassMax);
     expect(delta).toBeGreaterThan(0.15);
   });
+
+  it("living hollow storm answer clears the perceptual floor via soil soak (Slice 13)", () => {
+    const flat = new Grid2D(12, 12, 1);
+    const commit = (herb: number): WorldState => {
+      const world = new WorldState(flat.clone());
+      world.vegCover.fill(0);
+      world.herbBiomass.fill(herb);
+      world.soilMoisture.fill(0);
+      world.runVegetationStep(1);
+      world.runSoilWaterStep(1);
+      world.water.fill(0.4);
+      world.runSoilWaterStep(1);
+      return world;
+    };
+    const bare = commit(0);
+    const colonized = commit(config.herbBiomassMax);
+    let bareSoil = 0;
+    let colonizedSoil = 0;
+    for (let i = 0; i < bare.soilMoisture.data.length; i++) {
+      bareSoil += bare.soilMoisture.data[i]!;
+      colonizedSoil += colonized.soilMoisture.data[i]!;
+    }
+    bareSoil /= bare.soilMoisture.data.length;
+    colonizedSoil /= colonized.soilMoisture.data.length;
+    const delta = soilEncodingDelta(bareSoil, colonizedSoil, config.soilPorosity);
+    expect(delta).toBeGreaterThan(0.15);
+  });
 });

@@ -192,6 +192,25 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.bounded": { abs: 0 },
     "delta.earned": { abs: 0 },
   },
+  "living-hollow": {
+    "colonized.cover": { abs: 0 },
+    "colonized.biomass": { abs: 1e-5 },
+    "colonized.downslope": { abs: 1e-5 },
+    "colonized.roughness": { abs: 1e-6 },
+    "colonized.infiltrated": { abs: 1e-4 },
+    "bare.cover": { abs: 0 },
+    "bare.biomass": { abs: 0 },
+    "bare.downslope": { abs: 1e-5 },
+    "bare.roughness": { abs: 1e-6 },
+    "bare.infiltrated": { abs: 1e-4 },
+    "delta.biomassDelta": { abs: 1e-5 },
+    "delta.downslopeDelta": { abs: 1e-5 },
+    "delta.infilDelta": { abs: 1e-4 },
+    "delta.hashMatch": { abs: 0 },
+    "delta.bounded": { abs: 0 },
+    "delta.coverHeld": { abs: 0 },
+    "delta.earned": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

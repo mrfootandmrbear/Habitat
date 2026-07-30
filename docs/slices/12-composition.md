@@ -49,10 +49,10 @@ veg.biomass.herb ← clamp(biomass + Δbiomass, 0, herbBiomassMax · habitat.sui
 
 `vegetationProcess` remains the single vegetation owner. Seasonal herb-biomass writes are the same process id on a second band — not a parallel vegetation authority. `dispersal` owns only seed-bank / establishment-pressure fields.
 
-## Deferred to Slice 13
+## Deferred to Slice 13 — **Done**
 
-- Feeding `veg.biomass.herb` into `veg.cover` / roughness / infiltration (biology → physics).
-- Additional functional types, fat-tailed kernels, light in the Liebig gate, named species from preserve data.
+- Feeding `veg.biomass.herb` into roughness / infiltration via local `physicalCover` (biology → physics) — see [13-composition.md](13-composition.md).
+- Additional functional types, fat-tailed kernels, light in the Liebig gate, named species from preserve data (still deferred).
 
 ## Banned
 

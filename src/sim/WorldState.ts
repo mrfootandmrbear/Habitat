@@ -18,6 +18,7 @@ import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   establishmentProbability,
   nextHerbBiomass,
+  physicalCoverFrom,
   seedPressureAt,
 } from "./habitat/arrivalComposition";
 import {
@@ -706,8 +707,15 @@ export class WorldState {
         insolation[i] = committedLight.insolation;
         lai[i] = committedLight.leafAreaIndex;
         understory[i] = committedLight.understoryLight;
-        rough[i] = config.baseRoughness + cover * config.vegRoughnessBonus;
-        infilContrib[i] = cover * config.vegInfiltrationBonus;
+        // Slice 13: herb biomass stacks into physical writes only (E-005).
+        // physicalCover is local — never dual-writes veg.cover.
+        const physical = physicalCoverFrom(
+          cover,
+          this.herbBiomass.data[i]!,
+          config.herbBiomassMax,
+        );
+        rough[i] = config.baseRoughness + physical * config.vegRoughnessBonus;
+        infilContrib[i] = physical * config.vegInfiltrationBonus;
       }
     }
   }
@@ -743,7 +751,8 @@ export class WorldState {
 
   /**
    * Seasonal herb establishment — continuous biomass from seed × HSI.
-   * Zero suitability blocks growth. Does not write veg.cover (Slice 13).
+   * Zero suitability blocks growth. Does not write veg.cover
+   * (physical contribution via physicalCover in runVegetationStep — Slice 13).
    */
   runHerbEstablishmentStep(dt: number): void {
     const scale = Math.max(0, dt);

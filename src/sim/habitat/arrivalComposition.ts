@@ -78,3 +78,29 @@ export function nextHerbBiomass(args: {
   const next = Math.min(capacity, Math.max(0, args.biomass + growth));
   return next;
 }
+
+/**
+ * Slice 13 — cover-equivalent from earned herb biomass for physical writes only.
+ * Never dual-writes veg.cover (docs/slices/13-composition.md).
+ */
+export function herbCoverFraction(
+  herbBiomass: number,
+  herbBiomassMax: number,
+): number {
+  const max = Math.max(herbBiomassMax, 1e-6);
+  return clamp01(Math.max(0, herbBiomass) / max);
+}
+
+/**
+ * Local physical cover for roughness / infiltration — not a registered field.
+ */
+export function physicalCoverFrom(
+  vegCover: number,
+  herbBiomass: number,
+  herbBiomassMax: number,
+): number {
+  return Math.min(
+    1,
+    clamp01(vegCover) + herbCoverFraction(herbBiomass, herbBiomassMax),
+  );
+}
