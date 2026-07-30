@@ -17,6 +17,7 @@ import {
   loadManifests,
   validateManifests,
 } from "./validate-slice-manifests.ts";
+import { config } from "../src/config.ts";
 
 const ROOT = join(import.meta.dirname, "..");
 const REGISTER = join(ROOT, "docs/DECISION_REGISTER.md");
@@ -174,22 +175,109 @@ function buildLedgerTable(
   ].join("\n");
 }
 
-function updateConformanceDoc(table: string): void {
-  const text = readFileSync(CONFORMANCE, "utf8");
-  const start = "<!-- GENERATED: conformance-ledger -->";
-  const end = "<!-- END GENERATED -->";
+const LEDGER_MARKERS = [
+  "<!-- GENERATED: conformance-ledger -->",
+  "<!-- END GENERATED -->",
+] as const;
+const WORLD_FACTS_MARKERS = [
+  "<!-- GENERATED: world-facts -->",
+  "<!-- END GENERATED: world-facts -->",
+] as const;
+
+/**
+ * World facts emitted from `src/config.ts` rather than typed into prose.
+ *
+ * Governing documents kept restating grid size and cell size by hand, and
+ * C-012 was filed against a `worldSize: 48` misread as metres — wrong by 20×
+ * in Δx. Numbers that exist in code are generated here so `conformance:check`
+ * catches the drift instead of a reader catching it months later.
+ */
+function buildWorldFactsTable(): string {
+  const cells = config.gridSize * config.gridSize;
+  const rows: Array<[string, string, string]> = [
+    ["Grid", `${config.gridSize} × ${config.gridSize}`, "`config.gridSize`"],
+    ["Cell count", cells.toLocaleString("en-US"), "derived"],
+    ["Δx (cell edge)", `${config.cellSizeMeters} m`, "`config.cellSizeMeters`"],
+    [
+      "Metric extent",
+      `${config.worldExtentMeters} m`,
+      "`config.worldExtentMeters` = gridSize × Δx",
+    ],
+    [
+      "Cell area",
+      `${config.cellSizeMeters * config.cellSizeMeters} m²`,
+      "derived",
+    ],
+    [
+      "Scene half-extent",
+      `${config.worldSize} (Three.js units — **not a length**)`,
+      "`config.worldSize`",
+    ],
+    [
+      "Event Δt",
+      `${config.eventDtMinutes} sim-min (${config.dailyEventSteps} events/day)`,
+      "`config.eventDtMinutes`",
+    ],
+    [
+      "Soil",
+      `porosity ${config.soilPorosity}, default depth ${config.defaultSoilDepthMeters} m`,
+      "`config.soilPorosity`",
+    ],
+    [
+      "Step budget",
+      `${config.maxStepsPerFrame} event steps / frame`,
+      "`config.maxStepsPerFrame`",
+    ],
+  ];
+  return [
+    "| Fact | Value | Source |",
+    "| --- | --- | --- |",
+    ...rows.map(([k, v, s]) => `| ${k} | ${v} | ${s} |`),
+  ].join("\n");
+}
+
+/** `worldExtentMeters` is stored, not derived — keep it honest. */
+function checkWorldFactsConsistency(): string[] {
+  const errors: string[] = [];
+  const derived = config.gridSize * config.cellSizeMeters;
+  if (config.worldExtentMeters !== derived) {
+    errors.push(
+      `config.worldExtentMeters (${config.worldExtentMeters}) ≠ gridSize × cellSizeMeters (${derived})`,
+    );
+  }
+  return errors;
+}
+
+function replaceGeneratedBlock(
+  text: string,
+  [start, end]: readonly [string, string],
+  body: string,
+): string {
   const i0 = text.indexOf(start);
   const i1 = text.indexOf(end);
   if (i0 < 0 || i1 < 0) {
-    throw new Error("GENERATED markers missing in DECISION_CONFORMANCE.md");
+    throw new Error(`markers missing in DECISION_CONFORMANCE.md: ${start}`);
   }
-  const next =
-    text.slice(0, i0 + start.length) +
-    "\n\n" +
-    table +
-    "\n\n" +
-    text.slice(i1);
-  writeFileSync(CONFORMANCE, next);
+  return (
+    text.slice(0, i0 + start.length) + "\n\n" + body + "\n\n" + text.slice(i1)
+  );
+}
+
+function readGeneratedBlock(
+  text: string,
+  [start, end]: readonly [string, string],
+): string | undefined {
+  const i0 = text.indexOf(start);
+  const i1 = text.indexOf(end);
+  if (i0 < 0 || i1 < 0) return undefined;
+  return text.slice(i0 + start.length, i1).trim();
+}
+
+function updateConformanceDoc(table: string, worldFacts: string): void {
+  let text = readFileSync(CONFORMANCE, "utf8");
+  text = replaceGeneratedBlock(text, LEDGER_MARKERS, table);
+  text = replaceGeneratedBlock(text, WORLD_FACTS_MARKERS, worldFacts);
+  writeFileSync(CONFORMANCE, text);
 }
 
 function main(): void {
@@ -206,13 +294,23 @@ function main(): void {
   const head = gitHead();
 
   const table = buildLedgerTable(entries, citations, criteriaIds, head);
+  const worldFacts = buildWorldFactsTable();
+
+  let failed = false;
+  const warnings: string[] = [];
+
+  for (const err of checkWorldFactsConsistency()) {
+    console.error(`world facts: ${err}`);
+    failed = true;
+  }
+
   if (!check) {
-    updateConformanceDoc(table);
-    console.log(`Updated conformance ledger (${entries.length} entries, ${head})`);
+    updateConformanceDoc(table, worldFacts);
+    console.log(
+      `Updated conformance ledger (${entries.length} entries, ${head}) + world facts`,
+    );
   } else {
-    const onDisk = conformanceText.match(
-      /<!-- GENERATED: conformance-ledger -->\n\n([\s\S]*?)\n\n<!-- END GENERATED -->/,
-    )?.[1];
+    const onDisk = readGeneratedBlock(conformanceText, LEDGER_MARKERS);
     // Verified column is git HEAD at generation time; after commit it lags by one
     // hash. Compare content ignoring that column so clean checkouts stay green.
     const stripVerified = (t: string) =>
@@ -227,10 +325,14 @@ function main(): void {
       );
       process.exitCode = 1;
     }
+    const factsOnDisk = readGeneratedBlock(conformanceText, WORLD_FACTS_MARKERS);
+    if (!factsOnDisk || factsOnDisk !== worldFacts) {
+      console.error(
+        "World facts block is out of date with src/config.ts. Run: npm run conformance",
+      );
+      process.exitCode = 1;
+    }
   }
-
-  let failed = false;
-  const warnings: string[] = [];
 
   for (const [id, cites] of citations) {
     const srcCites = cites.filter((c) => c.file.startsWith("src/"));

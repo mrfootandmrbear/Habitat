@@ -28,7 +28,7 @@ The idea is scale-invariant: it reads the same at continental scale and at the s
 
 **What the preserve's own scale is for (owner, 2026-07-28):** *relative* scale — **different habitats available in the same player window.** The preserve should be large enough that distinct habitats emerge and coexist — wet hollow beside dry slope beside channel margin — and small enough that all of them are readable at once. That is W-002's "one continuous landscape with emergent regions" turned into a sizing rule, and it is the standard the extent must be chosen against.
 
-The build does not meet it today: `gridSize: 96` at `worldSize: 48` is a **48-metre plot at half-metre cells** — one patch, not a mosaic. Filed as **C-012**, because the extent and the cell size are both consequences of this criterion rather than free parameters.
+The build does not clearly meet it today: `gridSize: 96` at `cellSizeMeters: 10` is a **960-metre plot at ten-metre cells**. (`worldSize: 48` is a Three.js scene unit, not a length — `config.ts` says so explicitly. An earlier draft of this section read it as metres and described a 48 m plot at half-metre cells; that was wrong by a factor of twenty in each direction.) The extent is plausibly large enough for a mosaic; the **cell size is the binding constraint**, because a 10 m cell cannot resolve the channel margin or wetland edge that makes one habitat read as distinct from its neighbour. Filed as **C-012**, because the extent and the cell size are both consequences of this criterion rather than free parameters.
 
 ### 2.1 A *living* sand castle — and what the sand is
 
@@ -36,7 +36,7 @@ Two refinements that carry weight (owner, 2026-07-28):
 
 **The castle becomes alive.** The good end state is not "it survived the tide." It is that the thing you built stopped being inert. Plants take the berm, roots hold what water was pulling apart, and the structure now meets the next storm as something living rather than as a pile. Thriving *is* the castle coming alive.
 
-This is not aspirational — **it already runs**. Slice 6 gives vegetation → roughness and infiltration → water, and Slice 8 gates erosion on cover, which together mean a vegetated berm and a bare one already face the same rain differently. The mechanism has existed since the sim MVP and has never been *shown* to anyone. That is the whole argument for Slice 8c.
+This is not aspirational — **it already runs**. Slice 6 gives vegetation → roughness and infiltration → water, and Slice 8 gates erosion on cover, which together mean a vegetated berm and a bare one already face the same rain differently. The mechanism existed from the sim MVP and went a long time without being *shown* to anyone; that was the whole argument for Slice 8c, and it has since been shown — [batch-living-return.md](playtests/batch-living-return.md) (8c + Slice 13) Passed 2026-07-30, owner reporting the living hollow met the storm differently once shoots took, and wanting another run.
 
 **The sand is every substrate nature has to work with.** Not literal sand: soil, clay, gravel, rock, organic matter — the materials a landscape is made of, each behaving differently under the same forces. Sand drains and slumps; clay holds water and holds its shape; rock resists and outlasts; organic matter accumulates and feeds. A castle built of one is not a castle built of another, and that difference is a large part of what makes rebuilding interesting.
 
@@ -123,8 +123,8 @@ A sand castle gives you both, and Habitat should too:
 
 | Payoff | What it looks like | Build status |
 |---|---|---|
-| **Nature takes what you built** | Berms slump, channels incise, pools silt, walls wash out | Slice 8 geomorphology exists — and is **invisible** to a player. Its legibility question was deferred. |
-| **Life moves into it** | Something arrives because the conditions suit it — you dug the moat, the moat got tenants | Not built. This is what the limiting-factor / HSI spine is *for*. |
+| **Nature takes what you built** | Berms slump, channels incise, pools silt, walls wash out | **Built and shown.** Slice 8 geomorphology; Slice 8c form memory made it legible on a return visit. Deferred legibility ask folded into [batch-living-return.md](playtests/batch-living-return.md) — **Pass** 2026-07-30. |
+| **Life moves into it** | Something arrives because the conditions suit it — you dug the moat, the moat got tenants | **Built.** Slice 12 arrival on the limiting-factor / HSI spine — **C-007 Locked**, owner Pass ([12-arrival-earned.md](playtests/12-arrival-earned.md)); Slice 13 feeds the arrivals back into roughness and infiltration. |
 
 The second one reframes the biological half of the register. Its entries are **introduction**-shaped (E-007 attemptable roles, E-008 role resolution, RC-003 failed-introduction consequence). Nobody introduces crabs to a sand castle moat. You dig the moat and something shows up, or it doesn't, and the answer is in the conditions. **Arrival, not introduction**, is the primary biological verb — which is D-001 more purely than introduction ever was.
 
@@ -156,6 +156,8 @@ If yes, the project has arrived, whatever the ladder says. If no, the next slice
 
 This is a self-check the owner can run alone, at any time, in twenty seconds. Use it to order work.
 
+> **This section is binding (2026-07-30).** The rest of this document is advisory, but the clip test is now **D-007** in the [Decision Register](DECISION_REGISTER.md) §1 — Locked. Any slice registering a new simulation `Process` records a clip verdict in its [BUILD_GUIDE.md](BUILD_GUIDE.md) entry, and while the clip does not exist the next slice is legibility work rather than another system. It was promoted because advisory status was not holding: roughly sixteen consecutive slices added systems while the deferred erosion-legibility ask sat and rain kept reading as a spigot.
+
 ---
 
 ## 9. Boundaries this thesis keeps
@@ -169,7 +171,7 @@ This is a self-check the owner can run alone, at any time, in twenty seconds. Us
 
 ## 10. Open questions this thesis raises
 
-Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5 — none of them Locked, none to be implemented as settled policy:
+Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5. Implement under them as hypotheses, never as settled policy — except where a row below records a Lock, which means the criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3 was met and the entry is now binding:
 
 | ID | Question |
 |---|---|

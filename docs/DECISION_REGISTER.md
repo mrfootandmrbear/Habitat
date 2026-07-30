@@ -87,6 +87,12 @@ S-008, P-006, E-007, E-008, A-005, A-006, G-005, G-006, G-007, W-001 (recovered 
 
 Corrections and relocations are recorded here. Content changes still require the supersession mechanism in §0.3; this log exists so that non-supersession edits are also traceable.
 
+**v2.1 — showability gate and the C-012 units correction (2026-07-30).**
+
+- Added **D-007**, promoting the THESIS §8 twenty-second clip test from advisory to a Locked gate on any slice registering a new simulation `Process`. The register previously had a mechanism for the owner to add work and none for the project to stop adding; roughly sixteen consecutive slices added systems while the deferred erosion-legibility ask sat and rainfall kept reading as a spigot.
+- Corrected **C-012**, which was filed against `worldSize: 48` read as metres — a Three.js scene unit, not a length — and asserted a "48 m plot at 0.5 m cells". The build ships **960 m at 10 m cells**; the error was 20× in Δx and 400× in area, and it pointed the candidate at extent when the suspect value is resolution. SIMULATION_MODEL §2 was correct throughout. THESIS §2 carried the same error and is corrected.
+- Added the generated world-facts block to [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §5, emitted from `src/config.ts`. Governing documents cite it rather than retyping values, and `conformance:check` now fails on drift. The ledger verifies that IDs are *cited*, never that prose claims about the code are *true*; this closes that gap for world dimensions.
+
 **v2.0 — constitutional release.**
 
 - Promoted the register from a canonical working register to Habitat's canonical product constitution.
@@ -217,6 +223,17 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 **Implications.** Observation must reveal meaningful change. Prediction gives attention an explicit action (P-006). Time controls let the player choose the scale of attention. Strong play trends toward fewer, better-timed interventions rather than higher action throughput.
 
 **Rejected alternatives.** Constant task queues. Click efficiency as mastery. Idle waiting with no interpretive work. Rewarding intervention volume.
+
+### D-007 — Showability orders the work
+**Status:** Locked *(owner, 2026-07-30)*
+
+**Decision.** Before a slice that registers a new simulation `Process`, the twenty-second clip test ([THESIS.md](THESIS.md) §8) is run and its verdict recorded in that slice's [BUILD_GUIDE.md](BUILD_GUIDE.md) entry. While the clip does not yet exist, the next slice is whatever moves it closest to existing — legibility, encoding, or presentation — **not** another system.
+
+**Why.** THESIS §8 already stated the standard and explicitly costs no owner session, but the thesis is advisory by its own header, so the cheapest falsifiable test in the project had no force. Meanwhile the verification tiers price work asymmetrically: a new process closes with a Tier-M probe, whereas legibility needs a Tier-P proxy and often a Tier-O sitting. Work flows to whatever is cheapest to close. Between Slice 8 and Slice 21 roughly sixteen slices added systems while the deferred erosion-legibility ask sat unaddressed and rainfall kept reading as a spigot across three separate playtests. The register had a mechanism for the owner to **add** work and none for the project to say **stop adding**. This is that mechanism.
+
+**Implications.** The clip verdict is a required line in the BUILD_GUIDE entry of any slice registering a new `Process` in `SimScheduler`. It is owner-run, one sentence, no number, and it is **not** a playtest request — VERIFICATION_POLICY §4 batching and the ask gate do not apply, because the test is designed to cost no session. A failed clip does not block a slice already in flight; it constrains what comes next. Infrastructure, hygiene, refactor, and presentation slices are exempt by construction — they register no process. The remainder of THESIS stays advisory.
+
+**Rejected alternatives.** Leaving the standard advisory in THESIS §8, which is the status quo that produced the imbalance. Promoting it to a Tier-O playtest question, which would spend an owner session on something explicitly designed to cost none. Blocking new-process slices outright, which trades one pathology for another.
 
 ---
 
@@ -1403,11 +1420,13 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Question.** Are preserve extent and cell size **derived** from one criterion — *several distinct habitats coexist and are simultaneously readable in the player's window* ([THESIS.md](THESIS.md) §2) — rather than chosen as engine parameters?
 
-**Why now.** The build ships `gridSize: 96`, `worldSize: 48` — a 48 m plot at 0.5 m cells. That is a single patch. No wet hollow *beside* a dry slope *beside* a channel margin can emerge at that extent, which means W-002's "one continuous landscape with emergent regions" has nothing to emerge into and U-005's whole-preserve-versus-local-inspection tension does not yet exist.
+**Why now.** The build ships `gridSize: 96` at `cellSizeMeters: 10` — a **960 m plot at 10 m cells** (`worldSize: 48` is a Three.js scene unit, not a length). A wet hollow *beside* a dry slope *beside* a channel margin can plausibly fit in 960 m; what it cannot do is **read**, because a 10 m cell is coarser than the features that distinguish those habitats from one another. So W-002's "one continuous landscape with emergent regions" is limited by resolution rather than by extent, and U-005's whole-preserve-versus-local-inspection tension is blunted because there is no local detail to inspect.
+
+> **Correction (2026-07-30).** This entry and [THESIS.md](THESIS.md) §2 previously read `worldSize: 48` as metres and asserted a "48 m plot at 0.5 m cells" — wrong by 20× in cell size and 400× in area, and it pointed the candidate at the wrong parameter. [SIMULATION_MODEL.md](SIMULATION_MODEL.md) §2 had it right throughout. The world-facts block in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §6 is now generated from `config.ts` so this class of drift is caught by `conformance:check` rather than by reading.
 
 **Constraints.** W-002 (emergent regions), U-005 (readable whole, inspectable local), **C-011** — scale must be real, since intuition about how far water travels and how big a wetland is comes from the world. **C-008** response budget and the unmeasured Tier-M performance claim both bound it from the other side: extent × resolution sets step cost, and a preserve that cannot answer a sculpt promptly fails a different requirement. GEO-002 earn-its-cost.
 
-**Leading direction.** Set extent from the mosaic criterion first, then derive cell size from the **smallest feature that must read** — likely channel width or wetland margin — and accept whatever grid that implies, subject to a measured step-time budget rather than a guessed one. Both current values are almost certainly too small; neither should be changed without the probe that shows the new size still steps fast enough.
+**Leading direction.** Confirm extent against the mosaic criterion — 960 m is defensible and may already be enough — then derive cell size from the **smallest feature that must read**, likely channel width or wetland margin, and accept whatever grid that implies subject to a measured step-time budget rather than a guessed one. The correction above moves the suspicion from extent to **resolution**: Δx is the value most likely wrong. Note the cost shape before proposing a number — refining Δx at fixed extent grows cell count quadratically, so 10 m → 2 m is 96² → 480², a 25× step cost that the current main-thread loop has never been measured against. Neither value should change without the probe that shows the new size still steps fast enough (**C-008**).
 
 ### C-013 — Undo as an affordance of abundant sculpting
 **Status:** Open
