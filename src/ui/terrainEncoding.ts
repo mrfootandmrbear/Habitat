@@ -11,7 +11,7 @@ const WET: TerrainRgb = [0x4a / 255, 0x5c / 255, 0x3a / 255];
 const VEG: TerrainRgb = [0x3a / 255, 0x7a / 255, 0x3a / 255];
 const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
 /** Wet sand / mud foreshore — readable against dry land (Slice 17). */
-const INTERTIDAL: TerrainRgb = [0xa8 / 255, 0x8a / 255, 0x62 / 255];
+const INTERTIDAL: TerrainRgb = [0xc4 / 255, 0x9a / 255, 0x5e / 255];
 
 function lerpChannel(a: number, b: number, t: number): number {
   return a + (b - a) * t;

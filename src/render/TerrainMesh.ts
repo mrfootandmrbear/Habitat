@@ -26,6 +26,8 @@ export class TerrainMesh {
   private readonly height: number;
   private readonly worldSize: number;
   private readonly colors: THREE.BufferAttribute;
+  /** Skip normal rebuilds when elev barely moved (coastal-step lighting flash). */
+  private lastNormalElevSum = Number.NaN;
 
   constructor(width: number, height: number, worldSize: number) {
     this.width = width;
@@ -78,9 +80,12 @@ export class TerrainMesh {
     }
 
     let i = 0;
+    let elevSum = 0;
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
-        pos.setXYZ(i, ox + x * cellW, model.getTerrainHeight(x, z), oz + z * cellW);
+        const elev = model.getTerrainHeight(x, z);
+        elevSum += elev;
+        pos.setXYZ(i, ox + x * cellW, elev, oz + z * cellW);
 
         const col = new THREE.Color();
         if (world && overlay !== "none") {
@@ -115,7 +120,15 @@ export class TerrainMesh {
     }
     pos.needsUpdate = true;
     this.colors.needsUpdate = true;
-    this.geometry.computeVertexNormals();
+    // Recomputing normals every event at 16× makes flat-shaded lighting strobe
+    // as coastal elev ticks — only rebuild when the field moved meaningfully.
+    if (
+      !Number.isFinite(this.lastNormalElevSum) ||
+      Math.abs(elevSum - this.lastNormalElevSum) > 0.05
+    ) {
+      this.geometry.computeVertexNormals();
+      this.lastNormalElevSum = elevSum;
+    }
   }
 
   private applyPrediction(col: THREE.Color, code: number): void {

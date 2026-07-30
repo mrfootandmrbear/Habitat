@@ -1,6 +1,6 @@
 # C-017 — Wave exposure contributes to geomorphology
 
-**Status:** Open (owner-judged half outstanding)  
+**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
 **Criterion (verbatim).** A derived exposure field (fetch × wind) changes shoreline elev/depth only by contributing into the geomorphology owner; no second sediment writer; no SWE solver in-tree. Sheltered vs exposed paired shores diverge under one wind regime; mass of displaced soil closes.
 
 ## Machine half (discharged)
@@ -28,12 +28,12 @@
 | Bedrock closed | `bedrockClosed = 1` | same + `longshore.test.ts` |
 | Ocean share on ledger | shoreErosion ≈ 4.70 (retain 0.7 on-island) | same |
 
-**Baseline note.** Slice 19 adds `shore.longshore` and lee deposit inside geomorphology; `shore-exposure` scalars refresh (eastLoss negative = lee gain). Non-coastal probe physics unchanged aside from registry fingerprint when island fields are present.
+## Owner half (Pass — 2026-07-30)
 
-## Owner half (outstanding)
+**Question.** When the windward shore wore back and the lee spit grew, did that feel like the sea working the island — or like a tint the wind painted on?
 
-Whether shore change reads as the sea's work (A-005 / C-004). Batched Tier-O — now includes lee spit growth.
+**Verdict.** Pass via [batch-maritime-shore.md](../playtests/batch-maritime-shore.md) (shared sentence with C-016): after wind arrow (origin mark) + west-wind run, shore change read as the sea reshaping the island — not painted chrome.
 
-## Owner-only question (one sentence, no numbers)
+## Owner-only question (answered)
 
 When the windward shore wore back and the lee spit grew, did that feel like the sea working the island — or like a tint the wind painted on?

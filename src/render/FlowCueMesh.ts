@@ -62,7 +62,8 @@ export class FlowCueMesh {
         const i = z * this.width + x;
         if (i % stride !== 0) continue;
         const w = model.getWaterDepth(x, z);
-        if (w <= config.dryEpsilon || !dir) continue;
+        if (w <= config.dryEpsilon * 8 || !dir) continue;
+        if (world.oceanCells.has(i)) continue;
         const d = dir[i]!;
         if (d < 0) continue;
         if (seg >= this.maxSegments) break;

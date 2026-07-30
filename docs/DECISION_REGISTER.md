@@ -128,6 +128,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.7 — Maritime shore Tier-O Pass (C-016 / C-017 owner halves).**
+
+- Owner Pass on [batch-maritime-shore.md](playtests/batch-maritime-shore.md) after wind/tide cues and water display-depth smoothing. **C-016** / **C-017** owner halves discharged; remain Open until Lock (Promotion authority: Owner). Presentation: `WindArrowMesh`, MHW cage ring, `waterDisplayTauSeconds` observer lerp.
+
 **v2.0.4 — C-007 Locked (Slice 12 owner Pass).**
 
 - Promoted **C-007** (arrival as the primary biological verb) from Open to Locked after the machine half (Liebig HSI gate, `arrival-earned` probe: suitable biomass = 2.5, unsuitable = 0, `earned = 1`, `hashMatch = 1`) and the owner verdict that appearance of life must mimic real life and therefore arrive through earned conditions. Introduction remains secondary and later; **RC-003** falls in §16 queue priority. Artifacts: `docs/slices/12-composition.md`, `docs/evidence/arrival-earned.baseline.json`, `docs/playtests/12-arrival-earned.md`, `docs/candidates/C-007-dossier.md`.
@@ -1447,7 +1451,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** C-015 must land first. Envelope is authored / player-set (C-003 direction), deterministic (T-001), and a force dial with no cell targeting (C-004). Must not require a second hydrology engine.
 
-**Leading direction.** Envelope only — MHW / MLW as globals; intertidal cells are those between them. Instantaneous phase is rejected. Not Locked until one intertidal zone is inspectable and the owner settles the metaphor conflict.
+**Leading direction.** Envelope only — MHW / MLW as globals; intertidal cells are those between them. Instantaneous phase is rejected. Owner half Pass (batch-maritime-shore 2026-07-30); remains Open until Lock.
 
 ### C-017 — Wave exposure contributes to geomorphology; never a second sediment authority
 **Status:** Open
@@ -1458,7 +1462,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** T-006 / GEO-002: one sediment authority. Ban shallow-water equations in-browser the way C-001 banned Richards. Exposure is directional and derived, not painted. C-015 required.
 
-**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Slice 18 ships exposure + retreat; Slice 19 ships signed longshore tendency + lee deposit budget. Not Locked until owner shore-legibility (A-005 / C-004) lands.
+**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Slice 18 ships exposure + retreat; Slice 19 ships signed longshore tendency + lee deposit budget. Owner half Pass (batch-maritime-shore 2026-07-30); remains Open until Lock.
 
 ### C-018 — Salinity as the first mobile legacy substance
 **Status:** Open

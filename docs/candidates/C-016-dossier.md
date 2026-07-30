@@ -1,6 +1,6 @@
 # C-016 — Tidal forcing as a band-appropriate envelope
 
-**Status:** Open (owner-judged half outstanding)  
+**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
 **Criterion (verbatim).** Mean high / mean low water are global scalars; intertidal cells are those with elevation between them; no per-event tidal phase advances the sim. Same envelope → identical hash; widening the envelope grows the intertidal cell count monotonically.
 
 ## Machine half (discharged)
@@ -13,15 +13,15 @@
 | Ocean outlet unchanged by tide | `oceanUnchanged = 1` (1658 cells) | same |
 | No phase across `stepEvent` | mask stable over 8 events | `src/sim/tidal.test.ts`, probe |
 | API has no cell/place args | `setTidalAmplitude(amp)` / `tideById` | `src/sim/climate/tidalEnvelope.ts` |
-| Tier-P foreshore tint | encoding Δ ≈ 0.129 (> 0.08) | `presentation.proxy.test.ts` |
+| Tier-P foreshore tint | encoding Δ ≈ 0.202 (> 0.08) after legibility retune | same + `presentation.proxy.test.ts` |
 | Registered inspectable field | `shore.intertidal` | WorldState registry |
 
-**Baseline note.** Adding `shore.intertidal` (zeros when envelope off) moved `hashN` / `p005.hashFirstN` on probes that fingerprint full `stateHash`. Physics unchanged — refresh reason: new derived registry field at zero.
+## Owner half (Pass — 2026-07-30)
 
-## Owner half (outstanding)
+**Question.** When you widened the tide range and watched the shore band, did it feel like a place the sea claims — or like a second clock fighting the fast-forward metaphor?
 
-Whether a literal tide envelope muddies the thesis metaphor (THESIS §4 "tide" = fast-forward). Batched Tier-O — not fired this slice.
+**Verdict.** Pass via [batch-maritime-shore.md](../playtests/batch-maritime-shore.md) (shared sentence with C-017): after MHW cage ring + foreshore tint, the tide read as the sea claiming the shore — not chrome / a second clock.
 
-## Owner-only question (one sentence, no numbers)
+## Owner-only question (answered)
 
 When you widened the tide range and watched the shore band, did it feel like a place the sea claims — or like a second clock fighting the fast-forward metaphor?

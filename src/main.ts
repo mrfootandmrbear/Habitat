@@ -17,6 +17,7 @@ import { OceanMesh } from "./render/OceanMesh";
 import { SitingCursor } from "./render/SitingCursor";
 import { FlowCueMesh } from "./render/FlowCueMesh";
 import { OccupantMesh } from "./render/OccupantMesh";
+import { WindArrowMesh } from "./render/WindArrowMesh";
 import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
@@ -85,17 +86,20 @@ const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
 let extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
   seaLevel: world.seaLevel,
+  meanHighWater: world.meanHighWater,
 });
 const oceanMesh = new OceanMesh(config.worldSize);
 oceanMesh.setSeaLevel(world.seaLevel);
 const sitingCursor = new SitingCursor(n, n, config.worldSize);
 const flowCue = new FlowCueMesh(n, n, config.worldSize);
 const occupantMesh = new OccupantMesh(n, n, config.worldSize);
+const windArrow = new WindArrowMesh(config.worldSize);
+windArrow.setWind("west");
 scene.add(terrainMesh.mesh);
 scene.add(waterMesh.mesh);
 scene.add(oceanMesh.mesh);
 scene.add(extentCage);
-scene.add(extentCage);
+scene.add(windArrow.group);
 
 const briefChrome = mountBriefChrome(app);
 let scenarioSession: ScenarioSession | null = null;
@@ -125,7 +129,7 @@ scene.add(sitingCursor.group);
 scene.add(flowCue.object);
 scene.add(occupantMesh.object);
 terrainMesh.updateFrom(model, world, "none", null);
-waterMesh.updateFrom(model);
+waterMesh.snapFrom(model, world.oceanCells);
 occupantMesh.updateFrom(model, world);
 
 let rainRegime: RainRegimeId = "dry";
@@ -192,9 +196,12 @@ const ui = mountControls(
       windId = id;
       const w = windById(id);
       world.setWind(w.ux, w.uz);
+      windArrow.setWind(id);
       ui.setWind(id);
       ui.setHint(
-        `${w.label} — watch which slopes stay wetter and which shores retreat`,
+        id === "calm"
+          ? "Wind calm — no arrow; shores idle"
+          : `${w.label} — warm mark is where the wind comes from; tip shows blow`,
       );
       syncMeshes();
     },
@@ -203,12 +210,13 @@ const ui = mountControls(
       const amp = tideById(id).amplitudeMeters;
       world.setTidalAmplitude(amp);
       ui.setTide(id);
+      rebuildExtentCage();
       const mhw = world.meanHighWater;
       const mlw = world.meanLowWater;
       ui.setHint(
         amp <= 0 || mhw === undefined || mlw === undefined
           ? "Tide off — no intertidal band"
-          : `${tideById(id).label} · shore band ${world.intertidalCellCount()} cells`,
+          : `${tideById(id).label} — upper ring is mean high water; tinted shore is the band`,
       );
       syncMeshes();
     },
@@ -228,13 +236,7 @@ const ui = mountControls(
       const meters = seaLevelById(id).meters;
       world.setSeaLevel(meters);
       oceanMesh.setSeaLevel(meters);
-      scene.remove(extentCage);
-      extentCage.geometry.dispose();
-      (extentCage.material as import("three").Material).dispose();
-      extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
-        seaLevel: meters,
-      });
-      scene.add(extentCage);
+      rebuildExtentCage();
       syncMeshes();
       ui.setSeaLevel(id);
       ui.setHint(
@@ -248,6 +250,7 @@ const ui = mountControls(
       steps = 0;
       clock.resetDroppedSteps();
       syncMeshes();
+      syncWaterDisplay(0, true);
     },
     onTimeRate: (rate) => {
       timeRate = rate;
@@ -317,6 +320,7 @@ const ui = mountControls(
         steps = 0;
         clock.resetDroppedSteps();
         syncMeshes();
+        syncWaterDisplay(0, true);
         ui.setUndoEnabled(false);
         ui.setHint(`Loaded · hash ${world.stateHash()}`);
       } catch (err) {
@@ -430,7 +434,20 @@ function syncAudio(): void {
   }
 }
 
-function syncMeshes(): void {
+function rebuildExtentCage(): void {
+  scene.remove(extentCage);
+  extentCage.geometry.dispose();
+  (extentCage.material as import("three").Material).dispose();
+  extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
+    seaLevel: world.seaLevel,
+    meanHighWater: world.meanHighWater,
+  });
+  scene.add(extentCage);
+}
+
+let lastFlowCueWall = 0;
+
+function syncMeshes(nowWall?: number): void {
   world.ensureStructureFresh();
   terrainMesh.updateFrom(
     model,
@@ -439,10 +456,18 @@ function syncMeshes(): void {
     prediction.overlayClassify(),
     fillElevDelta(),
   );
-  waterMesh.updateFrom(model);
-  flowCue.updateFrom(model, world);
+  // Flow ticks every event look like strobe at 16× — refresh ~4 Hz max.
+  if (nowWall === undefined || nowWall - lastFlowCueWall >= 0.25) {
+    flowCue.updateFrom(model, world);
+    if (nowWall !== undefined) lastFlowCueWall = nowWall;
+  }
   occupantMesh.updateFrom(model, world);
   syncAudio();
+}
+
+function syncWaterDisplay(wallDt: number, snap = false): void {
+  if (snap) waterMesh.snapFrom(model, world.oceanCells);
+  else waterMesh.updateFrom(model, world.oceanCells, wallDt);
 }
 
 function predictionStatus(): string {
@@ -525,11 +550,13 @@ function frame(now: number): void {
   if (stepsRun > 0) {
     editUndo.noteTimeAdvanced();
     ui.setUndoEnabled(false);
-    syncMeshes();
+    syncMeshes(now / 1000);
     if (cutawayCell) {
       ui.setCutaway(formatCutaway(sampleCutaway(cutawayCell)));
     }
   }
+  // Water display catches up every wall frame — not every event step.
+  syncWaterDisplay(wallDt);
 
   const timeDebt = clock.getTimeDebt();
   const rateLabel = timeRate === "pause" ? "paused" : timeRate;
@@ -547,6 +574,8 @@ function frame(now: number): void {
     `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
       ` · ${rainRegimeById(rainRegime).label}` +
+      ` · ${windById(windId).label}` +
+      ` · ${tideById(tideId).label}` +
       (formMemory.hasThen ? " · then" : "") +
       ` · ${conservationLine()}`,
   );

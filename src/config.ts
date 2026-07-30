@@ -188,9 +188,11 @@ export const config = {
   herbBiomassMax: 2.5,
 
   /**
-   * Slice 21 / C-019 — overseas seed pressure on island worlds (seaLevel set).
-   * Mainland perimeter rain (seedSourceStrength) is unused when seaLevel is set.
+   * Wall-clock seconds for display water depth to catch ~63% of a step change.
+   * Observer only — sim depths stay authoritative (T-006). Stops 16× event
+   * strobing from reading as a broken framerate.
    */
+  waterDisplayTauSeconds: 0.28,
   overseasSeedBase: 40,
   /** Shore-biased exponential mean distance (cells) — shorter than mainland λ. */
   overseasMeanDistanceCells: 4,
