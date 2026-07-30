@@ -13,6 +13,12 @@ export const config = {
   mountainPeak: 14,
   /** Preserve elevation floor — not a drainage law (§2). Digs clamp here. */
   elevationFloor: 0,
+  /**
+   * Orographic precip γ in P = P₀(1 + γ·u·∇z) (Slice F / C-020 lite).
+   * ∇z is metres per cell; γ sized so a ~0.5 m/cell face yields a strong
+   * windward/leeward split after land-mean normalization.
+   */
+  orographicGamma: 2.5,
 
   /**
    * Integer sim-minute clock (SIMULATION_MODEL §6.1 / §6.5 option 1).

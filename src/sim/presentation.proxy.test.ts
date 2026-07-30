@@ -10,6 +10,8 @@ import { FlowCueMesh } from "../render/FlowCueMesh";
 import { generateMountain } from "./terrain/generateMountain";
 import { generateIsland } from "./terrain/generateIsland";
 import { shorelineEncodingDelta } from "./climate/seaLevel";
+import { fillOrographicRainDepths } from "./climate/orographicPrecip";
+import { windById } from "./climate/windRegime";
 import {
   elevChangeEncodingStrength,
   FormMemory,
@@ -191,6 +193,58 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       shorelineEncodingDelta(48, 48, terrain.data, 3.5),
     ).toBeGreaterThan(shoreFrac);
+  });
+
+  it("orographic wet/dry sides encode in soil darkening without inspector (Slice F)", () => {
+    const w = 32;
+    const h = 16;
+    const ridge = new Grid2D(w, h);
+    const mid = (w - 1) * 0.5;
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        ridge.set(x, z, Math.max(0.5, 10 - Math.abs(x - mid) * (10 / mid)));
+      }
+    }
+    const world = new WorldState(ridge, { closedBoundary: true });
+    const depths = new Float32Array(w * h);
+    const wind = windById("west");
+    for (let step = 0; step < config.dailyEventSteps * 2; step++) {
+      fillOrographicRainDepths(
+        depths,
+        world.terrain.data,
+        w,
+        h,
+        config.rainDepthPerEvent * 0.5,
+        wind,
+        config.orographicGamma,
+        () => false,
+      );
+      world.addRainField(depths);
+      world.stepEvent();
+    }
+    let left = 0;
+    let right = 0;
+    let nL = 0;
+    let nR = 0;
+    const half = (w / 2) | 0;
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        const i = z * w + x;
+        const m = world.soilMoisture.data[i]!;
+        if (x < half) {
+          left += m;
+          nL++;
+        } else {
+          right += m;
+          nR++;
+        }
+      }
+    }
+    const encoding = Math.abs(
+      soilEncodingDelta(left / nL, right / nR, config.soilPorosity),
+    );
+    // World encoding: ground darkens differently by side — no inspector layer.
+    expect(encoding).toBeGreaterThan(0.05);
   });
 
   it("scenario brief chrome is present when a brief is active (Slice 15)", () => {

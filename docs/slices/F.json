@@ -1,0 +1,18 @@
+{
+  "id": "F",
+  "title": "Force panel + climate-mean rain + orographic wind",
+  "simLoop": "Climate-mean precip intensity every event; wind × terrain slope modulates placement via orographic P = P0(1+γ·u·∇z) with land-mean normalization (C-020 lite / C-004).",
+  "gameLoop": "Shape the island, set rainfall mean / sea / wind on the Force panel, run time, and watch the place answer — soil darkening and water, not a dashboard.",
+  "registerIds": ["C-004", "C-011", "C-015", "C-020", "C-006", "H-004", "T-001", "T-006"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/rainRegime.test.ts",
+    "src/sim/orographic.test.ts",
+    "src/sim/island.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["orographic-wind", "island-drainage", "regime-divergence"],
+  "fields": [],
+  "notebookSeed": "I set a wetter climate and the windward slope stayed green.",
+  "tierO": "no owner-only question; deferred to next observable slice — panel + climate mean + orographic modulation exist; C-004 / C-020 naturalness may batch later"
+}

@@ -36,6 +36,8 @@ import {
   seaLevelById,
   type SeaLevelId,
 } from "./sim/climate/seaLevel";
+import { windById, type WindId } from "./sim/climate/windRegime";
+import { fillOrographicRainDepths } from "./sim/climate/orographicPrecip";
 import { FormMemory } from "./sim/formMemory";
 import {
   sampleAudioMix,
@@ -124,6 +126,7 @@ waterMesh.updateFrom(model);
 occupantMesh.updateFrom(model, world);
 
 let rainRegime: RainRegimeId = "dry";
+let windId: WindId = "west";
 let seaLevelId: SeaLevelId = initialSea;
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
@@ -134,6 +137,7 @@ let cutawayCell: { x: number; z: number } | null = null;
 /** Optional Web Audio gain — null until unlocked; mix still computed (C-014). */
 let waterGainTarget: GainTarget | null = null;
 let lastAudioSilent: boolean | null = null;
+const rainDepthScratch = new Float32Array(n * n);
 
 const clock = new SimClock({
   simDt: config.simDt,
@@ -163,12 +167,28 @@ function fillElevDelta(): Float32Array | null {
 
 const ui = mountControls(
   app,
-  { rainRegime, seaLevel: seaLevelId, timeRate, inspector, sitingTool },
+  {
+    rainRegime,
+    seaLevel: seaLevelId,
+    wind: windId,
+    timeRate,
+    inspector,
+    sitingTool,
+  },
   {
     onRainRegime: (id) => {
       rainRegime = id;
       ui.setRainRegime(id);
-      ui.setHint(`Force: ${rainRegimeById(id).label} (whole preserve)`);
+      ui.setHint(
+        `Climate: ${rainRegimeById(id).label} — watch the ground wetten`,
+      );
+    },
+    onWind: (id) => {
+      windId = id;
+      ui.setWind(id);
+      ui.setHint(
+        `${windById(id).label} — watch which slopes stay wetter`,
+      );
     },
     onToggleBrief: () => {
       if (scenarioSession) {
@@ -440,11 +460,22 @@ function frame(now: number): void {
 
   const { stepsRun } = clock.tick(wallDt);
   const regime = rainRegimeById(rainRegime);
+  const wind = windById(windId);
   const depth = rainDepthForRegime(regime, config.rainDepthPerEvent);
   for (let i = 0; i < stepsRun; i++) {
     const indexInDay = steps % config.dailyEventSteps;
     if (depth > 0 && regimeRainsThisEvent(regime, indexInDay, config.dailyEventSteps)) {
-      model.addRain(depth);
+      fillOrographicRainDepths(
+        rainDepthScratch,
+        world.terrain.data,
+        n,
+        n,
+        depth,
+        wind,
+        config.orographicGamma,
+        (cell) => world.oceanCells.has(cell),
+      );
+      world.addRainField(rainDepthScratch);
     }
     try {
       world.stepEvent();

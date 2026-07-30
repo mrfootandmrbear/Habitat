@@ -19,6 +19,8 @@
 
 **2026-07-30** island brief batch ([docs/playtests/batch-island-brief.md](../playtests/batch-island-brief.md)): rain regime dial **works for now** but does **not** feel natural. Owner direction for later: clouds that deliver rain/snow/sleet from wind, moisture, and heat — filed as **C-020**. Does not close the stewardship half; keep the dial until C-020 has a slice.
 
+**2026-07-30 (Slice F clarification).** Rainfall should feel like a **climate / mean precip setting** the world lives under (what vegetation experiences), not a storm on/off switch. Slice F retunes the dial to arid→wet mean intensity and adds wind orography so placement is visible in the landscape — Force panel is controls only, not a dashboard. Stewardship half still Open.
+
 ## Owner-only question (verbatim criterion)
 
 After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed?

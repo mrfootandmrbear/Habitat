@@ -1,0 +1,57 @@
+{
+  "scenario": "orographic-wind",
+  "metrics": {
+    "west.precip": {
+      "value": 80.63999953866005,
+      "abs": 0.01
+    },
+    "west.relResidual": {
+      "value": 0.0000013295530648506196,
+      "abs": 0.000001
+    },
+    "west.sideEncoding": {
+      "value": 0.12627104556142715,
+      "abs": 0.0001
+    },
+    "west.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "west.hashN": {
+      "value": 3849886272,
+      "abs": 0
+    },
+    "east.precip": {
+      "value": 80.63999953866005,
+      "abs": 0.01
+    },
+    "east.sideEncoding": {
+      "value": 0.12627104556142715,
+      "abs": 0.0001
+    },
+    "east.hashN": {
+      "value": 1238533614,
+      "abs": 0
+    },
+    "delta.hashDiverged": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.precipRatio": {
+      "value": 0.9999999634123286,
+      "abs": 0.0001
+    },
+    "delta.conserved": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.encodingFloor": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.calmPrecip": {
+      "value": 80.64000248908997,
+      "abs": 0.01
+    }
+  }
+}

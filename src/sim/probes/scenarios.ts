@@ -9,6 +9,8 @@ import {
   regimeRainsThisEvent,
   type RainRegimeId,
 } from "../climate/rainRegime";
+import { fillOrographicRainDepths } from "../climate/orographicPrecip";
+import { windById, type WindId } from "../climate/windRegime";
 import {
   LIMITING_DEPTH,
   LIMITING_MOISTURE,
@@ -31,6 +33,7 @@ import {
   criterionReaderFromWorld,
   livingHollowObjective,
 } from "../scenario/ScenarioSession";
+import { soilEncodingDelta } from "../../ui/cutaway";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -1332,6 +1335,160 @@ export function probeIslandDrainage(): ProbeResult {
   };
 }
 
+/**
+ * Slice F / C-020 lite — climate-mean rain + opposite winds → divergent
+ * wet/dry sides; mean precip tracks regime; mass closes. No cell targeting.
+ */
+export function probeOrographicWind(): ProbeResult {
+  const w = 40;
+  const h = 24;
+  const seedPeak = 12;
+  const days = 2;
+  const regime = rainRegimeById("moderate");
+  const base = rainDepthForRegime(regime, config.rainDepthPerEvent);
+  const depths = new Float32Array(w * h);
+
+  const ridge = () => {
+    const g = new Grid2D(w, h);
+    const mid = (w - 1) * 0.5;
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        g.set(
+          x,
+          z,
+          Math.max(0.5, seedPeak - Math.abs(x - mid) * (seedPeak / mid)),
+        );
+      }
+    }
+    return g;
+  };
+
+  const run = (windId: WindId) => {
+    const world = new WorldState(ridge(), { closedBoundary: true });
+    const wind = windById(windId);
+    for (let d = 0; d < days; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        if (
+          base > 0 &&
+          regimeRainsThisEvent(regime, i, config.dailyEventSteps)
+        ) {
+          fillOrographicRainDepths(
+            depths,
+            world.terrain.data,
+            w,
+            h,
+            base,
+            wind,
+            config.orographicGamma,
+            () => false,
+          );
+          world.addRainField(depths);
+        }
+        world.stepEvent();
+      }
+    }
+    let leftSoil = 0;
+    let rightSoil = 0;
+    let nL = 0;
+    let nR = 0;
+    const half = (w / 2) | 0;
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        const idx = z * w + x;
+        const m = world.soilMoisture.data[idx]!;
+        if (x < half) {
+          leftSoil += m;
+          nL++;
+        } else {
+          rightSoil += m;
+          nR++;
+        }
+      }
+    }
+    const leftMean = leftSoil / Math.max(1, nL);
+    const rightMean = rightSoil / Math.max(1, nR);
+    const relResidual =
+      Math.abs(world.waterBalanceResidual()) /
+      Math.max(1, world.precipitationLedger);
+    return {
+      hash: world.stateHash(),
+      precip: world.precipitationLedger,
+      relResidual,
+      leftMean,
+      rightMean,
+      sideEncoding: Math.abs(
+        soilEncodingDelta(leftMean, rightMean, config.soilPorosity),
+      ),
+    };
+  };
+
+  const westA = run("west");
+  const westB = run("west");
+  const east = run("east");
+  const calm = run("calm");
+
+  if (westA.hash !== westB.hash) {
+    throw new Error(
+      `orographic-wind: same wind must match (T-001) ${westA.hash} vs ${westB.hash}`,
+    );
+  }
+  if (westA.hash === east.hash) {
+    throw new Error(
+      "orographic-wind: opposite winds produced identical hashes",
+    );
+  }
+  if (westA.relResidual >= 1e-4) {
+    throw new Error(
+      `orographic-wind: H-004 residual too large (rel=${westA.relResidual})`,
+    );
+  }
+  const precipRatio = westA.precip / Math.max(1e-9, calm.precip);
+  if (precipRatio < 0.85 || precipRatio > 1.15) {
+    throw new Error(
+      `orographic-wind: precip should track climate mean (west/calm=${precipRatio})`,
+    );
+  }
+  if (!(westA.leftMean > westA.rightMean)) {
+    throw new Error(
+      `orographic-wind: west wind should wet west face (L=${westA.leftMean} R=${westA.rightMean})`,
+    );
+  }
+  const encoding = Math.max(westA.sideEncoding, east.sideEncoding);
+  if (encoding < 0.05) {
+    throw new Error(
+      `orographic-wind: wet/dry side soil encoding too weak (${encoding})`,
+    );
+  }
+
+  return {
+    scenario: "orographic-wind",
+    records: [
+      {
+        label: "west",
+        precip: westA.precip,
+        relResidual: westA.relResidual,
+        sideEncoding: westA.sideEncoding,
+        replayMatch: 1,
+        hashN: Number.parseInt(westA.hash.slice(0, 8), 16),
+      },
+      {
+        label: "east",
+        precip: east.precip,
+        sideEncoding: east.sideEncoding,
+        hashN: Number.parseInt(east.hash.slice(0, 8), 16),
+      },
+      {
+        label: "delta",
+        hashDiverged: westA.hash !== east.hash ? 1 : 0,
+        precipRatio,
+        conserved: westA.relResidual < 1e-4 ? 1 : 0,
+        encodingFloor: encoding >= 0.05 ? 1 : 0,
+        calmPrecip: calm.precip,
+      },
+    ],
+  };
+}
+
 export function probeScenarioWindow(): ProbeResult {
   const def = livingHollowObjective({
     threshold: 0.5,
@@ -1463,6 +1620,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "arrival-earned": probeArrivalEarned,
   "living-hollow": probeLivingHollow,
   "island-drainage": probeIslandDrainage,
+  "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
 };
 

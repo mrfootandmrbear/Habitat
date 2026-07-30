@@ -50,8 +50,8 @@ The outer ring — **build → forces → time → look** — is the thesis loop
 
 | Edge | Register | MVP? | Notes |
 |---|---|---|---|
-| Build the form — abundant sculpting | A-005, **C-006** | **Yes** | Shipped Slice 5b (berm/dig). Unrationed by design; scarcity is ecological time (RC-004) |
-| Choose the forces — regime control | **C-004** | **Post-MVP, thesis-critical** | The post-build verb. Today only `Rain: on/off` exists — a toggle where a regime belongs |
+| Build the form — abundant sculpting | A-005, **C-006** | **Yes** | Shipped Slice 5b (berm/dig); island canvas retuned Slice F. Unrationed; scarcity is ecological time (RC-004) |
+| Choose the forces — regime control | **C-004** | **Yes (shipping)** | Force panel: climate-mean rainfall, sea level, wind (Slice F). Full weather phase (**C-020**) later. Not a dashboard — look at the world |
 | Return visit — see what became of it | **C-008**, GEO-002 | **Post-MVP** | Slice 8c. The payoff exists in sim and is invisible in play |
 | Run it again, different forces | **C-005** | **Post-MVP** | Needs branch/compare; T-001 determinism already supplies the hard half |
 | Observe ↔ readable change | P-003, U-003, ART-001 | **Yes** | World is primary visualization |
@@ -130,10 +130,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **14** | Scenario objective scaffold (G-002) | Finite objective over the same sculpt → forces → time loop | **Done** — Tier-O Pass ([batch-island-brief.md](playtests/batch-island-brief.md)) |
 | **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet / force dial | **Done** — Tier-O Pass ([batch-island-brief.md](playtests/batch-island-brief.md)) |
 | **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **Done** — Tier-O Pass ([batch-island-brief.md](playtests/batch-island-brief.md)) |
+| **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt → set climate forces → watch the place | **Done** — BUILD_GUIDE §4.11b (agent; no Tier-O) |
 | **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | **Next** — BUILD_GUIDE §4.12 |
 | **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | Specified — BUILD_GUIDE §4.13 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass** ([batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30); next **Slice 17** tidal envelope; Slice A audio wired (C-014 Open); **C-020** atmospheric precip filed (later).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** Done (climate-mean forces + orographic lite); next **Slice 17** tidal envelope; Slice A audio wired (C-014 Open); full **C-020** clouds/phase later.
 
 ---
 

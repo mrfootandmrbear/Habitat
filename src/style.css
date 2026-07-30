@@ -29,6 +29,25 @@ body,
   max-width: calc(100vw - 2rem);
 }
 
+#controls fieldset#force-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(215, 230, 220, 0.25);
+  border-radius: 4px;
+}
+
+#controls fieldset#force-panel legend {
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(215, 230, 220, 0.7);
+}
+
 #controls button {
   border: 1px solid #3d5c4c;
   background: #1c3328;

@@ -249,6 +249,21 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.habitatMosaic": { abs: 0 },
     "delta.stepMs64": { abs: 1e9 },
   },
+  "orographic-wind": {
+    "west.precip": { abs: 1e-2 },
+    "west.relResidual": { abs: 1e-6 },
+    "west.sideEncoding": { abs: 1e-4 },
+    "west.replayMatch": { abs: 0 },
+    "west.hashN": { abs: 0 },
+    "east.precip": { abs: 1e-2 },
+    "east.sideEncoding": { abs: 1e-4 },
+    "east.hashN": { abs: 0 },
+    "delta.hashDiverged": { abs: 0 },
+    "delta.precipRatio": { abs: 1e-4 },
+    "delta.conserved": { abs: 0 },
+    "delta.encodingFloor": { abs: 0 },
+    "delta.calmPrecip": { abs: 1e-2 },
+  },
 };
 
 const args = process.argv.slice(2);

@@ -25,9 +25,10 @@ function gaussian(
 }
 
 /**
- * Radial island with interior basins and a low perimeter shelf (C-015).
- * Elevations stay ≥ elevationFloor; pass seaLevel above the shelf so the
- * rim floods while the peak and hollows remain land.
+ * Broad, lower island sculpting canvas (Slice F / C-015 / C-006).
+ * Wider shelf and gentler dome so more land sits above mid sea as workable
+ * ground; no deep pre-carved basins — hollows are mostly player-made.
+ * Elevations stay ≥ elevationFloor; seaLevel above shelf floods the rim.
  */
 export function generateIsland(
   width: number,
@@ -42,61 +43,35 @@ export function generateIsland(
   const cz = (height - 1) * 0.5;
   const maxR = Math.min(cx, cz);
   const shelf = options?.shelfHeight ?? Math.max(config.elevationFloor, 0.4);
+  // Effective relief ~55% of peakHeight — lower castle, more editable shelf.
+  const relief = (peakHeight - shelf) * 0.55;
 
   for (let z = 0; z < height; z++) {
     for (let x = 0; x < width; x++) {
       const dx = (x - cx) / maxR;
       const dz = (z - cz) / maxR;
       const r = Math.sqrt(dx * dx + dz * dz);
-      // Shore near r≈1; interior peak. Softfall so the rim is below typical sea.
+      // Gentler radial falloff — broader plateau of workable ground.
       const radial = Math.max(0, 1 - r);
-      let h = shelf + (peakHeight - shelf) * (radial * radial * (3 - 2 * radial));
-      const gullyMask = Math.exp(-((dx * 7) ** 2)) * Math.max(0, dz);
-      h -= (peakHeight - shelf) * 0.14 * gullyMask;
-      // Force outer ring toward shelf so seaLevel > shelf floods a coastline.
-      if (r > 0.92) {
-        h = shelf + (h - shelf) * Math.max(0, (1 - r) / 0.08);
+      const dome = Math.pow(radial, 1.25);
+      let h = shelf + relief * dome;
+      // Mild drainage hint (not a finished hollow).
+      const gullyMask = Math.exp(-((dx * 5) ** 2)) * Math.max(0, dz);
+      h -= relief * 0.06 * gullyMask;
+      // Soft outer ring toward shelf so sea floods a coastline.
+      if (r > 0.88) {
+        h = shelf + (h - shelf) * Math.max(0, (1 - r) / 0.12);
       }
       terrain.set(x, z, Math.max(config.elevationFloor, h));
     }
   }
 
-  const basins = [
-    {
-      cx: cx - maxR * 0.28,
-      cz: cz + maxR * 0.12,
-      sigma: maxR * 0.09,
-      amp: -(peakHeight - shelf) * 0.28,
-    },
-    {
-      cx: cx + maxR * 0.22,
-      cz: cz - maxR * 0.18,
-      sigma: maxR * 0.08,
-      amp: -(peakHeight - shelf) * 0.22,
-    },
-  ];
-
-  for (const b of basins) {
-    for (let z = 0; z < height; z++) {
-      for (let x = 0; x < width; x++) {
-        terrain.set(
-          x,
-          z,
-          Math.max(
-            config.elevationFloor,
-            terrain.get(x, z) + gaussian(x, z, b.cx, b.cz, b.sigma, b.amp),
-          ),
-        );
-      }
-    }
-  }
-
-  for (let i = 0; i < 6; i++) {
-    const bx = cx + (rand() - 0.5) * maxR * 1.2;
-    const bz = cz + (rand() - 0.5) * maxR * 1.2;
-    const sigma = maxR * (0.04 + rand() * 0.05);
-    const amp =
-      (peakHeight - shelf) * (0.02 + rand() * 0.05) * (rand() < 0.45 ? 1 : -1);
+  // Light seed noise only — no deep authored basins (player sculpts hollows).
+  for (let i = 0; i < 8; i++) {
+    const bx = cx + (rand() - 0.5) * maxR * 1.15;
+    const bz = cz + (rand() - 0.5) * maxR * 1.15;
+    const sigma = maxR * (0.05 + rand() * 0.07);
+    const amp = relief * (0.015 + rand() * 0.035) * (rand() < 0.5 ? 1 : -1);
     for (let z = 0; z < height; z++) {
       for (let x = 0; x < width; x++) {
         terrain.set(

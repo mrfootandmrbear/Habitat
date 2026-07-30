@@ -93,12 +93,13 @@ Summary only — do not reopen unless fixing regressions.
 | 14 | Scenario objective scaffold (G-002) | Finite objective over same loop | `ScenarioSession`, `scenario-window` | **Done** — Tier-O Pass (batch 2026-07-30) |
 | **16** | Sea level + island (**C-015**) | Shape an island; sea is the outlet | `generateIsland`, `ledger.oceanExchange` | **Done** — Tier-O Pass (batch 2026-07-30) |
 | **15** | Scenario brief chrome | Accept a brief on the island world | Scenario UI observer | **Done** — Tier-O Pass (batch 2026-07-30) |
+| **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt island · set forces · watch the place | `FORCE_PANEL`, `orographicPrecip`, `orographic-wind` | **Done** — agent (no Tier-O) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass** ([playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30). Next sim: Slice **17** tidal envelope (§4.12). Island place reading discharged for C-015; **W-001** supersession still an owner register act. **C-020** filed (atmospheric precip delivery — later). **Slice A** audio scaffold wired (C-014 still Open). C-004 stewardship reading still Open (dossier; rain dial “works for now,” not natural).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** Done (agent — climate-mean Force panel + orographic lite). Next: Slice **17** tidal envelope (§4.12). Island is the default playable world (C-015 place Pass; **W-001** supersession still owner). Rainfall dial is a **climate mean** (not storm on/off). Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); 17–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); 17–19 deepen maritime forces; 20–21 salt and overseas arrival. Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
-**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-019. Do not implement Open candidates as if Locked.
+**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked.
 
 ---
 
@@ -466,11 +467,38 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Wire `observe` on event step when scenario loaded (write isolation retained)
 - [x] `docs/slices/15.json` manifest; notebook seed from Slice 14 brief
 - [x] Tier-O **Pass** ([docs/playtests/batch-island-brief.md](playtests/batch-island-brief.md), owner 2026-07-30)
+- [x] **Next-but-one:** Slice 17 tidal envelope (§4.12) — Slice **F** may run first (force panel / climate mean) without blocking 17
+
+---
+
+### 4.11b Slice F — Force panel + climate-mean rain + orographic wind *(Done — agent)*
+
+**Why this exists.** Island Pass left the rain dial as a working but unnatural storm-like control. Owner direction: rainfall is a **climate mean** the preserve lives under (what vegetation experiences), not an on/off storm switch; wind × relief decides *where* that mean lands. The Force panel is the post-sculpt verb surface (C-004) — a control strip, not a dashboard. Proof is watching the landscape wetten and diverge, not reading meters.
+
+**Loops.** Sim: global climate-mean precip intensity every event; wind × terrain slope modulates placement via `P = P₀(1 + γ·u·∇z)` with land-mean normalization (H-004). Game: shape a blanker island, set rainfall mean / sea / wind, run time, **watch the place** answer (soil darkening / water) — no inspector required.
+
+**Register / candidates.** **C-004**, **C-011**, **C-015**, **C-020** (lite — do not Lock), H-004, T-001, T-006, C-006 (sculpt canvas).
+
+**Study.** [ISLAND_FORCES.md](ISLAND_FORCES.md); [FORCE_PANEL.md](FORCE_PANEL.md); NATURAL_PROCESS_MATH §4 orographic; EXTERNAL_REFERENCES study row.
+
+**Bans.** Cloud painter / cell-targeted rain. Charts, precip HUD meters, orographic inspector layer. Stochastic free weather while C-003 Open. Resolving full C-020. Blocking Slice 17. SWE. Inventing Locked policy.
+
+**Gate.** After 14 / 16 / 15 Tier-O Pass. Inserts before 17 in the queue tip; 17 remains next-but-one maritime physics.
+
+- [x] `docs/ISLAND_FORCES.md` + `docs/FORCE_PANEL.md` (feel contract: look at the world)
+- [x] Climate-mean rainfall dial (wetFraction=1; intensity = mean; labels arid→wet)
+- [x] Broader / lower `generateIsland` sculpting canvas (no deep authored basins)
+- [x] Wind dial + orographic modulate + `addRainField`; Force panel chrome (controls only)
+- [x] Tier-M: probe `orographic-wind` — opposite winds diverge; precip tracks mean; residual closes
+- [x] Tier-P: wet/dry side soil-darkening encoding without inspector (`presentation.proxy.test.ts`)
+- [x] `docs/slices/F.json` manifest
+- [x] Notebook seed: “I set a wetter climate and the windward slope stayed green.”
+- [x] No Tier-O required this slice (panel + modulation exist); C-004 / C-020 naturalness may batch later
 - [x] **Next-but-one:** Slice 17 tidal envelope (§4.12)
 
 ---
 
-### 4.12 Slice 17 — Tidal envelope / intertidal *(specified; after Slice 16)*
+### 4.12 Slice 17 — Tidal envelope / intertidal *(specified; after Slice F / 16)*
 
 **Why this exists.** C-016: tides as mean high / mean low water envelope, not instantaneous phase. Intertidal zone is the band between them — a real habitat the island form earns.
 
@@ -520,7 +548,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). Next: Slice **17** tidal envelope (§4.12). Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** Done (§4.11b). Next: Slice **17** tidal envelope (§4.12). Slices **17** / **18** specified (§4.12–4.13). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

@@ -7,6 +7,10 @@ import {
   SEA_LEVEL_REGIMES,
   type SeaLevelId,
 } from "../sim/climate/seaLevel";
+import {
+  WIND_REGIMES,
+  type WindId,
+} from "../sim/climate/windRegime";
 
 export type TimeRate = "pause" | "1x" | "4x" | "16x";
 
@@ -51,6 +55,7 @@ export function mountControls(
   initial: {
     rainRegime: RainRegimeId;
     seaLevel: SeaLevelId;
+    wind: WindId;
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
@@ -58,6 +63,7 @@ export function mountControls(
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
     onSeaLevel: (id: SeaLevelId) => void;
+    onWind: (id: WindId) => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
@@ -74,6 +80,7 @@ export function mountControls(
 ): {
   setRainRegime: (id: RainRegimeId) => void;
   setSeaLevel: (id: SeaLevelId) => void;
+  setWind: (id: WindId) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
@@ -85,11 +92,18 @@ export function mountControls(
   const bar = document.createElement("div");
   bar.id = "controls";
 
+  const forcePanel = document.createElement("fieldset");
+  forcePanel.id = "force-panel";
+  forcePanel.setAttribute("aria-label", "Forces (C-004 — global regimes)");
+  const forceLegend = document.createElement("legend");
+  forceLegend.textContent = "Forces";
+  forcePanel.appendChild(forceLegend);
+
   const rainSelect = document.createElement("select");
   rainSelect.id = "rain-regime";
   rainSelect.setAttribute(
     "aria-label",
-    "Rainfall regime (C-004 force dial)",
+    "Mean rainfall climate (C-004 force dial)",
   );
   for (const regime of RAIN_REGIMES) {
     const opt = document.createElement("option");
@@ -118,6 +132,25 @@ export function mountControls(
   seaSelect.addEventListener("change", () => {
     handlers.onSeaLevel(seaSelect.value as SeaLevelId);
   });
+
+  const windSelect = document.createElement("select");
+  windSelect.id = "wind-regime";
+  windSelect.setAttribute(
+    "aria-label",
+    "Wind (C-020 lite — orographic mean rain, no place targeting)",
+  );
+  for (const regime of WIND_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    windSelect.appendChild(opt);
+  }
+  windSelect.value = initial.wind;
+  windSelect.addEventListener("change", () => {
+    handlers.onWind(windSelect.value as WindId);
+  });
+
+  forcePanel.append(rainSelect, seaSelect, windSelect);
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
@@ -239,7 +272,7 @@ export function mountControls(
   const hint = document.createElement("div");
   hint.id = "siting-hint";
   hint.textContent =
-    "Build → Remember form → set Rain regime → run time → look (then vs now)";
+    "Shape the island · set climate forces · run time · watch the place answer";
 
   const cutaway = document.createElement("div");
   cutaway.id = "cutaway";
@@ -250,8 +283,7 @@ export function mountControls(
   status.textContent = "Habitat";
 
   bar.append(
-    rainSelect,
-    seaSelect,
+    forcePanel,
     briefBtn,
     resetBtn,
     rememberBtn,
@@ -274,6 +306,9 @@ export function mountControls(
     },
     setSeaLevel: (id) => {
       seaSelect.value = id;
+    },
+    setWind: (id) => {
+      windSelect.value = id;
     },
     setTimeRate: syncTimeRate,
     setInspector: (layer) => {

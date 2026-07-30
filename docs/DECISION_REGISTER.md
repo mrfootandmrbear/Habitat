@@ -120,6 +120,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Promoted **P-005** (save states) from hypothesis-Current to Locked after the `deep-time` probe discharged its criterion: save → advance 100 compressed sim-years → reload → advance again yields an identical state hash, and legacy `soil.depth` from a save still drives divergent decadal production. Artifact: `docs/evidence/deep-time.baseline.json`, `src/sim/probes/deepTime.ts`.
 
+**v2.0.6 — Slice F climate-mean rainfall + orographic lite.**
+
+- Reframed rainfall dial as **climate mean intensity** (arid→wet, every-event mean) under **C-004** / owner clarification — not storm on/off. Slice **F** adds Force panel + wind dial + orographic placement (**C-020** lite); full cloud/snow/sleet remains later. Island remains default playable world.
+
 **v2.0.5 — C-020 filed; island brief Tier-O Pass.**
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
@@ -1252,7 +1256,7 @@ Ordered by how many other decisions depend on them.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
 8g. **C-015**…**C-019** — island maritime direction (sea as base level; tidal envelope; wave exposure; salinity; island biogeography). Filed 2026-07-30. C-015 place reading Pass (2026-07-30); **W-001** supersession still an owner call.
-8h. **C-020** — atmospheric precip delivery (clouds → rain/snow/sleet from wind, moisture, heat). Filed 2026-07-30 from island-brief Pass notes; later — keep C-004 rain dial until then.
+8h. **C-020** — atmospheric precip delivery (clouds → rain/snow/sleet from wind, moisture, heat). Filed 2026-07-30 from island-brief Pass notes. **Slice F** lands a lite path (climate-mean rain + orographic wind); full phase/clouds later — keep C-004 force panel until then.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1487,7 +1491,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** Must not become cell-targeted smiting (C-004 / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until a slice demonstrates atmospheric delivery without collapsing stewardship into a cloud painter.
 
-**Leading direction.** Yes, later — after the maritime ladder (C-015…C-019) and while C-004 remains the post-build verb. Not Locked until one build shows precip phase and placement attributable to atmospheric state (not to a place the player clicked), with mass balance closed and no cell targeting.
+**Leading direction.** Yes — a **lite** path may land in **Slice F** (climate-mean rainfall dial + orographic wind modulation so geography places precip; no cell targeting). Full cloud / snow / sleet phase remains later and does not claim Locked until that criterion is met. Not Locked until one build shows precip phase and placement attributable to atmospheric state (not to a place the player clicked), with mass balance closed and no cell targeting.
 
 ---
 

@@ -991,6 +991,32 @@ export class WorldState {
   }
 
   /**
+   * Per-cell rain depths (Slice F orographic / C-020 lite). Length must match
+   * the grid. Ocean cells contribute to oceanExchange; no cell targeting API —
+   * depths are derived from global wind × terrain (C-004).
+   */
+  addRainField(depths: Float32Array): void {
+    if (depths.length !== this.water.data.length) {
+      throw new Error("addRainField: depth buffer length mismatch");
+    }
+    const data = this.water.data;
+    let added = 0;
+    const ocean = this.oceanCells;
+    for (let i = 0; i < data.length; i++) {
+      const d = depths[i]!;
+      if (d === 0) continue;
+      if (ocean.has(i)) {
+        this.oceanExchangeLedger += d;
+        added += d;
+        continue;
+      }
+      data[i]! += d;
+      added += d;
+    }
+    this.precipitationLedger += added;
+  }
+
+  /**
    * Keep soil-column water mass when depth changes. Volumetric moisture is
    * storage/depth; thinning (dig / erosion) can push fraction above porosity —
    * spill the excess to surface so bounds stay honest and mass closes.
