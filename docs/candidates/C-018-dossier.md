@@ -1,6 +1,6 @@
 # C-018 — Salinity as the first mobile legacy substance
 
-**Status:** Open (owner-judged half outstanding)  
+**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
 **Criterion (verbatim).** One salinity field sources at the ocean boundary, dilutes with freshwater, is save-legacy, and gates HSI / arrival so a salty hollow earns less (or different) occupancy than a freshened twin under one seed schedule. No player cleanup tool. Water-balance residual class unchanged.
 
 ## Machine half (discharged)
@@ -21,10 +21,14 @@
 
 **Steal.** Coastal salinity / freshening (EXTERNAL_REFERENCES) → `docs/slices/20-composition.md`; rejected player cleanup, second salt ledger, salt-as-mangrove-only (**C-018**).
 
-## Owner half (outstanding)
+## Owner half (Pass — 2026-07-30)
 
 Whether the viewer reads salt as legacy history blocking arrival (S-008) rather than blaming today's rain.
 
-## Owner-only question (one sentence, no numbers)
+**Tier-P (default view).** Salt crust tint / green washout without Inspect — `salinityEncodingDelta` ≈ 0.524 (> 0.08); `presentation.proxy.test.ts`. Wired in `defaultTerrainRgb` + `TerrainMesh`.
 
-When the salty hollow stayed sparse while the freshened twin greened under the same seed rain, did that feel like the ground still tasting of the sea — or like today's weather?
+**Verdict.** Pass via [batch-salt-overseas.md](../playtests/batch-salt-overseas.md) Question A under **Rainfall: moderate** / **Sea: mid** / **View: terrain**.
+
+## Owner-only question (answered)
+
+When the pale shore stayed sparse while inland greened under the same rain, did that feel like the ground still tasting of the sea — or like today's weather?

@@ -97,10 +97,10 @@ Summary only — do not reopen unless fixing regressions.
 | **17** | Tidal envelope / intertidal (**C-016**) | Widen tide → shore band grows | `tidalEnvelope`, `shore.intertidal`, `tidal-envelope` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
 | **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore retreats via geomorphology | `shoreExposure`, `shore-exposure` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
-| **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — agent; C-018 Open (owner S-008 batched) |
-| **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — agent; C-019 Open (owner sparse-earned batched) |
+| **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
+| **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done (agent). Maritime shore Tier-O **Pass** ([docs/playtests/batch-maritime-shore.md](playtests/batch-maritime-shore.md) — C-016 / C-017 after wind/tide cues + water display smoothing). C-018 / C-019 owner halves still outstanding. Full **C-020** clouds/phase later. **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open. Later stubs: AUD-003 / Field Notebook / scenario campaign.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md) — C-018 / C-019; Lock still owner). Full **C-020** clouds/phase later (owner: rain dial still reads as a spigot — dossier). **Slice A** audio wired (C-014 Open). C-004 stewardship reading still Open. Next: later stubs (AUD-003 / Field Notebook / scenario campaign).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -577,7 +577,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; salinity field + ocean source / freshwater dilution
 - [x] Tier-M: paired freshened-vs-salty hollow divergent arrival; save-legacy round-trip
 - [x] Probe `salinity-arrival`; `docs/slices/20.json`
-- [x] C-018 dossier (owner S-008 legibility outstanding)
+- [x] C-018 dossier (owner S-008 **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-A; Lock still owner)
 - [x] **Next-but-one:** Slice 21 island biogeography (§4.16)
 
 ---
@@ -599,7 +599,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; over-water dispersal kernel + area/isolation eligibility
 - [x] Tier-M: paired small/large island under identical regimes; hash-stable (T-001); island worlds must not use perimeter mainland rain as sole source
 - [x] Probe `island-arrival`; `docs/slices/21.json`
-- [x] C-019 dossier (owner sparse-earned feel outstanding)
+- [x] C-019 dossier (owner sparse-earned **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-B; Lock still owner)
 - [x] **Next-but-one:** AUD-003 recovery ambient / Field Notebook UI / scenario campaign — pick when gate opens (see Later stubs)
 
 ---
@@ -612,7 +612,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Field Notebook UI | U-006 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** / **20** / **21** Done. Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([batch-salt-overseas.md](playtests/batch-salt-overseas.md)). Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

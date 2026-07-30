@@ -21,6 +21,8 @@
 
 **2026-07-30 (Slice F clarification).** Rainfall should feel like a **climate / mean precip setting** the world lives under (what vegetation experiences), not a storm on/off switch. Slice F retunes the dial to arid→wet mean intensity and adds wind orography so placement is visible in the landscape — Force panel is controls only, not a dashboard. Stewardship half still Open.
 
+**2026-07-30 (batch-salt-overseas aside).** After A/B Pass on salt / overseas, owner flipped moderate → arid and reported the rainfall control still feels like a **spigot / faucet**, not weather that affects the land. Reinforces **C-020** (full atmospheric delivery) and keeps C-004 stewardship Open — do not retune Slice F dial labels as a substitute for clouds/phase.
+
 ## Owner-only question (verbatim criterion)
 
 After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed?

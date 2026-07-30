@@ -97,6 +97,7 @@ export class TerrainMesh {
             world.getVegCover(x, z),
             world.getFireScar(x, z),
             world.isForeshore(x, z),
+            world.getSoilSalinity(x, z),
           );
           col.setRGB(r, g, b);
           if (elevDelta) {

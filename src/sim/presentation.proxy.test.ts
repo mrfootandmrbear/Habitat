@@ -17,8 +17,16 @@ import {
   FormMemory,
 } from "./formMemory";
 import { lightEncodingDelta } from "../ui/lightEncoding";
-import { terrainEncodingDelta, defaultTerrainRgb, intertidalEncodingDelta } from "../ui/terrainEncoding";
-import { occupantEncodingDelta } from "../ui/occupantEncoding";
+import {
+  terrainEncodingDelta,
+  defaultTerrainRgb,
+  intertidalEncodingDelta,
+  salinityEncodingDelta,
+} from "../ui/terrainEncoding";
+import {
+  occupantEncodingDelta,
+  shoreInteriorOccupantDelta,
+} from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
 
@@ -202,6 +210,46 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       terrainEncodingDelta(dry, foreshore, config.soilPorosity),
     ).toBeGreaterThan(0.08);
+  });
+
+  it("salinity crust tint clears the perceptual floor without inspector (C-018)", () => {
+    expect(salinityEncodingDelta(config.soilPorosity)).toBeGreaterThan(0.08);
+    const fresh = { moisture: 0.25, cover: 0.35, salinity: 0 };
+    const salty = { moisture: 0.25, cover: 0.35, salinity: 0.85 };
+    expect(
+      terrainEncodingDelta(fresh, salty, config.soilPorosity),
+    ).toBeGreaterThan(0.08);
+  });
+
+  it("overseas shore fringe occupant encoding clears floor vs interior (C-019)", () => {
+    const size = 40;
+    const sea = 2;
+    const world = new WorldState(generateIsland(size, size, 10, 21), {
+      seaLevel: sea,
+      islandIsolation: 16,
+    });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    for (const i of world.oceanCells) {
+      world.soilMoisture.data[i] = 0;
+      world.groundwaterStorage.data[i] = 0;
+    }
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    const delta = shoreInteriorOccupantDelta(
+      world.herbBiomass.data,
+      world.terrain.data,
+      size,
+      size,
+      sea,
+      config.herbBiomassMax,
+      2,
+    );
+    expect(delta).toBeGreaterThan(0.08);
   });
 
   it("windward shore elev loss diverges from leeward under one wind (Slice 18 / C-017)", () => {

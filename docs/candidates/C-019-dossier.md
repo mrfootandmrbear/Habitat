@@ -1,6 +1,6 @@
 # C-019 — Island biogeography reframes the fixed species pool
 
-**Status:** Open (owner-judged half outstanding)  
+**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
 **Criterion (verbatim).** Overseas seed pressure replaces mainland-perimeter rain on island worlds; smaller island area (or greater isolation) yields lower eligible richness / establishment under identical regimes; W-003's curated catalogue remains the universe of types. Deterministic under T-001.
 
 ## Machine half (discharged)
@@ -18,10 +18,14 @@
 
 **Steal.** MacArthur–Wilson + new-island succession (EXTERNAL_REFERENCES) → `docs/slices/21-composition.md`; rejected species simulator, equilibrium paint, random spawn, mangrove-default, perimeter-as-island-default (**C-019**).
 
-## Owner half (outstanding)
+## Owner half (Pass — 2026-07-30)
 
-Whether sparse overseas arrival on a small / isolated island still feels earned (C-007) rather than broken or empty by bug.
+Whether sparse overseas arrival still feels earned (C-007) rather than broken or empty by bug — answered on the **default island** via shore-fringe vs interior (no twin reload).
 
-## Owner-only question (one sentence, no numbers)
+**Tier-P (default view).** Overseas shore fringe occupant encoding vs interior — Δ ≈ 0.087 (> 0.08); `presentation.proxy.test.ts`. Early-shoot visibility + per-instance biomass color on `OccupantMesh`.
 
-When the smaller island stayed emptier than the larger one under the same weather, did that feel like life having farther to come — or like the place was broken?
+**Verdict.** Pass via [batch-salt-overseas.md](../playtests/batch-salt-overseas.md) Question B under the same sitting as C-018.
+
+## Owner-only question (answered)
+
+When shoots took first along the shore and the island interior stayed emptier under the same weather, did that feel like life having farther to come — or like the place was broken?

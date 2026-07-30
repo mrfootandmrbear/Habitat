@@ -36,7 +36,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Maritime candidates C-016…C-019 Open (machine halves discharged; owner dossiers); **C-020** lite via F (full clouds later). W-001 supersession still owner.
+Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Next: later stubs (AUD-003 / Field Notebook / scenario campaign). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** lite via F (full clouds later — rain still reads as spigot). W-001 supersession still owner.
 
 ## Cursor Cloud specific instructions
 
