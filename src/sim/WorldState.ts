@@ -23,6 +23,10 @@ import {
 } from "./hydrology/flowRouting";
 import type { HydrologyModel } from "./hydrology/HydrologyModel";
 import { HeightfieldHydrology } from "./hydrology/HeightfieldHydrology";
+import {
+  evaluateLight,
+  terrainInsolation,
+} from "./vegetation/lightCompetition";
 
 /**
  * Owns authoritative world fields and the field registry.
@@ -63,6 +67,12 @@ export class WorldState {
   readonly infiltrationCapacity: Grid2D;
   /** Veg inbox contribution toward infiltration capacity. */
   readonly vegInfiltrationContribution: Grid2D;
+  /** Slope/aspect incoming light [0,1] — Slice 11, derived from terrain. */
+  readonly insolation: Grid2D;
+  /** Leaf area index [0, max LAI] — Slice 11, derived from veg.cover. */
+  readonly leafAreaIndex: Grid2D;
+  /** Beer–Lambert light below canopy [0,1] — Slice 11. */
+  readonly understoryLight: Grid2D;
   /**
    * Fuel load (kg/m²) — Slice 10, Olson litter model (NATURAL_PROCESS_MATH §3.5).
    * Accumulates from veg.cover; depleted by fire. Owner: fire, band: decadal.
@@ -161,6 +171,9 @@ export class WorldState {
       config.infiltrationRate,
     );
     this.vegInfiltrationContribution = new Grid2D(this.width, this.height);
+    this.insolation = new Grid2D(this.width, this.height);
+    this.leafAreaIndex = new Grid2D(this.width, this.height);
+    this.understoryLight = new Grid2D(this.width, this.height);
     this.fuelLoad = new Grid2D(this.width, this.height);
     this.fireBurning = new Grid2D(this.width, this.height);
     this.fireIntensity = new Grid2D(this.width, this.height);
@@ -512,22 +525,41 @@ export class WorldState {
     const c = this.vegCover.data;
     const rough = this.surfaceRoughness.data;
     const infilContrib = this.vegInfiltrationContribution.data;
+    const insolation = this.insolation.data;
+    const lai = this.leafAreaIndex.data;
+    const understory = this.understoryLight.data;
+    const elevation = this.terrain.data;
     const growth = config.vegGrowthRate;
     const decay = config.vegDecayRate;
     const thresh = config.vegMoistureThreshold;
 
-    for (let i = 0; i < c.length; i++) {
-      const moisture = m[i]!;
-      let cover = c[i]!;
-      if (moisture > thresh) {
-        cover += growth * moisture * (1 - cover);
-      } else {
-        cover -= decay * (1 - moisture / Math.max(thresh, 1e-6));
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const incoming = terrainInsolation(
+          elevation,
+          this.width,
+          this.height,
+          x,
+          z,
+        );
+        const light = evaluateLight(incoming, c[i]!);
+        const moisture = m[i]!;
+        let cover = c[i]!;
+        if (moisture > thresh) {
+          cover += growth * moisture * light.understoryLight * (1 - cover);
+        } else {
+          cover -= decay * (1 - moisture / Math.max(thresh, 1e-6));
+        }
+        cover = Math.min(1, Math.max(0, cover));
+        c[i] = cover;
+        const committedLight = evaluateLight(incoming, cover);
+        insolation[i] = committedLight.insolation;
+        lai[i] = committedLight.leafAreaIndex;
+        understory[i] = committedLight.understoryLight;
+        rough[i] = config.baseRoughness + cover * config.vegRoughnessBonus;
+        infilContrib[i] = cover * config.vegInfiltrationBonus;
       }
-      cover = Math.min(1, Math.max(0, cover));
-      c[i] = cover;
-      rough[i] = config.baseRoughness + cover * config.vegRoughnessBonus;
-      infilContrib[i] = cover * config.vegInfiltrationBonus;
     }
   }
 
@@ -782,6 +814,11 @@ export class WorldState {
     return this.vegCover.get(x, z);
   }
 
+  getUnderstoryLight(x: number, z: number): number {
+    if (!this.understoryLight.inBounds(x, z)) return 0;
+    return this.understoryLight.get(x, z);
+  }
+
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
     this.applyTerrainBrush(cx, cz, amount);
   }
@@ -965,6 +1002,36 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.vegInfiltrationContribution.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "light.insolation",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.insolation.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "veg.leafAreaIndex",
+        units: "m²/m²",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.leafAreaIndex.data,
+        range: [0, config.vegMaxLeafAreaIndex] as const,
+      },
+      {
+        id: "light.understory",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "daily" as const,
+        legacy: false,
+        data: this.understoryLight.data,
         range: [0, 1] as const,
       },
       {

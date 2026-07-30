@@ -634,10 +634,87 @@ export function probeBurnRecover(): ProbeResult {
   };
 }
 
+/**
+ * Slice 11 / ES-001: paired north/south aspects diverge under the same
+ * moisture, initial cover, and vegetation rules. Slope/aspect sets incoming
+ * light; Beer–Lambert canopy attenuation shapes the succession trajectory.
+ */
+export function probeSuccessionDiverge(): ProbeResult {
+  const size = 16;
+  const steps = 60;
+
+  const run = (risePerCell: number) => {
+    const terrain = new Grid2D(size, size);
+    const offset = Math.abs(risePerCell) * size;
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        terrain.set(x, z, offset + z * risePerCell);
+      }
+    }
+    const world = new WorldState(terrain);
+    world.soilMoisture.fill(0.25);
+    world.vegCover.fill(0.1);
+    for (let i = 0; i < steps; i++) world.runVegetationStep(1);
+    return {
+      hash: world.stateHash(),
+      meanInsolation: meanGrid(world.insolation.data),
+      meanUnderstoryLight: meanGrid(world.understoryLight.data),
+      meanCover: meanGrid(world.vegCover.data),
+    };
+  };
+
+  const south = run(-4);
+  const southReplay = run(-4);
+  const north = run(4);
+  if (south.hash !== southReplay.hash) {
+    throw new Error(
+      `succession-diverge: same aspect must replay exactly (${south.hash} vs ${southReplay.hash})`,
+    );
+  }
+  if (!(south.meanInsolation > north.meanInsolation)) {
+    throw new Error(
+      `succession-diverge: expected south insolation (${south.meanInsolation}) > north (${north.meanInsolation})`,
+    );
+  }
+  if (!(south.meanCover > north.meanCover)) {
+    throw new Error(
+      `succession-diverge: expected south cover (${south.meanCover}) > north (${north.meanCover})`,
+    );
+  }
+
+  return {
+    scenario: "succession-diverge",
+    records: [
+      {
+        label: "south",
+        meanInsolation: south.meanInsolation,
+        meanUnderstoryLight: south.meanUnderstoryLight,
+        meanCover: south.meanCover,
+        replayMatch: 1,
+      },
+      {
+        label: "north",
+        meanInsolation: north.meanInsolation,
+        meanUnderstoryLight: north.meanUnderstoryLight,
+        meanCover: north.meanCover,
+      },
+      {
+        label: "delta",
+        insolationGap: south.meanInsolation - north.meanInsolation,
+        coverGap: south.meanCover - north.meanCover,
+      },
+    ],
+  };
+}
+
 function sumGrid(data: Float32Array): number {
   let s = 0;
   for (let i = 0; i < data.length; i++) s += data[i]!;
   return s;
+}
+
+function meanGrid(data: Float32Array): number {
+  return sumGrid(data) / data.length;
 }
 
 function sectorMean(
@@ -668,6 +745,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "regime-divergence": probeRegimeDivergence,
   "limiting-shift": probeLimitingShift,
   "burn-recover": probeBurnRecover,
+  "succession-diverge": probeSuccessionDiverge,
 };
 
 export function runProbe(name: string): ProbeResult {

@@ -12,6 +12,7 @@ import {
   elevChangeEncodingStrength,
   FormMemory,
 } from "./formMemory";
+import { lightEncodingDelta } from "../ui/lightEncoding";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("worldToGrid snaps world hits to integer cells", () => {
@@ -104,5 +105,11 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     // Perceptual floor used across presentation proxies.
     expect(maxStrength).toBeGreaterThan(0.15);
     expect(mem.meanAbsDelta(world.terrain.data)).toBeGreaterThan(0.01);
+  });
+
+  it("understory-light overlay clears the perceptual floor for paired aspects", () => {
+    const northLight = 0.13348884880542755;
+    const southLight = 0.20132742822170258;
+    expect(lightEncodingDelta(northLight, southLight)).toBeGreaterThan(0.15);
   });
 });

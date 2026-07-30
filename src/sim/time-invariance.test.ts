@@ -97,6 +97,8 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "ledger.fuelConsumed",
       "ledger.infiltration",
       "ledger.precipitation",
+      "light.insolation",
+      "light.understory",
       "soil.depth",
       "soil.infiltrationCapacity",
       "soil.moisture",
@@ -104,6 +106,7 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "terrain.elevation",
       "veg.cover",
       "veg.infiltrationContribution",
+      "veg.leafAreaIndex",
       "water.surfaceDepth",
     ]);
 

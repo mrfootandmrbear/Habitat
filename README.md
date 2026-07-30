@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP:** Slice **10** fire/fuel **Done** (agent). Next: **Slice 11** light/succession (specified — BUILD_GUIDE §4.6). Slice **A** audio scaffold **Done** (machine half; C-014 Open). Slice 8c Tier-O still batched.
+**Post-MVP:** Slice **11** light/succession **Done** (agent). Next: **Slice 12** arrival / first occupant (specified under C-007 — BUILD_GUIDE §4.8). Slice **A** audio scaffold **Done** (machine half; C-014 Open). Slice 8c Tier-O still batched.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

@@ -85,9 +85,10 @@ Summary only — do not reopen unless fixing regressions.
 | 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | Agent Done / Tier-O ready |
 | 9 | Liebig HSI / limiting factor | Inspect what holds a patch back | `hsiComposition`, `limiting-shift` | Tier-M; Tier-O deferred |
 | 10 | Fire / fuel (Olson + BFS) | Authored ignition; wet resists | `fireProcess`, `burn-recover` | Tier-M; Tier-O deferred |
+| 11 | Slope/aspect + Beer–Lambert light | Same rules, different succession trajectories | `lightCompetition`, `succession-diverge` | Tier-M + Tier-P; Tier-O deferred |
 | A | Audio scaffold (observer) | Water ambient + silence-as-signal | `AudioBus`, C-014 dossier | Agent Done; C-014 Open |
 
-**Current gate:** Slice **10** fire/fuel **Done** (agent) → **Slice 11** light/succession next (§4.6 specified). **Slice A** audio scaffold **Done** (machine half; C-014 owner half outstanding). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
+**Current gate:** Slice **11** light/succession **Done** (agent) → **Slice 12** arrival / first occupant next (§4.8 specified under C-007). **Slice A** audio scaffold **Done** (machine half; C-014 owner half outstanding). Slice 8c Tier-O still batched (C-004 / C-013 dossiers join it).
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c adds *how hard it rains* and makes consequence visible; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*. Missing dials, unfiled: wind, season, climate regime. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -244,7 +245,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Authored ignition only (C-003); BFS spread cited and deterministic under T-001 (`ignite` tool + `igniteCell`)
 - [x] Moisture couples to spread — wet ground resists burning, closing fire back onto the hydrology spine
 - [x] Tier-M: conservation/accounting across a burn (fuel consumed vs. cover lost); determinism hash across the disturbance (`fire.test.ts`)
-- [x] Tier-M: post-fire recovery trajectory differs by pre-fire moisture (probe `burn-recover` — wet recover ≈ 0.85 vs dry ≈ 0.07; accountingError ≈ 6e-6; determinismMatch = 1)
+- [x] Tier-M: post-fire recovery trajectory differs by pre-fire moisture (probe `burn-recover` — wet recover ≈ 0.454 vs dry ≈ 0.07 after Slice 11 light coupling; accountingError ≈ 6e-6; determinismMatch = 1)
 - [x] `docs/slices/10.json` manifest (DoD row 9)
 - [x] Notebook seed: “The burn ran to the wet ground and stopped.”
 - [x] Tier-O candidate (batch): *did the burn read as something you did, or as something that happened to you?* (A-005 / N-001) — deferred
@@ -252,7 +253,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.6 Slice 11 — Light / succession *(specified; gate after Slice 10)*
+### 4.6 Slice 11 — Light / succession *(Done — agent)*
 
 **Why this exists.** [THESIS.md](THESIS.md) §2.1 / §5: the castle comes alive when life takes the form you built — and different aspects, burns, and moisture histories must produce different futures from the *same* rules, never from authored stages. Slice 9 already named water/depth/GW as limiting; Slice 10 clears cover. This slice adds the light dial so succession is a consequence of insolation × canopy, not a timer.
 
@@ -268,15 +269,17 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Gate.** After Slice 10 (fire/fuel **Done**). Burn→cover restart is available for burned-vs-unburned trajectory contrast.
 
-- [ ] Register insolation / LAI / understory light fields (or derive from elev + `veg.cover`) with owner + band (T-005)
-- [ ] Beer–Lambert (or reduced form) cited before code — composition note `docs/slices/11-composition.md` (NATURAL_PROCESS_MATH §3.2, §1.9)
-- [ ] Couple to existing `veg.cover` via `vegetationProcess` (extend, do not replace); burned cells restart succession differently once Slice 10 clears cover
-- [ ] Tier-M: monotonicity / bounds — more canopy → less understory light; fields stay in range, no NaN
-- [ ] Tier-M: paired divergence — north–south and/or burned–unburned trajectories diverge under identical forcing (same seed, same rules)
-- [ ] Probe `succession-diverge`: paired aspect or burn contrast with baseline tolerances
-- [ ] `docs/slices/11.json` manifest (DoD row 9) — create at implementation (conformance rejects planned-only probes/fields)
-- [ ] Notebook seed: e.g. “The south slope stayed open; the north filled in.”
-- [ ] Tier-O candidate (batch, do not ask alone): *do the slopes feel like different futures, or like the same place with different tint?*
+- [x] Register `light.insolation`, `veg.leafAreaIndex`, and `light.understory` with vegetation owner + daily band; understory-light inspector overlay (T-005)
+- [x] Beer–Lambert reduced form cited before code — composition note `docs/slices/11-composition.md` (NATURAL_PROCESS_MATH §3.2, §1.9)
+- [x] Couple to existing `veg.cover` via `vegetationProcess` (extend, do not replace); burn-cleared cells receive more understory light and a larger next-step gain
+- [x] Tier-M: monotonicity / bounds — more canopy → less understory light; registered fields stay in range with no NaN (`light-succession.test.ts`)
+- [x] Tier-M: paired divergence — identical moisture/rules yield south mean cover ≈ 0.506 vs north ≈ 0.361; deterministic replay match = 1
+- [x] Probe `succession-diverge`: insolation gap ≈ 0.525; cover gap ≈ 0.145 with committed baseline tolerances
+- [x] Tier-P: paired-aspect understory values produce inspector color-distance ≈ 0.223 (> 0.15 floor) at default encoding (`presentation.proxy.test.ts`)
+- [x] `docs/slices/11.json` manifest (DoD row 9)
+- [x] Notebook seed: “With the same soil moisture, the brighter south-facing slope filled in first.”
+- [x] Tier-O candidate (batch, do not ask alone): *do the slopes feel like different futures, or like the same place with different tint?*
+- [x] **Next-but-one:** Slice 12 specified to §4.3 depth (§4.8) before this slice closes (DoD row 10)
 
 ---
 
@@ -308,17 +311,45 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.8 Slice 12 — Arrival / first occupant *(specified; gate after Slice 11)*
+
+**Why this exists.** [THESIS.md](THESIS.md) §5 names “life moves into it” as the missing payoff. Slice 9 built the inspectable suitability gate and Slice 11 made terrain/light produce different ecological futures; this slice tests **C-007** as a hypothesis by letting one real plant functional type arrive because a place became suitable, without a player introduction action.
+
+**Loops.** Sim: fixed preserve seed source → dispersal pressure × Liebig HSI → establishment / biomass for one plant functional type. Game: shape and wet the place, run time, and see an occupant appear where the conditions earned it.
+
+**Register / candidates.** **C-007** (Open; owner-judged — build the hypothesis, update its dossier, do not promote), **ES-006** (capacity from resources, no fixed `K`), **E-009** (readiness inferred), **W-003** / **E-004** (fixed preserve pool and functional type), **T-001** / **T-003** (seeded replay and saved RNG/state), **T-005** (arrival pressure / occupant inspectable), **N-001** / **N-004** (outcome is caused, never painted or arbitrary).
+
+**Study.** NATURAL_PROCESS_MATH seed-dispersal kernel note (`p = 1 − e^{−Σ seeds}`) composed with §3.3 Liebig HSI; SIMULATION_MODEL §3.5 plant functional types. Write `docs/slices/12-composition.md` before code, including the fixed seed source, establishment equation, and why the chosen functional type belongs to Windward Basin.
+
+**Bans.** An introduction/place-species tool while C-007 is under test. Occupancy copied directly from HSI with no dispersal path. Unsaved or ambient randomness. A hidden readiness unlock. Invented species/material names. A second vegetation owner parallel to `vegetationProcess`.
+
+**Gate.** After Slice 11 (**Done**): inspectable light and divergent cover trajectories are available to the arrival gate. C-007 remains Open until its owner half reads as earned rather than spawned.
+
+- [ ] Composition note names one real functional type, fixed preserve seed source, dispersal/establishment equation, and field ownership
+- [ ] Register seed pressure / establishment probability / occupant biomass (minimal set) with owner + annual/seasonal band; RNG or accumulated arrival state is save-safe (T-003)
+- [ ] Couple establishment to existing `habitat.suitability`; zero suitability prevents establishment
+- [ ] Tier-M: improving the limiting HSI input raises arrival probability; improving a non-limiting input does not
+- [ ] Tier-M: same seed + forcing → identical arrival hash; fields bounded / finite
+- [ ] Probe `arrival-earned`: paired suitable/unsuitable patches under one seed schedule, with baseline tolerances and measured arrival delta
+- [ ] Tier-P: occupant encoding clears perceptual floor against the pre-arrival state without requiring the inspector
+- [ ] Update `docs/candidates/C-007-dossier.md` with the completed machine half; owner-only question remains one sentence with no number
+- [ ] `docs/slices/12.json` manifest (DoD row 9)
+- [ ] Notebook seed: “The first shoots appeared in the hollow I kept wet.”
+- [ ] Tier-O (batch per ask gate): *when it appeared, did it feel earned by the place you made — or like a spawn?*
+- [ ] **Next-but-one:** specify Slice 13 biology → physics integration before Slice 12 closes (DoD row 10)
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register |
 |---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed once life/recovery has a visible field | AUD-003, C-014 |
-| 12 | Roles / introductions → informs RC-003 | E-*, ES-006 |
 | 13 | Biology → physics integration test | E-005, F-001 |
 | — | Field Notebook UI | U-006 |
 | — | Scenarios | G-002, G-007 |
 
-Slice **11** moved to §4.6 (specified). Slice **A** expanded to §4.7 (machine half Done). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
+Slice **11** is Done at §4.6. Slice **A** is Done (machine half) at §4.7. Slice **12** moved to §4.8 (specified under C-007). Do not expand remaining stubs until their gate opens. Presentation (§4.2) may run in parallel — it does not add competing sim systems.
 
 ---
 

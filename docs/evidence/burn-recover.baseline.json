@@ -26,7 +26,7 @@
       "abs": 0
     },
     "fire.hashN": {
-      "value": 1710787780,
+      "value": 1279396699,
       "abs": 0
     },
     "wetSector.coverAfterBurn": {
@@ -34,7 +34,7 @@
       "abs": 0.000001
     },
     "wetSector.coverRecovered": {
-      "value": 0.8512920141220093,
+      "value": 0.4536204934120178,
       "abs": 0.00001
     },
     "drySector.coverAfterBurn": {
@@ -46,11 +46,11 @@
       "abs": 0.00001
     },
     "delta.recoveryGap": {
-      "value": 0.781292013823986,
+      "value": 0.3836204931139946,
       "abs": 0.0001
     },
     "delta.wetVsDry": {
-      "value": 12.161314435680788,
+      "value": 6.480292735439144,
       "abs": 0.1
     }
   }

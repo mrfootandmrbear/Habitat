@@ -3,6 +3,7 @@ import { config, type InspectorLayer } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
+import { understoryLightRgb } from "../ui/lightEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
 
 const BASE = new THREE.Color(0x8b7355);
@@ -193,6 +194,11 @@ export class TerrainMesh {
       case "suitability": {
         const t = world.getHabitatSuitability(x, z);
         col.setRGB(0.55 - 0.35 * t, 0.25 + 0.5 * t, 0.2 + 0.15 * t);
+        break;
+      }
+      case "understoryLight": {
+        const [r, g, b] = understoryLightRgb(world.getUnderstoryLight(x, z));
+        col.setRGB(r, g, b);
         break;
       }
       default:

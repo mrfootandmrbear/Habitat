@@ -1,0 +1,41 @@
+{
+  "scenario": "succession-diverge",
+  "metrics": {
+    "south.meanInsolation": {
+      "value": 0.9191450476646423,
+      "abs": 0.000001
+    },
+    "south.meanUnderstoryLight": {
+      "value": 0.20132742822170258,
+      "abs": 0.000001
+    },
+    "south.meanCover": {
+      "value": 0.5061704516410828,
+      "abs": 0.000001
+    },
+    "south.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "north.meanInsolation": {
+      "value": 0.39391928911209106,
+      "abs": 0.000001
+    },
+    "north.meanUnderstoryLight": {
+      "value": 0.13348884880542755,
+      "abs": 0.000001
+    },
+    "north.meanCover": {
+      "value": 0.36070936918258667,
+      "abs": 0.000001
+    },
+    "delta.insolationGap": {
+      "value": 0.5252257585525513,
+      "abs": 0.000001
+    },
+    "delta.coverGap": {
+      "value": 0.1454610824584961,
+      "abs": 0.000001
+    }
+  }
+}

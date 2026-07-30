@@ -7,7 +7,7 @@ import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
 
 /** Golden depth hash for default rain schedule (T-001). Update when physics intentionally changes. */
-const GOLDEN_DEPTH_HASH = "3010b0ef";
+const GOLDEN_DEPTH_HASH = "2a42dcce";
 
 function makeWorld(
   terrain: Grid2D,

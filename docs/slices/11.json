@@ -1,0 +1,20 @@
+{
+  "id": "11",
+  "title": "Light / succession",
+  "simLoop": "Slope and aspect derive incoming insolation; canopy LAI attenuates understory light through Beer–Lambert, and that light feeds the existing moisture-driven vegetation process without authored stages.",
+  "gameLoop": "North- and south-facing slopes, and burned and unburned canopy, develop different futures from the same rules.",
+  "registerIds": ["ES-001", "ART-001", "ES-006", "E-009", "T-005", "T-001", "T-006", "N-002", "N-004", "C-007"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/light-succession.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["succession-diverge"],
+  "fields": [
+    "light.insolation",
+    "veg.leafAreaIndex",
+    "light.understory"
+  ],
+  "notebookSeed": "With the same soil moisture, the brighter south-facing slope filled in first.",
+  "tierO": "no owner-only question; deferred — do the slopes feel like different futures, or like the same place with different tint? (batch with §4.0 step 6)"
+}

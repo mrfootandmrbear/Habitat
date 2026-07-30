@@ -137,6 +137,17 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.recoveryGap": { abs: 1e-4 },
     "delta.wetVsDry": { abs: 0.1 },
   },
+  "succession-diverge": {
+    "south.meanInsolation": { abs: 1e-6 },
+    "south.meanUnderstoryLight": { abs: 1e-6 },
+    "south.meanCover": { abs: 1e-6 },
+    "south.replayMatch": { abs: 0 },
+    "north.meanInsolation": { abs: 1e-6 },
+    "north.meanUnderstoryLight": { abs: 1e-6 },
+    "north.meanCover": { abs: 1e-6 },
+    "delta.insolationGap": { abs: 1e-6 },
+    "delta.coverGap": { abs: 1e-6 },
+  },
 };
 
 const args = process.argv.slice(2);

@@ -8,7 +8,10 @@ import { vegetationProcess } from "./process/vegetationProcess";
 
 describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
   it("declares soil→veg only for moisture — no water writes", () => {
-    expect(vegetationProcess.reads).toEqual(["soil.moisture"]);
+    expect(vegetationProcess.reads).toEqual([
+      "soil.moisture",
+      "terrain.elevation",
+    ]);
     expect(vegetationProcess.writes).toContain("veg.cover");
     expect(vegetationProcess.writes).not.toContain("water.surfaceDepth");
     expect(vegetationProcess.writes).not.toContain("soil.moisture");

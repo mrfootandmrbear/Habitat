@@ -270,7 +270,16 @@ function main(): void {
   }
 
   // DoD row 9 — slice manifests (Slices 8 and P required; earlier grandfathered)
-  const requiredManifestIds = new Set(["8", "8b", "8c", "9", "10", "A", "P"]);
+  const requiredManifestIds = new Set([
+    "8",
+    "8b",
+    "8c",
+    "9",
+    "10",
+    "11",
+    "A",
+    "P",
+  ]);
   const manifests = loadManifests(SLICES_DIR);
   const presentIds = new Set(manifests.map((m) => m.id));
   for (const id of requiredManifestIds) {

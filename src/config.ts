@@ -82,6 +82,13 @@ export const config = {
   vegGrowthRate: 0.12,
   vegDecayRate: 0.03,
   vegMoistureThreshold: 0.04,
+  /**
+   * Slice 11 — representative seasonal sun + Beer–Lambert canopy attenuation
+   * (NATURAL_PROCESS_MATH §1.9 / §3.2).
+   */
+  solarAltitudeDegrees: 45,
+  vegMaxLeafAreaIndex: 6,
+  lightExtinctionCoefficient: 0.5,
   baseRoughness: 0.03,
   vegRoughnessBonus: 0.12,
   vegInfiltrationBonus: 0.1,
@@ -148,6 +155,7 @@ export type InspectorLayer =
   | "groundwater"
   | "limitingFactor"
   | "suitability"
+  | "understoryLight"
   | "fuelLoad";
 
 /** Player land tools — causes (A-005) plus predict marks (P-006). */

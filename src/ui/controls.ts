@@ -25,6 +25,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "groundwater", label: "Inspect: groundwater" },
   { id: "limitingFactor", label: "Inspect: limiting factor" },
   { id: "suitability", label: "Inspect: habitat suitability" },
+  { id: "understoryLight", label: "Inspect: understory light" },
 ];
 
 /** Cause tools (A-005) + predict marks (P-006). */

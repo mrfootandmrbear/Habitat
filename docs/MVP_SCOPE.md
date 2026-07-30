@@ -124,10 +124,11 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Agent Done / Tier-O ready** — BUILD_GUIDE §4.3b |
 | **9** | Limiting factors / HSI spine | Inspect why a patch is limited — the **arrival gate** (**C-007**) | **Done** (agent) — BUILD_GUIDE §4.4; C-007 dossier partial |
 | **10** | Fuel → fire disturbance → succession restart | Site a burn as a cause | **Done — Tier-M** (Tier-O deferred; authored ignition; **C-003** Open) |
-| **11** | Insolation / Beer–Lambert light → succession trajectory | North/south, burned/unburned, wet/dry as different futures | **Next** — BUILD_GUIDE §4.6 (ES-001) |
-| **12+** | Roles, scenarios… | Notebook, readiness, completion… | After Slice 11 |
+| **11** | Insolation / Beer–Lambert light → succession trajectory | North/south, burned/unburned, wet/dry as different futures | **Done — Tier-M + Tier-P** (Tier-O deferred) |
+| **12** | Arrival / first occupant (C-007 hypothesis) | Something appears because the place suits it | **Next** — BUILD_GUIDE §4.8 |
+| **13+** | Biology integration, scenarios… | Notebook, readiness, completion… | After Slice 12 |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **next** (§4.6); Slice A audio scaffold **Done** (agent machine half; C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7).
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): closeouts **done** → 8b **done** → 8c agent **done** (Tier-O batched) → Slice 9 HSI **done** → Slice 10 fire/fuel **done** → Slice 11 light/succession **done** → Slice 12 arrival / first occupant **next** (§4.8); Slice A audio scaffold **Done** (agent machine half; C-014 Open — see [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.7).
 
 ---
 
