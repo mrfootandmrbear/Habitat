@@ -26,11 +26,16 @@ export class SitingCursor {
     this.group.name = "sitingCursor";
 
     const cellW = worldSize / (width - 1);
-    const geo = new THREE.BoxGeometry(cellW * 0.92, 0.35, cellW * 0.92);
+    const footprint = Math.max(1, 2 * config.sitingBrushRadius + 1);
+    const geo = new THREE.BoxGeometry(
+      cellW * footprint * 0.92,
+      0.35,
+      cellW * footprint * 0.92,
+    );
     const mat = new THREE.MeshBasicMaterial({
       color: 0xe8c84a,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.4,
       depthTest: true,
     });
     this.box = new THREE.Mesh(geo, mat);

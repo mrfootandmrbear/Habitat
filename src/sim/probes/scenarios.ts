@@ -6,6 +6,7 @@ import { generateMountain } from "../terrain/generateMountain";
 import {
   rainDepthForRegime,
   rainRegimeById,
+  regimeRainsThisEvent,
   type RainRegimeId,
 } from "../climate/rainRegime";
 import {
@@ -38,8 +39,8 @@ export function probePairedStorm(): ProbeResult {
       ramp.set(x, z, (w - 1 - x) * 0.4);
     }
   }
-  const bare = new WorldState(ramp.clone());
-  const veg = new WorldState(ramp.clone());
+  const bare = new WorldState(ramp.clone(), { closedBoundary: true });
+  const veg = new WorldState(ramp.clone(), { closedBoundary: true });
   bare.vegCover.fill(0);
   veg.vegCover.fill(1);
   bare.runVegetationStep(1);
@@ -369,13 +370,16 @@ export function probeRegimeDivergence(): ProbeResult {
 
   const run = (regimeId: RainRegimeId) => {
     const world = new WorldState(generateMountain(24, 24, 6, seed));
-    const depth = rainDepthForRegime(
-      rainRegimeById(regimeId),
-      config.rainDepthPerEvent,
-    );
+    const regime = rainRegimeById(regimeId);
+    const depth = rainDepthForRegime(regime, config.rainDepthPerEvent);
     for (let d = 0; d < days; d++) {
       for (let i = 0; i < config.dailyEventSteps; i++) {
-        if (depth > 0) world.addRain(depth);
+        if (
+          depth > 0 &&
+          regimeRainsThisEvent(regime, i, config.dailyEventSteps)
+        ) {
+          world.addRain(depth);
+        }
         world.stepEvent();
       }
     }

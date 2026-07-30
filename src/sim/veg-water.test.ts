@@ -51,8 +51,8 @@ describe("vegetation → water (Slice 6, E-005)", () => {
         ramp.set(x, z, (15 - x) * 0.4);
       }
     }
-    const bare = new WorldState(ramp.clone());
-    const vegetated = new WorldState(ramp.clone());
+    const bare = new WorldState(ramp.clone(), { closedBoundary: true });
+    const vegetated = new WorldState(ramp.clone(), { closedBoundary: true });
     setCover(bare, 0);
     setCover(vegetated, 1);
 
@@ -74,7 +74,9 @@ describe("vegetation → water (Slice 6, E-005)", () => {
   });
 
   it("preserves mass on a closed wet basin under roughness", () => {
-    const world = new WorldState(generateMountain(16, 16, 4, 3));
+    const world = new WorldState(generateMountain(16, 16, 4, 3), {
+      closedBoundary: true,
+    });
     setCover(world, 0.8);
     world.water.fill(0.25);
     const initial = totalWaterVolume(world.water.data);

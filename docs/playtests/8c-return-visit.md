@@ -15,14 +15,16 @@
 6. In the **Tool** dropdown, choose **Tool: look**.
 7. In the **Rain** dropdown, choose **Rain: heavy**.
 8. Click **16x**.
-9. Watch. Do not touch anything for two minutes.
-10. Click **Pause**.
-11. Look at what you built in step 3 (warm/cool tint marks change from the form you remembered).
+9. Watch for **forty-five seconds** — storms pulse; do not touch tools. Then open **Rain** and choose **Rain: dry**.
+10. Watch the water leave for another **forty-five seconds**.
+11. Click **Pause**.
+12. Look at what you built in step 3 (warm/cool tint marks change from the form you remembered).
 
 ## Already proven — do not check these
 
 - Mass is conserved across wet→dry with GW — H-004 residual within bounds (`soil-water.test.ts`).
-- Same seed + **Rain: light** reproduces exactly; **Rain: heavy** diverges — `regime-divergence` (`light.replayMatch = 1`, `hashDiverged = 1`, precip Δ ≈ 829).
+- Same seed + **Rain: light** reproduces exactly; **Rain: heavy** diverges — `regime-divergence` (`light.replayMatch = 1`, `hashDiverged = 1`).
+- Perimeter pour-point outlets drain spill (SIM §10.2) — mountain runs are not a closed bathtub; closed-basin tests opt out explicitly.
 - Erosion on player-made terrain is real sim output — `geomorphology.test.ts`.
 - After **Remember form** + geomorphology, elev-change encoding max strength > 0.15 (perceptual floor) — `presentation.proxy.test.ts`.
 - Basins fill to spill elevation — `basin-fill` probe.
@@ -30,8 +32,8 @@
 
 ## Verdict (circle one)
 
-- **Pass** — At step 11 you wanted to rebuild it, or wanted to see the same landscape under different weather. The pull was toward *another run*, not toward the inspector.
-- **Hold** — At step 11 you felt nothing in particular, or you found yourself opening the **Inspect:** dropdown to work out whether anything had happened at all.
+- **Pass** — At step 12 you wanted to rebuild it, or wanted to see the same landscape under different weather. The pull was toward *another run*, not toward the inspector.
+- **Hold** — At step 12 you felt nothing in particular, or you found yourself opening the **Inspect:** dropdown to work out whether anything had happened at all.
 
 **If Hold, the agent will:** raise the encoded contrast on elevation change until the Tier-P delta clears the floor by a wider margin, and tighten the before/after cue. It will not add a new simulation system in response to a Hold.
 

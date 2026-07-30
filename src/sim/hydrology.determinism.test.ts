@@ -7,11 +7,15 @@ import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
 
 /** Golden depth hash for default rain schedule (T-001). Update when physics intentionally changes. */
-const GOLDEN_DEPTH_HASH = "c5182d5a";
+const GOLDEN_DEPTH_HASH = "3010b0ef";
 
 function makeWorld(
   terrain: Grid2D,
-  options?: { flowRate?: number; maxOutflowFraction?: number },
+  options?: {
+    flowRate?: number;
+    maxOutflowFraction?: number;
+    closedBoundary?: boolean;
+  },
 ): WorldState {
   return new WorldState(terrain, options);
 }
@@ -201,7 +205,7 @@ describe("T-006 readonly sim view", () => {
 
 describe("Slice 2 hydrology infrastructure", () => {
   it("conserves water on a closed basin with no-flow edges", () => {
-    const world = makeWorld(new Grid2D(8, 8, 1));
+    const world = makeWorld(new Grid2D(8, 8, 1), { closedBoundary: true });
     world.water.fill(0.5);
     const initial = totalWaterVolume(world.water.data);
 
@@ -211,6 +215,15 @@ describe("Slice 2 hydrology infrastructure", () => {
 
     expect(totalWaterVolume(world.water.data)).toBeCloseTo(initial, 5);
     expect(world.boundaryOutflowLedger).toBe(0);
+  });
+
+  it("drains mountain spill through perimeter outlets", () => {
+    const world = makeWorld(generateMountain(24, 24, 6, 3));
+    expect(world.outletCells.size).toBeGreaterThan(0);
+    world.water.fill(0.3);
+    for (let i = 0; i < 200; i++) world.stepEvent();
+    expect(world.boundaryOutflowLedger).toBeGreaterThan(0);
+    expect(totalWaterVolume(world.water.data)).toBeLessThan(0.3 * 24 * 24);
   });
 
   it("drains faster on a steep ramp than a shallow ramp", () => {

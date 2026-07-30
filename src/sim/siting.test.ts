@@ -39,7 +39,9 @@ describe("terrain siting (Slice 5b, A-005)", () => {
   });
 
   it("preserves water volume after dig on a closed wet basin", () => {
-    const world = new WorldState(generateMountain(16, 16, 4, 1));
+    const world = new WorldState(generateMountain(16, 16, 4, 1), {
+      closedBoundary: true,
+    });
     world.water.fill(0.2);
     const initial = totalWaterVolume(world.water.data);
     world.digChannel(8, 8);

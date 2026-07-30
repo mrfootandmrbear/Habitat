@@ -85,9 +85,12 @@ export const config = {
   baseRoughness: 0.03,
   vegRoughnessBonus: 0.12,
   vegInfiltrationBonus: 0.1,
-  sitingBrushRadius: 1,
-  bermRaise: 0.85,
-  digLower: 0.65,
+  /** Cell-radius of berm/dig footprint (Euclidean). Was 1 — too small for C-006. */
+  sitingBrushRadius: 4,
+  /** Peak raise (m) at brush center per stroke. */
+  bermRaise: 2.25,
+  /** Peak lower (m) at brush center per stroke (clamped by soil.depth). */
+  digLower: 1.5,
   predictionWetThreshold: 0.01,
   /** Horizon in event steps (~45 sim-hours at 15 min/event). */
   predictionHorizonSteps: 180,

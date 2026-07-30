@@ -1,12 +1,13 @@
 /**
  * Conservative 4-neighbor outflow-flux step.
- * Off-map neighbors mirror the cell surface (no-flow, SIMULATION_MODEL §10.1).
+ * Off-map neighbors mirror the cell surface (no-flow, SIMULATION_MODEL §10.1),
+ * except at authored / derived outlet cells where off-map is absorbing (§10.2).
  */
 const DX = [0, 1, 0, -1] as const;
 const DZ = [-1, 0, 1, 0] as const;
 
 export type FluxStepResult = {
-  /** Water removed through authored outlets (none in Slice 2). */
+  /** Water removed through outlets (m depth · cell). */
   boundaryOutflow: number;
 };
 
@@ -40,6 +41,7 @@ export function fluxStep(
     const s = terrain[i]! + w;
     const nCell = roughness?.[i] ?? baseRoughness;
     const localFlow = flowRate * (baseRoughness / Math.max(nCell, 1e-4));
+    const isOutlet = outletCells?.has(i) === true;
 
     let d0 = 0;
     let d1 = 0;
@@ -52,7 +54,8 @@ export function fluxStep(
       const nz = z + DZ[dir]!;
       let neighborSurface: number;
       if (nx < 0 || nz < 0 || nx >= width || nz >= height) {
-        neighborSurface = s;
+        // §10.1 no-flow mirror, unless this cell is an outlet (§10.2 absorbing).
+        neighborSurface = isOutlet ? terrain[i]! : s;
       } else {
         const ni = nz * width + nx;
         neighborSurface = terrain[ni]! + water[ni]!;
@@ -83,7 +86,7 @@ export function fluxStep(
       const nz = z + DZ[dir]!;
       if (nx >= 0 && nz >= 0 && nx < width && nz < height) {
         delta[nz * width + nx]! += out;
-      } else if (outletCells?.has(i)) {
+      } else if (isOutlet) {
         boundaryOutflow += out;
       }
     }

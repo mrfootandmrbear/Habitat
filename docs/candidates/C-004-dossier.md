@@ -9,7 +9,7 @@
 |---|---|---|
 | Same seed + same regime → identical hash | `light.replayMatch = 1` | `docs/evidence/regime-divergence.baseline.json` |
 | Different regime → divergent hash | `delta.hashDiverged = 1` | same |
-| Heavy delivers more precip than light | precip Δ ≈ 829.44 | same |
+| Heavy delivers more precip than light | precip Δ ≈ 190.3 | same |
 | Regime API has no cell/place arguments | `rainDepthForRegime(regime, base)` only | `src/sim/climate/rainRegime.ts`, `src/sim/rainRegime.test.ts` |
 | Control surface is a global select | `Rain: dry \| light \| moderate \| heavy` | `src/ui/controls.ts` |
 

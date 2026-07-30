@@ -122,4 +122,30 @@ describe("soil storage · depth (Slice 8 mass balance)", () => {
     const scale = Math.max(1, world.precipitationLedger);
     expect(Math.abs(residual) / scale).toBeLessThan(1e-4);
   });
+
+  it("dig into saturated soil spills past porosity to surface (no bounds crash)", () => {
+    const world = new WorldState(generateMountain(24, 24, 6, 3));
+    world.soilMoisture.fill(config.soilPorosity);
+    const precipBefore = world.precipitationLedger;
+    let soilBefore = 0;
+    let surfBefore = 0;
+    for (let i = 0; i < world.soilMoisture.data.length; i++) {
+      soilBefore += world.soilStorageDepth(i);
+      surfBefore += world.water.data[i]!;
+    }
+    world.digChannel(12, 12);
+    expect(() => world.registry.assertBounds("after dig")).not.toThrow();
+    let soilAfter = 0;
+    let surfAfter = 0;
+    let maxM = 0;
+    for (let i = 0; i < world.soilMoisture.data.length; i++) {
+      soilAfter += world.soilStorageDepth(i);
+      surfAfter += world.water.data[i]!;
+      maxM = Math.max(maxM, world.soilMoisture.data[i]!);
+    }
+    expect(maxM).toBeLessThanOrEqual(config.soilPorosity + 1e-6);
+    expect(surfAfter).toBeGreaterThan(surfBefore);
+    expect(soilBefore + surfBefore).toBeCloseTo(soilAfter + surfAfter, 5);
+    expect(world.precipitationLedger).toBe(precipBefore);
+  });
 });

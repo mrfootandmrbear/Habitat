@@ -213,3 +213,45 @@ export function computeWatershedLabels(
   for (let i = 0; i < n; i++) labels[i] = sinkOf[i]! as number;
   return labels;
 }
+
+/**
+ * Provisional preserve outlets (SIMULATION_MODEL §10.2): perimeter cells at
+ * the edge-minimum elevation that are local minima along the boundary ring.
+ * Matches Priority-Flood's open-edge spill assumption so ponded water can leave
+ * instead of only evaporating. Flat closed basins opt out via WorldState.
+ */
+export function computePerimeterOutlets(
+  width: number,
+  height: number,
+  elevation: Float32Array,
+): Set<number> {
+  if (width < 2 || height < 2) return new Set();
+
+  const ring: number[] = [];
+  for (let x = 0; x < width; x++) ring.push(x);
+  for (let z = 1; z < height; z++) ring.push(z * width + (width - 1));
+  for (let x = width - 2; x >= 0; x--) ring.push((height - 1) * width + x);
+  for (let z = height - 2; z >= 1; z--) ring.push(z * width);
+
+  let edgeMin = Infinity;
+  let edgeMax = -Infinity;
+  for (const i of ring) {
+    const h = elevation[i]!;
+    edgeMin = Math.min(edgeMin, h);
+    edgeMax = Math.max(edgeMax, h);
+  }
+  // Flat rim (no pour-point relief) — stay closed (bathtub / flat unit grids).
+  if (edgeMax - edgeMin < 1e-6) return new Set();
+
+  const outlets = new Set<number>();
+  const n = ring.length;
+  for (let k = 0; k < n; k++) {
+    const i = ring[k]!;
+    const h = elevation[i]!;
+    if (h > edgeMin + 1e-4) continue;
+    const prev = elevation[ring[(k - 1 + n) % n]!]!;
+    const next = elevation[ring[(k + 1) % n]!]!;
+    if (h <= prev && h <= next) outlets.add(i);
+  }
+  return outlets;
+}

@@ -14,6 +14,7 @@ import { evaluateHsi } from "./habitat/hsiComposition";
 import {
   computeD8Accumulation,
   computeD8FlowDirection,
+  computePerimeterOutlets,
   computeWatershedLabels,
   priorityFloodFill,
   type FlowDirection,
@@ -71,6 +72,12 @@ export class WorldState {
   filledElevation: Float32Array | null = null;
   /** Pit depth on routing surface — registered derived field. */
   readonly depressionDepth: Grid2D;
+  /**
+   * Absorbing outlet cells (SIM §10.2). Default: perimeter edge-minima so the
+   * preserve is not a closed bathtub. Tests may pass `closedBoundary: true`.
+   */
+  outletCells: ReadonlySet<number> = new Set();
+  private readonly closedBoundary: boolean;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
@@ -102,6 +109,11 @@ export class WorldState {
       maxOutflowFraction?: number;
       /** When false, recharge and baseflow are off (paired probe baseline). */
       groundwaterEnabled?: boolean;
+      /**
+       * When true, map edges are no-flow with no outlets (closed basin).
+       * Default false — perimeter pour points drain (SIM §10.2 provisional).
+       */
+      closedBoundary?: boolean;
     },
   ) {
     this.width = terrain.width;
@@ -140,6 +152,7 @@ export class WorldState {
     this.gwRecessionAlpha = gwOn ? config.gwRecessionAlpha : 0;
     this.gwFieldCapacityFraction = config.gwFieldCapacityFraction;
     this.gwChannelBoost = config.gwChannelBoost;
+    this.closedBoundary = options?.closedBoundary === true;
 
     this.registry = new FieldRegistry();
     this.registerFields();
@@ -260,6 +273,9 @@ export class WorldState {
       this.height,
       this.flowDirection,
     );
+    this.outletCells = this.closedBoundary
+      ? new Set()
+      : computePerimeterOutlets(this.width, this.height, elev);
   }
 
   /** Mark structure dirty; recompute at next event step or ensureStructureFresh (§7.2). */
@@ -284,7 +300,7 @@ export class WorldState {
       dt,
       this.flowRate,
       this.maxOutflowFraction,
-      undefined,
+      this.outletCells,
       this.surfaceRoughness.data,
       config.baseRoughness,
     );
@@ -408,7 +424,6 @@ export class WorldState {
     this.ensureStructureFresh();
     const elev = this.terrain.data;
     const depth = this.soilDepth.data;
-    const moisture = this.soilMoisture.data;
     const cover = this.vegCover.data;
     const acc = this.flowAccumulation;
     const filled = this.filledElevation ?? elev;
@@ -449,9 +464,8 @@ export class WorldState {
         if (actualDh !== 0) {
           const oldH = Math.max(h, minDepth);
           const newH = Math.max(nextH, minDepth);
-          // Conserve column water when depth changes (new production is dry).
-          moisture[i]! = (moisture[i]! * oldH) / newH;
-          if (nextH <= 0) moisture[i]! = 0;
+          // Conserve column water; spill past porosity to surface (erosion).
+          this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
           depth[i]! = nextH;
           elev[i]! = elev[i]! + actualDh;
           dirty = true;
@@ -495,6 +509,35 @@ export class WorldState {
       added += amountPerCell;
     }
     this.precipitationLedger += added;
+  }
+
+  /**
+   * Keep soil-column water mass when depth changes. Volumetric moisture is
+   * storage/depth; thinning (dig / erosion) can push fraction above porosity —
+   * spill the excess to surface so bounds stay honest and mass closes.
+   */
+  private adjustMoistureForDepthChange(
+    i: number,
+    oldH: number,
+    newH: number,
+    nextDepth: number,
+  ): void {
+    const moisture = this.soilMoisture.data;
+    const water = this.water.data;
+    const porosity = config.soilPorosity;
+    const storage = moisture[i]! * oldH;
+    if (nextDepth <= 0) {
+      water[i]! += storage;
+      moisture[i]! = 0;
+      return;
+    }
+    const capacity = porosity * newH;
+    if (storage > capacity) {
+      water[i]! += storage - capacity;
+      moisture[i]! = porosity;
+    } else {
+      moisture[i]! = storage / newH;
+    }
   }
 
   resetWater(): void {
@@ -638,11 +681,8 @@ export class WorldState {
 
         const oldH = Math.max(depth0, minDepth);
         const newH = Math.max(nextDepth, minDepth);
-        // Conserve column water when depth changes (match geomorphology).
-        this.soilMoisture.data[i]! =
-          nextDepth <= 0
-            ? 0
-            : (this.soilMoisture.data[i]! * oldH) / newH;
+        // Conserve column water; spill past porosity to surface (dig/berm).
+        this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
         this.soilDepth.data[i]! = nextDepth;
         this.terrain.data[i]! = nextElev;
       }

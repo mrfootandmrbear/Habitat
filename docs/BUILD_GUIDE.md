@@ -199,13 +199,13 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] **Save / load in the UI** — localStorage via `sessionPersist.ts` (T-003 / P-005)  
 - [x] **Undo** for sculpting (**C-013** hypothesis) — edits only; cleared when time advances (S-007)  
 - [x] Erosion / deposition legible **without** the inspector on player-made terrain — form-memory elev tint (Tier-P max encoding > 0.15 after geo)  
-- [x] One force dial the player sets before running time — **Rain: dry / light / moderate / heavy** (authored; C-003 direction, C-004)  
+- [x] One force dial the player sets before running time — **Rain: dry / light / moderate / heavy** (authored; C-003 direction, C-004); storm wet-fraction + perimeter pour-point outlets (SIM §10.2) so heavy is not a closed-basin firehose  
 - [x] Before/after readable across a fast-forward — **Remember form** captures then; default view encodes Δelev  
 - [x] Tier-P: encoded-signal proxy on the eroded-vs-untouched delta at default camera; response-latency proxy per **C-008** *(proxy green; budget number still owner)*  
 - [x] Tier-M: same seed + same regime → identical hash; different regime → divergent outcome (`regime-divergence`)  
 - [x] `docs/slices/8c.json` manifest (DoD row 9)  
 - [x] Notebook seed: “The berm I built is a low ridge now, and the channel moved.”  
-- [ ] **Tier-O — this is the batched session** ([docs/playtests/8c-return-visit.md](playtests/8c-return-visit.md)): *did you want to run it again with different weather?* — ask gate pending owner session; C-004 dossier filed for the stewardship reading  
+- [ ] **Tier-O — this is the batched session** ([docs/playtests/8c-return-visit.md](playtests/8c-return-visit.md)): *did you want to run it again with different weather?* — retuned after owner flood report; re-run pending; C-004 dossier filed for the stewardship reading 
 
 ---
 

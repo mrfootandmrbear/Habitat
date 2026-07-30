@@ -25,6 +25,7 @@ import {
 import {
   rainDepthForRegime,
   rainRegimeById,
+  regimeRainsThisEvent,
   type RainRegimeId,
 } from "./sim/climate/rainRegime";
 import { FormMemory } from "./sim/formMemory";
@@ -327,16 +328,25 @@ function frame(now: number): void {
   lastFrame = now;
 
   const { stepsRun } = clock.tick(wallDt);
-  const depth = rainDepthForRegime(
-    rainRegimeById(rainRegime),
-    config.rainDepthPerEvent,
-  );
+  const regime = rainRegimeById(rainRegime);
+  const depth = rainDepthForRegime(regime, config.rainDepthPerEvent);
   for (let i = 0; i < stepsRun; i++) {
-    if (depth > 0) {
+    const indexInDay = steps % config.dailyEventSteps;
+    if (depth > 0 && regimeRainsThisEvent(regime, indexInDay, config.dailyEventSteps)) {
       model.addRain(depth);
     }
-    world.stepEvent();
-    steps += 1;
+    try {
+      world.stepEvent();
+      steps += 1;
+    } catch (err) {
+      clock.setTimeScale(0);
+      timeRate = "pause";
+      ui.setTimeRate("pause");
+      const msg = err instanceof Error ? err.message : String(err);
+      ui.setHint(`Sim paused — ${msg.slice(0, 120)}`);
+      console.error(err);
+      break;
+    }
   }
 
   if (prediction.shouldAutoCompare(steps)) {
