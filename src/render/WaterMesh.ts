@@ -1,18 +1,82 @@
 import * as THREE from "three";
 import { config } from "../config";
-import type { WaterStateView } from "../sim/types";
+import type { WorldState } from "../sim/WorldState";
+import {
+  createFieldTexture,
+  updateFieldTexture,
+  FIELD_SAMPLE_GLSL,
+} from "./fieldTexture";
+
+/**
+ * Water palette — data the renderer accepts, not shader-baked constants.
+ * See TerrainMesh.ts's TerrainPalette for the same reasoning; a future
+ * preserve (e.g. a reef/underwater biome) supplies a different shallow/deep
+ * pair via WaterMesh.setPalette.
+ */
+export type WaterPalette = {
+  shallow: THREE.ColorRepresentation;
+  deep: THREE.ColorRepresentation;
+};
+
+export function defaultWaterPalette(): WaterPalette {
+  return {
+    shallow: new THREE.Color(0.35, 0.62, 0.82),
+    deep: new THREE.Color(0.12, 0.35, 0.62),
+  };
+}
 
 const waterVertex = /* glsl */ `
+uniform sampler2D uDepthTex;
+uniform sampler2D uElevationTex;
+uniform sampler2D uOceanMaskTex;
+uniform vec2 uFieldSize;
+uniform float uTexelWorldSize;
+uniform float uShowEps;
+uniform float uStormActive;
 varying vec3 vWorldNormal;
 varying float vAlpha;
 varying float vDepthT;
-attribute vec4 waterColor;
+${FIELD_SAMPLE_GLSL}
 
 void main() {
-  vAlpha = waterColor.a;
-  vDepthT = waterColor.a > 0.0 ? waterColor.b : 0.0;
-  vec4 worldPos = modelMatrix * vec4(position, 1.0);
-  vWorldNormal = normalize(mat3(modelMatrix) * normal);
+  vec2 fUv = fieldUv(uv);
+  float elev = sampleFieldBilinear(uElevationTex, fUv, uFieldSize);
+  float depth = max(0.0, sampleFieldBilinear(uDepthTex, fUv, uFieldSize));
+  bool isOcean = sampleFieldBilinear(uOceanMaskTex, fUv, uFieldSize) > 0.5;
+  bool wet = !isOcean && depth > uShowEps;
+
+  float y = isOcean ? (elev - 1.0) : ((wet ? elev + depth : elev) + 0.04);
+
+  float t = wet ? min(1.0, depth * 2.0) : 0.0;
+  float a = wet ? (0.55 + 0.35 * t) : 0.0;
+  if (uStormActive > 0.5 && wet && depth < 0.04) {
+    a *= 0.35;
+  }
+  if (isOcean) {
+    a = 0.0;
+    t = 0.0;
+  }
+  vAlpha = a;
+  vDepthT = t;
+
+  // Analytic normal via central difference on the combined (elev + depth)
+  // surface — replaces the CPU geometry.computeVertexNormals() pass.
+  vec2 invSize = 1.0 / uFieldSize;
+  float hL = sampleFieldBilinear(uElevationTex, fUv - vec2(invSize.x, 0.0), uFieldSize)
+    + max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(invSize.x, 0.0), uFieldSize));
+  float hR = sampleFieldBilinear(uElevationTex, fUv + vec2(invSize.x, 0.0), uFieldSize)
+    + max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(invSize.x, 0.0), uFieldSize));
+  float hD = sampleFieldBilinear(uElevationTex, fUv - vec2(0.0, invSize.y), uFieldSize)
+    + max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(0.0, invSize.y), uFieldSize));
+  float hU = sampleFieldBilinear(uElevationTex, fUv + vec2(0.0, invSize.y), uFieldSize)
+    + max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(0.0, invSize.y), uFieldSize));
+  float dHdx = (hR - hL) / (2.0 * uTexelWorldSize);
+  float dHdz = (hU - hD) / (2.0 * uTexelWorldSize);
+  vec3 localNormal = normalize(vec3(-dHdx, 1.0, -dHdz));
+
+  vec3 displaced = vec3(position.x, y, position.z);
+  vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
+  vWorldNormal = normalize(mat3(modelMatrix) * localNormal);
   gl_Position = projectionMatrix * viewMatrix * worldPos;
 }
 `;
@@ -21,15 +85,15 @@ const waterFragment = /* glsl */ `
 varying vec3 vWorldNormal;
 varying float vAlpha;
 varying float vDepthT;
+uniform vec3 uShallowColor;
+uniform vec3 uDeepColor;
 
 void main() {
   if (vAlpha < 0.01) discard;
   vec3 n = normalize(vWorldNormal);
   vec3 lightDir = normalize(vec3(0.4, 1.0, 0.25));
   float ndl = 0.35 + 0.65 * max(dot(n, lightDir), 0.0);
-  vec3 shallow = vec3(0.35, 0.62, 0.82);
-  vec3 deep = vec3(0.12, 0.35, 0.62);
-  vec3 col = mix(shallow, deep, clamp(vDepthT, 0.0, 1.0)) * ndl;
+  vec3 col = mix(uShallowColor, uDeepColor, clamp(vDepthT, 0.0, 1.0)) * ndl;
   gl_FragColor = vec4(col, vAlpha);
 }
 `;
@@ -37,39 +101,61 @@ void main() {
 export class WaterMesh {
   readonly mesh: THREE.Mesh;
   private readonly geometry: THREE.PlaneGeometry;
-  private readonly width: number;
-  private readonly height: number;
-  private readonly worldSize: number;
   private readonly dryEpsilon: number;
-  private readonly waterColor: THREE.BufferAttribute;
   /** Display depths — lerped toward sim; never written back (T-006). */
   private readonly displayDepth: Float32Array;
-  private lastNormalKey = Number.NaN;
 
-  constructor(width: number, height: number, worldSize: number) {
-    this.width = width;
-    this.height = height;
-    this.worldSize = worldSize;
+  private readonly depthTex: THREE.DataTexture;
+  private readonly elevationTex: THREE.DataTexture;
+  private readonly oceanMaskTex: THREE.DataTexture;
+  private readonly oceanMaskField: Float32Array;
+  private lastOceanCells: ReadonlySet<number> | undefined = undefined;
+  private readonly uniforms: Record<string, THREE.IUniform>;
+  private palette: WaterPalette;
+
+  constructor(
+    width: number,
+    height: number,
+    worldSize: number,
+    options?: { upsample?: number; palette?: WaterPalette },
+  ) {
     this.dryEpsilon = config.dryEpsilon;
     this.displayDepth = new Float32Array(width * height);
+    this.palette = options?.palette ?? defaultWaterPalette();
+    const upsample = Math.max(1, Math.round(options?.upsample ?? 2));
 
     this.geometry = new THREE.PlaneGeometry(
       worldSize,
       worldSize,
-      width - 1,
-      height - 1,
+      (width - 1) * upsample,
+      (height - 1) * upsample,
     );
     this.geometry.rotateX(-Math.PI / 2);
 
-    const count = this.geometry.attributes.position!.count;
-    this.waterColor = new THREE.BufferAttribute(new Float32Array(count * 4), 4);
-    this.geometry.setAttribute("waterColor", this.waterColor);
+    this.depthTex = createFieldTexture(width, height);
+    this.elevationTex = createFieldTexture(width, height);
+    this.oceanMaskTex = createFieldTexture(width, height);
+    this.oceanMaskField = new Float32Array(width * height);
+
+    this.uniforms = {
+      uDepthTex: { value: this.depthTex },
+      uElevationTex: { value: this.elevationTex },
+      uOceanMaskTex: { value: this.oceanMaskTex },
+      uFieldSize: { value: new THREE.Vector2(width, height) },
+      uTexelWorldSize: { value: worldSize / (width - 1) },
+      uShowEps: { value: this.dryEpsilon },
+      uStormActive: { value: 0 },
+      uShallowColor: { value: new THREE.Color() },
+      uDeepColor: { value: new THREE.Color() },
+    };
+    this.applyPaletteToUniforms();
 
     // depthWrite + FrontSide: transparent DoubleSide + depthWrite:false was
     // re-sorting against terrain/cage every camera move (orbit flash).
     const material = new THREE.ShaderMaterial({
       vertexShader: waterVertex,
       fragmentShader: waterFragment,
+      uniforms: this.uniforms,
       transparent: true,
       depthWrite: true,
       depthTest: true,
@@ -84,20 +170,24 @@ export class WaterMesh {
     this.mesh.name = "water";
   }
 
+  /** Swap the water palette (preserve data — see WaterPalette). */
+  setPalette(palette: WaterPalette): void {
+    this.palette = palette;
+    this.applyPaletteToUniforms();
+  }
+
+  private applyPaletteToUniforms(): void {
+    (this.uniforms.uShallowColor!.value as THREE.Color).set(this.palette.shallow);
+    (this.uniforms.uDeepColor!.value as THREE.Color).set(this.palette.deep);
+  }
+
   /** Snap display buffer to sim (reset / load). */
-  snapFrom(
-    model: WaterStateView,
-    oceanCells?: ReadonlySet<number>,
-  ): void {
-    for (let z = 0; z < this.height; z++) {
-      for (let x = 0; x < this.width; x++) {
-        const i = z * this.width + x;
-        this.displayDepth[i] = oceanCells?.has(i)
-          ? 0
-          : Math.max(0, model.getWaterDepth(x, z));
-      }
+  snapFrom(world: WorldState): void {
+    const waterData = world.water.data;
+    for (let i = 0; i < this.displayDepth.length; i++) {
+      this.displayDepth[i] = world.oceanCells.has(i) ? 0 : Math.max(0, waterData[i]!);
     }
-    this.applyDisplay(model, oceanCells, true);
+    this.applyDisplay(world, false);
   }
 
   /**
@@ -107,87 +197,40 @@ export class WaterMesh {
    * `stormActive`: during a precip event, shallow sheets stay more transparent
    * so rain reads as weather (streaks/veil) rather than a blue mass (T-006).
    */
-  updateFrom(
-    model: WaterStateView,
-    oceanCells?: ReadonlySet<number>,
-    wallDt = 1 / 60,
-    stormActive = false,
-  ): void {
+  updateFrom(world: WorldState, wallDt = 1 / 60, stormActive = false): void {
     const tau = Math.max(1e-3, config.waterDisplayTauSeconds);
     const alpha = 1 - Math.exp(-Math.max(0, wallDt) / tau);
-    for (let z = 0; z < this.height; z++) {
-      for (let x = 0; x < this.width; x++) {
-        const i = z * this.width + x;
-        if (oceanCells?.has(i)) {
-          this.displayDepth[i] = 0;
-          continue;
-        }
-        const target = Math.max(0, model.getWaterDepth(x, z));
-        const cur = this.displayDepth[i]!;
-        this.displayDepth[i] = cur + (target - cur) * alpha;
-        // Snap dry to avoid everlasting microfilm.
-        if (this.displayDepth[i]! < this.dryEpsilon * 0.25 && target < this.dryEpsilon) {
-          this.displayDepth[i] = 0;
-        }
+    const waterData = world.water.data;
+    for (let i = 0; i < this.displayDepth.length; i++) {
+      if (world.oceanCells.has(i)) {
+        this.displayDepth[i] = 0;
+        continue;
       }
+      const target = Math.max(0, waterData[i]!);
+      const cur = this.displayDepth[i]!;
+      let next = cur + (target - cur) * alpha;
+      // Snap dry to avoid everlasting microfilm.
+      if (next < this.dryEpsilon * 0.25 && target < this.dryEpsilon) {
+        next = 0;
+      }
+      this.displayDepth[i] = next;
     }
-    this.applyDisplay(model, oceanCells, false, stormActive);
+    this.applyDisplay(world, stormActive);
   }
 
-  private applyDisplay(
-    model: WaterStateView,
-    oceanCells: ReadonlySet<number> | undefined,
-    forceNormals: boolean,
-    stormActive = false,
-  ): void {
-    const pos = this.geometry.attributes.position as THREE.BufferAttribute;
-    const cellW = this.worldSize / (this.width - 1);
-    const cellH = this.worldSize / (this.height - 1);
-    const ox = -this.worldSize / 2;
-    const oz = -this.worldSize / 2;
-    let i = 0;
-    let wetSum = 0;
-    let wetCount = 0;
-    // During a storm, hide the microfilm sheet; keep deeper pools readable.
-    const showEps = stormActive ? Math.max(this.dryEpsilon, 0.012) : this.dryEpsilon;
-    for (let z = 0; z < this.height; z++) {
-      for (let x = 0; x < this.width; x++) {
-        const cell = z * this.width + x;
-        const h = model.getTerrainHeight(x, z);
-        if (oceanCells?.has(cell)) {
-          pos.setXYZ(i, ox + x * cellW, h - 1, oz + z * cellH);
-          this.waterColor.setXYZW(i, 0, 0, 0, 0);
-          i++;
-          continue;
-        }
-        const w = this.displayDepth[cell]!;
-        const wet = w > showEps;
-        const y = (wet ? h + w : h) + 0.04;
-        pos.setXYZ(i, ox + x * cellW, y, oz + z * cellH);
-
-        const t = wet ? Math.min(1, w * 2) : 0;
-        let a = wet ? 0.55 + 0.35 * t : 0;
-        if (stormActive && wet && w < 0.04) {
-          a *= 0.35;
-        }
-        this.waterColor.setXYZW(i, 0, 0, t, a);
-        if (wet) {
-          wetSum += y;
-          wetCount++;
-        }
-        i++;
+  private applyDisplay(world: WorldState, stormActive: boolean): void {
+    updateFieldTexture(this.depthTex, this.displayDepth);
+    updateFieldTexture(this.elevationTex, world.terrain.data);
+    if (world.oceanCells !== this.lastOceanCells) {
+      this.oceanMaskField.fill(0);
+      for (const idx of world.oceanCells) {
+        this.oceanMaskField[idx] = 1;
       }
+      updateFieldTexture(this.oceanMaskTex, this.oceanMaskField);
+      this.lastOceanCells = world.oceanCells;
     }
-    pos.needsUpdate = true;
-    this.waterColor.needsUpdate = true;
-    const key = wetCount > 0 ? wetSum / wetCount + wetCount * 1e-3 : 0;
-    if (
-      forceNormals ||
-      !Number.isFinite(this.lastNormalKey) ||
-      Math.abs(key - this.lastNormalKey) > 0.05
-    ) {
-      this.geometry.computeVertexNormals();
-      this.lastNormalKey = key;
-    }
+    const showEps = stormActive ? Math.max(this.dryEpsilon, 0.012) : this.dryEpsilon;
+    this.uniforms.uShowEps!.value = showEps;
+    this.uniforms.uStormActive!.value = stormActive ? 1 : 0;
   }
 }

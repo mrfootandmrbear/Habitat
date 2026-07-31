@@ -4,14 +4,26 @@ import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
 import { understoryLightRgb } from "../ui/lightEncoding";
-import { defaultTerrainRgb } from "../ui/terrainEncoding";
+import {
+  defaultTerrainRgb,
+  WET,
+  VEG,
+  SCAR,
+  INTERTIDAL,
+  SALT,
+} from "../ui/terrainEncoding";
 import { herbBiomassRgb, strandBiomassRgb, binderBiomassRgb, marshBiomassRgb, shrubBiomassRgb, crustBiomassRgb } from "../ui/occupantEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
-import { substrateProps } from "../sim/terrain/substrates";
+import { substrateProps, SUBSTRATES } from "../sim/terrain/substrates";
+import {
+  createFieldTexture,
+  updateFieldTexture,
+  FIELD_SAMPLE_GLSL,
+} from "./fieldTexture";
 
 const BASE = new THREE.Color(0x8b7355);
-const WET = new THREE.Color(0x4a5c3a);
-const VEG = new THREE.Color(0x3a7a3a);
+const WET_OVERLAY = new THREE.Color(0x4a5c3a);
+const VEG_OVERLAY = new THREE.Color(0x3a7a3a);
 const ERODE = new THREE.Color(0xc45c3a);
 const DEPOSIT = new THREE.Color(0xe8d5a8);
 const PREDICT_PENDING = new THREE.Color(0x2ec4b6);
@@ -19,43 +31,326 @@ const PREDICT_HIT = new THREE.Color(0x3dcc6f);
 const PREDICT_MISS = new THREE.Color(0xe85d4c);
 const PREDICT_UNEXPECTED = new THREE.Color(0xe8b84c);
 
-/** Terrain mesh tinted by soil moisture; supports T-005 inspector overlays. */
+/** Uniform array size for the GPU path's material table — headroom past the
+ * current 4 substrates so a future preserve can add rows without a shader
+ * change. */
+const MATERIAL_SLOTS = 8;
+
+/**
+ * Terrain palette — data the renderer accepts, not shader-baked constants.
+ * Sourced by default from the same constants the CPU default-view path uses
+ * (ui/terrainEncoding.ts, sim/terrain/substrates.ts) so both paths render
+ * identically; a future preserve can supply a different palette via
+ * TerrainMesh.setPalette without touching this file.
+ */
+export type TerrainPalette = {
+  wet: THREE.ColorRepresentation;
+  veg: THREE.ColorRepresentation;
+  scar: THREE.ColorRepresentation;
+  intertidal: THREE.ColorRepresentation;
+  salt: THREE.ColorRepresentation;
+  erode: THREE.ColorRepresentation;
+  deposit: THREE.ColorRepresentation;
+  /** Indexed by substrate material id (sim/terrain/substrates.ts). */
+  materials: readonly { dryRgb: THREE.ColorRepresentation; porosity: number }[];
+};
+
+export function defaultTerrainPalette(): TerrainPalette {
+  return {
+    wet: new THREE.Color(...WET),
+    veg: new THREE.Color(...VEG),
+    scar: new THREE.Color(...SCAR),
+    intertidal: new THREE.Color(...INTERTIDAL),
+    salt: new THREE.Color(...SALT),
+    erode: ERODE.clone(),
+    deposit: DEPOSIT.clone(),
+    materials: SUBSTRATES.map((s) => ({
+      dryRgb: new THREE.Color(...s.dryRgb),
+      porosity: s.porosity,
+    })),
+  };
+}
+
+const TERRAIN_VERTEX_HEADER = /* glsl */ `
+uniform sampler2D uElevationTex;
+uniform vec2 uFieldSize;
+uniform float uTexelWorldSize;
+varying float vFieldElev;
+${FIELD_SAMPLE_GLSL}
+`;
+
+const TERRAIN_NORMAL_INJECT = /* glsl */ `
+vec2 tFieldUv = fieldUv(uv);
+objectNormal = fieldHeightNormal(uElevationTex, tFieldUv, uFieldSize, uTexelWorldSize);
+`;
+
+const TERRAIN_DISPLACE_INJECT = /* glsl */ `
+vFieldElev = sampleFieldBilinear(uElevationTex, tFieldUv, uFieldSize);
+transformed.y = vFieldElev;
+`;
+
+const TERRAIN_FRAGMENT_HEADER = /* glsl */ `
+uniform sampler2D uSoilMoistureTex;
+uniform sampler2D uVegCoverTex;
+uniform sampler2D uFireScarTex;
+uniform sampler2D uSalinityTex;
+uniform sampler2D uMaterialTex;
+uniform sampler2D uErosionPulseTex;
+uniform vec2 uFieldSize;
+uniform float uSeaLevel;
+uniform float uMeanHighWater;
+uniform float uHasSea;
+uniform vec3 uWetColor;
+uniform vec3 uVegColor;
+uniform vec3 uScarColor;
+uniform vec3 uIntertidalColor;
+uniform vec3 uSaltColor;
+uniform vec3 uErodeColor;
+uniform vec3 uDepositColor;
+uniform vec3 uMaterialDryRgb[${MATERIAL_SLOTS}];
+uniform float uMaterialPorosity[${MATERIAL_SLOTS}];
+varying float vFieldElev;
+${FIELD_SAMPLE_GLSL}
+
+vec3 materialDryRgb(int idx) {
+  vec3 result = uMaterialDryRgb[0];
+  for (int i = 0; i < ${MATERIAL_SLOTS}; i++) {
+    if (i == idx) result = uMaterialDryRgb[i];
+  }
+  return result;
+}
+
+float materialPorosity(int idx) {
+  float result = uMaterialPorosity[0];
+  for (int i = 0; i < ${MATERIAL_SLOTS}; i++) {
+    if (i == idx) result = uMaterialPorosity[i];
+  }
+  return result;
+}
+`;
+
+// GLSL port of ui/terrainEncoding.ts defaultTerrainRgb, plus the always-on
+// ambient erosion pulse (TerrainMesh.md §2b) layered on top. Keep in sync
+// with defaultTerrainRgb's lerp shape if that function changes.
+const TERRAIN_COLOR_INJECT = /* glsl */ `
+{
+  vec2 fUv = fieldUv(vUv);
+  float moisture = sampleFieldBilinear(uSoilMoistureTex, fUv, uFieldSize);
+  float cover = clamp(sampleFieldBilinear(uVegCoverTex, fUv, uFieldSize), 0.0, 1.0);
+  float scar = clamp(sampleFieldBilinear(uFireScarTex, fUv, uFieldSize), 0.0, 1.0);
+  float salinity = clamp(sampleFieldBilinear(uSalinityTex, fUv, uFieldSize), 0.0, 1.0);
+  int materialId = int(sampleFieldBilinear(uMaterialTex, fUv, uFieldSize) + 0.5);
+  float porosity = max(materialPorosity(materialId), 1e-6);
+  vec3 base = materialDryRgb(materialId);
+
+  float soilT = clamp(moisture / porosity, 0.0, 1.0);
+  vec3 wetBase = mix(base, uWetColor, soilT);
+  float vegAmount = clamp(cover * (0.28 + 0.62 * soilT) * (1.0 - salinity * 0.9), 0.0, 1.0);
+  vec3 col = mix(wetBase, uVegColor, vegAmount);
+  if (scar > 0.0) {
+    col = mix(col, uScarColor, min(0.85, scar * 0.9));
+  }
+  bool isForeshore = uHasSea > 0.5 && vFieldElev >= uSeaLevel && vFieldElev < uMeanHighWater;
+  if (isForeshore) {
+    col = mix(col, uIntertidalColor, 0.62);
+  }
+  if (salinity > 0.0) {
+    col = mix(col, uSaltColor, min(0.78, salinity * 0.7));
+  }
+
+  float pulse = sampleFieldBilinear(uErosionPulseTex, fUv, uFieldSize);
+  float pulseStrength = min(1.0, abs(pulse) / 0.025);
+  if (pulseStrength > 0.0) {
+    col = mix(col, pulse < 0.0 ? uErodeColor : uDepositColor, pulseStrength * 0.9);
+  }
+
+  diffuseColor.rgb = col;
+}
+`;
+
+/** Ambient erosion pulse decay per sync (TerrainMesh.md §2b) — ~0.85-0.9. */
+const EROSION_PULSE_DECAY = 0.88;
+
+/**
+ * Terrain mesh: a Group wrapping two sub-meshes.
+ * - gpuMesh: default view — GPU-displaced/colored, smooth, upsampled past
+ *   the sim grid. Fast path: field textures updated via native memcpy, no
+ *   per-cell CPU loop.
+ * - cpuMesh: inspector overlays / prediction marks / "remembered form" tint
+ *   — unchanged CPU per-cell rebuild (Tier-P color logic, ~20 overlay modes)
+ *   at native sim-grid resolution.
+ * Exactly one is a child of `mesh` at a time, so raycasting (siting/cutaway)
+ * only ever hits the currently-visible surface.
+ */
 export class TerrainMesh {
-  readonly mesh: THREE.Mesh;
-  private readonly geometry: THREE.PlaneGeometry;
+  readonly mesh: THREE.Group;
   private readonly width: number;
   private readonly height: number;
   private readonly worldSize: number;
+
+  // CPU fallback path (overlay / prediction / elevDelta) — unchanged from
+  // the pre-GPU implementation.
+  private readonly cpuMesh: THREE.Mesh;
+  private readonly cpuGeometry: THREE.PlaneGeometry;
   private readonly colors: THREE.BufferAttribute;
-  /** Skip normal rebuilds when elev barely moved (coastal-step lighting flash). */
   private lastNormalElevSum = Number.NaN;
 
-  constructor(width: number, height: number, worldSize: number) {
+  // GPU default path.
+  private readonly gpuMesh: THREE.Mesh;
+  private readonly gpuMaterial: THREE.MeshStandardMaterial;
+  private readonly elevationTex: THREE.DataTexture;
+  private readonly soilMoistureTex: THREE.DataTexture;
+  private readonly vegCoverTex: THREE.DataTexture;
+  private readonly fireScarTex: THREE.DataTexture;
+  private readonly salinityTex: THREE.DataTexture;
+  private readonly materialTex: THREE.DataTexture;
+  private readonly erosionPulseTex: THREE.DataTexture;
+  private readonly gpuUniforms: Record<string, THREE.IUniform>;
+  private readonly prevElevField: Float32Array;
+  private readonly erosionPulseField: Float32Array;
+  private erosionPulseInitialized = false;
+
+  private activeChild: "gpu" | "cpu" = "gpu";
+  private palette: TerrainPalette;
+
+  constructor(
+    width: number,
+    height: number,
+    worldSize: number,
+    options?: { upsample?: number; palette?: TerrainPalette },
+  ) {
     this.width = width;
     this.height = height;
     this.worldSize = worldSize;
+    this.palette = options?.palette ?? defaultTerrainPalette();
+    const upsample = Math.max(1, Math.round(options?.upsample ?? 2));
 
-    this.geometry = new THREE.PlaneGeometry(
+    // --- CPU fallback mesh (native sim-grid resolution, unchanged logic) ---
+    this.cpuGeometry = new THREE.PlaneGeometry(
       worldSize,
       worldSize,
       width - 1,
       height - 1,
     );
-    this.geometry.rotateX(-Math.PI / 2);
-
-    const count = this.geometry.attributes.position!.count;
-    this.colors = new THREE.BufferAttribute(new Float32Array(count * 3), 3);
-    this.geometry.setAttribute("color", this.colors);
-
-    const material = new THREE.MeshStandardMaterial({
+    this.cpuGeometry.rotateX(-Math.PI / 2);
+    const cpuCount = this.cpuGeometry.attributes.position!.count;
+    this.colors = new THREE.BufferAttribute(new Float32Array(cpuCount * 3), 3);
+    this.cpuGeometry.setAttribute("color", this.colors);
+    const cpuMaterial = new THREE.MeshStandardMaterial({
       vertexColors: true,
       roughness: 0.92,
       metalness: 0.05,
       flatShading: true,
     });
+    this.cpuMesh = new THREE.Mesh(this.cpuGeometry, cpuMaterial);
+    this.cpuMesh.name = "terrain-cpu-fallback";
 
-    this.mesh = new THREE.Mesh(this.geometry, material);
+    // --- GPU default mesh (upsampled, shader-driven) ---
+    const gpuGeometry = new THREE.PlaneGeometry(
+      worldSize,
+      worldSize,
+      (width - 1) * upsample,
+      (height - 1) * upsample,
+    );
+    gpuGeometry.rotateX(-Math.PI / 2);
+
+    this.elevationTex = createFieldTexture(width, height);
+    this.soilMoistureTex = createFieldTexture(width, height);
+    this.vegCoverTex = createFieldTexture(width, height);
+    this.fireScarTex = createFieldTexture(width, height);
+    this.salinityTex = createFieldTexture(width, height);
+    this.materialTex = createFieldTexture(width, height);
+    this.erosionPulseTex = createFieldTexture(width, height);
+    this.prevElevField = new Float32Array(width * height);
+    this.erosionPulseField = new Float32Array(width * height);
+
+    this.gpuUniforms = {
+      uElevationTex: { value: this.elevationTex },
+      uSoilMoistureTex: { value: this.soilMoistureTex },
+      uVegCoverTex: { value: this.vegCoverTex },
+      uFireScarTex: { value: this.fireScarTex },
+      uSalinityTex: { value: this.salinityTex },
+      uMaterialTex: { value: this.materialTex },
+      uErosionPulseTex: { value: this.erosionPulseTex },
+      uFieldSize: { value: new THREE.Vector2(width, height) },
+      uTexelWorldSize: { value: worldSize / (width - 1) },
+      uSeaLevel: { value: 0 },
+      uMeanHighWater: { value: 0 },
+      uHasSea: { value: 0 },
+      uWetColor: { value: new THREE.Color() },
+      uVegColor: { value: new THREE.Color() },
+      uScarColor: { value: new THREE.Color() },
+      uIntertidalColor: { value: new THREE.Color() },
+      uSaltColor: { value: new THREE.Color() },
+      uErodeColor: { value: new THREE.Color() },
+      uDepositColor: { value: new THREE.Color() },
+      uMaterialDryRgb: { value: [] as THREE.Color[] },
+      uMaterialPorosity: { value: [] as number[] },
+    };
+    this.applyPaletteToUniforms();
+
+    this.gpuMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.92,
+      metalness: 0.05,
+    });
+    this.gpuMaterial.defines = { USE_UV: "" };
+    this.gpuMaterial.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, this.gpuUniforms);
+      shader.vertexShader = `${TERRAIN_VERTEX_HEADER}\n${shader.vertexShader
+        .replace(
+          "#include <beginnormal_vertex>",
+          `#include <beginnormal_vertex>\n${TERRAIN_NORMAL_INJECT}`,
+        )
+        .replace(
+          "#include <begin_vertex>",
+          `#include <begin_vertex>\n${TERRAIN_DISPLACE_INJECT}`,
+        )}`;
+      shader.fragmentShader = `${TERRAIN_FRAGMENT_HEADER}\n${shader.fragmentShader.replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>\n${TERRAIN_COLOR_INJECT}`,
+      )}`;
+    };
+
+    this.gpuMesh = new THREE.Mesh(gpuGeometry, this.gpuMaterial);
+    this.gpuMesh.name = "terrain-gpu";
+
+    this.mesh = new THREE.Group();
     this.mesh.name = "terrain";
+    this.mesh.add(this.gpuMesh);
+    this.activeChild = "gpu";
+  }
+
+  /** Swap the terrain palette (preserve data — see TerrainPalette). */
+  setPalette(palette: TerrainPalette): void {
+    this.palette = palette;
+    this.applyPaletteToUniforms();
+  }
+
+  private applyPaletteToUniforms(): void {
+    const p = this.palette;
+    (this.gpuUniforms.uWetColor!.value as THREE.Color).set(p.wet);
+    (this.gpuUniforms.uVegColor!.value as THREE.Color).set(p.veg);
+    (this.gpuUniforms.uScarColor!.value as THREE.Color).set(p.scar);
+    (this.gpuUniforms.uIntertidalColor!.value as THREE.Color).set(p.intertidal);
+    (this.gpuUniforms.uSaltColor!.value as THREE.Color).set(p.salt);
+    (this.gpuUniforms.uErodeColor!.value as THREE.Color).set(p.erode);
+    (this.gpuUniforms.uDepositColor!.value as THREE.Color).set(p.deposit);
+    const dryRgb: THREE.Color[] = [];
+    const porosity: number[] = [];
+    for (let i = 0; i < MATERIAL_SLOTS; i++) {
+      const m = p.materials[i] ?? p.materials[0];
+      dryRgb.push(new THREE.Color(m?.dryRgb ?? 0x8b7355));
+      porosity.push(m?.porosity ?? 0.45);
+    }
+    this.gpuUniforms.uMaterialDryRgb!.value = dryRgb;
+    this.gpuUniforms.uMaterialPorosity!.value = porosity;
+  }
+
+  private setActiveChild(mode: "gpu" | "cpu"): void {
+    if (this.activeChild === mode) return;
+    this.mesh.remove(this.activeChild === "gpu" ? this.gpuMesh : this.cpuMesh);
+    this.mesh.add(mode === "gpu" ? this.gpuMesh : this.cpuMesh);
+    this.activeChild = mode;
   }
 
   updateFrom(
@@ -66,7 +361,58 @@ export class TerrainMesh {
     /** Per-cell elev delta (now − then) for return-visit encoding; null = off. */
     elevDelta: Float32Array | null = null,
   ): void {
-    const pos = this.geometry.attributes.position as THREE.BufferAttribute;
+    const useCpuFallback =
+      overlay !== "none" || predictionClassify !== null || elevDelta !== null;
+
+    if (useCpuFallback) {
+      this.setActiveChild("cpu");
+      this.updateCpuFallback(model, world, overlay, predictionClassify, elevDelta);
+      return;
+    }
+
+    this.setActiveChild("gpu");
+    if (world) {
+      this.updateGpuDefault(world);
+    }
+  }
+
+  private updateGpuDefault(world: WorldState): void {
+    updateFieldTexture(this.elevationTex, world.terrain.data);
+    updateFieldTexture(this.soilMoistureTex, world.soilMoisture.data);
+    updateFieldTexture(this.vegCoverTex, world.vegCover.data);
+    updateFieldTexture(this.fireScarTex, world.fireScar.data);
+    updateFieldTexture(this.salinityTex, world.soilSalinity.data);
+    updateFieldTexture(this.materialTex, world.soilMaterial.data);
+
+    // Ambient erosion pulse (TerrainMesh.md §2b) — decaying signed impulse
+    // tracker off real geomorphology activity, independent of "Remember form".
+    const elevNow = world.terrain.data;
+    if (!this.erosionPulseInitialized) {
+      this.prevElevField.set(elevNow);
+      this.erosionPulseInitialized = true;
+    } else {
+      for (let i = 0; i < this.erosionPulseField.length; i++) {
+        const delta = elevNow[i]! - this.prevElevField[i]!;
+        this.erosionPulseField[i] = this.erosionPulseField[i]! * EROSION_PULSE_DECAY + delta;
+      }
+      this.prevElevField.set(elevNow);
+    }
+    updateFieldTexture(this.erosionPulseTex, this.erosionPulseField);
+
+    const hasSea = world.seaLevel !== undefined && world.tidalAmplitude > 0;
+    this.gpuUniforms.uHasSea!.value = hasSea ? 1 : 0;
+    this.gpuUniforms.uSeaLevel!.value = world.seaLevel ?? 0;
+    this.gpuUniforms.uMeanHighWater!.value = world.meanHighWater ?? 0;
+  }
+
+  private updateCpuFallback(
+    model: WaterStateView,
+    world: WorldState | undefined,
+    overlay: InspectorLayer,
+    predictionClassify: Uint8Array | null,
+    elevDelta: Float32Array | null,
+  ): void {
+    const pos = this.cpuGeometry.attributes.position as THREE.BufferAttribute;
     const cellW = this.worldSize / (this.width - 1);
     const ox = -this.worldSize / 2;
     const oz = -this.worldSize / 2;
@@ -131,7 +477,7 @@ export class TerrainMesh {
       !Number.isFinite(this.lastNormalElevSum) ||
       Math.abs(elevSum - this.lastNormalElevSum) > 0.05
     ) {
-      this.geometry.computeVertexNormals();
+      this.cpuGeometry.computeVertexNormals();
       this.lastNormalElevSum = elevSum;
     }
   }
@@ -180,7 +526,7 @@ export class TerrainMesh {
       }
       case "soilMoisture": {
         const t = Math.min(1, world.getSoilMoisture(x, z) / config.soilPorosity);
-        col.copy(BASE).lerp(WET, t);
+        col.copy(BASE).lerp(WET_OVERLAY, t);
         break;
       }
       case "soilDepth": {
@@ -190,7 +536,7 @@ export class TerrainMesh {
       }
       case "vegetation": {
         const t = world.getVegCover(x, z);
-        col.copy(BASE).lerp(VEG, t);
+        col.copy(BASE).lerp(VEG_OVERLAY, t);
         break;
       }
       case "depression": {

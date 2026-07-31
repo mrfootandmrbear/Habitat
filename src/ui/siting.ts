@@ -36,7 +36,9 @@ export function pickTerrainCell(
   );
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(ndc, camera);
-  const hits = raycaster.intersectObject(terrainMesh, false);
+  // recursive: true — terrainMesh may be a Group wrapping the active
+  // GPU/CPU-fallback sub-mesh (TerrainMesh); harmless no-op for a leaf Mesh.
+  const hits = raycaster.intersectObject(terrainMesh, true);
   const hit = hits[0];
   if (!hit) return null;
   return worldToGrid(hit.point.x, hit.point.z);

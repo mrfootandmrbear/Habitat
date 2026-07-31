@@ -16,13 +16,16 @@ import {
 
 export type TerrainRgb = readonly [number, number, number];
 
-const WET: TerrainRgb = [0x4a / 255, 0x5c / 255, 0x3a / 255];
-const VEG: TerrainRgb = [0x3a / 255, 0x7a / 255, 0x3a / 255];
-const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
+// Exported so the GPU default-view path (render/TerrainMesh.ts) can pass
+// these as shader uniforms instead of duplicating the hex values — one
+// palette definition, sourced by both the CPU and GPU coloring paths.
+export const WET: TerrainRgb = [0x4a / 255, 0x5c / 255, 0x3a / 255];
+export const VEG: TerrainRgb = [0x3a / 255, 0x7a / 255, 0x3a / 255];
+export const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
 /** Wet sand / mud foreshore — readable against dry land (Slice 17). */
-const INTERTIDAL: TerrainRgb = [0xc4 / 255, 0x9a / 255, 0x5e / 255];
+export const INTERTIDAL: TerrainRgb = [0xc4 / 255, 0x9a / 255, 0x5e / 255];
 /** Pale salt crust — ground still tasting of the sea (C-018). */
-const SALT: TerrainRgb = [0xe8 / 255, 0xde / 255, 0xc4 / 255];
+export const SALT: TerrainRgb = [0xe8 / 255, 0xde / 255, 0xc4 / 255];
 
 function lerpChannel(a: number, b: number, t: number): number {
   return a + (b - a) * t;

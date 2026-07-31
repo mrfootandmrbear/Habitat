@@ -206,7 +206,7 @@ scene.add(sitingCursor.group);
 scene.add(flowCue.object);
 scene.add(occupantMesh.object);
 terrainMesh.updateFrom(model, world, "none", null);
-waterMesh.snapFrom(model, world.oceanCells);
+waterMesh.snapFrom(world);
 occupantMesh.updateFrom(model, world);
 
 let rainRegime: RainRegimeId = "dry";
@@ -728,8 +728,8 @@ function climateDayIndex(): number {
 }
 
 function syncWaterDisplay(wallDt: number, snap = false): void {
-  if (snap) waterMesh.snapFrom(model, world.oceanCells);
-  else waterMesh.updateFrom(model, world.oceanCells, wallDt, stormDisplayActive);
+  if (snap) waterMesh.snapFrom(world);
+  else waterMesh.updateFrom(world, wallDt, stormDisplayActive);
 }
 
 function predictionStatus(): string {
