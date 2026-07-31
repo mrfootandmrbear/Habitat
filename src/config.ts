@@ -222,6 +222,17 @@ export const config = {
   binderLoamSandFactor: 0.25,
   /** How much remobilization (|longshore|) binders tolerate before HSI falls. */
   binderBurialTolerance: 0.9,
+  /**
+   * Salt-marsh engineer (C-016 / Slice N9) — mid-envelope hydroperiod hump.
+   * Same seed schedule as herb/strand/binder; HSI uses inundation × salt × temp.
+   */
+  marshEstablishmentScale: 0.08,
+  marshEstablishmentRate: 0.35,
+  marshBiomassMax: 2.5,
+  /** Pore salt at/below which marsh f_salinity stays 1 (herb fails earlier). */
+  marshSalinityFullThrough: 0.9,
+  marshTempKillC: -2,
+  marshTempOptC: 14,
 
   /**
    * Wall-clock seconds for display water depth to catch ~63% of a step change.
@@ -270,6 +281,7 @@ export type InspectorLayer =
   | "herbBiomass"
   | "strandBiomass"
   | "binderBiomass"
+  | "marshBiomass"
   | "seedBank"
   | "intertidal"
   | "shoreExposure"

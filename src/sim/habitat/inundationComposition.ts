@@ -29,8 +29,17 @@ export function tidalHydroperiod(
 /**
  * Upland / inland herb inundation suitability: 1 above the envelope,
  * 0 anywhere the tide regularly floods (hydroperiod > 0).
- * Marsh guilds later take a hump on the same hydroperiod (not this slice).
  */
 export function factorInundationUpland(hydroperiod: number): number {
   return clamp01(hydroperiod) > 0 ? 0 : 1;
+}
+
+/**
+ * Salt-marsh engineer inundation suitability (Slice N9): triangular hump on the
+ * same envelope hydroperiod. Peaks at mid-band (0.5); dry terrace (0) and
+ * deep subtidal (1) → 0. Never fold into herb Liebig (inundation-arrival).
+ */
+export function factorInundationMarsh(hydroperiod: number): number {
+  const h = clamp01(hydroperiod);
+  return clamp01(1 - 2 * Math.abs(h - 0.5));
 }

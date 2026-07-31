@@ -135,6 +135,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     visibleWhen: (s) => s.meanBinderBiomass > BIOMASS_EPS,
   },
   {
+    id: "colonized-marsh",
+    event: "colonized",
+    scale: "preserve",
+    sentence: "Cool teal turf held the mid-tide foreshore while the dry terrace stayed herb-green.",
+    traces: [
+      {
+        fieldId: "veg.biomass.marsh",
+        evidence: "mean marsh biomass above epsilon",
+      },
+      {
+        fieldId: "shore.intertidal",
+        evidence: "envelope band where marsh establishes",
+      },
+    ],
+    visibleWhen: (s) => s.meanMarshBiomass > BIOMASS_EPS,
+  },
+  {
     id: "recovered-green",
     event: "recovered",
     scale: "preserve",

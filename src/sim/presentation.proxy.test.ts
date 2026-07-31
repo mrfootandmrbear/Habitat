@@ -35,6 +35,7 @@ import {
   shoreInteriorOccupantDelta,
   guildOccupantEncodingDelta,
   binderOccupantEncodingDelta,
+  marshOccupantEncodingDelta,
 } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -255,6 +256,16 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         config.binderBiomassMax,
         config.strandBiomassMax,
         config.binderBiomassMax,
+      ),
+    ).toBeGreaterThan(0.08);
+  });
+
+  it("marsh vs binder guild tint clears perceptual floor (C-016)", () => {
+    expect(
+      marshOccupantEncodingDelta(
+        config.marshBiomassMax,
+        config.binderBiomassMax,
+        config.marshBiomassMax,
       ),
     ).toBeGreaterThan(0.08);
   });

@@ -7,7 +7,7 @@
 
 ## Steal
 
-Island-colonization distinct gate — tidal inundation / hydroperiod ≠ soil.salinity ≠ spray → herb Liebig `f_inundation`. Envelope hydroperiod from elev vs MHW/MLW; upland herbs zero when hydroperiod > 0. Strand omits the arm (holds via `f_shore`). Marsh hump deferred (P2 salt-marsh engineer). Rejected: collapse into salinity/moisture; instantaneous tidal phase (C-016).
+Island-colonization distinct gate — tidal inundation / hydroperiod ≠ soil.salinity ≠ spray → herb Liebig `f_inundation`. Envelope hydroperiod from elev vs MHW/MLW; upland herbs zero when hydroperiod > 0. Strand omits the arm (holds via `f_shore`). Marsh hump shipped as Slice N9 / NS-009. Rejected: collapse into salinity/moisture; instantaneous tidal phase (C-016).
 
 ## Rule
 

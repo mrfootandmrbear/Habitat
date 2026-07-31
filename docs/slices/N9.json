@@ -1,0 +1,23 @@
+{
+  "id": "N9",
+  "title": "Salt-marsh engineer (NS-009)",
+  "simLoop": "One seed schedule fills herb + strand + binder + marsh banks; marsh HSI = min(inundation hump, salinity*, temp) so mid-envelope foreshore earns marsh while dry terrace earns herb; physicalCover blunts coastal/hillslope erosion (C-007 / C-016).",
+  "gameLoop": "If I leave a mid-tide foreshore open under one seed schedule, marsh cover should arrive there — not on the dry terrace where herbs earn.",
+  "registerIds": ["W-003", "E-004", "C-007", "C-011", "C-016", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/marshArrival.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["marsh-arrival"],
+  "fields": [
+    "veg.seedBank.marsh",
+    "veg.establishment.marsh",
+    "veg.biomass.marsh",
+    "shore.intertidal",
+    "terrain.elevation",
+    "soil.salinity"
+  ],
+  "notebookSeed": "Cool teal turf held the mid-tide foreshore while the dry terrace stayed herb-green.",
+  "tierO": "no owner-only question this closeout — C-016 Lock already settled; machine half green"
+}

@@ -56,6 +56,7 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     const herb0 = sumGrid(world.herbBiomass.data);
     const strand0 = sumGrid(world.strandBiomass.data);
     const binder0 = sumGrid(world.binderBiomass.data);
+    const marsh0 = sumGrid(world.marshBiomass.data);
     const cover0 = sumGrid(world.vegCover.data);
     const elev0 = world.terrain.get(12, 12);
 
@@ -72,6 +73,7 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     expect(sumGrid(world.herbBiomass.data)).toBe(herb0);
     expect(sumGrid(world.strandBiomass.data)).toBe(strand0);
     expect(sumGrid(world.binderBiomass.data)).toBe(binder0);
+    expect(sumGrid(world.marshBiomass.data)).toBe(marsh0);
     expect(sumGrid(world.vegCover.data)).toBe(cover0);
     expect(world.terrain.get(12, 12)).not.toBe(elev0);
   });
@@ -88,6 +90,7 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     expect(sumGrid(world.herbBiomass.data)).toBe(0);
     expect(sumGrid(world.strandBiomass.data)).toBe(0);
     expect(sumGrid(world.binderBiomass.data)).toBe(0);
+    expect(sumGrid(world.marshBiomass.data)).toBe(0);
     expect(sumGrid(world.vegCover.data)).toBe(0);
   });
 });

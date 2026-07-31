@@ -45,6 +45,7 @@ import {
 import { shorelineEncodingDelta } from "../climate/seaLevel";
 import {
   foreshoreEncodingFrac,
+  meanHighWater,
   tideById,
 } from "../climate/tidalEnvelope";
 import {
@@ -2956,6 +2957,153 @@ export function probeBinderArrival(): ProbeResult {
 }
 
 /**
+ * C-016 / Slice N9 — salt-marsh engineer on mid-foreshore vs herb on dry terrace.
+ * One seed schedule; mid-envelope hydroperiod earns marsh; terrace earns herb.
+ */
+export function probeMarshArrival(): ProbeResult {
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const amp = tideById("spring").amplitudeMeters;
+  const mhw = meanHighWater(sea, amp);
+  const w = 16;
+  const h = 16;
+  const foreshoreX = 4;
+  const foreshoreZ = 4;
+  const terraceX = 12;
+  const terraceZ = 12;
+
+  const make = () => {
+    const terrain = new Grid2D(w, h, mhw + 0.5);
+    terrain.set(foreshoreX, foreshoreZ, sea);
+    const world = new WorldState(terrain, {
+      seaLevel: sea,
+      tidalAmplitude: amp,
+    });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.runHabitatStep(1);
+    world.herbSeedBank.fill(config.seedSourceStrength);
+    world.strandSeedBank.fill(config.seedSourceStrength);
+    world.binderSeedBank.fill(config.seedSourceStrength);
+    world.marshSeedBank.fill(config.seedSourceStrength);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const a = make();
+  const b = make();
+  const replayMatch = a.stateHash() === b.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("marsh-arrival: replay hash mismatch");
+  }
+
+  const foreshoreMarsh = a.getMarshBiomass(foreshoreX, foreshoreZ);
+  const foreshoreHerb = a.getHerbBiomass(foreshoreX, foreshoreZ);
+  const terraceHerb = a.getHerbBiomass(terraceX, terraceZ);
+  const terraceMarsh = a.getMarshBiomass(terraceX, terraceZ);
+  const seedMatch =
+    Math.abs(
+      a.getHerbSeedBank(foreshoreX, foreshoreZ) -
+        a.getHerbSeedBank(terraceX, terraceZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const guildSeedMatch =
+    Math.abs(
+      a.getMarshSeedBank(foreshoreX, foreshoreZ) -
+        a.getHerbSeedBank(foreshoreX, foreshoreZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const foreshoreGuildDelta = foreshoreMarsh - foreshoreHerb;
+  const terraceGuildDelta = terraceHerb - terraceMarsh;
+  const saltMatch =
+    Math.abs(
+      a.soilSalinity.get(foreshoreX, foreshoreZ) -
+        a.soilSalinity.get(terraceX, terraceZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const sprayMatch =
+    Math.abs(
+      a.shoreExposure.get(foreshoreX, foreshoreZ) -
+        a.shoreExposure.get(terraceX, terraceZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+
+  if (seedMatch !== 1 || guildSeedMatch !== 1) {
+    throw new Error("marsh-arrival: seed schedule not matched");
+  }
+  if (saltMatch !== 1 || sprayMatch !== 1) {
+    throw new Error("marsh-arrival: salt/spray not matched (must isolate inundation)");
+  }
+  if (!(foreshoreMarsh > 0.1)) {
+    throw new Error(
+      `marsh-arrival: foreshore marsh too low (${foreshoreMarsh})`,
+    );
+  }
+  if (!(foreshoreGuildDelta > 0.05)) {
+    throw new Error(
+      `marsh-arrival: foreshore guild delta too small (${foreshoreGuildDelta})`,
+    );
+  }
+  if (!(terraceHerb > 0.1)) {
+    throw new Error(`marsh-arrival: terrace herb too low (${terraceHerb})`);
+  }
+  if (!(terraceGuildDelta > 0.05)) {
+    throw new Error(
+      `marsh-arrival: terrace guild delta too small (${terraceGuildDelta})`,
+    );
+  }
+  if (terraceMarsh !== 0) {
+    throw new Error(
+      `marsh-arrival: terrace marsh expected 0 (got ${terraceMarsh})`,
+    );
+  }
+  if (!a.isIntertidal(foreshoreX, foreshoreZ)) {
+    throw new Error("marsh-arrival: foreshore should be intertidal");
+  }
+  if (a.isIntertidal(terraceX, terraceZ)) {
+    throw new Error("marsh-arrival: terrace should not be intertidal");
+  }
+
+  return {
+    scenario: "marsh-arrival",
+    records: [
+      {
+        label: "foreshore",
+        marshBiomass: foreshoreMarsh,
+        herbBiomass: foreshoreHerb,
+        intertidal: 1,
+        elev: sea,
+      },
+      {
+        label: "terrace",
+        marshBiomass: terraceMarsh,
+        herbBiomass: terraceHerb,
+        intertidal: 0,
+        elev: mhw + 0.5,
+      },
+      {
+        label: "delta",
+        foreshoreGuildDelta,
+        terraceGuildDelta,
+        seedMatch,
+        guildSeedMatch,
+        saltMatch,
+        sprayMatch,
+        replayMatch,
+        hashN: Number.parseInt(a.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -3614,6 +3762,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "heat-arrival": probeHeatArrival,
   "strand-arrival": probeStrandArrival,
   "binder-arrival": probeBinderArrival,
+  "marsh-arrival": probeMarshArrival,
   "spray-arrival": probeSprayArrival,
   "inundation-arrival": probeInundationArrival,
   "light-arrival": probeLightArrival,

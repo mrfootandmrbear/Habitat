@@ -41,7 +41,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — Nature P2: salt-marsh engineer** (guild after NS-008; hydroperiod hump). **NS-007 shipped** (N7 / `f_light`). **NS-008 shipped** (N8 / `f_inundation`). **C-006 Locked** (v2.0.11). **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12). **C-021** / **C-022** filed. C-020 G1–G5 named — fix in parallel. **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-020** / **C-014** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
+**Executable tip — Nature P2: woody/shrub** (stage 3; climate-capped). **NS-009 shipped** (N9 / salt-marsh engineer). **NS-007 shipped** (N7 / `f_light`). **NS-008 shipped** (N8 / `f_inundation`). **C-006 Locked** (v2.0.11). **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12). **C-021** / **C-022** filed. C-020 G1–G5 named — fix in parallel. **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-020** / **C-014** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
 
 **Owner Lock backlog:** A/B/**C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** Locked · **W-001** Superseded · remaining **C-020** / **C-014**.
 
