@@ -3217,6 +3217,142 @@ export function probeShrubArrival(): ProbeResult {
 }
 
 /**
+ * Slice N11 — cryptogam / biological crust stage-2 bootstrap.
+ * Damp bare inland earns crust; dry / shaded / salty stay empty under one seed.
+ */
+export function probeCrustArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 8;
+  const sz = 8;
+
+  const make = (opts: {
+    moistureFrac: number;
+    herbFrac: number;
+    salinity?: number;
+  }) => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(opts.salinity ?? 0);
+    world.shoreExposure.fill(0);
+    world.herbBiomass.fill(config.herbBiomassMax * opts.herbFrac);
+    world.runHabitatStep(1);
+    world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+    world.herbSeedBank.fill(0);
+    world.strandSeedBank.fill(0);
+    world.binderSeedBank.fill(0);
+    world.marshSeedBank.fill(0);
+    world.shrubSeedBank.fill(0);
+    world.crustSeedBank.fill(config.seedSourceStrength);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const dampA = make({ moistureFrac: 1, herbFrac: 0 });
+  const dampB = make({ moistureFrac: 1, herbFrac: 0 });
+  const dry = make({ moistureFrac: 0, herbFrac: 0 });
+  const shaded = make({ moistureFrac: 1, herbFrac: 1 });
+  const salty = make({ moistureFrac: 1, herbFrac: 0, salinity: 1 });
+
+  const replayMatch = dampA.stateHash() === dampB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("crust-arrival: damp replay hash mismatch");
+  }
+
+  const dampCrust = dampA.getCrustBiomass(sx, sz);
+  const dryCrust = dry.getCrustBiomass(sx, sz);
+  const shadedCrust = shaded.getCrustBiomass(sx, sz);
+  const saltyCrust = salty.getCrustBiomass(sx, sz);
+  const moistureDelta = dampCrust - dryCrust;
+  const guildSeedMatch =
+    Math.abs(dampA.getCrustSeedBank(sx, sz) - config.seedSourceStrength) < 1e-9
+      ? 1
+      : 0;
+
+  if (guildSeedMatch !== 1) {
+    throw new Error("crust-arrival: crust seed schedule not matched");
+  }
+  if (!(dampCrust > 0.1)) {
+    throw new Error(`crust-arrival: damp crust too low (${dampCrust})`);
+  }
+  if (!(moistureDelta > 0.05)) {
+    throw new Error(
+      `crust-arrival: damp−dry crust delta too small (${moistureDelta})`,
+    );
+  }
+  if (dryCrust !== 0) {
+    throw new Error(`crust-arrival: dry crust expected 0 (got ${dryCrust})`);
+  }
+  if (shadedCrust !== 0) {
+    throw new Error(
+      `crust-arrival: shaded crust expected 0 (got ${shadedCrust})`,
+    );
+  }
+  if (saltyCrust !== 0) {
+    throw new Error(`crust-arrival: salty crust expected 0 (got ${saltyCrust})`);
+  }
+
+  // Moisture-holding payoff: crust raises infiltration vs bare under same moisture.
+  const flat = new Grid2D(8, 8, 1);
+  flat.fill(2);
+  const bareInfil = new WorldState(flat.clone(), { closedBoundary: true });
+  const crustInfil = new WorldState(flat.clone(), { closedBoundary: true });
+  bareInfil.vegCover.fill(0);
+  crustInfil.vegCover.fill(0);
+  bareInfil.crustBiomass.fill(0);
+  crustInfil.crustBiomass.fill(config.crustBiomassMax);
+  bareInfil.soilMoisture.fill(0);
+  crustInfil.soilMoisture.fill(0);
+  bareInfil.runVegetationStep(1);
+  crustInfil.runVegetationStep(1);
+  bareInfil.runSoilWaterStep(1);
+  crustInfil.runSoilWaterStep(1);
+  const infilDelta =
+    crustInfil.infiltrationCapacity.get(4, 4) -
+    bareInfil.infiltrationCapacity.get(4, 4);
+  if (!(infilDelta > 0)) {
+    throw new Error(`crust-arrival: infil delta not positive (${infilDelta})`);
+  }
+
+  return {
+    scenario: "crust-arrival",
+    records: [
+      {
+        label: "dampBare",
+        crustBiomass: dampCrust,
+        moisture: config.soilPorosity,
+      },
+      {
+        label: "dryBare",
+        crustBiomass: dryCrust,
+        moistureLimited: dryCrust === 0 ? 1 : 0,
+      },
+      {
+        label: "dampShaded",
+        crustBiomass: shadedCrust,
+        openLimited: shadedCrust === 0 ? 1 : 0,
+      },
+      {
+        label: "dampSalty",
+        crustBiomass: saltyCrust,
+        saltLimited: saltyCrust === 0 ? 1 : 0,
+      },
+      {
+        label: "delta",
+        moistureDelta,
+        infilDelta,
+        guildSeedMatch,
+        replayMatch,
+        hashN: Number.parseInt(dampA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -3877,6 +4013,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "binder-arrival": probeBinderArrival,
   "marsh-arrival": probeMarshArrival,
   "shrub-arrival": probeShrubArrival,
+  "crust-arrival": probeCrustArrival,
   "spray-arrival": probeSprayArrival,
   "inundation-arrival": probeInundationArrival,
   "light-arrival": probeLightArrival,

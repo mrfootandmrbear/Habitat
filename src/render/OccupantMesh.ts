@@ -4,6 +4,7 @@ import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
 import {
   binderBiomassRgb,
+  crustBiomassRgb,
   herbBiomassRgb,
   marshBiomassRgb,
   shootVisibility,
@@ -13,8 +14,8 @@ import {
 
 /**
  * First-occupant shoots — presentation only (T-006).
- * Reads herb + strand + binder + marsh + shrub biomass; does not create population state.
- * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal / shrub forest).
+ * Reads herb + strand + binder + marsh + shrub + crust biomass; does not create population state.
+ * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal / shrub forest / crust sage).
  */
 export class OccupantMesh {
   readonly object: THREE.InstancedMesh;
@@ -63,6 +64,7 @@ export class OccupantMesh {
     const binderMax = config.binderBiomassMax;
     const marshMax = config.marshBiomassMax;
     const shrubMax = config.shrubBiomassMax;
+    const crustMax = config.crustBiomassMax;
     let n = 0;
 
     for (let z = 0; z < this.height; z++) {
@@ -72,21 +74,32 @@ export class OccupantMesh {
         const binder = world.getBinderBiomass(x, z);
         const marsh = world.getMarshBiomass(x, z);
         const shrub = world.getShrubBiomass(x, z);
+        const crust = world.getCrustBiomass(x, z);
         const herbVis = shootVisibility(herb, herbMax);
         const strandVis = shootVisibility(strand, strandMax);
         const binderVis = shootVisibility(binder, binderMax);
         const marshVis = shootVisibility(marsh, marshMax);
         const shrubVis = shootVisibility(shrub, shrubMax);
-        const vis = Math.max(herbVis, strandVis, binderVis, marshVis, shrubVis);
+        const crustVis = shootVisibility(crust, crustMax);
+        const vis = Math.max(
+          herbVis,
+          strandVis,
+          binderVis,
+          marshVis,
+          shrubVis,
+          crustVis,
+        );
         if (vis <= 0) continue;
-        let guild: "herb" | "strand" | "binder" | "marsh" | "shrub" = "herb";
+        let guild: "herb" | "strand" | "binder" | "marsh" | "shrub" | "crust" =
+          "herb";
         let tintBiomass = herb;
-        let tintMax = herbMax;
+        let tintMax: number = herbMax;
         if (
           shrubVis >= herbVis &&
           shrubVis >= strandVis &&
           shrubVis >= binderVis &&
           shrubVis >= marshVis &&
+          shrubVis >= crustVis &&
           shrubVis > 0
         ) {
           guild = "shrub";
@@ -97,6 +110,7 @@ export class OccupantMesh {
           marshVis >= strandVis &&
           marshVis >= binderVis &&
           marshVis >= shrubVis &&
+          marshVis >= crustVis &&
           marshVis > 0
         ) {
           guild = "marsh";
@@ -107,6 +121,7 @@ export class OccupantMesh {
           strandVis >= binderVis &&
           strandVis >= marshVis &&
           strandVis >= shrubVis &&
+          strandVis >= crustVis &&
           strandVis > 0
         ) {
           guild = "strand";
@@ -117,16 +132,29 @@ export class OccupantMesh {
           binderVis >= strandVis &&
           binderVis >= marshVis &&
           binderVis >= shrubVis &&
+          binderVis >= crustVis &&
           binderVis > 0
         ) {
           guild = "binder";
           tintBiomass = binder;
           tintMax = binderMax;
+        } else if (
+          crustVis >= herbVis &&
+          crustVis >= strandVis &&
+          crustVis >= binderVis &&
+          crustVis >= marshVis &&
+          crustVis >= shrubVis &&
+          crustVis > 0
+        ) {
+          guild = "crust";
+          tintBiomass = crust;
+          tintMax = crustMax;
         }
         const y = model.getTerrainHeight(x, z);
-        // Woody reads slightly taller than mats (presentation only — T-006).
-        const woodyBoost = guild === "shrub" ? 1.35 : 1;
-        const scaleY = (0.35 + vis * 1.4) * woodyBoost;
+        // Woody reads taller; crust stays low mat (presentation only — T-006).
+        const heightBoost =
+          guild === "shrub" ? 1.35 : guild === "crust" ? 0.45 : 1;
+        const scaleY = (0.35 + vis * 1.4) * heightBoost;
         const scaleXZ = 0.45 + vis * 0.9;
         this.dummy.position.set(ox + x * cellW, y, oz + z * cellW);
         this.dummy.scale.set(scaleXZ, scaleY, scaleXZ);
@@ -142,7 +170,9 @@ export class OccupantMesh {
                 ? strandBiomassRgb(tintBiomass, tintMax)
                 : guild === "binder"
                   ? binderBiomassRgb(tintBiomass, tintMax)
-                  : herbBiomassRgb(tintBiomass, tintMax);
+                  : guild === "crust"
+                    ? crustBiomassRgb(tintBiomass, tintMax)
+                    : herbBiomassRgb(tintBiomass, tintMax);
         this.color.setRGB(r, g, b);
         this.object.setColorAt(n, this.color);
         n++;

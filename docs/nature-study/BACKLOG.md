@@ -2,7 +2,7 @@
 
 Authority: [PROTOCOL.md](PROTOCOL.md). Ranked after parent merge of cards. **Hypothesis only** — Open candidates stay Open.
 
-Last updated: 2026-07-31 (NS-010 shipped as Slice N10).
+Last updated: 2026-07-31 (NS-011 shipped as Slice N11).
 
 ---
 
@@ -20,6 +20,7 @@ Last updated: 2026-07-31 (NS-010 shipped as Slice N10).
 | [NS-007](cards/NS-007-aspect-light-into-liebig.md) | Aspect light into Liebig | Slice N7; `f_light` / `light-arrival`; C-007/C-011 |
 | [NS-009](cards/NS-009-salt-marsh-engineer.md) | Salt-marsh engineer | Slice N9; `veg.*.marsh` / `marsh-arrival`; C-016 |
 | [NS-010](cards/NS-010-woody-shrub.md) | Climate-capped woody shrub | Slice N10; `veg.*.shrub` / `shrub-arrival`; C-007 / NS-002 |
+| [NS-011](cards/NS-011-cryptogam-crust.md) | Cryptogam crust bootstrap | Slice N11; `veg.*.crust` / `crust-arrival`; C-007 stage-2 |
 
 ---
 
@@ -62,8 +63,7 @@ Last updated: 2026-07-31 (NS-010 shipped as Slice N10).
 
 | Topic | Lane | Notes |
 |---|---|---|
-| Cryptogam / crust | guild | Stage 2 bootstrap — **tip** |
-| Nutrients / guano | factor | Needs candidate if not covered |
+| Nutrients / guano | factor | Needs candidate if not covered — **off tip** |
 | Animals / F-001 engineers | — | Deferred; out of protocol scope |
 
 ---
@@ -82,6 +82,7 @@ After merge, parent updates in the **same session**:
 
 | Date | Cards | Tip after merge |
 |---|---|---|
+| 2026-07-31 | NS-011 | residual Lock C-014; C-010 implement later (N11 cryptogam/crust shipped; nutrients/animals stay off tip) |
 | 2026-07-31 | NS-010 | Nature P2 cryptogam/crust (N10 woody/shrub shipped) |
 | 2026-07-31 | NS-009 | Nature P2 woody/shrub (N9 salt-marsh shipped) |
 | 2026-07-31 | NS-007 | (shipped N7; tip was salt-marsh) |

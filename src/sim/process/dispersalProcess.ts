@@ -2,8 +2,8 @@ import type { Process } from "./Process";
 
 /**
  * Slice 12 — fixed preserve perimeter seed source → seed bank (C-007).
- * Annual band; owns herb + strand + binder + marsh + shrub seed/establishment
- * (C-018 / C-009 / C-016 / Slice N10). No stochastic draws (C-003 Open). No introduction tool.
+ * Annual band; owns herb + strand + binder + marsh + shrub + crust seed/establishment
+ * (C-018 / C-009 / C-016 / Slice N10 / N11). No stochastic draws (C-003 Open). No introduction tool.
  */
 export const dispersalProcess: Process = {
   id: "dispersal",
@@ -17,6 +17,10 @@ export const dispersalProcess: Process = {
     "shore.longshore",
     "terrain.elevation",
     "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
   ],
   writes: [
     "veg.seedBank.herb",
@@ -29,6 +33,8 @@ export const dispersalProcess: Process = {
     "veg.establishment.marsh",
     "veg.seedBank.shrub",
     "veg.establishment.shrub",
+    "veg.seedBank.crust",
+    "veg.establishment.crust",
   ],
   step(world, dt) {
     world.runDispersalStep(dt);

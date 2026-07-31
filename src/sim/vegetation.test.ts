@@ -15,6 +15,8 @@ describe("vegetation (Slice 5, ES-001 / ES-006)", () => {
       "veg.biomass.strand",
       "veg.biomass.binder",
       "veg.biomass.marsh",
+      "veg.biomass.shrub",
+      "veg.biomass.crust",
     ]);
     expect(vegetationProcess.writes).toContain("veg.cover");
     expect(vegetationProcess.writes).not.toContain("water.surfaceDepth");

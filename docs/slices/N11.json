@@ -1,0 +1,23 @@
+{
+  "id": "N11",
+  "title": "Cryptogam crust bootstrap (NS-011)",
+  "simLoop": "One seed schedule fills crust banks with other guilds; crust HSI = min(moisture, open canopy, salinity, upland inundation) so damp bare inland escalates while dry/shaded/salty stay empty; physicalCover raises infiltration (C-007 / W-003 stage-2).",
+  "gameLoop": "If I keep a bare inland patch damp — not flooded, not salty — a living crust should arrive and hold moisture better than the dry twin.",
+  "registerIds": ["W-003", "E-004", "C-007", "C-011", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/crustArrival.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["crust-arrival"],
+  "fields": [
+    "veg.seedBank.crust",
+    "veg.establishment.crust",
+    "veg.biomass.crust",
+    "soil.moisture",
+    "soil.salinity",
+    "veg.biomass.herb"
+  ],
+  "notebookSeed": "A sage crust took the damp bare ground; the dry twin stayed empty.",
+  "tierO": "no owner-only question this closeout — moisture/open/salt gates are machine-verifiable; nutrients stay deferred"
+}

@@ -17,6 +17,8 @@ const BINDER: OccupantRgb = [0xc4 / 255, 0xa2 / 255, 0x4e / 255];
 const MARSH: OccupantRgb = [0x2f / 255, 0x8f / 255, 0x7a / 255];
 /** Woody shrub — deep forest green so inland scrub reads apart from herb shoot (Slice N10). */
 const SHRUB: OccupantRgb = [0x1a / 255, 0x5c / 255, 0x38 / 255];
+/** Cryptogam crust — muted sage so damp bare mats read apart from herb shoot (Slice N11). */
+const CRUST: OccupantRgb = [0x6a / 255, 0x7a / 255, 0x4e / 255];
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -109,6 +111,20 @@ export function shrubBiomassRgb(
   ];
 }
 
+/** Cryptogam crust tint — muted sage vs herb shoot (Slice N11 Tier-P). */
+export function crustBiomassRgb(
+  biomass: number,
+  biomassMax: number,
+): OccupantRgb {
+  const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
+  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  return [
+    lerp(BARE[0], CRUST[0], u),
+    lerp(BARE[1], CRUST[1], u),
+    lerp(BARE[2], CRUST[2], u),
+  ];
+}
+
 /** Encoding Δ between herb shoot green and strand olive at equal biomass. */
 export function guildOccupantEncodingDelta(
   biomass: number,
@@ -150,6 +166,17 @@ export function shrubOccupantEncodingDelta(
 ): number {
   const a = marshBiomassRgb(biomass, marshMax);
   const b = shrubBiomassRgb(biomass, shrubMax);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+/** Encoding Δ between shrub forest-green and crust sage at equal biomass. */
+export function crustOccupantEncodingDelta(
+  biomass: number,
+  shrubMax: number,
+  crustMax: number,
+): number {
+  const a = shrubBiomassRgb(biomass, shrubMax);
+  const b = crustBiomassRgb(biomass, crustMax);
   return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 

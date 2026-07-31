@@ -1,0 +1,57 @@
+{
+  "scenario": "crust-arrival",
+  "metrics": {
+    "dampBare.crustBiomass": {
+      "value": 1.5,
+      "abs": 0.000001
+    },
+    "dampBare.moisture": {
+      "value": 0.45,
+      "abs": 0
+    },
+    "dryBare.crustBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "dryBare.moistureLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "dampShaded.crustBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "dampShaded.openLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "dampSalty.crustBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "dampSalty.saltLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.moistureDelta": {
+      "value": 1.5,
+      "abs": 0.000001
+    },
+    "delta.infilDelta": {
+      "value": 0.10000000894069672,
+      "abs": 0.000001
+    },
+    "delta.guildSeedMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 1596506479,
+      "abs": 0
+    }
+  }
+}

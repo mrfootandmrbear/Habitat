@@ -169,6 +169,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     visibleWhen: (s) => s.meanShrubBiomass > BIOMASS_EPS,
   },
   {
+    id: "colonized-crust",
+    event: "colonized",
+    scale: "preserve",
+    sentence: "A sage crust took the damp bare ground; the dry twin stayed empty.",
+    traces: [
+      {
+        fieldId: "veg.biomass.crust",
+        evidence: "mean crust biomass above epsilon",
+      },
+      {
+        fieldId: "soil.moisture",
+        evidence: "damp open substrate that unlocks stage-2 bootstrap",
+      },
+    ],
+    visibleWhen: (s) => s.meanCrustBiomass > BIOMASS_EPS,
+  },
+  {
     id: "recovered-green",
     event: "recovered",
     scale: "preserve",

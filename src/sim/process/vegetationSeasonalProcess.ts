@@ -1,7 +1,7 @@
 import type { Process } from "./Process";
 
 /**
- * Slice 12 / N4 / N5 / N9 / N10 — seasonal herb + strand + binder + marsh + shrub
+ * Slice 12 / N4 / N5 / N9 / N10 / N11 — seasonal herb + strand + binder + marsh + shrub + crust
  * from seed × guild HSI. Same process id as daily vegetation — single vegetation
  * owner, second band. Does not write veg.cover (biology→physics via physicalCover
  * in daily step — Slice 13).
@@ -16,6 +16,7 @@ export const vegetationSeasonalProcess: Process = {
     "veg.seedBank.binder",
     "veg.seedBank.marsh",
     "veg.seedBank.shrub",
+    "veg.seedBank.crust",
     "veg.biomass.herb",
     "shore.exposure",
     "soil.salinity",
@@ -30,6 +31,7 @@ export const vegetationSeasonalProcess: Process = {
     "veg.biomass.binder",
     "veg.biomass.marsh",
     "veg.biomass.shrub",
+    "veg.biomass.crust",
   ],
   step(world, dt) {
     world.runHerbEstablishmentStep(dt);

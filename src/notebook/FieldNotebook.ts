@@ -23,6 +23,7 @@ export const notebookObserver = {
     "veg.biomass.binder",
     "veg.biomass.marsh",
     "veg.biomass.shrub",
+    "veg.biomass.crust",
     "fire.scar",
     "habitat.limitingFactor",
     "soil.salinity",
@@ -84,6 +85,7 @@ export function snapshotFromFields(args: {
   binderBiomass?: Float32Array;
   marshBiomass?: Float32Array;
   shrubBiomass?: Float32Array;
+  crustBiomass?: Float32Array;
   fireScar: Float32Array;
   limitingFactor: Float32Array;
   /** Optional ocean cell indices — skipped for limiting modal. */
@@ -99,6 +101,7 @@ export function snapshotFromFields(args: {
     binderBiomass,
     marshBiomass,
     shrubBiomass,
+    crustBiomass,
     fireScar,
     limitingFactor,
     oceanCells,
@@ -132,6 +135,7 @@ export function snapshotFromFields(args: {
     meanBinderBiomass: binderBiomass ? meanOf(binderBiomass) : 0,
     meanMarshBiomass: marshBiomass ? meanOf(marshBiomass) : 0,
     meanShrubBiomass: shrubBiomass ? meanOf(shrubBiomass) : 0,
+    meanCrustBiomass: crustBiomass ? meanOf(crustBiomass) : 0,
     scarFraction: fractionAbove(fireScar, 0),
     modalLimitingFactor: land > 0 ? modal : -1,
     landCellCount: land,
@@ -149,6 +153,7 @@ export function freezeNotebookSnapshot(args: {
   binderBiomass?: Float32Array;
   marshBiomass?: Float32Array;
   shrubBiomass?: Float32Array;
+  crustBiomass?: Float32Array;
   fireScar: Float32Array;
   limitingFactor: Float32Array;
   oceanCells?: ReadonlySet<number> | null;
@@ -163,6 +168,7 @@ export function freezeNotebookSnapshot(args: {
     binderBiomass: args.binderBiomass?.slice(),
     marshBiomass: args.marshBiomass?.slice(),
     shrubBiomass: args.shrubBiomass?.slice(),
+    crustBiomass: args.crustBiomass?.slice(),
     fireScar: args.fireScar.slice(),
     limitingFactor: args.limitingFactor.slice(),
     // Set is read-only for modal counts; notebook never mutates it.

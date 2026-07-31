@@ -249,6 +249,15 @@ export const config = {
   shrubCoverHalfSat: 0.25,
 
   /**
+   * Cryptogam / biological crust (Slice N11) — stage-2 cover bootstrap.
+   * Same seed schedule; damp bare inland; open canopy (shade-limited by
+   * denser guilds); upland inundation zero. No litter/OM Process.
+   */
+  crustEstablishmentScale: 0.08,
+  crustEstablishmentRate: 0.4,
+  crustBiomassMax: 1.5,
+
+  /**
    * Wall-clock seconds for display water depth to catch ~63% of a step change.
    * Observer only — sim depths stay authoritative (T-006). Stops 16× event
    * strobing from reading as a broken framerate.
@@ -297,6 +306,7 @@ export type InspectorLayer =
   | "binderBiomass"
   | "marshBiomass"
   | "shrubBiomass"
+  | "crustBiomass"
   | "seedBank"
   | "intertidal"
   | "shoreExposure"

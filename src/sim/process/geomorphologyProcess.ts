@@ -20,6 +20,8 @@ export const geomorphologyProcess: Process = {
     "veg.biomass.strand",
     "veg.biomass.binder",
     "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
     "depression.depth",
     "shore.exposure",
     "shore.longshore",
@@ -31,6 +33,8 @@ export const geomorphologyProcess: Process = {
     "veg.biomass.strand",
     "veg.biomass.binder",
     "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
   ],
   step(world, dt) {
     world.runGeomorphologyStep(dt);
