@@ -848,8 +848,14 @@ export class WorldState {
     );
     this.filledElevation = filled;
     this.depressionDepth.data.set(depressionDepth);
-    // Route on filled surface so pits spill honestly (H-003).
-    this.flowDirection = computeD8FlowDirection(this.width, this.height, filled);
+    // Route on filled surface so pits spill honestly (H-003). Same open set
+    // priorityFloodFill was seeded with, so flat resolution agrees with fill.
+    this.flowDirection = computeD8FlowDirection(
+      this.width,
+      this.height,
+      filled,
+      this.oceanCells.size > 0 ? this.oceanCells : undefined,
+    );
     this.flowAccumulation = computeD8Accumulation(
       this.width,
       this.height,

@@ -10,8 +10,11 @@ const D8_DZ = [-1, -1, -1, 0, 0, 1, 1, 1] as const;
 export type FlowDirection = Int8Array;
 
 /**
- * Priority-flood depression fill (ε-style spill). Returns filled elevation;
- * depression depth is filled − original (clamped ≥ 0).
+ * Priority-flood depression fill (Barnes, Lehman & Mulla 2014). Fills each
+ * depression to its exact spill elevation — every filled surface is a true
+ * flat by construction. Flat routing (draining the flat toward its pour
+ * point instead of by neighbor index) is `computeD8FlowDirection`'s job, not
+ * this function's: see its doc comment.
  */
 export function priorityFloodFill(
   width: number,
@@ -110,22 +113,113 @@ export function priorityFloodFill(
 }
 
 /**
- * D8 on a routing surface. Flat resolution: among non-uphill neighbors,
- * pick steepest drop; ties broken by neighbor index (deterministic).
+ * Multi-source BFS distance, in flat-hops, from every cell to the nearest
+ * "pour edge" of its flat: a cell that can actually leave the flat, either
+ * because it has a genuinely lower (non-tied) neighbor, or because it is
+ * itself one of the seeds `priorityFloodFill` was called with (the same
+ * `openBoundary` set — perimeter ring by default, or ocean cells under
+ * C-015). Using the *same* open set the fill itself used, rather than
+ * guessing from grid position, keeps this in scope: it does not decide
+ * which cells are open (that boundary-model question is §4.51's), only how
+ * a flat drains toward whichever cells already are. Distance only
+ * propagates across equal-elevation edges, so it is undefined (-1) for
+ * cells outside any flat.
+ *
+ * This is the "flat resolution" half of Barnes, Lehman & Mulla 2014 §4:
+ * routing a flat by distance-to-outlet instead of by cell index is what
+ * guarantees the resulting D8 direction graph has no cycles.
+ */
+function computeFlatPourDistance(
+  width: number,
+  height: number,
+  elevation: Float32Array,
+  openBoundary?: ReadonlySet<number>,
+): Int32Array {
+  const n = width * height;
+  const dist = new Int32Array(n).fill(-1);
+  const queue: number[] = [];
+
+  for (let z = 0; z < height; z++) {
+    for (let x = 0; x < width; x++) {
+      const i = z * width + x;
+      const isOpen = openBoundary
+        ? openBoundary.has(i)
+        : x === 0 || z === 0 || x === width - 1 || z === height - 1;
+      let hasLower = false;
+      if (!isOpen) {
+        const h = elevation[i]!;
+        for (let d = 0; d < 8 && !hasLower; d++) {
+          const nx = x + D8_DX[d]!;
+          const nz = z + D8_DZ[d]!;
+          if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+          if (elevation[nz * width + nx]! < h) hasLower = true;
+        }
+      }
+      if (isOpen || hasLower) {
+        dist[i] = 0;
+        queue.push(i);
+      }
+    }
+  }
+
+  let head = 0;
+  while (head < queue.length) {
+    const i = queue[head++]!;
+    const x = i % width;
+    const z = (i / width) | 0;
+    const h = elevation[i]!;
+    const dHere = dist[i]!;
+    for (let d = 0; d < 8; d++) {
+      const nx = x + D8_DX[d]!;
+      const nz = z + D8_DZ[d]!;
+      if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+      const ni = nz * width + nx;
+      if (elevation[ni]! !== h) continue; // only travel within the flat
+      if (dist[ni]! !== -1) continue;
+      dist[ni] = dHere + 1;
+      queue.push(ni);
+    }
+  }
+
+  return dist;
+}
+
+/**
+ * D8 on a routing surface. Among non-uphill neighbors, a genuinely lower
+ * neighbor always wins (steepest drop, ties by index). A flat (equal-
+ * elevation) neighbor is only taken when it is strictly closer to a pour
+ * point than the current cell — `computeFlatPourDistance` above — so flow
+ * crosses a flat toward its outlet instead of toward the lowest cell index.
+ * The old index-only tie-break provably created 2-cycles on a flat's rim
+ * (hydrology/geomorphology review §1); distance-to-pour-point cannot cycle,
+ * since it strictly decreases along every flat edge taken.
+ *
+ * `openBoundary`, when given, must be the same set `priorityFloodFill` was
+ * seeded with (perimeter ring by default; ocean cells under C-015) — it is
+ * only threaded through so a flat that reaches the open edge drains there
+ * instead of being (mis)judged by grid position.
  */
 export function computeD8FlowDirection(
   width: number,
   height: number,
   elevation: Float32Array,
+  openBoundary?: ReadonlySet<number>,
 ): FlowDirection {
   const n = width * height;
   const direction = new Int8Array(n);
   direction.fill(-1);
+  const flatDist = computeFlatPourDistance(
+    width,
+    height,
+    elevation,
+    openBoundary,
+  );
 
   for (let z = 0; z < height; z++) {
     for (let x = 0; x < width; x++) {
       const i = z * width + x;
       const h = elevation[i]!;
+      const dHere = flatDist[i]! === -1 ? Infinity : flatDist[i]!;
       let bestScore = -Infinity;
       let bestDir = -1;
 
@@ -137,8 +231,15 @@ export function computeD8FlowDirection(
         const nh = elevation[ni]!;
         if (nh > h) continue; // uphill only forbidden
         const drop = h - nh;
-        // Tiny index bias resolves flats without inventing cliffs.
-        const score = drop * 1e6 - ni;
+        let score: number;
+        if (drop > 0) {
+          // Genuine downhill always beats staying on the flat.
+          score = 1e13 + drop * 1e6 - ni;
+        } else {
+          const dThere = flatDist[ni]! === -1 ? Infinity : flatDist[ni]!;
+          if (dThere >= dHere) continue; // must strictly approach the pour point
+          score = (dHere - dThere) * 1e6 - ni;
+        }
         if (score > bestScore) {
           bestScore = score;
           bestDir = d;

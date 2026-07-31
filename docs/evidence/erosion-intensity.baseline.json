@@ -2,7 +2,7 @@
   "scenario": "erosion-intensity",
   "metrics": {
     "calm.channelLoss": {
-      "value": 0.0001087188720703125,
+      "value": 0.00005602836608886719,
       "abs": 0.000001
     },
     "calm.intensity": {
@@ -14,7 +14,7 @@
       "abs": 0
     },
     "moderate.channelLoss": {
-      "value": 0.0008955001831054688,
+      "value": 0.0007243156433105469,
       "abs": 0.000001
     },
     "moderate.intensity": {
@@ -22,7 +22,7 @@
       "abs": 0
     },
     "stormy.channelLoss": {
-      "value": 0.002248525619506836,
+      "value": 0.0021533966064453125,
       "abs": 0.000001
     },
     "stormy.intensity": {
@@ -34,7 +34,7 @@
       "abs": 0
     },
     "delta.intensityDelta": {
-      "value": 0.0021398067474365234,
+      "value": 0.0020973682403564453,
       "abs": 0.000001
     },
     "delta.neutralMatch": {
@@ -46,7 +46,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 860182970,
+      "value": 1151413489,
       "abs": 0
     }
   }

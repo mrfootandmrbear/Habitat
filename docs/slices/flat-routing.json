@@ -1,0 +1,27 @@
+{
+  "id": "flat-routing",
+  "title": "Drainage flat-routing correctness (GEO-001)",
+  "simLoop": "computeD8FlowDirection's flat tie-break used to pick the lowest cell index among tied neighbors, which provably 2-cycles on the rim of any true flat (every priorityFloodFill-filled lake, since the fill has no epsilon and every filled surface is an exact flat). The cycle double-counted area in computeD8Accumulation and terminated channels inside lakes instead of continuing through the spill point, corrupting aNorm — which hillslope erosion forcing and the groundwater channel boost both read directly. Fixed by a second multi-source BFS (computeFlatPourDistance) that measures each flat cell's distance, in flat-hops, to the nearest pour edge — either a genuinely lower neighbor or the same open-boundary set (perimeter ring, or ocean cells under C-015) priorityFloodFill was seeded with. Flat routing now strictly decreases this distance at every step, which cannot cycle by construction.",
+  "gameLoop": "A channel that overflows a filled lake should keep flowing out the far side, not disappear into the lake it just crossed — and the erosion and baseflow that channel drives downstream should reflect where water actually goes, not an artifact of which cell index happened to come first in a tie.",
+  "registerIds": ["GEO-001", "T-001"],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/flow-structure.test.ts"
+  ],
+  "probes": [
+    "berm-reroute",
+    "hillslope-deposit",
+    "erosion-intensity",
+    "baseflow-persist",
+    "deep-time",
+    "disturbance-recovery",
+    "orographic-wind"
+  ],
+  "fields": [
+    "terrain.elevation",
+    "soil.depth",
+    "groundwater.storage"
+  ],
+  "notebookSeed": "The channel used to vanish into the lake it fed. Now it keeps going out the far side, the same way water actually leaves a full basin.",
+  "tierO": "no owner-only question this closeout — machine half only (CI-judged: cycle-free D8 direction graph, channel continuity through the spill point, real-minima-only sink count on the default island); D-007 clip gate does not apply since no new Process was registered."
+}

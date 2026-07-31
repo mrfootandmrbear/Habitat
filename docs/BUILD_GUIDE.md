@@ -1081,6 +1081,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Do not** attempt a partial version that skips bands "only a little". A silent tolerance is the one failure mode where nothing goes red: **T-001** replay, **P-006** fairness, and **C-005** comparison all break without a test noticing. If deep time is wanted before the candidates are judged, the honest interim is **L1 + L7**, which buys 39.9 min → 6.7 min with outcomes provably unchanged.
 
+**Framing written** ([C-024-C-025-framing.md](candidates/C-024-C-025-framing.md)): leading direction is a discrete skip-duration menu (1 day … 1000 years) bound per-preset to a floor, replayed as a sparse action log — a control surface separate from the L6 rate ladder, not a mode of it. Still framing only; implement nothing until both owner sittings in the dossier are held.
+
 ---
 
 ### 4.44 Slice — Fire spread as a rate *(queued)*
@@ -1167,19 +1169,21 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.49 Slice — Drainage flat-routing correctness *(queued — highest priority of the hydrology set)*
+### 4.49 Slice — Drainage flat-routing correctness *(Done — highest priority of the hydrology set)*
 
 **Why this exists.** [Hydrology/geomorphology review](reviews/2026-07-31-hydrology-geomorphology-review.md) §1. `priorityFloodFill` fills depressions to the exact spill level with no ε increment, despite a doc comment claiming "ε-style spill" (`flowRouting.ts:15,102-104`) — every filled lake surface is a true flat. The flat resolver (`flowRouting.ts:141`) picks the lowest-index non-uphill neighbor, which provably creates 2-cycles on the rim of any interior flat (filled lake floors; the `elevationFloor`-clamped shelf both terrain generators produce). `computeD8Accumulation` then double-counts area through the cycles and channels terminate inside lakes instead of continuing through the spill point — **the drainage network is severed at every filled depression** — and the corrupted accumulation (`aNorm`) feeds directly into hillslope erosion forcing (`WorldState.ts:1227`) and the groundwater channel boost (`:1066`). This is upstream of geomorphology and baseflow both; nothing downstream of it is trustworthy until it's fixed.
 
 **Register:** GEO-001 Locked (geology precedes ecology — a severed drainage network corrupts the substrate ecology inherits); T-001 Locked; §2.1 Conservation / Symmetry invariant classes
 **New Process?** no — corrects the flat-resolution step inside existing D8 routing. D-007 clip gate does not apply.
 
-- [ ] Add the ε increment `priorityFloodFill`'s own doc comment already claims exists, so filled surfaces are not exact flats
-- [ ] Flat resolver directs flow toward the pour point (e.g. a second BFS pass from the spill cell assigning monotonically increasing pseudo-elevation across the flat), not toward the lowest cell index
-- [ ] Test: a synthetic filled depression with a known pour point produces zero cycles in `computeD8Accumulation` and channels continue through the spill rather than terminating inside the lake
-- [ ] Regression: `computeWatershedLabels` sink count on the default island drops to the count of *real* minima (no cycle-minted spurious sinks)
-- [ ] Baselines: `aNorm`-dependent hillslope-erosion and groundwater-channel-boost probes will move — state the reason in the commit body, this is expected and is the fix working
-- [ ] Composition + manifest; **Next-but-one:** §4.50 Surface-flux stability guard
+- [x] **Not the ε increment — the deeper fault line instead.** Epsilon would only have narrowed how often a flat occurs, not fixed what happens on one; `priorityFloodFill`'s fill is untouched (still exact), and its doc comment — which claimed an "ε-style spill" that was never implemented — now says what the function actually does
+- [x] Flat resolver directs flow toward the pour point via a second multi-source BFS (`computeFlatPourDistance`, distance-to-pour-point in flat-hops), not toward the lowest cell index — the exact mechanism this item's own example named
+- [x] Test: a synthetic filled depression with a known pour point produces zero cycles in `computeD8Accumulation` and channels continue past the spill rather than terminating inside the lake — `flow-structure.test.ts`
+- [x] Regression: on the default island, land sinks (via `computeWatershedLabels`) stay under 5% of land cells, not one per cell; the pre-fix index tie-break is reproduced in-test and shown to cycle on the same terrain
+- [x] Baselines moved and refreshed: `berm-reroute`, `hillslope-deposit`, `erosion-intensity`, `baseflow-persist`, `deep-time`, `disturbance-recovery`, `orographic-wind` — expected, this is the fix working
+- [x] Composition + manifest: [flat-routing-composition.md](slices/flat-routing-composition.md), [flat-routing.json](slices/flat-routing.json); **Next-but-one:** §4.50 Surface-flux stability guard
+
+**Scope note.** The first pass at threading the open-boundary set used "touches the grid edge" as the open signal, which silently reached into §4.51's territory (structural vs. dynamic boundary) and produced a real regression (1,396 land-adjacent sinks on the default island) — caught by the regression test before it shipped, fixed by threading the actual `oceanCells`/perimeter set `priorityFloodFill` was seeded with instead of guessing from grid position. Full account: [flat-routing-composition.md](slices/flat-routing-composition.md).
 
 ---
 
@@ -1267,13 +1271,13 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | HSI curve-shape corrections | C-007, C-011, S-007, N-004 | §4.46 **Queued** |
 | — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Queued** — after HSI curves |
 | — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |
-| — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Queued** — highest priority of the four reviews below |
+| — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Done** |
 | — | Surface-flux stability guard | T-001, H-004 | §4.50 **Queued** — after flat-routing |
 | — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Queued** — after flux guard |
 | — | Encoding delta correctness | U-003, D-007 | §4.52 **Queued** |
 | C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — not blocking §4.52 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed.
 
 **Executable tip is now the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
 
