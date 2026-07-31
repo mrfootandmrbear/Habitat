@@ -102,7 +102,7 @@ Summary only — do not reopen unless fixing regressions.
 | **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner Lock 2026-07-30 |
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
-| — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — agent (C-020 Lock still owner) |
+| — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — **C-020 Locked** v2.0.13 |
 | **N** | Salt-memory encoding (**NS-006**) | Freshened green vs salty pale sparse | `saltMemoryEncodingDelta` | **Done** — clip Pass (C-018 Q-A) |
 | **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 **Locked**) |
@@ -114,13 +114,13 @@ Summary only — do not reopen unless fixing regressions.
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — C-005 Locked as tooling (v2.0.12) |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006 Locked** (v2.0.12); **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: woody/shrub guild (climate-capped; needs NS-002). Parallel: C-020 G1–G5; taste residual **C-020** / **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: woody/shrub guild (climate-capped; needs NS-002). Parallel: **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env).
 
-**Next (executable tip):** Nature P2: **woody/shrub** guild (stage 3; climate-capped). Parallel: C-020 glitch fix G1–G5; **C-014** when hearable. **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** Nature P2: **woody/shrub** guild (stage 3; climate-capped). Parallel: **C-014** when hearable. **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
 
-**Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional C-020 SWE store only if G3 presentation hold fails. Scenario campaign (G-002 / C-010) after implement.
+**Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Filed dials still Open: **C-021** season; **C-022** erosion intensity.
 
@@ -926,10 +926,10 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) — C-002 Locked v2.0.12 |
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
 | — | Season + erosion dials filed | C-021, C-022 | register v2.0.11 |
-| — | C-020 glitches named | C-020 G1–G5 | [C-020-dossier](candidates/C-020-dossier.md) |
+| — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** Nature P2 woody/shrub; residual Lock **C-020** / **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** Nature P2 woody/shrub; residual Lock **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

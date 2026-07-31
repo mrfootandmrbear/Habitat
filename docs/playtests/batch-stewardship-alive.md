@@ -43,7 +43,7 @@ Owner: "cannot hear, by appearance yes it was still." Stillness-by-appearance **
 **D — U-006 notebook — unanswered**
 Owner did not answer. Sitting / Open remains.
 
-**If Hold on B (active):** glitches named G1–G5 ([C-020-dossier.md](../candidates/C-020-dossier.md)) — retune storm cue / clouds / phase presentation, re-measure proxies, ask again — not paint rain onto cells.
+**If Hold on B (active):** glitches **G1–G5 fixed** ([C-020-dossier.md](../candidates/C-020-dossier.md)) — re-ask Lock; SWE only if snow cover still fails taste.
 
 **If C needs a re-sit:** require an environment where the owner can hear; do not Lock on appearance alone.
 

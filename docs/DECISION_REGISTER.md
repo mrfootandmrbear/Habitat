@@ -134,6 +134,10 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.13 — C-020 Locked (atmospheric precip delivery).**
+
+- Promoted **C-020** Open→Locked after G1–G5 presentation fixes and owner Lock re-ask Pass ([C-020-weather-lock.md](playtests/C-020-weather-lock.md) 2026-07-31): weather the atmosphere made, including cold spells reading as snow. Machine: `cloud-delivery` probe; `stormCue.test.ts` (G1–G5). Artifacts: `docs/candidates/C-020-dossier.md`, `docs/slices/clouds-composition.md`. SWE store remains optional; not required for Lock.
+
 **v2.0.12 — Owner Lock: C-005 tooling / C-013 / C-002 / U-006.**
 
 - **C-005** Locked as **debug / optional tooling**, not a core play instrument (owner 2026-07-31: Compare felt like a debug panel). Scaffold may remain; F-002 advanced comparison stays Deferred. Artifacts: `docs/candidates/C-005-dossier.md`, `docs/evidence/branch-compare.baseline.json`.
@@ -1306,7 +1310,7 @@ Ordered by how many other decisions depend on them.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. ~~**C-013**~~ **Locked** (fair undo boundary 2026-07-31). **C-014** — how audio derives from state; stillness-by-appearance Pass; audible silence unverified (no hear) — remains Open.
 8g. ~~**C-015** + **W-001**~~ **C-015 Locked**; **W-001 Superseded** (ballot B 2026-07-30). ~~**C-016**…**C-019**~~ **Locked** (owner Lock batch A 2026-07-30).
-8h. **C-020** — atmospheric precip delivery. Machine green; owner: weather-feel Pass with glitches → **Hold Lock**. Glitches named 2026-07-31 ([C-020-dossier.md](candidates/C-020-dossier.md)); fix then re-ask Lock.
+8h. ~~**C-020** — atmospheric precip delivery~~ **Locked** (owner Lock re-ask Pass 2026-07-31 — weather the atmosphere made; G1–G5 fixed).
 8i. **C-021** / **C-022** — season and erosion-intensity force dials (THESIS §4); filed Open — no player regime control on seasonal band or geomorph intensity yet.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
@@ -1372,7 +1376,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Why.** THESIS §4: build the form, then choose the forces. D-001 / N-001 survive only if forces are not dragged onto a chosen hill. Owner Pass (batch-stewardship-alive 2026-07-30): regime change felt like the island was alive — something the world did. Wanting time rates beyond 16× is product feedback, not a Hold on stewardship.
 
-**Implications.** Force panel / climate dials have no cell arguments. Paired-regime divergence is required (T-001). **C-020** remains Open for weather-feel / glitch cleanup; Locked C-004 does not require perfect atmospheric presentation.
+**Implications.** Force panel / climate dials have no cell arguments. Paired-regime divergence is required (T-001). **C-020** Locked for atmospheric precip presentation; Locked C-004 does not require further weather-feel retunes unless a new defect appears.
 
 **Rejected alternatives.** Place-targeted storms. Force dial as god-mode score optimization. Collapsing stewardship into painting outcomes.
 
@@ -1590,7 +1594,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** W-003 Locked, C-007 Locked, T-001, C-003, N-004, C-015 Locked.
 
 ### C-020 — Atmospheric precip delivery (clouds from wind, moisture, heat)
-**Status:** Open
+**Status:** Locked
 
 **Question.** Should precipitation eventually arrive as **weather the atmosphere makes** — clouds that deliver rain, snow, or sleet from wind, moisture, and heat — rather than as a global rain-regime dial that dumps water everywhere at once?
 
@@ -1598,9 +1602,11 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Owner sitting (2026-07-30).** Weather read as weather, **but glitches remain** — Hold Lock until glitches are named and fixed ([batch-stewardship-alive.md](playtests/batch-stewardship-alive.md); [C-020-dossier.md](candidates/C-020-dossier.md)). Do not promote on Pass-with-glitches alone.
 
-**Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until atmospheric delivery is Lock-ready.
+**Owner Lock (2026-07-31).** G1–G5 fixed; re-ask Pass ([C-020-weather-lock.md](playtests/C-020-weather-lock.md)): weather the atmosphere made, including cold spells reading as snow. **Locked.**
 
-**Leading direction.** Yes — lite path shipped (climate-mean + orographic + atmosphere Process + clouds). Full Lock waits on named glitch cleanup + owner re-Pass. Not Locked until precip phase and placement read cleanly as weather the atmosphere made, with mass balance closed and no cell targeting.
+**Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Rain-regime dial remains the climate moisture budget under atmospheric delivery.
+
+**Leading direction.** Yes — Locked. Climate-mean + orographic + atmosphere Process + clouds; precip phase from heat; presentation holds (G1–G5). Optional SWE store is a later enhancement, not a Lock requirement.
 
 ### C-021 — Season as a force dial
 **Status:** Open

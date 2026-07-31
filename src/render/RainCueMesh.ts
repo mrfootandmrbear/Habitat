@@ -1,18 +1,22 @@
 import * as THREE from "three";
+import { snowCoverTarget } from "../ui/stormCue";
 
 /**
  * Observer-only storm event cue (Slice R / C-020 / T-006).
  * Reads as a weather event: soft overcast veil + wind-aligned streaks.
- * Never writes WorldState.
+ * Snow adds a short-lived ground cover hold (G3) — never writes WorldState.
  */
 export class RainCueMesh {
   readonly group: THREE.Group;
   private readonly points: THREE.Points;
   private readonly veil: THREE.Mesh;
+  private readonly groundCover: THREE.Mesh;
   private readonly velocities: Float32Array;
   private targetOpacity = 0;
   private streakOpacity = 0;
   private veilOpacity = 0;
+  private targetGround = 0;
+  private groundOpacity = 0;
   private readonly worldSize: number;
 
   constructor(worldSize: number, count = 1400) {
@@ -55,6 +59,21 @@ export class RainCueMesh {
     this.veil = new THREE.Mesh(veilGeo, veilMat);
     this.veil.position.y = 14;
     this.group.add(this.veil);
+
+    // Snow ground hold — pale sheet that lingers after flakes (G3).
+    const groundGeo = new THREE.PlaneGeometry(worldSize * 1.02, worldSize * 1.02);
+    groundGeo.rotateX(-Math.PI / 2);
+    const groundMat = new THREE.MeshBasicMaterial({
+      color: 0xeef2f6,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    this.groundCover = new THREE.Mesh(groundGeo, groundMat);
+    this.groundCover.position.y = 0.35;
+    this.group.add(this.groundCover);
+
     this.group.visible = false;
   }
 
@@ -66,6 +85,7 @@ export class RainCueMesh {
   setStorm(active: boolean, strength: number = 1, phase: number = 0): void {
     const s = Math.min(1, Math.max(0, strength));
     this.targetOpacity = active ? s : 0;
+    this.targetGround = snowCoverTarget(phase, active, s);
     const streakMat = this.points.material as THREE.PointsMaterial;
     const veilMat = this.veil.material as THREE.MeshBasicMaterial;
     if (phase >= 2) {
@@ -81,7 +101,12 @@ export class RainCueMesh {
       streakMat.size = 0.16;
       veilMat.color.setHex(0x6a7a88);
     }
-    if (active) this.group.visible = true;
+    if (active || this.groundOpacity > 0.02) this.group.visible = true;
+  }
+
+  /** Current ground-cover opacity — Tier-P proxy for snow hold (G3). */
+  getGroundCoverOpacity(): number {
+    return this.groundOpacity;
   }
 
   /**
@@ -92,12 +117,26 @@ export class RainCueMesh {
     this.streakOpacity += (this.targetOpacity * 0.7 - this.streakOpacity) * fade;
     this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
 
+    // Snow cover builds with the spell; melts slowly after (presentation hold).
+    const groundRate =
+      this.targetGround > this.groundOpacity
+        ? 1 - Math.exp(-2.2 * Math.max(0, dt))
+        : 1 - Math.exp(-0.4 * Math.max(0, dt));
+    this.groundOpacity += (this.targetGround - this.groundOpacity) * groundRate;
+
     const streakMat = this.points.material as THREE.PointsMaterial;
     const veilMat = this.veil.material as THREE.MeshBasicMaterial;
+    const groundMat = this.groundCover.material as THREE.MeshBasicMaterial;
     streakMat.opacity = this.streakOpacity;
     veilMat.opacity = this.veilOpacity;
+    groundMat.opacity = this.groundOpacity;
 
-    if (this.streakOpacity < 0.02 && this.targetOpacity <= 0) {
+    if (
+      this.streakOpacity < 0.02 &&
+      this.targetOpacity <= 0 &&
+      this.groundOpacity < 0.02 &&
+      this.targetGround <= 0
+    ) {
       this.group.visible = false;
       return;
     }
@@ -132,5 +171,7 @@ export class RainCueMesh {
     (this.points.material as THREE.Material).dispose();
     this.veil.geometry.dispose();
     (this.veil.material as THREE.Material).dispose();
+    this.groundCover.geometry.dispose();
+    (this.groundCover.material as THREE.Material).dispose();
   }
 }

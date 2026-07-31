@@ -32,12 +32,17 @@ import {
 } from "./sim/sessionPersist";
 import {
   rainRegimeById,
+  regimeIsWetDay,
   type RainRegimeId,
 } from "./sim/climate/rainRegime";
 import {
   heatById,
   type HeatId,
 } from "./sim/climate/atmosphere";
+import {
+  stormCueStrength,
+  stormSpellArmed,
+} from "./ui/stormCue";
 import {
   seaLevelById,
   type SeaLevelId,
@@ -676,6 +681,15 @@ function syncMeshes(nowWall?: number): void {
 
 /** Presentation: storm event active (rain cue + muted shallow sheet). */
 let stormDisplayActive = false;
+/** Wall-seconds remaining after spell unarms — stops 16× strobe (G1). */
+let stormReleaseHold = 0;
+const STORM_RELEASE_HOLD_S = 1.6;
+
+function climateDayIndex(): number {
+  return Math.floor(
+    world.simMinutes / config.eventDtMinutes / config.dailyEventSteps,
+  );
+}
 
 function syncWaterDisplay(wallDt: number, snap = false): void {
   if (snap) waterMesh.snapFrom(model, world.oceanCells);
@@ -749,16 +763,33 @@ function frame(now: number): void {
       break;
     }
   }
-  // Storm + cloud cues — fade holds across the spell (T-006 — no write).
+  // Storm + cloud cues — hold across wet block / cloud charge (G1; T-006).
   cloudMesh.setAtmosphere(world.cloudWater, world.precipPhase);
   cloudMesh.update(wallDt, wind.ux, wind.uz);
   if (stepsRun > 0) {
-    stormDisplayActive = rainingThisTick;
-    const strength =
-      rainRegime === "heavy" ? 1 : rainRegime === "moderate" ? 0.75 : 0.55;
-    rainCue.setStorm(rainingThisTick, strength, phaseThisTick);
+    const wetDay = regimeIsWetDay(
+      rainRegimeById(rainRegime),
+      climateDayIndex(),
+    );
+    const armed = stormSpellArmed({
+      rainingThisTick,
+      cloudWater: world.cloudWater,
+      wetDay,
+    });
+    if (armed) {
+      stormReleaseHold = STORM_RELEASE_HOLD_S;
+      stormDisplayActive = true;
+    } else if (stormReleaseHold > 0) {
+      stormReleaseHold = Math.max(0, stormReleaseHold - wallDt);
+      stormDisplayActive = true;
+    } else {
+      stormDisplayActive = false;
+    }
+    const strength = stormCueStrength(rainRegime);
+    rainCue.setStorm(stormDisplayActive, strength, phaseThisTick);
   } else if (timeRate === "pause") {
     stormDisplayActive = false;
+    stormReleaseHold = 0;
     rainCue.setStorm(false);
   }
   rainCue.update(wallDt, wind.ux, wind.uz);

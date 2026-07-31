@@ -1,7 +1,7 @@
 # Full C-020 — Clouds / precip phase
 
-**Status:** Done — machine green (C-020 Lock still owner)  
-**Register:** **C-020** Open (hypothesis). **D-007** Locked. C-004 force dials. T-001 / T-006 / H-004 / N-004.
+**Status:** Done — **C-020 Locked** (v2.0.13)  
+**Register:** **C-020** Locked. **D-007** Locked. C-004 force dials. T-001 / T-006 / H-004 / N-004.
 
 ## Clip verdict (D-007)
 
@@ -38,9 +38,10 @@ No EXTERNAL_REFERENCES cloud engine. Rule-shape only.
 
 ## Presentation (T-006)
 
-- `CloudMesh` — soft cloud bodies whose opacity tracks `cloudWater` (observer only).
-- `RainCueMesh` — liquid / sleet streaks while discharging rain or sleet.
-- Snow cue — flake points while phase is snow (same mesh family, different look).
+- `CloudMesh` — soft cloud bodies whose opacity tracks `cloudWater`; windward bias toward delivery side (G4); wrap-edge fade (G2).
+- `RainCueMesh` — liquid / sleet streaks while the spell is armed (wet-day / cloud hold — G1); strength by regime archetype (G5).
+- Snow cue — flake points + short-lived ground-cover hold while phase is snow (G3; no SWE store).
+- Helpers: `src/ui/stormCue.ts`; proxies in `stormCue.test.ts`.
 
 ## Paired expectations (Tier-M)
 
@@ -56,7 +57,7 @@ Probe: `cloud-delivery`.
 - Skipping D-007 (recorded above).
 - Place-targeted storms / cloud paint.
 - Stochastic free weather while C-003 Open.
-- Claiming C-020 Locked (owner taste half).
+- Claiming C-020 Locked before owner Lock (discharged 2026-07-31).
 - Charts or precip HUD meters.
 
 ## Notebook seed

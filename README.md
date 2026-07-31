@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10); **C-006 Locked** (v2.0.11); **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12). **C-021** / **C-022** filed (season / erosion dials). **Slice B** / **Slice E** Done. **NS-007** / **NS-008** / **NS-009** Done. Open taste: **C-020** Hold Lock (G1–G5 named) / **C-014**. **Next:** Nature P2 woody/shrub ([BUILD_GUIDE](docs/BUILD_GUIDE.md)). Island is the default playable world.
+**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10); **C-006 Locked** (v2.0.11); **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12); **C-020 Locked** (v2.0.13). **C-021** / **C-022** filed (season / erosion dials). **Slice B** / **Slice E** Done. **NS-007** / **NS-008** / **NS-009** Done. Open taste: **C-014**. **Next:** Nature P2 woody/shrub ([BUILD_GUIDE](docs/BUILD_GUIDE.md)). Island is the default playable world.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

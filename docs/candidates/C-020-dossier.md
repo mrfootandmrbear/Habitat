@@ -1,6 +1,6 @@
 # C-020 — Atmospheric precip delivery
 
-**Status:** Open (Hold Lock — weather-feel Pass-with-glitches)  
+**Status:** Locked (2026-07-31)  
 **Criterion (verbatim from DECISION_CONFORMANCE).** Precipitation phase and placement are attributable to atmospheric state (wind, moisture, heat → cloud → rain/snow/sleet), not to a place the player targeted; mass balance closes (H-004); same seed + same atmospheric forcing → identical hash; the control surface (if any) remains a regime / climate dial with no cell arguments. Existing rain-regime dial may remain as a fallback until this criterion is met.
 
 ## Machine half
@@ -13,9 +13,10 @@
 | Event presentation | overcast veil + streaks; muted shallow blue sheet | `RainCueMesh`, `WaterMesh` stormActive |
 | Atmosphere Process | cloud charge → orographic discharge | `atmosphereProcess`, `climate.cloudWater` |
 | Phase from heat | warm→rain / mild→sleet / cold→snow | Heat dial; `climate.precipPhase` |
-| Cloud presentation | soft bodies track cloud water | `CloudMesh` |
+| Cloud presentation | soft bodies track cloud water; windward bias | `CloudMesh` |
 | Probe | T-001 + H-004 + phase divergence | `cloud-delivery` |
-| Persistent SWE store | **Not built** — melt-on-contact this pass | optional next |
+| G1–G5 presentation | wet-day hold, strength ladder, wrap fade, windward bias, snow ground hold | `stormCue.test.ts` |
+| Persistent SWE store | **Not built** — presentation snow hold suffices for Lock | optional later |
 
 ## Owner taste
 
@@ -33,22 +34,22 @@
 
 **2026-07-30 stewardship sitting** ([batch-stewardship-alive.md](../playtests/batch-stewardship-alive.md) Q-B): **"the weather read as weather but there's some glitches to work out."** Treat as **Pass-with-glitches / Hold Lock** — do **not** Lock until glitches are named and fixed in a follow-up encoding pass. Leave **Open**.
 
+**2026-07-31 Lock re-ask** ([C-020-weather-lock.md](../playtests/C-020-weather-lock.md)): Owner **Pass / Lock** — weather the atmosphere made; cold spells reading as snow. **Locked** register v2.0.13.
+
 ## Named glitches (2026-07-31 — agent, from code + prior notes)
 
-Owner did not enumerate glitches in the sitting. These are the presentation / delivery defects that match "reads as weather but glitchy," ordered by clip-test impact. Fix these before re-asking Lock — do not invent SWE / new Process unless a named row requires it.
+| # | Glitch | Status |
+|---|---|---|
+| G1 | Storm cue strobes at 16× | **Fixed** — wet-day / cloud-charge arm + 1.6s wall release hold |
+| G2 | Cloud wrap pop | **Fixed** — `wrapEdgeFade` |
+| G3 | Snow is streak-tint only | **Fixed** — presentation ground-cover hold (no SWE) |
+| G4 | Clouds ignore where rain lands | **Fixed** — windward home attract + opacity bias |
+| G5 | Arid vs light cue strength collapsed | **Fixed** — `stormCueStrength` ladder |
 
-| # | Glitch | Where | Why it reads wrong |
-|---|---|---|---|
-| G1 | **Storm cue strobes at 16×** | `main.ts` arms `rainCue.setStorm` from per-frame precip-ledger delta; dry days between wet chunks clear the cue every wall frame that runs steps | Residual "pulsing faucet" — spells blink on/off instead of holding a front across the wet block |
-| G2 | **Cloud wrap pop** | `CloudMesh.update` teleports bodies across world edges with no fade | Sky blobs jump; breaks "atmosphere is continuous" |
-| G3 | **Snow is streak-tint only** | Melt-on-contact; no lasting ground cover (dossier already notes optional SWE) | Cold spells change precip streaks but the ground never reads as snowed-on — phase feel incomplete without a presentation hold (SWE store still optional; a short-lived cover cue may suffice) |
-| G4 | **Clouds ignore where rain lands** | Decorative orbiting spheres; opacity tracks scalar `cloudWater` only | Delivery and sky are decoupled — orographic wet side can rain while clouds drift uniformly |
-| G5 | **Arid vs light cue strength collapsed** | `main.ts` maps `heavy→1`, `moderate→0.75`, else `0.55` | Desert rare-storm and light rain share the same veil/streak strength — archetype cadence is in the sim, not in the cue |
+**Tier-P:** `src/ui/stormCue.test.ts`.
 
-**Retune order:** G1 → G5 → G2 → G4 → G3 (G3 last; prefer a presentation hold before a SWE store unless cover cue fails Tier-P).
-
-## Owner-only question (Lock) — Hold
+## Owner-only question (Lock) — discharged
 
 When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow?
 
-**Next agent step:** fix named glitches G1–G5 (presentation / phase / cadence), re-measure `cloud-delivery` + encoding proxies — then re-ask Lock. Not paint rain onto cells.
+**Answer:** Yes — Lock (2026-07-31).
