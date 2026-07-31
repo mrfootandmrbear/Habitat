@@ -134,6 +134,11 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.11 — C-006 Locked; season / erosion dials filed.**
+
+- Promoted **C-006** (abundant sculpting) Open→Locked — CI criterion met: no per-edit economy; 100 berm/dig/deposit edits write no veg/biomass; heavy sculpt without elapsed time leaves biomass = 0. Artifact: `src/sim/c006-abundant-sculpting.test.ts`.
+- Filed **C-021** (season force dial) and **C-022** (erosion-intensity force dial) from THESIS §4 — named in the loop, never previously candidates. Seasonal band and geomorph run with no player regime control today.
+
 **v2.0.10 — Ballot B + stewardship sitting (C-015 / W-001 / C-004).**
 
 - Owner **Supersede W-001 / Lock C-015** (2026-07-30): island + sea datum is the canonical preserve reference; **W-001** Superseded by **C-015**.
@@ -1285,14 +1290,15 @@ Ordered by how many other decisions depend on them.
 5. ~~**C-001** — cheap GW/baseflow store~~ **Locked** (Slice 8b / `baseflow-persist`).
 6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
 7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
-8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
+8. ~~**C-006**~~ **Locked** (CI promote 2026-07-31 — no edit economy; no siting→ecology write). **C-008** — response-latency budget; Tier-P measurable once the owner names the number.
 8b. ~~**C-009** — substrate differentiation~~ **Locked** (owner Lock batch A 2026-07-30).
 8c. **C-010** — legacy substances / contaminant load; gated behind C-009 (**now Locked**), but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
 8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 sitting: stillness-by-appearance Pass; audible silence unverified (no hear) — remains Open.
 8g. ~~**C-015** + **W-001**~~ **C-015 Locked**; **W-001 Superseded** (ballot B 2026-07-30). ~~**C-016**…**C-019**~~ **Locked** (owner Lock batch A 2026-07-30).
-8h. **C-020** — atmospheric precip delivery. Machine green; owner: weather-feel Pass with glitches → **Hold Lock** until glitches named and fixed.
+8h. **C-020** — atmospheric precip delivery. Machine green; owner: weather-feel Pass with glitches → **Hold Lock**. Glitches named 2026-07-31 ([C-020-dossier.md](candidates/C-020-dossier.md)); fix then re-ask Lock.
+8i. **C-021** / **C-022** — season and erosion-intensity force dials (THESIS §4); filed Open — no player regime control on seasonal band or geomorph intensity yet.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1369,13 +1375,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** Promote from Deferred to a real mechanic; a run should be reproducible and shareable from seed + force settings. Blocked from Locked until P-005's criterion is discharged and one comparison UI exists.
 
 ### C-006 — Sculpting is abundant; scarcity lives in ecological time
-**Status:** Open
+**Status:** Locked
 
-**Question.** Is terrain sculpting **abundant and tactile** (RCT3 brush — you do it constantly, undo is free), against a register tone that treats intervention as rationed and deliberate?
+**Decision.** Terrain sculpting is **unrationed** — no counter, cost, or cooldown on berm / dig / deposit. Scarcity lives in **ecological time** (RC-004), not an action economy. A session of heavy sculpting cannot produce a finished ecosystem without elapsed simulation time (N-001).
 
-**Constraints.** N-001 bans painting *outcomes*; terrain is a cause, so abundance does not breach it. RC-004 already names ecological time — not action count — as the constraint, which supports abundance. A-005's "site a cause" framing stays true; only its implied scarcity is at issue.
+**Why.** THESIS §2 / §4 / §9: phase one is abundant RCT3-style sculpting; intervening sparingly governs ecological intervention only. A-005's "site a cause" framing stays; only the implied scarcity is rejected. CI promote 2026-07-31.
 
-**Leading direction.** Abundant sculpting, scarce time. Requires no register supersession — A-005 and RC-004 already permit it — but the tone should be stated so agents stop inferring rationing.
+**Implications.** Agents must not invent edit budgets. Undo of edits (**C-013**) remains the frictionless take-back; elapsed time is not undoable. Deposit stamps substrate (C-009), never mature vegetation.
+
+**Rejected alternatives.** Per-edit cost / cooldown to "prevent degenerate play." Gating sandbox sculpting behind scenario progress (G-001). Painting ecosystems from a siting tool.
+
+**Evidence.** `src/sim/c006-abundant-sculpting.test.ts`: no economy-pattern hits in sim/ui/config; 100 berm+dig+deposit edits leave herb/strand/binder/cover sums unchanged; heavy sculpt without `stepEvent` → all biomass sums = 0; terrain elev moves.
+
+**Constraints.** N-001, RC-004, A-005, G-001, THESIS §9.
 
 ### C-007 — Arrival as the primary biological verb
 **Status:** Locked
@@ -1425,7 +1437,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** Legacy by SIMULATION_MODEL §12's definition — not reconstructible from current forcing — so it is save-invalidating (T-003) and belongs in the decadal band. Transport must ride the existing water mass balance rather than introduce a second one (H-004, GEO-002 earn-its-cost). Uptake couples to vegetation, which already exists. Must not become a cleanup *tool* the player applies to a cell (N-001, D-001): the player sets conditions; the landscape processes the substance. Scenario objectives read it through arrival and persistence (**C-007**, G-005), never as a raw score (N-002).
 
-**Leading direction.** Yes — **C-009** Locked supplies the material table to attach to. Deliberately deferred until scenarios are near; recorded so substrate work does not foreclose it.
+**Leading direction.** Yes — **C-009** Locked supplies the material table; **C-018** Locked is the everyday salt instance. Contaminant load remains the toxic-site instance and the S-007 / S-008 substrate. Framing: [C-010-framing.md](candidates/C-010-framing.md). Implement under Open only after framing bans are respected — no cleanup tool, no second water ledger.
 
 ### C-011 — Real-world intuition is the instrument
 **Status:** Open
@@ -1458,11 +1470,11 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Question.** Does abundant sculpting (**C-006**) require an undo, and what exactly may be undone?
 
-**Why now.** There is no undo anywhere in the build. RCT3's freedom to keep shaping — the origin experience — rests on being able to take an edit back without ceremony, and the register does not mention undo at all.
+**Why now.** **C-006** is Locked — abundance without a free take-back still fights the RCT3 origin. Machine half is shipped (`sessionPersist` sculpt undo; `sessionPersist.test.ts` hash cases). Owner half outstanding: whether losing undo after time advances feels fair ([C-013-dossier.md](candidates/C-013-dossier.md)).
 
 **Constraints and the hard part.** Undo of an **edit** is uncontroversial. Undo of **elapsed ecological time** is not: S-007 makes hysteresis fundamental and RC-004 makes time the real constraint, so a world where the tide can be un-run contradicts the thesis directly — the sand castle whose collapse you can rewind is not the same object. T-001 determinism and the P-005 save machinery supply the natural mechanism, since a restore point is the same construct as a branch (**C-005**).
 
-**Leading direction.** Undo applies to **edits before time advances**; once the world has run, the way "back" is restoring a branch point, not rewinding history. That keeps sculpting frictionless and keeps consequence real. Not Locked until the boundary is built and does not read as a punishment.
+**Leading direction.** Undo applies to **edits before time advances**; once the world has run, the way "back" is restoring a branch point, not rewinding history. Machine half discharged; Lock waits on owner taste.
 
 ### C-014 — How audio derives from simulation state
 **Status:** Open
@@ -1564,6 +1576,28 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until atmospheric delivery is Lock-ready.
 
 **Leading direction.** Yes — lite path shipped (climate-mean + orographic + atmosphere Process + clouds). Full Lock waits on named glitch cleanup + owner re-Pass. Not Locked until precip phase and placement read cleanly as weather the atmosphere made, with mass balance closed and no cell targeting.
+
+### C-021 — Season as a force dial
+**Status:** Open
+
+**Question.** Should the player set a **season / seasonal-regime dial** (which part of the year the preserve is living through, and how hard) as a force-panel control — distinct from rainfall mean and heat — so the seasonal band answers to a chosen regime rather than only to compressed calendar ticks?
+
+**Why now.** THESIS §4 names season among the forces the player chooses after sculpting. The seasonal band already runs (`vegetationSeasonalProcess`, `seasonalDailySteps`); there is no player regime control — Force panel stub in [FORCE_PANEL.md](FORCE_PANEL.md); [ISLAND_FORCES.md](ISLAND_FORCES.md) lists season as Deferred / unfiled.
+
+**Constraints.** Regimes not smiting (C-004 Locked / THESIS §9) — no cell-targeted "make this slope winter." Real-world referent (N-004 / C-011). Must not invent materials. Determinism (T-001). Heat dial already gates precip phase and `f_temp`; season must not duplicate heat as a second temperature paint. Pair with **C-022** under the same force-panel contract.
+
+**Leading direction.** File as Open; implement under hypothesis only. A dial that modulates which seasonal processes fire / how strongly (day length, phenology pressure, frost risk band) without becoming a calendar skip tool that erases hysteresis (S-007).
+
+### C-022 — Erosion intensity as a force dial
+**Status:** Open
+
+**Question.** Should the player set an **erosion / geomorph intensity dial** — how hard the landscape-work forces act — as a force-panel control, so the same castle can be re-run under quieter or more aggressive incision and deposit without retuning code constants?
+
+**Why now.** THESIS §4 names erosion among the forces. Geomorphology already runs (Slice 8 / Exner-lite Slice E); intensity is fixed in `config` / process constants — no player regime. Same-castle / different-forces loop (**C-005**) needs an erosion axis once rain and wind exist.
+
+**Constraints.** Regimes not smiting (C-004 Locked). One law, dialled intensity (T-004 / GEO-002) — not a second erosion Process. Mass conservation (H-004). Must not become a "smooth this hill" brush. Real-world referent: storminess / disturbance regime, not a magic erode slider with no physical meaning (N-004, C-011).
+
+**Leading direction.** Global intensity multiplier (or storminess archetype) on existing hillslope / channel / shore work. Open until criterion exists and a paired-regime probe shows divergent channel loss under identical terrain.
 
 ---
 

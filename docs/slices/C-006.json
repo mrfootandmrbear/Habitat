@@ -1,0 +1,13 @@
+{
+  "id": "C-006",
+  "title": "Abundant sculpting CI promote",
+  "simLoop": "Berm / dig / deposit remain unrationed causes; no edit path writes mature vegetation or biomass without elapsed simulation time (N-001, RC-004).",
+  "gameLoop": "Player sculpts freely; scarcity is ecological time, not an action economy.",
+  "registerIds": ["C-006", "N-001", "RC-004", "A-005", "G-001"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/sim/c006-abundant-sculpting.test.ts"],
+  "probes": [],
+  "fields": ["terrain.elevation", "soil.depth", "veg.biomass.herb", "veg.biomass.strand", "veg.biomass.binder", "veg.cover"],
+  "notebookSeed": "The hand kept shaping; the place stayed bare until time ran.",
+  "tierO": "no owner-only question — CI promote"
+}

@@ -37,7 +37,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| — | *(empty)* | Nature Wave 1 P0 complete; agent tip → C-006 CI promote |
+| — | *(empty)* | C-006 / C-013 framing / C-010 framing Done; agent tip → Nature P1 (hydroperiod, light→Liebig) |
 
 
 ### P1 — derived field, no new Process

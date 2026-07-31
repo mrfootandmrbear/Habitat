@@ -17,7 +17,9 @@
 | Longshore / beaches | **Derived** deposit (shipped; Slice 19) | `shore.longshore` tendency + lee deposit budget inside geomorphology (**C-017**). |
 | Salinity / salt spray | **Deferred** (20) | First everyday **C-010** instance (**C-018**). |
 | Overseas seed pressure | **Derived** (shipped; Slice 21) | Shore-biased overseas kernel × \(S_{\text{elig}}=f(A,d)\) on island worlds (**C-019**). Mainland perimeter rain retained when seaLevel absent. |
-| Clouds → rain/snow/sleet | **Dial + Process** (shipped; full **C-020**) | Atmosphere Process + Heat dial; rainfall dial charges cloud; storm discharges; phase from air temp. SWE store optional later. || Season / climate regime (beyond precip mean) | **Deferred** | Unfiled beyond candidates; mean rainfall is the precip half. |
+| Clouds → rain/snow/sleet | **Dial + Process** (shipped; full **C-020**) | Atmosphere Process + Heat dial; rainfall dial charges cloud; storm discharges; phase from air temp. SWE store optional later. Named Hold-Lock glitches G1–G5 in [C-020-dossier](candidates/C-020-dossier.md). |
+| Season / climate regime (beyond precip mean) | **Dial** (Open **C-021**) | Filed from THESIS §4; seasonal band runs with no player regime today. |
+| Erosion / geomorph intensity | **Dial** (Open **C-022**) | Filed from THESIS §4; geomorph runs at fixed intensity. |
 | Storm surge | **Deferred** | Unfiled gap — do not invent a C-id here. |
 | Freshwater lens | **Deferred** | GW × salt; needs C-018 path. |
 | Runoff, infil, GW, ET, erosion, fire, aspect/light | **Inherited** | Terrestrial ladder already shipped. |
@@ -25,4 +27,4 @@
 | Cell-targeted rain / smiting | **Ban** | THESIS §9 / **C-004**. |
 | Stochastic free weather while **C-003** Open | **Ban** | Seeded / authored climate layer only. |
 
-**Owner gaps (not filed this slice).** Storm surge; season beyond precip mean; freshwater lens. Recommend file or reject in a later session — do not invent Locked policy from this table.
+**Owner gaps (not filed this slice).** Storm surge; freshwater lens. **C-021** season and **C-022** erosion intensity filed 2026-07-31. Recommend file or reject surge/lens later — do not invent Locked policy from this table.

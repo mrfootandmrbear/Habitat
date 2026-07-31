@@ -41,11 +41,11 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — C-006 abundant sculpting CI promote:** [BUILD_GUIDE §4.28](docs/BUILD_GUIDE.md). Lock A+B+C-004 done (register v2.0.9–v2.0.10). Slice B / C-005 machine Done (dossier). Taste residual: **C-005** / **C-020** Hold Lock / **C-014** / **U-006** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Nature P0 NS-005 / N5 Done.
+**Executable tip — Nature P1 (hydroperiod, light→Liebig):** [nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md) P1. **C-006 Locked** (v2.0.11). **C-021** / **C-022** filed. C-020 G1–G5 named — fix in parallel. **C-013** machine Done (owner question batched). **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-005** / **C-013** / **C-020** / **C-014** / **U-006** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
 
 **Owner Lock backlog:** A/B/**C-004** Locked · **W-001** Superseded · remaining C-005 / C-020 / C-014 / U-006.
 
-**Thesis holes (not tip):** C-012 Δx/mosaic · season dial (unfiled) · C-010 after C-009 Lock · optional C-020 SWE store.
+**Thesis holes (not tip):** C-012 Δx/mosaic (only if place-reading fails) · C-021/C-022 implement under Open · C-010 framing is on tip after C-013 · optional C-020 SWE only if G3 fails.
 
 ## Cursor Cloud specific instructions
 

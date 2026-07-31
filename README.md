@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10): C-009 / C-015…C-019 / C-004 Locked; **W-001** Superseded. **Slice B** branch-and-compare machine Done (C-005 dossier). **Slice E** Exner-lite inland deposit Done. Open taste: **C-005** / **C-020** Hold Lock / **C-014** / **U-006**. **Next:** agent **C-006** CI promote ([BUILD_GUIDE §4.28](docs/BUILD_GUIDE.md)). Island is the default playable world.
+**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10); **C-006 Locked** (v2.0.11). **C-021** / **C-022** filed (season / erosion dials). **Slice B** / **Slice E** Done. Open taste: **C-005** / **C-020** Hold Lock (G1–G5 named) / **C-014** / **U-006**. **Next:** C-013 → C-010 framing → Nature P1 ([BUILD_GUIDE](docs/BUILD_GUIDE.md)). Island is the default playable world.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

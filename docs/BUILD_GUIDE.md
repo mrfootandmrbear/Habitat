@@ -111,17 +111,17 @@ Summary only — do not reopen unless fixing regressions.
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered; **C-005** machine Done (dossier — Lock owner). **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-006** CI promote (§4.28) when free; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) incl. C-005 / C-020.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P1; parallel fix C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005** (machine Done), **C-020** (Hold Lock), **C-014** (audio env), **U-006** (unanswered).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005**, **C-013**, **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env), **U-006** (unanswered).
 
-**Next (executable tip):** **C-006** abundant sculpting CI promote (§4.28). Parallel: owner Lock batch (C-005 / C-020 / C-014 / U-006); name/fix C-020 weather glitches when free.
+**Next (executable tip):** Nature P1 (hydroperiod, light→Liebig). Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
 
-**Thesis holes (not tip):** **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004 Locked surface); **C-010** toxic-site (**C-009** Locked — framing open); optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
+**Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional C-020 SWE store only if G3 presentation hold fails. Scenario campaign (G-002 / C-010) after implement.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean; erosion intensity as a regime dial. Closing a sim edge is the mechanism; adding a dial is the reason.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Filed dials still Open: **C-021** season; **C-022** erosion intensity.
 
-**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-020. Do not implement Open candidates as if Locked. Slice 21 acted on MacArthur–Wilson + new-island succession → overseas kernel + `island-arrival` (**C-019**); rejected species simulator, equilibrium paint, perimeter-as-island-default.
+**Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-022. Do not implement Open candidates as if Locked. Slice 21 acted on MacArthur–Wilson + new-island succession → overseas kernel + `island-arrival` (**C-019**); rejected species simulator, equilibrium paint, perimeter-as-island-default.
 
 ---
 
@@ -828,15 +828,15 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.28 Slice C-006 — Abundant sculpting CI promote *(stub)*
+### 4.28 Slice C-006 — Abundant sculpting CI promote *(Done — agent)*
 
 **Why this exists.** DECISION_CONFORMANCE §3: C-006 Judge is CI/agent only — no per-edit economy; no siting path writes mature ecology (N-001, RC-004).
 
 **Gate.** After Slice B machine green. May run whenever free; does not block owner Lock batch.
 
-- [ ] Conformance / unit test: no action-economy counters on berm/dig/deposit; no direct mature veg/biomass write from siting tools
-- [ ] Promote C-006 when criterion fully met (agent authority §3.0)
-- [ ] **Next-but-one:** season force dial candidate file, or C-012 only if place-reading still fails
+- [x] Conformance / unit test: no action-economy counters on berm/dig/deposit; no direct mature veg/biomass write from siting tools (`src/sim/c006-abundant-sculpting.test.ts`)
+- [x] Promote C-006 when criterion fully met (agent authority §3.0) — register v2.0.11
+- [x] **Next-but-one:** filed **C-021** / **C-022** (season + erosion dials); tip → C-013 → C-010 framing → Nature P1; C-012 only if place-reading still fails
 
 ---
 
@@ -853,7 +853,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] `hillslopeDeposit.ts` weights + pond no-incise; integrate in `runGeomorphologyStep`
 - [x] Tier-M tests + probe `hillslope-deposit`; `docs/slices/E.json` + composition
 - [x] EXTERNAL_REFERENCES study log row (Mei-class capacity fudge)
-- [x] **Next-but-one:** remains C-006 (§4.28)
+- [x] **Next-but-one:** C-006 CI promote (§4.28) — **Done**
 
 ---
 
@@ -871,10 +871,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N5 / NS-005 | Sandy crest sand-binder | W-003, C-017, C-009 | **Done** (§4.26) |
 | B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Lock owner |
 | E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) |
-| C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 |
+| C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
+| — | Season + erosion dials filed | C-021, C-022 | register v2.0.11 |
+| — | C-020 glitches named | C-020 G1–G5 | [C-020-dossier](candidates/C-020-dossier.md) |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **Next:** agent **C-006** (§4.28); owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)) incl. C-005.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **Next:** C-013 → C-010 framing → Nature P1; owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

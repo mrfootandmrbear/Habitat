@@ -177,20 +177,23 @@ Filed as candidates in [DECISION_REGISTER.md](DECISION_REGISTER.md) §16.5. Impl
 |---|---|
 | **C-004** | Force control as an intervention axis distinct from spatial siting |
 | **C-005** | Branch-and-compare as a core instrument rather than a deferred tool |
-| **C-006** | Sculpting is abundant; scarcity lives in ecological time |
+| **C-006** | Sculpting is abundant; scarcity lives in ecological time | **Locked** (CI 2026-07-31) |
 | **C-007** | Arrival / colonization as the primary biological verb | **Locked** (Slice 12) |
 | **C-008** | Intervention → visible response budget (the RCT3 immediacy constraint) |
-| **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces |
+| **C-009** | Substrate differentiation — sand, clay, rock and organic matter behaving differently under the same forces | **Locked** |
 | **C-010** | Legacy substances (contaminant load) — the toxic-site scenario premise, and the missing substrate for S-007 / S-008 |
 | **C-011** | Real-world intuition is the instrument — no invented materials or forces; nothing to learn that a person does not already know |
 | **C-012** | Preserve extent and resolution follow the habitat-mosaic criterion — several habitats readable in one window |
 | **C-013** | Undo as an affordance of abundant sculpting — edits yes, elapsed ecological time no |
 | **C-014** | How audio derives from simulation state — three Locked entries with no plan |
-| **C-015** | The world is an island; sea level is global base level and a force dial (may reframe W-001) |
-| **C-016** | Tidal forcing as a band-appropriate envelope (MHW / MLW), not instantaneous phase |
-| **C-017** | Wave exposure contributes to geomorphology; never a second sediment / SWE authority |
-| **C-018** | Salinity as the first mobile legacy substance (C-010 instance that is not poison) |
-| **C-019** | Island biogeography — pool richness from area / isolation; overseas arrival |
+| **C-015** | The world is an island; sea level is global base level and a force dial (may reframe W-001) | **Locked** |
+| **C-016** | Tidal forcing as a band-appropriate envelope (MHW / MLW), not instantaneous phase | **Locked** |
+| **C-017** | Wave exposure contributes to geomorphology; never a second sediment / SWE authority | **Locked** |
+| **C-018** | Salinity as the first mobile legacy substance (C-010 instance that is not poison) | **Locked** |
+| **C-019** | Island biogeography — pool richness from area / isolation; overseas arrival | **Locked** |
+| **C-020** | Atmospheric precip delivery — clouds / phase from wind, moisture, heat | Open (Hold Lock) |
+| **C-021** | Season as a force dial (THESIS §4 — named, previously unfiled) |
+| **C-022** | Erosion intensity as a force dial (THESIS §4 — named, previously unfiled) |
 
 ### 10.1 Island reframe (2026-07-30)
 

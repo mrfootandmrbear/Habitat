@@ -29,10 +29,10 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 
 Chrome: one **Forces** group containing these selects (exact labels in `src/ui/controls.ts`). No cell arguments on any handler.
 
-## Stubs (empty slots — do not invent policy)
+## Stubs (empty slots — Open candidates; do not invent Locked policy)
 
-- Season (unfiled)
-
+- **Season** — **C-021** (filed; no dial yet)
+- **Erosion intensity** — **C-022** (filed; geomorph runs at fixed intensity)
 ## Geography as modulator
 
 Under a fixed rainfall mean and wind:
