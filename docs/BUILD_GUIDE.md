@@ -1083,6 +1083,154 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.44 Slice — Fire spread as a rate *(queued)*
+
+**Why this exists.** [Fire/fuel review](reviews/2026-07-31-fire-fuel-review.md) §1–§3. `runFireStep` ignores `dt` and its BFS runs to full queue exhaustion in one call — an entire connected fuel region burns instantly and every burn flag clears before the function returns, so `fire.burning` (a declared written field) is never observably `1` outside the function, and a 1-hour tick burns identically to a 30-day tick. The only reset of `fire.intensity` lives in a post-effects loop an early return skips when no sources remain, so a fire that has gone out reports its last burn's intensity forever. `visited` is also marked before the spread test passes (`WorldState.ts:1831–1832`), so a cell rejected from one neighbor can never be re-probed from a better one — burn shape is an artifact of scan order, worst exactly on ridgelines. Slice 10 ([§4.5](#45-slice-10--fire--fuel-done--agent)) claims deterministic BFS and Tier-M conservation; both survive, but nothing about the slice's own claims describes fire as instantaneous or as leaking stale intensity.
+
+**Register:** T-001 Locked (determinism); T-006 Locked (single WorldState authority); C-003 Open (authored ignition only, unaffected by this fix); ES-002 (disturbance is a process, not a punishment)
+**New Process?** no — changes the internals of the existing fire step (rate-limiting, lifecycle, neighbor-test ordering); reads/writes/band are unchanged. D-007 clip gate does not apply.
+
+- [ ] BFS expansion capped per step at `ROS · dt / cellSizeMeters` rings instead of running to exhaustion; `fire.burning` stays set on active cells between steps so a fire has visible duration
+- [ ] Track active/burning cells explicitly (replacing the full-grid `Uint8Array` visited scan each call) so `fire.intensity` clears on cells that stop burning without depending on an early return that skips cleanup — this is the same fix that resolves the stale-intensity bug
+- [ ] `visited` gates re-enqueuing a cell already in the frontier; only cells that actually ignite become permanently unavailable — a cell that fails the gate from one neighbor must remain probeable from another
+- [ ] Clamp the slope factor (`WorldState.ts:1841`, currently unbounded `exp(slopeA · dz/dx)`) so a player-sculpted near-vertical face cannot become an unconditional ignition source regardless of moisture
+- [ ] Test: two ticks of different `dt` on the same ignition produce proportionally different burned area, not identical instantaneous results; a fire that stops spreading reports `fire.intensity = 0` within one tick of its last active cell going out
+- [ ] New probe or extend `fire.test.ts`: burn shape is invariant to a rotation of the neighbor-check order (closes the "sorted queue by index" comment's actual claim)
+- [ ] Baselines: `fire.test.ts` and `burn-recover` will move — state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** §4.45 Fuel / scar numeric fix
+
+---
+
+### 4.45 Slice — Fuel / scar numeric fix *(queued)*
+
+**Why this exists.** [Fire/fuel review](reviews/2026-07-31-fire-fuel-review.md) §4. `runFuelAccumulationStep` is explicit Euler for `dF/dt = I − kF` with the decay coefficient clamped (`k = min(1, fuelDecayK·dt)`) but the input left unclamped — for `dt ≥ 1/fuelDecayK` the equilibrium becomes `cover·I·dt`, growing without bound until it pins at `fuelLoadMax`, so fuel load on the decadal band becomes a function of tick size rather than of climate. `decayFireScar` has the identical shape: it advertises "exponential fade" but implements `scar·(1 − 0.08·dt)`, which hard-zeroes at `dt ≥ 12.5` instead of decaying. This is a **Refinement-class** invariant failure in the §2.1 sense (dead `dt` / non-convergent schedule) — the exact bug class the deferred-time-debt work in **L1** exists to make visible by running variable/catch-up timesteps in the first place.
+
+**Register:** T-001 Locked; S-009 Current (durations invariant under chosen rate — a `dt`-dependent equilibrium violates this directly)
+**New Process?** no — replaces the update law inside the existing fuel/scar steps. D-007 clip gate does not apply.
+
+- [ ] Replace both explicit-Euler updates with the analytic, unconditionally stable form: `F' = F·e^(−k·dt) + (I/k)(1 − e^(−k·dt))`
+- [ ] Move the scar decay rate (currently hardcoded `0.08` at `WorldState.ts:1879`) into `config.ts` beside `fuelDecayK` and `fuelInputMax` (AGENTS.md: numbers in config are generated, not typed)
+- [ ] Test: fuel load and scar value at a fixed sim-time are within tolerance regardless of whether that time was reached in one large step or many small ones (the Refinement invariant, stated as a probe)
+- [ ] Baselines: any probe touching fuel load or scar decay under variable timestep will move — state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** §4.46 HSI curve-shape corrections
+
+---
+
+### 4.46 Slice — HSI curve-shape corrections *(queued)*
+
+**Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.1. Six suitability factors are monotone ramps where the physically correct shape is a hump or threshold-slope — and that correct shape already exists elsewhere in the same file set: `factorInundationMarsh` (`inundationComposition.ts:42-45`) is a proper hump next to the upland arm's hard step at MHW; `factorSalinityTolerant` (`salinityComposition.ts:24-33`) is a proper threshold-slope next to the plain linear `factorSalinity`. Temperature has no upper limb (a 50°C world scores optimal for every guild), moisture has no wet limb for herb/shrub/crust (crust — a desiccation-adapted organism — is scored best at saturation), binder burial tolerance is inverted (sand binders require burial to stay vigorous; the current curve rewards sitting still), and strand/binder exposure factors have no destructive limb. The MHW step is the most consequential in combination with **L3**: a cell eroding across MHW by a millimetre loses its entire mature stand in one tick once mortality has no rate either.
+
+**Register:** C-007 Locked; C-011 Locked (real-world intuition is the instrument — binder burial response and crust moisture response are both currently backwards against their real referents); S-007 Locked; N-004
+**New Process?** no — corrects suitability-curve shapes inside existing `*Composition.ts` files; the Liebig min-scan machinery itself is unchanged (verified correct — [review §3](reviews/2026-07-31-vegetation-habitat-review.md)). D-007 clip gate does not apply.
+
+- [ ] Upland inundation gets the supratidal taper marsh already has (`inundationComposition.ts`)
+- [ ] Intolerant-guild salinity gets a lower plateau on the existing `factorSalinityTolerant` shape (`salinityComposition.ts`)
+- [ ] Temperature gets an upper limb — unimodal, right-skewed thermal performance curve (`temperatureComposition.ts`)
+- [ ] Moisture gets a wet-side penalty for herb/shrub, and is inverted (peaks low-to-moderate) for crust specifically (`hsiComposition.ts`, `shrubHsiComposition.ts`, `crustHsiComposition.ts`)
+- [ ] Binder burial tolerance becomes a hump with optimum at moderate accretion, and the forcing term switches from `|longshore|` (magnitude) to the transport divergence ∂Q/∂x — uniform drift should net zero burial pressure (`binderHsiComposition.ts`)
+- [ ] Strand/binder exposure gets a destructive upper limb matching marsh's existing hump shape (`strandHsiComposition.ts`, `binderHsiComposition.ts`)
+- [ ] `factorSandSubstrate` gets `clamp01` — the one unbounded curve in the set of sixteen (`binderHsiComposition.ts:60-66`)
+- [ ] Test: each corrected curve is unimodal or threshold-shaped as specified, bounded [0,1], and the MHW/burial/moisture edge cases named above no longer produce the described backwards result
+- [ ] Baselines: guild `*-arrival` and HSI-dependent probes will move — state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** §4.47 Guild cover & light-competition correctness
+
+---
+
+### 4.47 Slice — Guild cover & light-competition correctness *(queued)*
+
+**Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.2–§2.3. `physicalCoverFrom` sums six guild fractions and clamps at 1 (`arrivalComposition.ts:196-205`); overlapping canopies physically combine as `1 − Π(1 − cᵢ)`, not a sum — three guilds at 40% independent cover give 0.78 by the correct formula but clamp to 1.0 here, which both overstates coupling into roughness/infiltration and flattens it past saturation. `canopyCoverFraction` has the identical defect for crust shading (`crustHsiComposition.ts:55-77`). Separately, nothing in this slice reads `light.understory` or `veg.leafAreaIndex` — `factorLight` uses open-sky insolation only (`lightComposition.ts:28`), so **there is no light competition between guilds today** — and a cell's own cover growth is scaled by its own *transmitted* light (`WorldState.ts:1412,1416`) when photosynthesis is driven by *absorbed* light, the inverse relationship, already double-counted by the same line's `(1 − cover)` logistic term. `LAI = cover · maxLAI` (`lightCompetition.ts:45`) is linear where the Beer–Lambert law it feeds implies `LAI = −ln(1−cover)/k` — full cover currently leaves a nonzero light floor instead of approaching darkness.
+
+**Register:** C-023 Open (guild competition — this slice does not decide C-023, but the understory mechanism C-023's leading direction already names as the natural displacement path is currently unused; fixing absorbed-vs-transmitted light here is a prerequisite, not an implementation of C-023 itself); ES-006 Locked; C-011 Locked
+**New Process?** no — corrects the cover-combination formula and the light term the existing vegetation growth law reads. D-007 clip gate does not apply. **Does not implement C-023** — guild competition/displacement remains blocked on owner judgment; this slice only fixes the physics the eventual mechanism would ride on.
+
+- [ ] `physicalCoverFrom` and `canopyCoverFraction` switch from additive-clamped to product-complement (`1 − Π(1 − cᵢ)`)
+- [ ] Vegetation growth reads absorbed light (`I₀(1 − exp(−k·LAI))`) instead of transmitted light, removing the double-count with the existing `(1 − cover)` logistic term
+- [ ] `LAI = cover · maxLAI` replaced with the Beer–Lambert-consistent inverse form
+- [ ] Test: three guilds at 40% independent cover combine to ≈0.78, not 1.0; full-cover LAI produces near-zero transmitted light, not a floor
+- [ ] Baselines: roughness/infiltration-dependent probes and any guild growth-rate probe will move — state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** §4.48 Habitat/dispersal determinism hygiene
+
+---
+
+### 4.48 Slice — Habitat/dispersal determinism hygiene *(queued)*
+
+**Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.4. Three independent hygiene defects in the same code region: `habitatProcess`'s declared `reads` (`habitatProcess.ts:12-18`) omits `this.terrain.data` and `this.soilMaterial.data`, both silently consumed inside `runHabitatStep` — invisible to any future scheduler dependency analysis. `runHerbEstablishmentStep` updates guilds sequentially with downstream guilds reading already-updated upstream values in the same tick (`WorldState.ts:1661,1718,1738-1742`) — a Gauss-Seidel update where the §2.1 Symmetry invariant class calls for order-independence. `runDispersalStep` and `runHerbEstablishmentStep` compute the identical six-guild HSI math twice, at different cadences (annual vs. seasonal, `WorldState.ts:1498-1559` vs. `1670-1747`), so the displayed `veg.establishment.*` field can silently disagree with what actually drove growth.
+
+**Register:** T-001 Locked; T-005 (registered fields inspectable — undeclared reads undermine this)
+**New Process?** no — scheduling/read-declaration and code-dedup hygiene only. D-007 clip gate does not apply.
+
+- [ ] `habitatProcess.reads` declares `terrain.elevation` (or whatever field backs `terrain.data`) and `soil.material`
+- [ ] Guild establishment update switches to a Jacobi snapshot at tick start, removing same-tick order dependence
+- [ ] `runHerbEstablishmentStep` reads the HSI values `runDispersalStep` already computed and wrote, instead of recomputing them
+- [ ] Test: swapping the guild update order in source produces byte-identical results (closes the Symmetry gap directly)
+- [ ] Composition + manifest; **Next-but-one:** §4.49 Drainage flat-routing correctness
+
+---
+
+### 4.49 Slice — Drainage flat-routing correctness *(queued — highest priority of the hydrology set)*
+
+**Why this exists.** [Hydrology/geomorphology review](reviews/2026-07-31-hydrology-geomorphology-review.md) §1. `priorityFloodFill` fills depressions to the exact spill level with no ε increment, despite a doc comment claiming "ε-style spill" (`flowRouting.ts:15,102-104`) — every filled lake surface is a true flat. The flat resolver (`flowRouting.ts:141`) picks the lowest-index non-uphill neighbor, which provably creates 2-cycles on the rim of any interior flat (filled lake floors; the `elevationFloor`-clamped shelf both terrain generators produce). `computeD8Accumulation` then double-counts area through the cycles and channels terminate inside lakes instead of continuing through the spill point — **the drainage network is severed at every filled depression** — and the corrupted accumulation (`aNorm`) feeds directly into hillslope erosion forcing (`WorldState.ts:1227`) and the groundwater channel boost (`:1066`). This is upstream of geomorphology and baseflow both; nothing downstream of it is trustworthy until it's fixed.
+
+**Register:** GEO-001 Locked (geology precedes ecology — a severed drainage network corrupts the substrate ecology inherits); T-001 Locked; §2.1 Conservation / Symmetry invariant classes
+**New Process?** no — corrects the flat-resolution step inside existing D8 routing. D-007 clip gate does not apply.
+
+- [ ] Add the ε increment `priorityFloodFill`'s own doc comment already claims exists, so filled surfaces are not exact flats
+- [ ] Flat resolver directs flow toward the pour point (e.g. a second BFS pass from the spill cell assigning monotonically increasing pseudo-elevation across the flat), not toward the lowest cell index
+- [ ] Test: a synthetic filled depression with a known pour point produces zero cycles in `computeD8Accumulation` and channels continue through the spill rather than terminating inside the lake
+- [ ] Regression: `computeWatershedLabels` sink count on the default island drops to the count of *real* minima (no cycle-minted spurious sinks)
+- [ ] Baselines: `aNorm`-dependent hillslope-erosion and groundwater-channel-boost probes will move — state the reason in the commit body, this is expected and is the fix working
+- [ ] Composition + manifest; **Next-but-one:** §4.50 Surface-flux stability guard
+
+---
+
+### 4.50 Slice — Surface-flux stability guard *(queued)*
+
+**Why this exists.** [Hydrology/geomorphology review](reviews/2026-07-31-hydrology-geomorphology-review.md) §2. Per-face flux (`fluxStep.ts:78`, `diff · localFlow · dt`) has no cap relative to the head difference driving it — `maxOutflowFraction` (`:89`) prevents negative depth but not overshoot, so two deep adjacent columns with a small height difference can equilibrate past level and reverse sign next step (checkerboard sloshing, the standard failure mode of an explicit virtual-pipe scheme with no CFL-style bound). This compounds with `localFlow = flowRate·(baseRoughness/max(n, 1e-4))` (`:51`): a zero or uninitialized roughness cell hits the floor and runs at 300× base flow, with nothing enforcing `n ≥ baseRoughness`.
+
+**Register:** T-001 Locked; H-004 Locked (watersheds retain history — an unstable flux scheme corrupts the storage state H-004 requires to persist correctly)
+**New Process?** no — adds a stability bound inside the existing flux step. D-007 clip gate does not apply.
+
+- [ ] Cap per-face flux to a fraction of the driving head difference (CFL-style bound: flux magnitude cannot exceed what would equalize the two columns in one step)
+- [ ] Clamp roughness at `n ≥ baseRoughness` before it enters `localFlow`, or floor `localFlow` itself, so no cell can run at the 300× degenerate rate
+- [ ] Test: a synthetic two-column head-difference case does not oscillate past equilibrium over repeated steps at the fastest offered rate
+- [ ] Composition + manifest; **Next-but-one:** §4.51 Coastal base-level & substrate coupling
+
+---
+
+### 4.51 Slice — Coastal base-level & substrate coupling *(queued)*
+
+**Why this exists.** [Hydrology/geomorphology review](reviews/2026-07-31-hydrology-geomorphology-review.md) §3–§4. `fluxStep` sets an ocean neighbor's stage to bed elevation, not `seaLevel` (`fluxStep.ts:70-72`) — `seaLevel` never appears in `fluxStep` at all — so coastal wetlands over-drain against a head difference overstated by the full ocean depth, with no marine backwater or ingress. Separately, `priorityFloodFill` seeds the entire map perimeter as structurally free-draining (`flowRouting.ts:79-88`) while `fluxStep` mirrors (no-flow) at every non-outlet edge (`:64-66`) — `generateMountain`'s flat, floor-clamped rim is the acute case, producing a structurally sealed bathtub that the fill model still treats as open on all four sides. And coastal erosion uses one global rate (`WorldState.ts:1176,1232`) where hillslope erosion correctly reads per-substrate `erosionK` (`:1225`) — a sand shore and a rock shore currently retreat identically, defeating the 47× erodibility contrast `substrates.ts` establishes everywhere else.
+
+**Register:** C-015 Locked (the world is an island; sea level is global base level — `fluxStep` not reading `seaLevel` is a direct shortfall against this); C-009 Locked (substrate differentiation — coastal erosion ignoring substrate is the same shortfall applied to the shore); T-001 Locked
+**New Process?** no — corrects boundary-condition and rate-lookup code in the existing surface-water and coastal-erosion steps. D-007 clip gate does not apply.
+
+- [ ] `fluxStep`'s ocean-neighbor stage uses `seaLevel`, not `terrain[ni]`
+- [ ] Reconcile the structural (Priority-Flood, perimeter-open) and dynamic (`fluxStep`, no-flow except named outlets) boundary models — likely direction: `computePerimeterOutlets` and the fill model's open-perimeter assumption should agree, so a generator like `generateMountain` that floor-clamps its rim doesn't produce a structurally sealed basin the fill model contradicts
+- [ ] Coastal erosion (`kCoast`) reads per-cell `substrateProps(mat).erosionK` the way hillslope erosion already does, instead of one global rate
+- [ ] Test: a coastal pond at a known depth relative to `seaLevel` (not bed elevation) reaches the expected equilibrium; a sand shore and rock shore retreat at measurably different rates under identical wave forcing
+- [ ] Baselines: coastal/shore probes will move — state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** §4.52 Encoding delta correctness
+
+---
+
+### 4.52 Slice — Encoding delta correctness *(queued)*
+
+**Why this exists.** [UI encoding review](reviews/2026-07-31-ui-encoding-review.md) §1–§4. `VERIFICATION_POLICY.md` names the encoded-delta proxy (`presentation.proxy.test.ts` and its siblings in `src/ui/`) as the Tier-P mechanism that discharges Definition of Done row 2 ("Observable") for every slice — "the agent proves the signal is encoded." That mechanism has a blind spot: every occupant/light color ramp saturates at ~55% (occupant) or 33% (light) of its domain (`occupantEncoding.ts:34` and six duplicates; `lightEncoding.ts:5`), so **every delta function built on those ramps returns exactly zero across the top of the range** — a proxy that cannot distinguish 55% biomass from 100% biomass is not proving what row 2 requires. Separately, every delta floor measures raw RGB Euclidean distance rather than a perceptual metric, and two unrelated quantities that co-occur on the shore — sand-binder mat (`occupantEncoding.ts:15`) and intertidal foreshore (`terrainEncoding.ts:26`) — sit ~0.07 unit-RGB apart because no test compares palettes across files, only within one file's own set.
+
+**Register:** U-003 Current (the world is the primary visualization); D-007 Locked (twenty-second clip — a miscalibrated Tier-P proxy weakens every future clip-adjacent legibility claim)
+**New Process?** no — presentation/verification-proxy correctness only; no WorldState field changes. D-007 clip gate does not apply. **Not** the palette redesign — that is **C-026**, filed separately, Open, owner-judged.
+
+- [ ] Occupant and light color ramps use a form that stays injective across the full [0,1] domain (e.g. drop the `*1.35` overshoot factor, or extend the clip point to 1.0)
+- [ ] Delta functions switch from raw RGB Euclidean distance to a luminance-weighted distance at minimum (CIELAB ΔE is the fuller fix, not required to close this slice)
+- [ ] Add a cross-file palette contrast check so co-occurring categorical colors (e.g. binder vs. intertidal) are measured against each other, not only within their own file
+- [ ] Fix `terrainEncoding.ts`'s scar/intertidal/salt overlay order so a late tint cannot fully erase an earlier categorical state
+- [ ] Fix `substrateEncodingDelta` to compare all pairs (including clay↔rock) at each substrate's own porosity, not a hardcoded 0.4
+- [ ] Fix the `timeRates.ts:101-102` hardcoded "fastest sustainable" label to derive from `sustainableRates()` like every other label in the module
+- [ ] Test: re-running every existing Tier-P proxy after the ramp fix — confirm no prior "Observable" claim was actually resting on the now-fixed blind spot (if one was, its slice's row-2 evidence needs a note, not a re-litigation)
+- [ ] Composition + manifest; **Next-but-one:** owner-judged **C-026** if sitting, else residual Lock queue
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -1114,6 +1262,16 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Queued** — ships only on hash-identity |
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
+| — | Fire spread as a rate | T-001, T-006, C-003, ES-002 | §4.44 **Queued** |
+| — | Fuel / scar numeric fix | T-001, S-009 | §4.45 **Queued** — after fire spread |
+| — | HSI curve-shape corrections | C-007, C-011, S-007, N-004 | §4.46 **Queued** |
+| — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Queued** — after HSI curves |
+| — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |
+| — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Queued** — highest priority of the four reviews below |
+| — | Surface-flux stability guard | T-001, H-004 | §4.50 **Queued** — after flat-routing |
+| — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Queued** — after flux guard |
+| — | Encoding delta correctness | U-003, D-007 | §4.52 **Queued** |
+| C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — not blocking §4.52 |
 
 Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting.
 
@@ -1127,6 +1285,8 @@ L1 throughput defect  →  L6 real-world time units  →  L2 local seed rain
 L1 and L6 lead because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
 
 **Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
+
+**A second, parallel review queue** — four scoped domain reviews using the same expert-review pattern as the renderer ([3c4b9f0](https://github.com/mrfootandmrbear/Habitat/commit/3c4b9f0)): [fire/fuel](reviews/2026-07-31-fire-fuel-review.md), [vegetation/habitat](reviews/2026-07-31-vegetation-habitat-review.md) (extends the living-world review's L2/L3/L5 territory), [hydrology/geomorphology](reviews/2026-07-31-hydrology-geomorphology-review.md), and [UI encoding](reviews/2026-07-31-ui-encoding-review.md) — queued as **§4.44–§4.52**. None registers a new `Process` and none needs a candidate except **C-026** (deliberate CVD-safe palette, Open, owner-judged, not blocking §4.52's bug fixes). Sequencing against the Living wave above is not yet owner-set; the one item worth calling out is **§4.49 drainage flat-routing correctness** — it corrupts `aNorm`, which both hillslope erosion and the groundwater channel boost already depend on, so it's upstream of more than its own review scope suggests. **§4.52 encoding delta correctness** is also worth flagging outside severity ranking: it fixes the Tier-P proxy mechanism ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)) that discharges Definition-of-done row 2 for every slice, past and future.
 
 ---
 

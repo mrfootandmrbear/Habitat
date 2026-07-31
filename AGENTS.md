@@ -39,7 +39,9 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Reviews: [sim-gap](docs/reviews/2026-07-30-sim-gap-review.md) (physics) · [living-world](docs/reviews/2026-07-31-living-world-review.md) (life) · [time-architecture](docs/reviews/2026-07-31-time-architecture-review.md) (the clock). Joint ladder largely Done; **Done ≠ Lock**.
+Reviews: [sim-gap](docs/reviews/2026-07-30-sim-gap-review.md) (physics) · [living-world](docs/reviews/2026-07-31-living-world-review.md) (life) · [time-architecture](docs/reviews/2026-07-31-time-architecture-review.md) (the clock) · [fire/fuel](docs/reviews/2026-07-31-fire-fuel-review.md) · [vegetation/habitat](docs/reviews/2026-07-31-vegetation-habitat-review.md) (extends living-world) · [hydrology/geomorphology](docs/reviews/2026-07-31-hydrology-geomorphology-review.md) · [UI encoding](docs/reviews/2026-07-31-ui-encoding-review.md). Joint ladder largely Done; **Done ≠ Lock**.
+
+**Second queue, parallel to the Living wave below** — nine defect-fix slices from the four newest reviews, [BUILD_GUIDE §4.44–§4.52](docs/BUILD_GUIDE.md), plus **C-026** (CVD-safe palette, Open, owner-judged). None registers a new `Process`; none but C-026 needs a candidate. Sequencing against the Living wave is not yet owner-set — **§4.49 drainage flat-routing correctness** is worth pulling forward regardless of the rest, since it corrupts `aNorm` and everything downstream of it (hillslope erosion, groundwater channel boost); **§4.52 encoding delta correctness** is worth flagging too, since it fixes the Tier-P proxy mechanism every slice's "Observable" row relies on.
 
 **Executable tip — the Living wave, in order** ([BUILD_GUIDE §4.36–§4.43](docs/BUILD_GUIDE.md)):
 
