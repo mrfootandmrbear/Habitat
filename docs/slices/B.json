@@ -1,0 +1,16 @@
+{
+  "id": "B",
+  "title": "Branch-and-compare scaffold (C-005)",
+  "simLoop": "Fork one WorldState with force dials attached; same seed+forces → identical hash; different rain → divergent soil (T-001 / P-005 / C-005).",
+  "gameLoop": "Branch the castle, set different forces on A vs B, run time on both, Compare branches — moisture tint, not numbers.",
+  "registerIds": ["C-005", "P-005", "T-001", "T-006", "C-004", "N-002"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/branch.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["branch-compare"],
+  "fields": [],
+  "notebookSeed": "I ran the same berm under wet and dry climate and the hollow only held water under the wetter one.",
+  "tierO": "Did you want to fork the world and run it again under different forces — or did Compare feel like a debug panel?"
+}

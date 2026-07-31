@@ -41,11 +41,11 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — C-005 branch-and-compare scaffold:** [BUILD_GUIDE §4.27](docs/BUILD_GUIDE.md). Lock A+B+C-004 done (register v2.0.9–v2.0.10). Taste residual: **C-020** Hold Lock (glitches), **C-014** Open (no hear), **U-006** unanswered — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Nature P0 NS-005 / N5 Done.
+**Executable tip — C-006 abundant sculpting CI promote:** [BUILD_GUIDE §4.28](docs/BUILD_GUIDE.md). Lock A+B+C-004 done (register v2.0.9–v2.0.10). Slice B / C-005 machine Done (dossier). Taste residual: **C-005** / **C-020** Hold Lock / **C-014** / **U-006** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Nature P0 NS-005 / N5 Done.
 
-**Owner Lock backlog:** A/B/**C-004** Locked · **W-001** Superseded · remaining C-020 / C-014 / U-006.
+**Owner Lock backlog:** A/B/**C-004** Locked · **W-001** Superseded · remaining C-005 / C-020 / C-014 / U-006.
 
-**Thesis holes (not tip):** C-005 queued §4.27 · C-012 Δx/mosaic · season dial (unfiled) · C-010 after C-009 Lock · C-006 CI-promotable when free. Optional C-020 SWE store.
+**Thesis holes (not tip):** C-012 Δx/mosaic · season dial (unfiled) · C-010 after C-009 Lock · optional C-020 SWE store.
 
 ## Cursor Cloud specific instructions
 

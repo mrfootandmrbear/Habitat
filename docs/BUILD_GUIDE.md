@@ -108,14 +108,15 @@ Summary only — do not reopen unless fixing regressions.
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 **Locked**) |
 | **N3** | Onshore spray stress (**NS-003**) | Windward stalls herb; strand holds | `f_spray`, `spray-arrival` | **Done** — agent (C-017 **Locked**) |
 | **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
+| **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-005** scaffold (§4.27); taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) C / C-020 glitch naming.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered; **C-005** machine Done (dossier — Lock owner). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-006** CI promote (§4.28) when free; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) incl. C-005 / C-020.
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-020** (Hold Lock), **C-014** (audio env), **U-006** (unanswered).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005** (machine Done), **C-020** (Hold Lock), **C-014** (audio env), **U-006** (unanswered).
 
-**Next (executable tip):** **C-005** branch-and-compare scaffold (§4.27). Parallel: name/fix **C-020** weather glitches when free; re-sit **C-014** when owner can hear; **U-006** when answered.
+**Next (executable tip):** **C-006** abundant sculpting CI promote (§4.28). Parallel: owner Lock batch (C-005 / C-020 / C-014 / U-006); name/fix C-020 weather glitches when free.
 
-**Thesis holes (not tip):** **C-005** queued as §4.27; **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004 Locked surface); **C-010** toxic-site (**C-009** Locked — framing open); **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
+**Thesis holes (not tip):** **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004 Locked surface); **C-010** toxic-site (**C-009** Locked — framing open); optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean; erosion intensity as a regime dial. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -812,16 +813,29 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.27 Slice B — Branch-and-compare scaffold (**C-005**) *(stub)*
+### 4.27 Slice B — Branch-and-compare scaffold (**C-005**) *(Done — machine)*
 
-**Why this exists.** THESIS §7: same castle, different forces — Habitat's original instrument. Force dials exist (Slice F / C-020); fork + side-by-side is still missing.
+**Why this exists.** THESIS §7: same castle, different forces — Habitat's original instrument. Force dials exist (Slice F / C-020); fork + compare was missing.
 
 **Gate.** After N5 machine green. Owner Lock batch may run in parallel.
 
-- [ ] World fork / restore point API extending P-005 (T-001 hash equality under same seed+forces)
-- [ ] Two branches under different force settings; comparison view without number-reading
-- [ ] Tier-M round-trip + branch isolation; Tier-O whether comparison is *wanted* (owner)
-- [ ] **Next-but-one:** season force dial candidate file, or C-006 CI promote when free
+- [x] World fork / restore point API extending P-005 (T-001 hash equality under same seed+forces) — `src/sim/branch.ts` + `forceSettings.ts`
+- [x] Two branches under different force settings; comparison view without number-reading — Show A/B + moisture tint
+- [x] Tier-M round-trip + branch isolation — probe `branch-compare` (encoding ≈ 0.191, isolated = 1); Tier-O deferred to dossier
+- [x] `docs/slices/B.json` + `B-composition.md` + [C-005-dossier.md](candidates/C-005-dossier.md) (owner Lock)
+- [x] **Next-but-one:** C-006 CI promote (§4.28)
+
+---
+
+### 4.28 Slice C-006 — Abundant sculpting CI promote *(stub)*
+
+**Why this exists.** DECISION_CONFORMANCE §3: C-006 Judge is CI/agent only — no per-edit economy; no siting path writes mature ecology (N-001, RC-004).
+
+**Gate.** After Slice B machine green. May run whenever free; does not block owner Lock batch.
+
+- [ ] Conformance / unit test: no action-economy counters on berm/dig/deposit; no direct mature veg/biomass write from siting tools
+- [ ] Promote C-006 when criterion fully met (agent authority §3.0)
+- [ ] **Next-but-one:** season force dial candidate file, or C-012 only if place-reading still fails
 
 ---
 
@@ -837,10 +851,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | **Done** (§4.24) |
 | N3 / NS-003 | Onshore spray stress | C-017, C-018 | **Done** (§4.25) |
 | N5 / NS-005 | Sandy crest sand-binder | W-003, C-017, C-009 | **Done** (§4.26) |
-| B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | §4.27 |
+| B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Lock owner |
+| C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Next:** owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)); executable agent tip **C-005** scaffold (§4.27).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **Next:** agent **C-006** (§4.28); owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)) incl. C-005.
 
 ---
 

@@ -52,6 +52,15 @@ import {
 import { soilEncodingDelta } from "../../ui/cutaway";
 import { intertidalEncodingDelta } from "../../ui/terrainEncoding";
 import { seedPressureAt } from "../habitat/arrivalComposition";
+import {
+  BranchSession,
+  branchMoistureEncodingDelta,
+  forkWorld,
+} from "../branch";
+import {
+  applyForces,
+  type ForceSettings,
+} from "../forceSettings";
 
 export type ProbeRecord = Record<string, number | string>;
 
@@ -477,6 +486,123 @@ export function probeRegimeDivergence(): ProbeResult {
         precipDelta: heavy.precip - lightA.precip,
         soilDelta: heavy.soilSum - lightA.soilSum,
         hashDiverged: lightA.hash !== heavy.hash ? 1 : 0,
+      },
+    ],
+  };
+}
+
+/**
+ * C-005: fork one castle; same forces → identical hash; different rain →
+ * divergent soil; compare encoding clears the perceptual floor (no numbers).
+ */
+export function probeBranchCompare(): ProbeResult {
+  const seed = 13;
+  const days = 8;
+  const base: ForceSettings = {
+    rain: "light",
+    heat: "warm",
+    sea: "none",
+    tide: "off",
+    wind: "calm",
+  };
+
+  const root = new WorldState(generateMountain(16, 16, 5, seed));
+  applyForces(root, base);
+  root.raiseBerm(8, 8);
+
+  const sameA = forkWorld(root, base);
+  const sameB = forkWorld(root, base);
+  for (let d = 0; d < days; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      sameA.stepEvent();
+      sameB.stepEvent();
+    }
+  }
+  if (sameA.stateHash() !== sameB.stateHash()) {
+    throw new Error(
+      `branch-compare: same forces must match (T-001) ${sameA.stateHash()} vs ${sameB.stateHash()}`,
+    );
+  }
+
+  const session = BranchSession.open(root, base);
+  applyForces(session.a, { ...base, rain: "heavy" });
+  applyForces(session.b, { ...base, rain: "dry" });
+  for (let d = 0; d < days; d++) {
+    for (let i = 0; i < config.dailyEventSteps; i++) {
+      session.stepBoth();
+    }
+  }
+  if (session.a.stateHash() === session.b.stateHash()) {
+    throw new Error("branch-compare: heavy vs dry produced identical hashes");
+  }
+
+  let soilA = 0;
+  let soilB = 0;
+  const n = session.a.soilMoisture.data.length;
+  for (let i = 0; i < n; i++) {
+    soilA += session.a.soilMoisture.data[i]!;
+    soilB += session.b.soilMoisture.data[i]!;
+  }
+  const meanA = soilA / n;
+  const meanB = soilB / n;
+  const encoding = branchMoistureEncodingDelta(meanA, meanB);
+  if (!(encoding > 0.15)) {
+    throw new Error(
+      `branch-compare: moisture encoding ${encoding} did not clear floor 0.15`,
+    );
+  }
+  if (!(session.a.precipitationLedger > session.b.precipitationLedger)) {
+    throw new Error(
+      `branch-compare: expected heavy precip > dry (${session.a.precipitationLedger} vs ${session.b.precipitationLedger})`,
+    );
+  }
+
+  // Isolation: mutate A mid-run; B matches a control twin.
+  const isoRoot = new WorldState(generateMountain(12, 12, 4, seed));
+  applyForces(isoRoot, base);
+  const iso = BranchSession.open(isoRoot, base);
+  const control = forkWorld(isoRoot, base);
+  applyForces(iso.a, { ...base, rain: "heavy" });
+  iso.a.raiseBerm(3, 3);
+  for (let i = 0; i < 24; i++) {
+    iso.stepBoth();
+    control.stepEvent();
+  }
+  const isolated = iso.b.stateHash() === control.stateHash() ? 1 : 0;
+  if (!isolated) {
+    throw new Error("branch-compare: branch B aliased or contaminated by A");
+  }
+
+  return {
+    scenario: "branch-compare",
+    records: [
+      {
+        label: "same",
+        hashMatch: 1,
+        hashN: Number.parseInt(sameA.stateHash().slice(0, 8), 16),
+        precip: sameA.precipitationLedger,
+      },
+      {
+        label: "heavy",
+        hashN: Number.parseInt(session.a.stateHash().slice(0, 8), 16),
+        precip: session.a.precipitationLedger,
+        meanSoil: meanA,
+      },
+      {
+        label: "dry",
+        hashN: Number.parseInt(session.b.stateHash().slice(0, 8), 16),
+        precip: session.b.precipitationLedger,
+        meanSoil: meanB,
+      },
+      {
+        label: "delta",
+        hashDiverged: 1,
+        precipDelta:
+          session.a.precipitationLedger - session.b.precipitationLedger,
+        soilDelta: meanA - meanB,
+        encoding,
+        encodingCleared: encoding > 0.15 ? 1 : 0,
+        isolated,
       },
     ],
   };
@@ -3109,6 +3235,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "deep-time": probeDeepTime,
   "baseflow-persist": probeBaseflowPersist,
   "regime-divergence": probeRegimeDivergence,
+  "branch-compare": probeBranchCompare,
   "limiting-shift": probeLimitingShift,
   "burn-recover": probeBurnRecover,
   "succession-diverge": probeSuccessionDiverge,

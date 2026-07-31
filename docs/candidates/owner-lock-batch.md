@@ -36,6 +36,7 @@ Place reading already Pass ([batch-island-brief](../playtests/batch-island-brief
 | Id | Outstanding owner-only question | Result |
 |---|---|---|
 | **C-004** | After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed? | ☑ **Pass → Locked** — alive / world-did-it; want-faster-than-16× = product feedback |
+| **C-005** | Did you want to fork the world and run it again under different forces — or did Compare feel like a debug panel? | ☐ Open — machine Done ([C-005-dossier](C-005-dossier.md)); Lock pending |
 | **C-020** | When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow? | ☐ **Hold Lock** — weather-feel Pass-with-glitches; leave Open until glitches named + fixed |
 | **C-014** | When the water left, did the quiet feel like the place going still — or like the sound broke? | ☐ **Open** — cannot hear (env); stillness-by-appearance Pass; audible silence unverified |
 | **U-006** | After something on the map changed, did opening the notebook feel like answering a question you already had — or like the game explaining itself first? | ☐ Unanswered — sitting remains |

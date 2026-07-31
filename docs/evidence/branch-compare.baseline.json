@@ -1,0 +1,65 @@
+{
+  "scenario": "branch-compare",
+  "metrics": {
+    "same.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "same.hashN": {
+      "value": 821597845,
+      "abs": 0
+    },
+    "same.precip": {
+      "value": 3.08602736890316,
+      "abs": 0.00001
+    },
+    "heavy.hashN": {
+      "value": 2594881104,
+      "abs": 0
+    },
+    "heavy.precip": {
+      "value": 21.602191895246506,
+      "abs": 0.00001
+    },
+    "heavy.meanSoil": {
+      "value": 0.03219771043852359,
+      "abs": 0.00001
+    },
+    "dry.hashN": {
+      "value": 2470904816,
+      "abs": 0
+    },
+    "dry.precip": {
+      "value": 3.366575315594673,
+      "abs": 0.00001
+    },
+    "dry.meanSoil": {
+      "value": 0.003521451041630837,
+      "abs": 0.00001
+    },
+    "delta.hashDiverged": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.precipDelta": {
+      "value": 18.235616579651833,
+      "abs": 0.00001
+    },
+    "delta.soilDelta": {
+      "value": 0.028676259396892754,
+      "abs": 0.00001
+    },
+    "delta.encoding": {
+      "value": 0.1911750626459517,
+      "abs": 0.0001
+    },
+    "delta.encodingCleared": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.isolated": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

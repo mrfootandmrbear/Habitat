@@ -108,6 +108,11 @@ export function mountControls(
     onLoad: () => void;
     onUndo: () => void;
     onRememberForm: () => void;
+    onBranch: () => void;
+    onShowBranchA: () => void;
+    onShowBranchB: () => void;
+    onCompareBranches: () => void;
+    onEndBranch: () => void;
     onToggleBrief: () => void;
     onToggleNotebook: () => void;
   },
@@ -125,6 +130,7 @@ export function mountControls(
   setHint: (text: string) => void;
   setCutaway: (text: string) => void;
   setUndoEnabled: (enabled: boolean) => void;
+  setBranchMode: (active: boolean) => void;
 } {
   const bar = document.createElement("div");
   bar.id = "controls";
@@ -257,6 +263,64 @@ export function mountControls(
   );
   rememberBtn.addEventListener("click", handlers.onRememberForm);
 
+  const branchGroup = document.createElement("div");
+  branchGroup.id = "branch-actions";
+  branchGroup.setAttribute("role", "group");
+  branchGroup.setAttribute(
+    "aria-label",
+    "Branch and compare (C-005 — same castle, different forces)",
+  );
+
+  const branchBtn = document.createElement("button");
+  branchBtn.type = "button";
+  branchBtn.id = "branch-open";
+  branchBtn.textContent = "Branch";
+  branchBtn.setAttribute(
+    "aria-label",
+    "Fork this world into A and B (C-005)",
+  );
+  branchBtn.addEventListener("click", handlers.onBranch);
+
+  const showABtn = document.createElement("button");
+  showABtn.type = "button";
+  showABtn.id = "branch-show-a";
+  showABtn.textContent = "Show A";
+  showABtn.disabled = true;
+  showABtn.addEventListener("click", handlers.onShowBranchA);
+
+  const showBBtn = document.createElement("button");
+  showBBtn.type = "button";
+  showBBtn.id = "branch-show-b";
+  showBBtn.textContent = "Show B";
+  showBBtn.disabled = true;
+  showBBtn.addEventListener("click", handlers.onShowBranchB);
+
+  const compareBranchBtn = document.createElement("button");
+  compareBranchBtn.type = "button";
+  compareBranchBtn.id = "branch-compare";
+  compareBranchBtn.textContent = "Compare branches";
+  compareBranchBtn.disabled = true;
+  compareBranchBtn.setAttribute(
+    "aria-label",
+    "Tint soil moisture difference between A and B (no numbers)",
+  );
+  compareBranchBtn.addEventListener("click", handlers.onCompareBranches);
+
+  const endBranchBtn = document.createElement("button");
+  endBranchBtn.type = "button";
+  endBranchBtn.id = "branch-end";
+  endBranchBtn.textContent = "Keep this branch";
+  endBranchBtn.disabled = true;
+  endBranchBtn.addEventListener("click", handlers.onEndBranch);
+
+  branchGroup.append(
+    branchBtn,
+    showABtn,
+    showBBtn,
+    compareBranchBtn,
+    endBranchBtn,
+  );
+
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
   saveBtn.textContent = "Save";
@@ -388,6 +452,7 @@ export function mountControls(
     notebookBtn,
     resetBtn,
     rememberBtn,
+    branchGroup,
     saveBtn,
     loadBtn,
     undoBtn,
@@ -439,6 +504,13 @@ export function mountControls(
     },
     setUndoEnabled: (enabled: boolean) => {
       undoBtn.disabled = !enabled;
+    },
+    setBranchMode: (active: boolean) => {
+      showABtn.disabled = !active;
+      showBBtn.disabled = !active;
+      compareBranchBtn.disabled = !active;
+      endBranchBtn.disabled = !active;
+      branchBtn.disabled = active;
     },
   };
 }

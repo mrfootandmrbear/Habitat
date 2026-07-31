@@ -13,7 +13,7 @@
 | Undo control has no confirm / cost gate | `Undo edit` button only | `src/ui/controls.ts` |
 | Restore machinery shared with save/load (P-005) | `captureWorld` / `restoreWorld` hash round-trip | `sessionPersist.ts` + test |
 
-**Gap vs full criterion wording.** Explicit **branch-and-compare** UI (**C-005**) is not built; after time advances, the practical route back is **Save / Load** (same snapshot restore). That satisfies “not a rewind of history” (S-007) but leaves C-005’s compare instrument for a later slice.
+**Gap vs full criterion wording.** Explicit **branch-and-compare** scaffold (**C-005**) now exists (`Branch` / Show A·B / Compare branches); after time advances, the route back is still an explicit restore (branch or Save/Load), never a rewind of history (S-007). C-005 Lock remains owner-judged — see [C-005-dossier.md](C-005-dossier.md).
 
 ## Owner-only question
 

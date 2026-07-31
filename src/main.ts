@@ -45,6 +45,8 @@ import {
 import { tideById, type TideId } from "./sim/climate/tidalEnvelope";
 import { windById, type WindId } from "./sim/climate/windRegime";
 import { FormMemory } from "./sim/formMemory";
+import { BranchSession } from "./sim/branch";
+import type { ForceSettings } from "./sim/forceSettings";
 import {
   sampleSoundscape,
   snapshotCoverReader,
@@ -81,7 +83,7 @@ const terrain = generateIsland(
 );
 
 const initialSea: SeaLevelId = "mid";
-const world = new WorldState(terrain, {
+let world = new WorldState(terrain, {
   seaLevel: seaLevelById(initialSea).meters,
   windUx: windById("west").ux,
   windUz: windById("west").uz,
@@ -93,11 +95,18 @@ paintSubstrateMosaic(
   world.oceanCells,
   config.terrainSeed,
 );
-const model = world.hydrologyModel;
+let model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
 const editUndo = new EditUndoStack();
 const formMemory = new FormMemory();
 const elevDeltaScratch = new Float32Array(n * n);
+/** C-005 dual-lane session; null when playing a single world. */
+let branchSession: BranchSession | null = null;
+
+function adoptWorld(next: typeof world): void {
+  world = next;
+  model = world.hydrologyModel;
+}
 
 const { scene, camera, renderer, controls } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
@@ -233,6 +242,10 @@ function runCompare(): void {
 }
 
 function fillElevDelta(): Float32Array | null {
+  if (branchSession?.compareMode) {
+    branchSession.fillMoistureCompareDelta(elevDeltaScratch);
+    return elevDeltaScratch;
+  }
   if (!formMemory.hasThen) return null;
   for (let i = 0; i < world.terrain.data.length; i++) {
     const x = i % n;
@@ -240,6 +253,46 @@ function fillElevDelta(): Float32Array | null {
     elevDeltaScratch[i] = formMemory.deltaAt(world.terrain.data, x, z);
   }
   return elevDeltaScratch;
+}
+
+function currentForces(): ForceSettings {
+  return {
+    rain: rainRegime,
+    heat: heatId,
+    sea: seaLevelId,
+    tide: tideId,
+    wind: windId,
+  };
+}
+
+function syncForceUiFrom(forces: ForceSettings): void {
+  rainRegime = forces.rain;
+  heatId = forces.heat;
+  seaLevelId = forces.sea;
+  tideId = forces.tide;
+  windId = forces.wind;
+  ui.setRainRegime(forces.rain);
+  ui.setHeat(forces.heat);
+  ui.setSeaLevel(forces.sea);
+  ui.setTide(forces.tide);
+  ui.setWind(forces.wind);
+  windArrow.setWind(forces.wind);
+  oceanMesh.setSeaLevel(seaLevelById(forces.sea).meters);
+  rebuildExtentCage();
+}
+
+function showBranchLane(lane: "a" | "b"): void {
+  if (!branchSession) return;
+  branchSession.setActive(lane);
+  adoptWorld(branchSession.activeWorld);
+  syncForceUiFrom(branchSession.forcesOn(lane));
+  syncMeshes();
+  syncWaterDisplay(0, true);
+  ui.setHint(
+    branchSession.compareMode
+      ? `Showing ${lane.toUpperCase()} · compare tint is moisture vs the other lane`
+      : `Showing ${lane.toUpperCase()} — set forces, run time, then Compare branches`,
+  );
 }
 
 const ui = mountControls(
@@ -397,6 +450,42 @@ const ui = mountControls(
       syncMeshes();
       ui.setHint("Remembered form — run time, then look for change tint");
     },
+    onBranch: () => {
+      branchSession = BranchSession.open(world, currentForces());
+      adoptWorld(branchSession.activeWorld);
+      ui.setBranchMode(true);
+      syncMeshes();
+      syncWaterDisplay(0, true);
+      ui.setHint(
+        "Branched A = B — change forces on one lane, run time, Compare branches",
+      );
+    },
+    onShowBranchA: () => {
+      showBranchLane("a");
+    },
+    onShowBranchB: () => {
+      showBranchLane("b");
+    },
+    onCompareBranches: () => {
+      if (!branchSession) return;
+      branchSession.compareMode = !branchSession.compareMode;
+      syncMeshes();
+      ui.setHint(
+        branchSession.compareMode
+          ? "Compare on — cool/warm tint is wetter/drier than the other lane"
+          : "Compare off — looking at this lane alone",
+      );
+    },
+    onEndBranch: () => {
+      if (!branchSession) return;
+      const kept = branchSession.activeWorld;
+      branchSession = null;
+      adoptWorld(kept);
+      ui.setBranchMode(false);
+      syncMeshes();
+      syncWaterDisplay(0, true);
+      ui.setHint("Kept this branch as the live world");
+    },
     onSave: () => {
       try {
         saveToLocalStorage(world);
@@ -409,6 +498,10 @@ const ui = mountControls(
     },
     onLoad: () => {
       try {
+        if (branchSession) {
+          branchSession = null;
+          ui.setBranchMode(false);
+        }
         if (!loadFromLocalStorage(world)) {
           ui.setHint("No saved world in this browser");
           return;
@@ -630,7 +723,11 @@ function frame(now: number): void {
   for (let i = 0; i < stepsRun; i++) {
     try {
       const precipBefore = world.precipitationLedger;
-      world.stepEvent();
+      if (branchSession) {
+        branchSession.stepBoth();
+      } else {
+        world.stepEvent();
+      }
       if (world.precipitationLedger > precipBefore) {
         rainingThisTick = true;
         phaseThisTick = world.precipPhase;
@@ -700,6 +797,9 @@ function frame(now: number): void {
       ` · ${windById(windId).label}` +
       ` · ${tideById(tideId).label}` +
       (formMemory.hasThen ? " · then" : "") +
+      (branchSession
+        ? ` · branch ${branchSession.active.toUpperCase()}${branchSession.compareMode ? "↔" : ""}`
+        : "") +
       ` · ${conservationLine()}`,
   );
 

@@ -37,7 +37,8 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| — | *(empty)* | Nature Wave 1 P0 complete; agent tip → C-005 scaffold |
+| — | *(empty)* | Nature Wave 1 P0 complete; agent tip → C-006 CI promote |
+
 
 ### P1 — derived field, no new Process
 

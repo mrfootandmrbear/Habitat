@@ -16,6 +16,11 @@ import {
   elevChangeEncodingStrength,
   FormMemory,
 } from "./formMemory";
+import {
+  BranchSession,
+  branchMoistureEncodingDelta,
+} from "./branch";
+import { applyForces, type ForceSettings } from "./forceSettings";
 import { lightEncodingDelta } from "../ui/lightEncoding";
 import {
   terrainEncodingDelta,
@@ -422,6 +427,35 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     );
     // World encoding: ground darkens differently by side — no inspector layer.
     expect(encoding).toBeGreaterThan(0.05);
+  });
+
+  it("branch moisture compare encoding clears floor without numbers (C-005)", () => {
+    const base: ForceSettings = {
+      rain: "dry",
+      heat: "warm",
+      sea: "none",
+      tide: "off",
+      wind: "calm",
+    };
+    const root = new WorldState(generateMountain(12, 12, 4, 9));
+    applyForces(root, base);
+    const session = BranchSession.open(root, base);
+    applyForces(session.a, { ...base, rain: "heavy" });
+    applyForces(session.b, { ...base, rain: "dry" });
+    for (let i = 0; i < config.dailyEventSteps * 8; i++) session.stepBoth();
+    let meanA = 0;
+    let meanB = 0;
+    const nCells = session.a.soilMoisture.data.length;
+    for (let i = 0; i < nCells; i++) {
+      meanA += session.a.soilMoisture.data[i]!;
+      meanB += session.b.soilMoisture.data[i]!;
+    }
+    meanA /= nCells;
+    meanB /= nCells;
+    expect(branchMoistureEncodingDelta(meanA, meanB)).toBeGreaterThan(0.15);
+    const out = new Float32Array(nCells);
+    session.setActive("a");
+    expect(session.fillMoistureCompareDelta(out)).toBeGreaterThan(0.15);
   });
 
   it("scenario brief chrome is present when a brief is active (Slice 15)", () => {
