@@ -39,9 +39,13 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 ## Current queue tip
 
-Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** machine path via F+R+clouds — Lock still owner. **Slice A+** Done (AUD-003). **Field Notebook** Done (U-006 machine; Lock still reviewer). W-001 supersession still owner.
+Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Queue tip:** **Nature P0:** NS-006 salt-memory encoding → NS-002 Heat→plant → NS-004 strand ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)). Scenario campaign / toxic-site premise (G-002 / C-010) after C-009 framing. Optional C-020 SWE store. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
+**Executable tip — Nature P0:** NS-006 salt-memory encoding → NS-002 Heat→plant → NS-004 strand ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)).
+
+**Owner Lock backlog:** C-009 · C-015…C-019 · C-004 · C-020 · C-014 · U-006 (reviewer). W-001 supersession still owner.
+
+**Thesis holes (not tip):** C-005 branch-and-compare · C-012 Δx/mosaic · season dial (unfiled) · C-010 after C-009 Lock · C-006 CI-promotable when free. Optional C-020 SWE store.
 
 ## Cursor Cloud specific instructions
 

@@ -89,6 +89,7 @@ registerField({
 |---|---|---|---|---|---|
 | `terrain.elevation` | m above datum | preserve `[zMin, zMax]` | `geomorphology` | decadal | **yes** |
 | `soil.depth` | m of mobile regolith | [0, 5] | `geomorphology` | decadal | **yes** |
+| `soil.material` | enum class id | sand / clay / rock (Float32) | `geomorphology` | decadal | **yes** |
 | `soil.porosity` | m³/m³ | [0.25, 0.65] | `geomorphology` | decadal | **yes** |
 | `soil.hydrologicGroup` | enum A–D | {0,1,2,3} | `geomorphology` | decadal | **yes** |
 | `structure.obstructionHeight` | m above terrain | [0, 5] | `structures` | daily | **yes** |
@@ -99,12 +100,12 @@ Bedrock elevation is **not stored**. It is `terrain.elevation − soil.depth`, d
 
 `structure.obstructionHeight` is the field a beaver dam, a check dam, a road berm, or a removed culvert writes. It is read by flow routing as an additive term on the routing surface and by the flux solver as a sill. It exists so that engineering does not require writing another process's terrain (§11).
 
-> **Two fields are expected here and are not yet designed.** [THESIS.md](THESIS.md) calls Habitat a living sand castle where the "sand" is every substrate nature works with, which this table currently represents as one undifferentiated soil.
+> **Substrate status (2026-07-30).** [THESIS.md](THESIS.md) calls the "sand" every substrate nature works with.
 >
-> - **C-009 — material class.** A per-cell substrate identity (sand, clay, loam, gravel, rock, organic) plus a **data-driven** property table read by existing processes — infiltration rate, erodibility, cohesion, water retention — rather than a second erosion or infiltration law per material (GEO-002, T-004). Owned by `geomorphology`, decadal, legacy.
-> - **C-010 — legacy substances.** A mobile, transformable quantity (contaminant load is the motivating case) that travels on the *existing* water mass balance, is drawn down by a vegetation-mediated pathway over decades, and gates arrival. Legacy by §12's definition, therefore save-invalidating (T-003). It is the missing substrate for S-007 and S-008, which today have only `soil.porosity`'s compaction memory to stand on. **First instance:** `soil.salinity` under Open **C-018** (Slice 20) — salt, not yet contaminant.
+> - **C-009 — material class.** **Shipped** as Slice **S**: `soil.material` (sand / clay / rock) plus a data-driven property table in `substrates.ts` read by existing processes — not a second erosion or infiltration law per material (GEO-002, T-004). Owner legibility Pass; **Lock still owner** (Open until register act). Further classes (loam, gravel, organic) remain design under the Open candidate.
+> - **C-010 — legacy substances.** Still **Open** — contaminant load is the motivating case; travels on the *existing* water mass balance, drawn down by a vegetation-mediated pathway over decades, gates arrival. Legacy by §12's definition, therefore save-invalidating (T-003). Missing substrate for S-007 / S-008 beyond compaction memory. **First instance shipped:** `soil.salinity` under Open **C-018** (Slice 20) — salt, not yet contaminant.
 >
-> Both are **Open candidates** — design under them as hypotheses, not as settled schema. The binding constraint on anyone touching this table meanwhile: **whatever material representation lands must be able to carry a mobile quantity per cell.** A material table that cannot would have to be rebuilt when C-010 arrives.
+> Both remain **Open candidates** until Lock — implement under them as hypotheses, not settled policy. Binding constraint: **material representation must carry a mobile quantity per cell** so C-010 does not force a rebuild.
 
 Its owner is `structures`, not `engineers`. The same field carries obstruction of two origins — biological (E-005, annual band) and player-sited (A-005/A-006, committed whenever the player acts) — and neither may own it, because a field with two writers has no owner at all. `structures` owns it; `engineers` and `interventions` both contribute through the delta inbox (§11.2), summed in contributor-id order. It sits in the `daily` band so that a player earthwork takes effect at the next day boundary, which is the same boundary at which §7.2 recomputes the cached structural layer — the two would otherwise disagree for the remainder of a storm sequence.
 

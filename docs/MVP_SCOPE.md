@@ -52,7 +52,7 @@ The outer ring — **build → forces → time → look** — is the thesis loop
 |---|---|---|---|
 | Build the form — abundant sculpting | A-005, **C-006** | **Yes** | Shipped Slice 5b (berm/dig); island canvas retuned Slice F. Unrationed; scarcity is ecological time (RC-004) |
 | Choose the forces — regime control | **C-004** | **Yes (shipping)** | Force panel: climate-mean rainfall, sea level, wind (Slice F). Full weather phase (**C-020**) later. Not a dashboard — look at the world |
-| Return visit — see what became of it | **C-008**, GEO-002 | **Post-MVP** | Slice 8c. The payoff exists in sim and is invisible in play |
+| Return visit — see what became of it | **C-008**, GEO-002 | **Done** | Slice 8c Tier-O **Pass** (batch-living-return 2026-07-30). C-008 budget number still owner |
 | Run it again, different forces | **C-005** | **Post-MVP** | Needs branch/compare; T-001 determinism already supplies the hard half |
 | Observe ↔ readable change | P-003, U-003, ART-001 | **Yes** | World is primary visualization |
 | Expect → commit prediction | P-006 | **Yes** | Load-bearing; not polish |
@@ -142,7 +142,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | — | Field Notebook UI (**U-006**) | Bounded causal explanation chrome | **Done** — BUILD_GUIDE §4.20 (machine; Lock still reviewer) |
 | — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Done** — BUILD_GUIDE §4.21 (machine; Lock still owner) |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** Done (machine); **Full C-020 clouds** Done (machine). **Next:** scenario campaign after C-009/C-010 framing.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** Done (machine); **Full C-020 clouds** Done (machine). Gap review: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **Next:** Nature P0 (NS-006 → NS-002 → NS-004); scenario campaign after C-009 / C-010 framing.
 
 ---
 
