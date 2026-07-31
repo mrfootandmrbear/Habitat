@@ -546,6 +546,25 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.replayMatch": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "light-arrival": {
+    "south.hsi": { abs: 1e-6 },
+    "south.herbBiomass": { abs: 1e-6 },
+    "south.insolation": { abs: 1e-6 },
+    "south.limiting": { abs: 0 },
+    "south.moisture": { abs: 1e-6 },
+    "north.hsi": { abs: 1e-6 },
+    "north.herbBiomass": { abs: 1e-6 },
+    "north.insolation": { abs: 1e-6 },
+    "north.limiting": { abs: 0 },
+    "north.lightLimited": { abs: 0 },
+    "north.moisture": { abs: 1e-6 },
+    "delta.herbDelta": { abs: 1e-6 },
+    "delta.hsiDelta": { abs: 1e-6 },
+    "delta.insolationGap": { abs: 1e-6 },
+    "delta.moistureMatch": { abs: 0 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.hashN": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

@@ -1,0 +1,16 @@
+{
+  "id": "N7",
+  "title": "Aspect light into Liebig (NS-007)",
+  "simLoop": "Open-sky aspect insolation enters herb Liebig HSI as f_light; steep north stalls establishment while south earns under one seed schedule (Beer–Lambert understory stays succession-only).",
+  "gameLoop": "Sculpt a north face vs a south face; the shady slope should stay emptier while the bright twin greens under the same seed schedule — light as the named limit, not a hidden multiplier.",
+  "registerIds": ["C-007", "C-011", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/lightArrival.test.ts",
+    "src/sim/habitat/hsi.test.ts"
+  ],
+  "probes": ["light-arrival"],
+  "fields": ["light.insolation", "habitat.suitability", "habitat.limitingFactor"],
+  "notebookSeed": "The north face stayed dim; the south twin took green under the same seed.",
+  "tierO": "no owner-only question this closeout — machine half green; next-but-one P2 salt-marsh engineer"
+}

@@ -205,7 +205,7 @@ export class TerrainMesh {
         break;
       }
       case "limitingFactor": {
-        // 0 moisture · 1 depth · 2 GW · 3 salinity · 4 temperature · 5 spray · 6 inundation
+        // 0 moisture · 1 depth · 2 GW · 3 salinity · 4 temperature · 5 spray · 6 inundation · 7 light
         const id = Math.round(world.getLimitingFactor(x, z));
         if (id === 0) col.setRGB(0.2, 0.45, 0.85);
         else if (id === 1) col.setRGB(0.65, 0.4, 0.2);
@@ -213,7 +213,9 @@ export class TerrainMesh {
         else if (id === 3) col.setRGB(0.75, 0.7, 0.35);
         else if (id === 4) col.setRGB(0.85, 0.35, 0.2);
         else if (id === 5) col.setRGB(0.55, 0.75, 0.85);
-        else col.setRGB(0.25, 0.45, 0.65);
+        else if (id === 6) col.setRGB(0.25, 0.45, 0.65);
+        else if (id === 7) col.setRGB(0.95, 0.85, 0.35);
+        else col.setRGB(0.4, 0.4, 0.4);
         break;
       }
       case "suitability": {

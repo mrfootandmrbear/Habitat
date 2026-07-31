@@ -7,6 +7,7 @@ import {
   LIMITING_DEPTH,
   LIMITING_GROUNDWATER,
   LIMITING_INUNDATION,
+  LIMITING_LIGHT,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
   LIMITING_SPRAY,
@@ -189,6 +190,35 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       mhwMeters: 3,
     });
     expect(s.fInundation).toBe(1);
+    expect(s.limiting).toBe(LIMITING_MOISTURE);
+  });
+
+  it("names light when open-sky insolation is zero (C-007 / C-011)", () => {
+    const s = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      insolation: 0,
+    });
+    expect(s.limiting).toBe(LIMITING_LIGHT);
+    expect(s.hsi).toBe(0);
+    expect(s.fLight).toBe(0);
+  });
+
+  it("horizontal insolation leaves f_light at 1 so moisture can still limit", () => {
+    const s = evaluateHsi({
+      moisture: 0.1,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      insolation: Math.sin((config.solarAltitudeDegrees * Math.PI) / 180),
+    });
+    expect(s.fLight).toBe(1);
     expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 

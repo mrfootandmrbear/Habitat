@@ -2,7 +2,7 @@
 
 Authority: [PROTOCOL.md](PROTOCOL.md). Ranked after parent merge of cards. **Hypothesis only** — Open candidates stay Open.
 
-Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
+Last updated: 2026-07-31 (NS-007 shipped as Slice N7).
 
 ---
 
@@ -17,6 +17,7 @@ Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | Onshore spray stress | Slice N3; `f_spray` / `spray-arrival`; C-017 Open |
 | [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | Sandy crest sand-binder | Slice N5; `veg.*.binder` / `binder-arrival`; C-009/C-017 Open |
 | [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | Tidal inundation hydroperiod | Slice N8; `f_inundation` / `inundation-arrival`; C-016 |
+| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | Aspect light into Liebig | Slice N7; `f_light` / `light-arrival`; C-007/C-011 |
 
 ---
 
@@ -36,7 +37,7 @@ Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
 
 | Id | Lane | Title | Merge bucket |
 |---|---|---|---|
-| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Aspect light into Liebig | **P0** (tip) |
+| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Aspect light into Liebig | **Shipped** (N7) |
 | [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | factor | Tidal inundation hydroperiod gate | **Shipped** (N8) |
 
 ---
@@ -47,7 +48,7 @@ Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
 
 | Order | Card | Why |
 |---|---|---|
-| 1 | [NS-007](cards/NS-007-aspect-light-into-liebig.md) | Promote `light.insolation` → `f_light` in Liebig; keep Beer–Lambert on succession only |
+| — | — | empty (NS-007 shipped) |
 
 ### P1 — derived field, no new Process
 
@@ -59,7 +60,7 @@ Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
 
 | Topic | Lane | Notes |
 |---|---|---|
-| Salt-marsh engineer | guild | After NS-008 inundation factor — **unblocked** |
+| Salt-marsh engineer | guild | After NS-008 inundation factor — **tip** (N9) |
 | Woody / shrub | guild | Stage 3; climate-capped (needs NS-002) |
 | Cryptogam / crust | guild | Stage 2 bootstrap |
 | Nutrients / guano | factor | Needs candidate if not covered |
@@ -90,3 +91,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | NS-005 shipped (N5) | — (P0 empty) | Crest binder + physicalCover coastal blunt; tip → C-005 scaffold |
 | 2026-07-31 | NS-007, NS-008 | NS-008 | P1 factors carded. Tip → inundation HSI arm (≠ salinity, ≠ spray). NS-007 light→Liebig next. No new Process; no invent-Locked. |
 | 2026-07-31 | NS-008 shipped (N8) | NS-007 | `f_inundation` / `inundation-arrival`; tip → aspect light→Liebig. Salt-marsh engineer unblocked in P2. |
+| 2026-07-31 | NS-007 shipped (N7) | — (P0 empty) | `f_light` / `light-arrival`; tip → P2 salt-marsh engineer (N9). |

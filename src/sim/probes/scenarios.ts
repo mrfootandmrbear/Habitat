@@ -16,11 +16,13 @@ import { meanExposure } from "../climate/shoreExposure";
 import {
   LIMITING_DEPTH,
   LIMITING_INUNDATION,
+  LIMITING_LIGHT,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
   LIMITING_SPRAY,
   LIMITING_TEMPERATURE,
 } from "../habitat/hsiComposition";
+import { terrainInsolation } from "../vegetation/lightCompetition";
 import {
   DEEP_TIME_SIM_YEARS,
   decadalBandsForYears,
@@ -2605,6 +2607,127 @@ export function probeInundationArrival(): ProbeResult {
 }
 
 /**
+ * C-007 / C-011 — open-sky aspect light gates herb arrival.
+ * South twin earns; steep north face is light-limited. Moisture matched so
+ * the twin isolates insolation from dry-down (Beer–Lambert stays succession-only).
+ */
+export function probeLightArrival(): ProbeResult {
+  const w = 16;
+  const sx = 8;
+  const sz = 8;
+  const rise = 12;
+
+  const planar = (risePerCell: number) => {
+    const terrain = new Grid2D(w, w);
+    const offset = Math.abs(risePerCell) * w;
+    for (let z = 0; z < w; z++) {
+      for (let x = 0; x < w; x++) {
+        terrain.set(x, z, offset + z * risePerCell);
+      }
+    }
+    return terrain;
+  };
+
+  const make = (risePerCell: number) => {
+    const world = new WorldState(planar(risePerCell));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.runHabitatStep(1);
+    world.herbSeedBank.fill(config.seedSourceStrength);
+    world.strandSeedBank.fill(config.seedSourceStrength);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const southA = make(-rise);
+  const southB = make(-rise);
+  const north = make(rise);
+
+  const replayMatch = southA.stateHash() === southB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("light-arrival: south replay hash mismatch");
+  }
+
+  const southHsi = southA.getHabitatSuitability(sx, sz);
+  const northHsi = north.getHabitatSuitability(sx, sz);
+  const southHerb = southA.getHerbBiomass(sx, sz);
+  const northHerb = north.getHerbBiomass(sx, sz);
+  const northLim = north.getLimitingFactor(sx, sz);
+  const herbDelta = southHerb - northHerb;
+  const southI = terrainInsolation(southA.terrain.data, w, w, sx, sz);
+  const northI = terrainInsolation(north.terrain.data, w, w, sx, sz);
+  const moistureMatch =
+    Math.abs(
+      southA.soilMoisture.get(sx, sz) - north.soilMoisture.get(sx, sz),
+    ) < 1e-9
+      ? 1
+      : 0;
+
+  if (moistureMatch !== 1) {
+    throw new Error(
+      "light-arrival: moisture not matched (must isolate aspect light)",
+    );
+  }
+  if (!(southI > northI)) {
+    throw new Error(
+      `light-arrival: expected south insolation (${southI}) > north (${northI})`,
+    );
+  }
+  if (!(southHsi > northHsi)) {
+    throw new Error(
+      `light-arrival: expected south HSI (${southHsi}) > north (${northHsi})`,
+    );
+  }
+  if (northLim !== LIMITING_LIGHT) {
+    throw new Error(
+      `light-arrival: expected north limiting=light (got ${northLim})`,
+    );
+  }
+  if (!(southHerb > 0.1)) {
+    throw new Error(`light-arrival: south herb too low (${southHerb})`);
+  }
+  if (!(herbDelta > 0.05)) {
+    throw new Error(`light-arrival: herb delta too small (${herbDelta})`);
+  }
+
+  return {
+    scenario: "light-arrival",
+    records: [
+      {
+        label: "south",
+        hsi: southHsi,
+        herbBiomass: southHerb,
+        insolation: southI,
+        limiting: southA.getLimitingFactor(sx, sz),
+        moisture: southA.soilMoisture.get(sx, sz),
+      },
+      {
+        label: "north",
+        hsi: northHsi,
+        herbBiomass: northHerb,
+        insolation: northI,
+        limiting: northLim,
+        lightLimited: northLim === LIMITING_LIGHT ? 1 : 0,
+        moisture: north.soilMoisture.get(sx, sz),
+      },
+      {
+        label: "delta",
+        herbDelta,
+        hsiDelta: southHsi - northHsi,
+        insolationGap: southI - northI,
+        moistureMatch,
+        replayMatch,
+        hashN: Number.parseInt(southA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * C-018 / Slice N4 — strand vs inland herb under one seed schedule.
  * Salty exposed shore earns strand mats; fresh inland hollow earns herb.
  */
@@ -3493,6 +3616,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "binder-arrival": probeBinderArrival,
   "spray-arrival": probeSprayArrival,
   "inundation-arrival": probeInundationArrival,
+  "light-arrival": probeLightArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,

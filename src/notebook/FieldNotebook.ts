@@ -27,6 +27,7 @@ export const notebookObserver = {
     "climate.airTemperature",
     "shore.exposure",
     "shore.intertidal",
+    "light.insolation",
   ] as const,
   writes: [] as const,
 };

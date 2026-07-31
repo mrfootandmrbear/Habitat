@@ -14,11 +14,11 @@
       "abs": 0.000001
     },
     "small.biomass": {
-      "value": 1.0709847211837769,
+      "value": 0.951728880405426,
       "abs": 0.000001
     },
     "small.hsi": {
-      "value": 1,
+      "value": 0.861640453338623,
       "abs": 0.000001
     },
     "small.notPerimeter": {
@@ -42,19 +42,19 @@
       "abs": 0.000001
     },
     "large.biomass": {
-      "value": 1.8826005458831787,
+      "value": 1.7294484376907349,
       "abs": 0.000001
     },
     "large.hsi": {
-      "value": 1,
+      "value": 0.861640453338623,
       "abs": 0.000001
     },
     "isolation.nearBiomass": {
-      "value": 2.1574182510375977,
+      "value": 2.012279748916626,
       "abs": 0.000001
     },
     "isolation.farBiomass": {
-      "value": 0.5423335433006287,
+      "value": 0.4740726351737976,
       "abs": 0.000001
     },
     "isolation.nearSElig": {
@@ -66,7 +66,7 @@
       "abs": 0.000001
     },
     "isolation.isolationDelta": {
-      "value": 1.615084707736969,
+      "value": 1.5382071137428284,
       "abs": 0.000001
     },
     "delta.landDelta": {
@@ -78,7 +78,7 @@
       "abs": 0.000001
     },
     "delta.biomassDelta": {
-      "value": 0.8116158246994019,
+      "value": 0.7777195572853088,
       "abs": 0.000001
     },
     "delta.replayMatch": {
@@ -86,7 +86,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 2854722853,
+      "value": 229650980,
       "abs": 0
     }
   }

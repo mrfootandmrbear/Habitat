@@ -1,12 +1,13 @@
 /**
- * Liebig HSI composition (Slice 9 + Slice 20 salinity + Heat + spray + inundation).
+ * Liebig HSI composition (Slice 9 + Slice 20 salinity + Heat + spray + inundation + light).
  * Rule: docs/slices/9-composition.md — NATURAL_PROCESS_MATH §3.3 min form.
  * Salinity: docs/slices/20-composition.md (C-018).
  * Temperature: docs/slices/N2-composition.md (C-004 / C-020 hypothesis).
  * Spray: docs/slices/N3-composition.md (C-017) — distinct from soil salt.
  * Inundation: docs/slices/N8-composition.md (C-016) — ≠ salinity, ≠ spray.
+ * Light: docs/slices/N7-composition.md (C-007 / C-011) — open-sky I₀, not understory.
  *
- * HSI = min(f_moisture, f_depth, f_groundwater, f_salinity, f_temp, f_spray, f_inundation); limiting = argmin.
+ * HSI = min(f_moisture, f_depth, f_groundwater, f_salinity, f_temp, f_spray, f_inundation, f_light); limiting = argmin.
  * Not a health score (N-002); the arrival gate under C-007.
  */
 
@@ -15,6 +16,7 @@ import {
   factorInundationUpland,
   tidalHydroperiod,
 } from "./inundationComposition";
+import { factorLight } from "./lightComposition";
 import { factorSalinity } from "./salinityComposition";
 import { factorSpray } from "./sprayComposition";
 import { factorTemperature } from "./temperatureComposition";
@@ -26,6 +28,7 @@ export const LIMITING_SALINITY = 3;
 export const LIMITING_TEMPERATURE = 4;
 export const LIMITING_SPRAY = 5;
 export const LIMITING_INUNDATION = 6;
+export const LIMITING_LIGHT = 7;
 
 export type LimitingFactorId =
   | typeof LIMITING_MOISTURE
@@ -34,7 +37,8 @@ export type LimitingFactorId =
   | typeof LIMITING_SALINITY
   | typeof LIMITING_TEMPERATURE
   | typeof LIMITING_SPRAY
-  | typeof LIMITING_INUNDATION;
+  | typeof LIMITING_INUNDATION
+  | typeof LIMITING_LIGHT;
 
 export const LIMITING_LABELS: Record<LimitingFactorId, string> = {
   [LIMITING_MOISTURE]: "moisture",
@@ -44,6 +48,7 @@ export const LIMITING_LABELS: Record<LimitingFactorId, string> = {
   [LIMITING_TEMPERATURE]: "temperature",
   [LIMITING_SPRAY]: "spray",
   [LIMITING_INUNDATION]: "inundation",
+  [LIMITING_LIGHT]: "light",
 };
 
 export type HsiSample = {
@@ -58,6 +63,7 @@ export type HsiSample = {
   fTemp: number;
   fSpray: number;
   fInundation: number;
+  fLight: number;
 };
 
 export function clamp01(x: number): number {
@@ -102,6 +108,11 @@ export function evaluateHsi(args: {
   elevMeters?: number;
   mlwMeters?: number;
   mhwMeters?: number;
+  /**
+   * Open-sky insolation [0,1] for light (C-007 / C-011). Omit → f_light = 1
+   * (flat / legacy call sites). Never pass understoryLight.
+   */
+  insolation?: number;
 }): HsiSample {
   const fMoisture = factorMoisture(args.moisture, args.porosity);
   const fDepth = factorDepth(args.soilDepth, args.depthRef);
@@ -120,6 +131,9 @@ export function evaluateHsi(args: {
       ? tidalHydroperiod(elev, mlw, mhw)
       : 0;
   const fInundation = factorInundationUpland(hydroperiod);
+  // Missing insolation → full light so pure-factor unit tests stay focused.
+  const fLight =
+    args.insolation !== undefined ? factorLight(args.insolation) : 1;
   const factors: [LimitingFactorId, number][] = [
     [LIMITING_MOISTURE, fMoisture],
     [LIMITING_DEPTH, fDepth],
@@ -128,6 +142,7 @@ export function evaluateHsi(args: {
     [LIMITING_TEMPERATURE, fTemp],
     [LIMITING_SPRAY, fSpray],
     [LIMITING_INUNDATION, fInundation],
+    [LIMITING_LIGHT, fLight],
   ];
   // Stable tie-break: lowest factor id wins.
   let limiting: LimitingFactorId = LIMITING_MOISTURE;
@@ -154,5 +169,6 @@ export function evaluateHsi(args: {
     fTemp,
     fSpray,
     fInundation,
+    fLight,
   };
 }

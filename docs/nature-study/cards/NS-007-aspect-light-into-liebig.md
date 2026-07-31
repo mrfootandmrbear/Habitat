@@ -15,5 +15,5 @@
 | steal | • Promote existing light.insolation into Liebig as inspectable f_light — no new Process · Keep evaluateLight / canopy attenuation on succession only |
 | reject | • Folding understoryLight into arrival HSI (confuses establishment with post-cover competition) · Hidden light multiplier with no limiting.light label (C-011) |
 | legibility | limiting factor label: light |
-| priority | P0 |
+| priority | P0 — **Shipped** (N7) |
 | evidence_grade | Habitat-already |

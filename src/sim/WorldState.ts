@@ -987,6 +987,8 @@ export class WorldState {
    * Slice 20: soil.salinity is a fourth Liebig arm (C-018).
    * Heat plant gate: climate.airTemperature is a fifth Liebig arm (C-004 / C-020).
    * Spray gate: shore.exposure is a sixth Liebig arm (C-017) — ≠ soil salt.
+   * Inundation: tidal envelope hydroperiod is a seventh arm (C-016).
+   * Light: open-sky aspect insolation is an eighth arm (C-007 / C-011) — ≠ understory.
    */
   runHabitatStep(_dt: number): void {
     const m = this.soilMoisture.data;
@@ -1013,26 +1015,37 @@ export class WorldState {
       ? meanHighWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
       : undefined;
 
-    for (let i = 0; i < hsi.length; i++) {
-      const sample = evaluateHsi({
-        moisture: m[i]!,
-        soilDepth: depth[i]!,
-        groundwater: gw[i]!,
-        porosity: substrateProps(mat[i]!).porosity,
-        depthRef,
-        gwRef,
-        salinity: salt[i]!,
-        airTempC,
-        tempKillC,
-        tempOptC,
-        shoreExposure: exposure[i]!,
-        elevMeters: hasTide ? elev[i]! : undefined,
-        mlwMeters: mlw,
-        mhwMeters: mhw,
-      });
-      hsi[i] = sample.hsi;
-      lim[i] = sample.limiting;
-      gap[i] = sample.limitingGap;
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const insolation = terrainInsolation(
+          elev,
+          this.width,
+          this.height,
+          x,
+          z,
+        );
+        const sample = evaluateHsi({
+          moisture: m[i]!,
+          soilDepth: depth[i]!,
+          groundwater: gw[i]!,
+          porosity: substrateProps(mat[i]!).porosity,
+          depthRef,
+          gwRef,
+          salinity: salt[i]!,
+          airTempC,
+          tempKillC,
+          tempOptC,
+          shoreExposure: exposure[i]!,
+          elevMeters: hasTide ? elev[i]! : undefined,
+          mlwMeters: mlw,
+          mhwMeters: mhw,
+          insolation,
+        });
+        hsi[i] = sample.hsi;
+        lim[i] = sample.limiting;
+        gap[i] = sample.limitingGap;
+      }
     }
   }
 

@@ -228,6 +228,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     ],
     visibleWhen: (s) => s.modalLimitingFactor === 6 && s.landCellCount > 0,
   },
+  {
+    id: "limited-light",
+    event: "limited",
+    scale: "preserve",
+    sentence: "The north face stayed dim; the south twin took green under the same seed.",
+    traces: [
+      {
+        fieldId: "habitat.limitingFactor",
+        evidence: "modal limiting factor is light (7)",
+      },
+      {
+        fieldId: "light.insolation",
+        evidence: "open-sky aspect insolation is the HSI argmin — not understory attenuation",
+      },
+    ],
+    visibleWhen: (s) => s.modalLimitingFactor === 7 && s.landCellCount > 0,
+  },
 ];
 
 /** Uncertainty preface for what-contributed (U-006 — no certainty claim). */

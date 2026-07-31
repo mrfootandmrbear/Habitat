@@ -1,0 +1,73 @@
+{
+  "scenario": "light-arrival",
+  "metrics": {
+    "south.hsi": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "south.herbBiomass": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "south.insolation": {
+      "value": 0.9958932064677037,
+      "abs": 0.000001
+    },
+    "south.limiting": {
+      "value": 0,
+      "abs": 0
+    },
+    "south.moisture": {
+      "value": 0.44999998807907104,
+      "abs": 0.000001
+    },
+    "north.hsi": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "north.herbBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "north.insolation": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "north.limiting": {
+      "value": 7,
+      "abs": 0
+    },
+    "north.lightLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "north.moisture": {
+      "value": 0.44999998807907104,
+      "abs": 0.000001
+    },
+    "delta.herbDelta": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "delta.hsiDelta": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "delta.insolationGap": {
+      "value": 0.9958932064677037,
+      "abs": 0.000001
+    },
+    "delta.moistureMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 1682887788,
+      "abs": 0
+    }
+  }
+}
