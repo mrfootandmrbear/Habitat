@@ -28,7 +28,7 @@ limitingGap = secondMin − HSI
 | salinity | `soil.salinity` | `1 − S` clamped to [0, 1] (Slice 20 / C-018) |
 | temperature | `climate.airTemperature` | ramp kill→opt for herb guild (NS-002 / C-004) |
 
-No light or nutrient factors until those stores exist. Zero on any factor zeroes HSI (correct for arrival). Salinity is the non-halophyte herb gate; pan/halophyte guilds are later catalogue roles on the same field. Temperature reuses the Heat dial already driving precip phase (C-020).
+No light or nutrient factors until those stores exist. Zero on any factor zeroes HSI (correct for arrival). Salinity is the non-halophyte herb gate; strand splash pioneer (NS-004) uses a separate salt-tolerant arm on the same `soil.salinity` field. Temperature reuses the Heat dial already driving precip phase (C-020).
 
 ## Banned
 

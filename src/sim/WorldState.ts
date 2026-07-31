@@ -37,6 +37,7 @@ import {
   leeDepositWeight,
 } from "./climate/longshoreTendency";
 import { evaluateHsi } from "./habitat/hsiComposition";
+import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
 import {
   concentrateSalinity,
   diluteSalinity,
@@ -169,6 +170,18 @@ export class WorldState {
    * Owner: vegetation, band: seasonal. Not legacy (herbaceous).
    */
   readonly herbBiomass: Grid2D;
+  /**
+   * Strand seed bank — C-018 splash pioneer (same overseas/perimeter schedule).
+   * Owner: dispersal, band: annual. Legacy colonization memory.
+   */
+  readonly strandSeedBank: Grid2D;
+  /** Strand establishment probability [0,1] from seed × strand HSI. */
+  readonly strandEstablishment: Grid2D;
+  /**
+   * Strand biomass (kg DM·m⁻²) — C-018 shore mats.
+   * Owner: vegetation, band: seasonal.
+   */
+  readonly strandBiomass: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -337,6 +350,9 @@ export class WorldState {
     this.herbSeedBank = new Grid2D(this.width, this.height);
     this.herbEstablishment = new Grid2D(this.width, this.height);
     this.herbBiomass = new Grid2D(this.width, this.height);
+    this.strandSeedBank = new Grid2D(this.width, this.height);
+    this.strandEstablishment = new Grid2D(this.width, this.height);
+    this.strandBiomass = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
     this.shoreExposure = new Grid2D(this.width, this.height);
@@ -1159,12 +1175,14 @@ export class WorldState {
         insolation[i] = committedLight.insolation;
         lai[i] = committedLight.leafAreaIndex;
         understory[i] = committedLight.understoryLight;
-        // Slice 13: herb biomass stacks into physical writes only (E-005).
+        // Slice 13 / N4: herb + strand stack into physical writes only (E-005).
         // physicalCover is local — never dual-writes veg.cover.
         const physical = physicalCoverFrom(
           cover,
           this.herbBiomass.data[i]!,
           config.herbBiomassMax,
+          this.strandBiomass.data[i]!,
+          config.strandBiomassMax,
         );
         rough[i] = config.baseRoughness + physical * config.vegRoughnessBonus;
         infilContrib[i] = physical * config.vegInfiltrationBonus;
@@ -1173,16 +1191,38 @@ export class WorldState {
   }
 
   /**
-   * Annual seed bank (Slice 12 / C-007; Slice 21 / C-019).
+   * Annual seed bank (Slice 12 / C-007; Slice 21 / C-019; N4 / C-018).
    * Mainland: fixed preserve-perimeter source.
    * Island (seaLevel set): overseas shore-biased kernel × S_elig(A,d).
-   * Snapshots establishment probability from current Liebig HSI.
+   * One seed schedule fills herb + strand banks; establishment uses guild HSI.
    */
   runDispersalStep(_dt: number): void {
-    const seed = this.herbSeedBank.data;
-    const est = this.herbEstablishment.data;
-    const hsi = this.habitatSuitability.data;
-    const scale = config.herbEstablishmentScale;
+    const herbSeed = this.herbSeedBank.data;
+    const herbEst = this.herbEstablishment.data;
+    const strandSeed = this.strandSeedBank.data;
+    const strandEst = this.strandEstablishment.data;
+    const herbHsi = this.habitatSuitability.data;
+    const exposure = this.shoreExposure.data;
+    const salt = this.soilSalinity.data;
+    const herbScale = config.herbEstablishmentScale;
+    const strandScale = config.strandEstablishmentScale;
+    const airTempC = this.airTemperature;
+
+    const writeCell = (i: number, pressure: number) => {
+      herbSeed[i] = pressure;
+      herbEst[i] = establishmentProbability(pressure, herbHsi[i]!, herbScale);
+      strandSeed[i] = pressure;
+      const strand = evaluateStrandHsi({
+        shoreExposure: exposure[i]!,
+        salinity: salt[i]!,
+        airTempC,
+      });
+      strandEst[i] = establishmentProbability(
+        pressure,
+        strand.hsi,
+        strandScale,
+      );
+    };
 
     if (this.seaLevelMeters === undefined) {
       const strength = config.seedSourceStrength;
@@ -1190,16 +1230,10 @@ export class WorldState {
       for (let z = 0; z < this.height; z++) {
         for (let x = 0; x < this.width; x++) {
           const i = z * this.width + x;
-          const pressure = seedPressureAt(
-            x,
-            z,
-            this.width,
-            this.height,
-            strength,
-            mean,
+          writeCell(
+            i,
+            seedPressureAt(x, z, this.width, this.height, strength, mean),
           );
-          seed[i] = pressure;
-          est[i] = establishmentProbability(pressure, hsi[i]!, scale);
         }
       }
       return;
@@ -1208,44 +1242,65 @@ export class WorldState {
     const ocean = this.oceanCells;
     const shore = computeShorelineCells(this.width, this.height, ocean);
     const dist = shoreDistanceField(this.width, this.height, ocean, shore);
-    const strength =
-      config.overseasSeedBase * this.eligibleRichness();
+    const strength = config.overseasSeedBase * this.eligibleRichness();
     const mean = config.overseasMeanDistanceCells;
 
-    for (let i = 0; i < seed.length; i++) {
+    for (let i = 0; i < herbSeed.length; i++) {
       if (ocean.has(i)) {
-        seed[i] = 0;
-        est[i] = 0;
+        herbSeed[i] = 0;
+        herbEst[i] = 0;
+        strandSeed[i] = 0;
+        strandEst[i] = 0;
         continue;
       }
-      const pressure = overseasSeedPressure(dist[i]!, strength, mean);
-      seed[i] = pressure;
-      est[i] = establishmentProbability(pressure, hsi[i]!, scale);
+      writeCell(i, overseasSeedPressure(dist[i]!, strength, mean));
     }
   }
 
   /**
-   * Seasonal herb establishment — continuous biomass from seed × HSI.
-   * Zero suitability blocks growth. Does not write veg.cover
+   * Seasonal guild establishment — herb (wet hollow) + strand (shore mats).
+   * Zero guild HSI blocks that guild. Does not write veg.cover
    * (physical contribution via physicalCover in runVegetationStep — Slice 13).
    */
   runHerbEstablishmentStep(dt: number): void {
     const scale = Math.max(0, dt);
-    const seed = this.herbSeedBank.data;
-    const hsi = this.habitatSuitability.data;
-    const biomass = this.herbBiomass.data;
-    const estScale = config.herbEstablishmentScale;
-    const rate = config.herbEstablishmentRate;
-    const maxB = config.herbBiomassMax;
+    const herbSeed = this.herbSeedBank.data;
+    const herbHsi = this.habitatSuitability.data;
+    const herbBiomass = this.herbBiomass.data;
+    const strandSeed = this.strandSeedBank.data;
+    const strandBiomass = this.strandBiomass.data;
+    const exposure = this.shoreExposure.data;
+    const salt = this.soilSalinity.data;
+    const airTempC = this.airTemperature;
+    const herbEstScale = config.herbEstablishmentScale;
+    const herbRate = config.herbEstablishmentRate;
+    const herbMax = config.herbBiomassMax;
+    const strandEstScale = config.strandEstablishmentScale;
+    const strandRate = config.strandEstablishmentRate;
+    const strandMax = config.strandBiomassMax;
 
-    for (let i = 0; i < biomass.length; i++) {
-      biomass[i] = nextHerbBiomass({
-        biomass: biomass[i]!,
-        seedBank: seed[i]!,
-        habitatSuitability: hsi[i]!,
-        establishmentScale: estScale,
-        establishmentRate: rate,
-        biomassMax: maxB,
+    for (let i = 0; i < herbBiomass.length; i++) {
+      herbBiomass[i] = nextHerbBiomass({
+        biomass: herbBiomass[i]!,
+        seedBank: herbSeed[i]!,
+        habitatSuitability: herbHsi[i]!,
+        establishmentScale: herbEstScale,
+        establishmentRate: herbRate,
+        biomassMax: herbMax,
+        dt: scale,
+      });
+      const strandHsi = evaluateStrandHsi({
+        shoreExposure: exposure[i]!,
+        salinity: salt[i]!,
+        airTempC,
+      }).hsi;
+      strandBiomass[i] = nextHerbBiomass({
+        biomass: strandBiomass[i]!,
+        seedBank: strandSeed[i]!,
+        habitatSuitability: strandHsi,
+        establishmentScale: strandEstScale,
+        establishmentRate: strandRate,
+        biomassMax: strandMax,
         dt: scale,
       });
     }
@@ -1666,6 +1721,21 @@ export class WorldState {
     return this.herbEstablishment.get(x, z);
   }
 
+  getStrandBiomass(x: number, z: number): number {
+    if (!this.strandBiomass.inBounds(x, z)) return 0;
+    return this.strandBiomass.get(x, z);
+  }
+
+  getStrandSeedBank(x: number, z: number): number {
+    if (!this.strandSeedBank.inBounds(x, z)) return 0;
+    return this.strandSeedBank.get(x, z);
+  }
+
+  getStrandEstablishment(x: number, z: number): number {
+    if (!this.strandEstablishment.inBounds(x, z)) return 0;
+    return this.strandEstablishment.get(x, z);
+  }
+
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
     this.applyTerrainBrush(cx, cz, amount);
   }
@@ -2024,6 +2094,36 @@ export class WorldState {
         legacy: false,
         data: this.herbBiomass.data,
         range: [0, config.herbBiomassMax] as const,
+      },
+      {
+        id: "veg.seedBank.strand",
+        units: "seeds/m²",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: true,
+        data: this.strandSeedBank.data,
+        range: [0, 1e5] as const,
+      },
+      {
+        id: "veg.establishment.strand",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.strandEstablishment.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "veg.biomass.strand",
+        units: "kg DM/m²",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "seasonal" as const,
+        legacy: false,
+        data: this.strandBiomass.data,
+        range: [0, config.strandBiomassMax] as const,
       },
       {
         id: "ledger.fuelConsumed",

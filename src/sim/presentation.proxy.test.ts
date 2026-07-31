@@ -28,6 +28,7 @@ import {
 import {
   occupantEncodingDelta,
   shoreInteriorOccupantDelta,
+  guildOccupantEncodingDelta,
 } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -230,6 +231,16 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       occupantEncodingDelta(0.375, 2.5, config.herbBiomassMax),
     ).toBeGreaterThan(0.15);
+  });
+
+  it("strand vs herb guild tint clears perceptual floor (C-018)", () => {
+    expect(
+      guildOccupantEncodingDelta(
+        config.herbBiomassMax,
+        config.herbBiomassMax,
+        config.strandBiomassMax,
+      ),
+    ).toBeGreaterThan(0.08);
   });
 
   it("sand vs clay dry BASE clears the perceptual floor without inspector (C-009)", () => {

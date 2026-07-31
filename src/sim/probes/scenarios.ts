@@ -2231,6 +2231,120 @@ export function probeHeatArrival(): ProbeResult {
 }
 
 /**
+ * C-018 / Slice N4 — strand vs inland herb under one seed schedule.
+ * Salty exposed shore earns strand mats; fresh inland hollow earns herb.
+ */
+export function probeStrandArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const shoreX = 1;
+  const shoreZ = 4;
+  const inlandX = 1;
+  const inlandZ = 12;
+
+  const make = () => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.shoreExposure.set(shoreX, shoreZ, 1);
+    world.soilSalinity.set(shoreX, shoreZ, 0.85);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const a = make();
+  const b = make();
+  const replayMatch = a.stateHash() === b.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("strand-arrival: replay hash mismatch");
+  }
+
+  const shoreStrand = a.getStrandBiomass(shoreX, shoreZ);
+  const shoreHerb = a.getHerbBiomass(shoreX, shoreZ);
+  const inlandHerb = a.getHerbBiomass(inlandX, inlandZ);
+  const inlandStrand = a.getStrandBiomass(inlandX, inlandZ);
+  const seedMatch =
+    Math.abs(
+      a.getHerbSeedBank(shoreX, shoreZ) - a.getHerbSeedBank(inlandX, inlandZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const guildSeedMatch =
+    Math.abs(
+      a.getStrandSeedBank(shoreX, shoreZ) - a.getHerbSeedBank(shoreX, shoreZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const shoreGuildDelta = shoreStrand - shoreHerb;
+  const inlandGuildDelta = inlandHerb - inlandStrand;
+
+  if (seedMatch !== 1 || guildSeedMatch !== 1) {
+    throw new Error("strand-arrival: seed schedule not matched");
+  }
+  if (!(shoreStrand > 0.1)) {
+    throw new Error(`strand-arrival: shore strand too low (${shoreStrand})`);
+  }
+  if (!(shoreGuildDelta > 0.05)) {
+    throw new Error(
+      `strand-arrival: shore guild delta too small (${shoreGuildDelta})`,
+    );
+  }
+  if (!(inlandHerb > 0.1)) {
+    throw new Error(`strand-arrival: inland herb too low (${inlandHerb})`);
+  }
+  if (!(inlandGuildDelta > 0.05)) {
+    throw new Error(
+      `strand-arrival: inland guild delta too small (${inlandGuildDelta})`,
+    );
+  }
+  if (inlandStrand !== 0) {
+    throw new Error(
+      `strand-arrival: inland strand expected 0 (got ${inlandStrand})`,
+    );
+  }
+  if (a.getLimitingFactor(shoreX, shoreZ) !== LIMITING_SALINITY) {
+    throw new Error("strand-arrival: shore herb not salinity-limited");
+  }
+
+  return {
+    scenario: "strand-arrival",
+    records: [
+      {
+        label: "shore",
+        strandBiomass: shoreStrand,
+        herbBiomass: shoreHerb,
+        salinity: 0.85,
+        exposure: 1,
+        herbLimiting: a.getLimitingFactor(shoreX, shoreZ),
+      },
+      {
+        label: "inland",
+        strandBiomass: inlandStrand,
+        herbBiomass: inlandHerb,
+        salinity: 0,
+        exposure: 0,
+        herbLimiting: a.getLimitingFactor(inlandX, inlandZ),
+      },
+      {
+        label: "delta",
+        shoreGuildDelta,
+        inlandGuildDelta,
+        seedMatch,
+        guildSeedMatch,
+        replayMatch,
+        hashN: Number.parseInt(a.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -2780,6 +2894,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "scenario-window": probeScenarioWindow,
   "salinity-arrival": probeSalinityArrival,
   "heat-arrival": probeHeatArrival,
+  "strand-arrival": probeStrandArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,

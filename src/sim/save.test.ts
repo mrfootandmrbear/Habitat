@@ -11,8 +11,8 @@ import {
 } from "./save";
 
 describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
-  it("uses schema version 8 after Slice S soil.material registration", () => {
-    expect(SCHEMA_VERSION).toBe(8);
+  it("uses schema version 9 after C-018 strand seed bank registration", () => {
+    expect(SCHEMA_VERSION).toBe(9);
   });
 
   it("round-trips registered state including soil.depth", () => {
@@ -21,7 +21,7 @@ describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
     world.addRain(0.02);
     const before = world.stateHash();
     const doc = serializeRegistry(world.registry);
-    expect(doc.schemaVersion).toBe(8);
+    expect(doc.schemaVersion).toBe(9);
     expect(doc.fields.some((f) => f.id === "soil.depth" && f.legacy)).toBe(
       true,
     );
@@ -30,6 +30,9 @@ describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
     );
     expect(
       doc.fields.some((f) => f.id === "veg.seedBank.herb" && f.legacy),
+    ).toBe(true);
+    expect(
+      doc.fields.some((f) => f.id === "veg.seedBank.strand" && f.legacy),
     ).toBe(true);
 
     const other = new WorldState(generateMountain(8, 8, 4, 1));

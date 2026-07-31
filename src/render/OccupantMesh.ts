@@ -2,13 +2,16 @@ import * as THREE from "three";
 import { config } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
-import { herbBiomassRgb, shootVisibility } from "../ui/occupantEncoding";
+import {
+  herbBiomassRgb,
+  shootVisibility,
+  strandBiomassRgb,
+} from "../ui/occupantEncoding";
 
 /**
  * First-occupant shoots — presentation only (T-006).
- * Reads veg.biomass.herb; does not create population state.
- * Per-instance color tracks biomass so sparse overseas fringe (C-019) reads
- * quieter than a denser shore band without an inspector layer.
+ * Reads herb + strand biomass; does not create population state.
+ * Dominant guild tints the cell (bright herb green vs olive strand mats).
  */
 export class OccupantMesh {
   readonly object: THREE.InstancedMesh;
@@ -52,14 +55,19 @@ export class OccupantMesh {
     const cellW = this.worldSize / (this.width - 1);
     const ox = -this.worldSize / 2;
     const oz = -this.worldSize / 2;
-    const maxB = config.herbBiomassMax;
+    const herbMax = config.herbBiomassMax;
+    const strandMax = config.strandBiomassMax;
     let n = 0;
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
-        const biomass = world.getHerbBiomass(x, z);
-        const vis = shootVisibility(biomass, maxB);
+        const herb = world.getHerbBiomass(x, z);
+        const strand = world.getStrandBiomass(x, z);
+        const herbVis = shootVisibility(herb, herbMax);
+        const strandVis = shootVisibility(strand, strandMax);
+        const vis = Math.max(herbVis, strandVis);
         if (vis <= 0) continue;
+        const useStrand = strandVis >= herbVis && strandVis > 0;
         const y = model.getTerrainHeight(x, z);
         const scaleY = 0.35 + vis * 1.4;
         const scaleXZ = 0.45 + vis * 0.9;
@@ -68,7 +76,9 @@ export class OccupantMesh {
         this.dummy.rotation.set(0, ((x * 17 + z * 31) % 360) * (Math.PI / 180), 0);
         this.dummy.updateMatrix();
         this.object.setMatrixAt(n, this.dummy.matrix);
-        const [r, g, b] = herbBiomassRgb(biomass, maxB);
+        const [r, g, b] = useStrand
+          ? strandBiomassRgb(strand, strandMax)
+          : herbBiomassRgb(herb, herbMax);
         this.color.setRGB(r, g, b);
         this.object.setColorAt(n, this.color);
         n++;

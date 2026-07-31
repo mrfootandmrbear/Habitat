@@ -1,0 +1,22 @@
+{
+  "id": "N4",
+  "title": "Strand splash pioneer (NS-004)",
+  "simLoop": "One seed schedule fills herb + strand banks; strand HSI = min(shore, salt-tolerant, temp) so salty exposed shore earns strand while inland herb takes the fresh hollow (C-007 / C-018 / C-019).",
+  "gameLoop": "If I leave the windy shore salty and let the sea deliver seed, green should hug the strand before anything takes the inland hollow.",
+  "registerIds": ["W-003", "E-004", "C-007", "C-018", "C-019", "N-001", "N-004", "T-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/strandArrival.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["strand-arrival"],
+  "fields": [
+    "veg.seedBank.strand",
+    "veg.establishment.strand",
+    "veg.biomass.strand",
+    "shore.exposure",
+    "soil.salinity"
+  ],
+  "notebookSeed": "Olive mats hugged the salty shore before the inland hollow greened.",
+  "tierO": "no owner-only question this closeout — C-018 / C-019 Lock remain owner; machine half green"
+}

@@ -194,6 +194,18 @@ export const config = {
   herbBiomassMax: 2.5,
 
   /**
+   * Strand splash pioneer (C-018 / Slice N4) — salt-tolerant shore guild.
+   * Same seed schedule as herb; HSI uses shore.exposure × tolerant salinity.
+   */
+  strandEstablishmentScale: 0.08,
+  strandEstablishmentRate: 0.35,
+  strandBiomassMax: 2.5,
+  /** Pore salt at/below which strand f_salinity stays 1 (herb fails earlier). */
+  strandSalinityFullThrough: 0.9,
+  strandTempKillC: -4,
+  strandTempOptC: 12,
+
+  /**
    * Wall-clock seconds for display water depth to catch ~63% of a step change.
    * Observer only — sim depths stay authoritative (T-006). Stops 16× event
    * strobing from reading as a broken framerate.
@@ -238,6 +250,7 @@ export type InspectorLayer =
   | "potentialEt"
   | "actualEt"
   | "herbBiomass"
+  | "strandBiomass"
   | "seedBank"
   | "intertidal"
   | "shoreExposure"

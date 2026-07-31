@@ -17,6 +17,22 @@ export function factorSalinity(salinity: number): number {
 }
 
 /**
+ * Strand / splash-pioneer salinity arm (C-018 / C-018 guild response).
+ * Full through moderate–high pore salt where herb fails; collapses only at
+ * hypersaline extreme (S → 1). Not spray (C-017).
+ */
+export function factorSalinityTolerant(
+  salinity: number,
+  fullThrough = 0.9,
+): number {
+  const s = Math.max(0, salinity);
+  const plateau = Math.min(1, Math.max(0, fullThrough));
+  if (s <= plateau) return 1;
+  const span = Math.max(1e-6, 1 - plateau);
+  return clamp01(1 - (s - plateau) / span);
+}
+
+/**
  * Freshwater infiltrate dilutes pore salinity (incoming S = 0).
  * `storageBefore` / `infiltrate` are water-column depths (m).
  */

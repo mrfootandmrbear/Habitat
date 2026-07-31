@@ -9,6 +9,8 @@ export type OccupantRgb = readonly [number, number, number];
 
 const BARE: OccupantRgb = [0x8b / 255, 0x73 / 255, 0x55 / 255];
 const SHOOT: OccupantRgb = [0x2e / 255, 0xc4 / 255, 0x4e / 255];
+/** Strand splash mats — olive so salty shore reads apart from inland herb (C-018). */
+const STRAND: OccupantRgb = [0x6b / 255, 0xa3 / 255, 0x2f / 255];
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -43,6 +45,31 @@ export function shootVisibility(biomass: number, biomassMax: number): number {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
   if (t < 0.008) return 0;
   return Math.min(1, Math.sqrt(t) * 1.35);
+}
+
+/** Strand mat tint — olive vs herb shoot green (C-018 Tier-P). */
+export function strandBiomassRgb(
+  biomass: number,
+  biomassMax: number,
+): OccupantRgb {
+  const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
+  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  return [
+    lerp(BARE[0], STRAND[0], u),
+    lerp(BARE[1], STRAND[1], u),
+    lerp(BARE[2], STRAND[2], u),
+  ];
+}
+
+/** Encoding Δ between herb shoot green and strand olive at equal biomass. */
+export function guildOccupantEncodingDelta(
+  biomass: number,
+  herbMax: number,
+  strandMax: number,
+): number {
+  const a = herbBiomassRgb(biomass, herbMax);
+  const b = strandBiomassRgb(biomass, strandMax);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 
 /**

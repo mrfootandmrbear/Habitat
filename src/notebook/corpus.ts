@@ -101,6 +101,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
       s.meanHerbBiomass > BIOMASS_EPS && s.meanSoilMoisture > SURFACE_EPS,
   },
   {
+    id: "colonized-strand",
+    event: "colonized",
+    scale: "preserve",
+    sentence: "Olive mats hugged the salty shore before the inland hollow greened.",
+    traces: [
+      {
+        fieldId: "veg.biomass.strand",
+        evidence: "mean strand biomass above epsilon",
+      },
+      {
+        fieldId: "soil.salinity",
+        evidence: "shore salt present where strand establishes",
+      },
+    ],
+    visibleWhen: (s) => s.meanStrandBiomass > BIOMASS_EPS,
+  },
+  {
     id: "recovered-green",
     event: "recovered",
     scale: "preserve",

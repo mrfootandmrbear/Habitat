@@ -41,7 +41,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — Nature P0:** NS-004 strand ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)). NS-006 / NS-002 shipped.
+**Executable tip — Nature P1:** NS-003 spray stress ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)). NS-006 / NS-002 / NS-004 shipped.
 
 **Owner Lock backlog:** C-009 · C-015…C-019 · C-004 · C-020 · C-014 · U-006 (reviewer). W-001 supersession still owner.
 

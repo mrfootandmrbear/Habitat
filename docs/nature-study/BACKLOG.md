@@ -13,6 +13,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 | [NS-001](cards/NS-001-wet-site-herb.md) | Wet-site herb guild | Slice 12–13; HSI moisture/depth/GW/salinity |
 | [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | Twin hollow salt memory | Slice N; `saltMemoryEncodingDelta`; C-018 Q-A Pass |
 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | Heat dial plant gate | Slice N2; `f_temp` / `heat-arrival`; C-004/C-020 Open |
+| [NS-004](cards/NS-004-strand-splash-pioneer.md) | Strand splash pioneer | Slice N4; `veg.*.strand` / `strand-arrival`; C-018/C-019 Open |
 
 ---
 
@@ -21,9 +22,9 @@ Last updated: 2026-07-30 (Wave 1 merged).
 | Id | Lane | Title | Merge bucket |
 |---|---|---|---|
 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | factor | Heat dial plant gate | **Shipped** (N2) |
-| [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | Onshore spray stress gate | P1 |
-| [NS-004](cards/NS-004-strand-splash-pioneer.md) | guild | Strand splash pioneer | **P0** (one new guild) |
-| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | P1 — hold until strand differentiates |
+| [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | Onshore spray stress gate | **P0** (next) |
+| [NS-004](cards/NS-004-strand-splash-pioneer.md) | guild | Strand splash pioneer | **Shipped** (N4) |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | P1 — hold until spray differentiates |
 | [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | engagement | Twin hollow salt memory | **Shipped** (N) |
 
 ---
@@ -34,14 +35,13 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| 1 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | One new guild; couples shipped salt + shore + overseas; differentiates strand vs inland herb |
+| 1 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | Derived spray ≠ soil salt; Wind × shoreExposure; no new Process |
 
 ### P1 — derived field, no new Process
 
 | Card / topic | Lane | Notes |
 |---|---|---|
-| [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | `proposed:stress.spray` from Wind × shoreExposure; keep distinct from `soil.salinity` |
-| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Second guild — hold until NS-004 differentiates two bets |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Second guild — hold until NS-003 / strand spray retune |
 | Light / aspect into Liebig vs competition-only | factor | `lightCompetition.ts` already ships; card before promoting to HSI |
 | Hydroperiod / inundation gate (≠ soil.salinity) | factor | Island evidence separates spray / soil salt / inundation |
 
@@ -75,3 +75,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | — | — | Doc sync: sourced_from, propose vs land, card→slice checklist |
 | 2026-07-30 | NS-002…NS-006 | NS-006 → NS-002 → NS-004 | Clip first; dial next; one guild (strand). NS-003/NS-005 → P1. No invent-Locked. |
 | 2026-07-30 | NS-006, NS-002 shipped | NS-004 | Slice N encoding + Slice N2 `f_temp`; tip → strand guild |
+| 2026-07-30 | NS-004 shipped (N4) | NS-003 | Strand vs inland under one seed; tip → spray stress |

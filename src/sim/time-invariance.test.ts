@@ -123,11 +123,14 @@ describe("field registry (SIMULATION_MODEL §3)", () => {
       "surface.roughness",
       "terrain.elevation",
       "veg.biomass.herb",
+      "veg.biomass.strand",
       "veg.cover",
       "veg.establishment.herb",
+      "veg.establishment.strand",
       "veg.infiltrationContribution",
       "veg.leafAreaIndex",
       "veg.seedBank.herb",
+      "veg.seedBank.strand",
       "water.surfaceDepth",
     ]);
 

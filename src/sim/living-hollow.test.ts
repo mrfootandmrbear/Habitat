@@ -31,6 +31,15 @@ describe("herb → physics (Slice 13, E-005)", () => {
       0.7,
       6,
     );
+    expect(
+      physicalCoverFrom(
+        0,
+        config.herbBiomassMax * 0.5,
+        config.herbBiomassMax,
+        config.strandBiomassMax * 0.5,
+        config.strandBiomassMax,
+      ),
+    ).toBe(1);
   });
 
   it("does not dual-write veg.cover from herb biomass", () => {

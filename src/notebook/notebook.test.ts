@@ -25,6 +25,7 @@ function drySnap(over: Partial<NotebookSnapshot> = {}): NotebookSnapshot {
     meanGroundwater: 0,
     meanCover: 0,
     meanHerbBiomass: 0,
+    meanStrandBiomass: 0,
     scarFraction: 0,
     modalLimitingFactor: -1,
     landCellCount: 0,

@@ -10,7 +10,12 @@ import type { Process } from "./Process";
 export const vegetationProcess: Process = {
   id: "vegetation",
   band: "daily",
-  reads: ["soil.moisture", "terrain.elevation", "veg.biomass.herb"],
+  reads: [
+    "soil.moisture",
+    "terrain.elevation",
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+  ],
   writes: [
     "veg.cover",
     "surface.roughness",
