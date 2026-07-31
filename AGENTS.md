@@ -41,9 +41,9 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — Nature P1:** NS-005 sand-binder ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)). NS-006 / NS-002 / NS-004 / NS-003 shipped.
+**Executable tip — Owner Lock batch:** [docs/candidates/owner-lock-batch.md](docs/candidates/owner-lock-batch.md) (C-009 / C-016…C-019 ready; C-015 + W-001). Remaining taste: [docs/playtests/batch-stewardship-alive.md](docs/playtests/batch-stewardship-alive.md) (C-004 / C-020 / C-014 / U-006). Nature tip paused: NS-005 after Lock session.
 
-**Owner Lock backlog:** C-009 · C-015…C-019 · C-004 · C-020 · C-014 · U-006 (reviewer). W-001 supersession still owner.
+**Owner Lock backlog:** ballot A ready · B = W-001 · C = stewardship sitting.
 
 **Thesis holes (not tip):** C-005 branch-and-compare · C-012 Δx/mosaic · season dial (unfiled) · C-010 after C-009 Lock · C-006 CI-promotable when free. Optional C-020 SWE store.
 

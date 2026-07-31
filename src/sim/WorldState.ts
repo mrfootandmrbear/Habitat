@@ -36,7 +36,7 @@ import {
   fillLongshoreTendency,
   leeDepositWeight,
 } from "./climate/longshoreTendency";
-import { evaluateHsi } from "./habitat/hsiComposition";
+import { evaluateHsi, LIMITING_SPRAY } from "./habitat/hsiComposition";
 import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
 import {
   concentrateSalinity,
@@ -1925,7 +1925,8 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.habitatLimitingFactor.data,
-        range: [0, 3] as const,
+        // Liebig arm ids through LIMITING_SPRAY (5) — NS-002 temp + NS-003 spray.
+        range: [0, LIMITING_SPRAY] as const,
       },
       {
         id: "habitat.limitingGap",

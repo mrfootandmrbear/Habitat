@@ -107,11 +107,11 @@ Summary only — do not reopen unless fixing regressions.
 | **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.**
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** owner Lock batch ([candidates/owner-lock-batch.md](candidates/owner-lock-batch.md)); Nature NS-005 paused.
 
 **Owner Lock backlog** (dossier / register acts — not the executable tip): **C-009** substrate; **C-015…C-019** maritime (owner halves Pass); **C-004** stewardship reading; **C-020** weather-feel; **C-014** audio; **U-006** notebook Lock (reviewer).
 
-**Next (executable tip):** **Nature P1:** [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) sand-binder ([BACKLOG](nature-study/BACKLOG.md)).
+**Next (executable tip):** **Owner Lock batch** — [candidates/owner-lock-batch.md](candidates/owner-lock-batch.md) (ready Pass cluster + W-001); remaining taste sitting [playtests/batch-stewardship-alive.md](playtests/batch-stewardship-alive.md). Nature tip paused: [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) after Lock session.
 
 **Thesis holes (not tip):** **C-005** branch-and-compare (file scaffold after Nature encoding); **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004); **C-010** toxic-site after **C-009** Lock; **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
 
@@ -815,7 +815,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N5 / NS-005 | Sandy crest sand-binder | W-003, C-017 | §4.26 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done. **Next:** Nature P1 **NS-005** sand-binder.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done. **Next:** owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)); Nature **NS-005** paused.
 
 ---
 
