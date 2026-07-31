@@ -1,0 +1,16 @@
+{
+  "id": "E",
+  "title": "Exner-lite inland hillslope deposit",
+  "simLoop": "Hillslope/channel removals pool and redeposit by capacity/depression weights inside geomorphology; ponded cells do not incise (GEO-002 Exner continuity — no SWE, no second sediment writer).",
+  "gameLoop": "Channels cut; basins and flats receive the relocated soil under the same forces.",
+  "registerIds": ["GEO-002", "C-002", "S-006", "T-001", "H-004"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/terrain/hillslopeDeposit.test.ts",
+    "src/sim/geomorphology.test.ts"
+  ],
+  "probes": ["hillslope-deposit"],
+  "fields": ["terrain.elevation", "soil.depth", "depression.depth", "ledger.shoreErosion"],
+  "notebookSeed": "The cut channel fed the hollow; the hollow held what the slope gave up.",
+  "tierO": "no owner-only question — machine conservation closeout"
+}

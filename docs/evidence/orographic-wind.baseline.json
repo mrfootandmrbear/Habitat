@@ -2,15 +2,15 @@
   "scenario": "orographic-wind",
   "metrics": {
     "west.precip": {
-      "value": 47.34246640416313,
+      "value": 47.342466456608236,
       "abs": 0.01
     },
     "west.relResidual": {
-      "value": 4.294429809062662e-8,
+      "value": 2.2405391678050397e-8,
       "abs": 0.000001
     },
     "west.sideEncoding": {
-      "value": 0.08331568041207382,
+      "value": 0.08331568042766484,
       "abs": 0.0001
     },
     "west.replayMatch": {
@@ -18,19 +18,19 @@
       "abs": 0
     },
     "west.hashN": {
-      "value": 2449087421,
+      "value": 2503987553,
       "abs": 0
     },
     "east.precip": {
-      "value": 47.34246640416313,
+      "value": 47.342466456608236,
       "abs": 0.01
     },
     "east.sideEncoding": {
-      "value": 0.08331568043049571,
+      "value": 0.08331568039281396,
       "abs": 0.0001
     },
     "east.hashN": {
-      "value": 1193229153,
+      "value": 2729858437,
       "abs": 0
     },
     "delta.hashDiverged": {
@@ -38,7 +38,7 @@
       "abs": 0
     },
     "delta.precipRatio": {
-      "value": 1.0000000296942435,
+      "value": 1.000000030802025,
       "abs": 0.0001
     },
     "delta.conserved": {

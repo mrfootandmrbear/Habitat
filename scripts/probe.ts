@@ -399,6 +399,15 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.stamped": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "hillslope-deposit": {
+    "run.pitGain": { abs: 1e-5 },
+    "run.channelLoss": { abs: 1e-5 },
+    "run.sumDelta": { abs: 1e-5 },
+    "run.bedrockOk": { abs: 0 },
+    "run.replayMatch": { abs: 0 },
+    "run.massOk": { abs: 0 },
+    "run.hashN": { abs: 0 },
+  },
   "island-arrival": {
     "small.landCells": { abs: 0 },
     "small.sElig": { abs: 1e-6 },

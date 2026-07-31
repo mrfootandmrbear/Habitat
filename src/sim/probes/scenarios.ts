@@ -3228,6 +3228,112 @@ export function probeCloudDelivery(): ProbeResult {
   };
 }
 
+/**
+ * GEO-002 Exner-lite — hillslope channel removals redeposit into a depression.
+ * Capacity/depression weights inside geomorphology only (no second sediment
+ * writer, no SWE / Hjulström gates).
+ */
+export function probeHillslopeDeposit(): ProbeResult {
+  const w = 10;
+  const h = 8;
+
+  const make = () => {
+    const terrain = new Grid2D(w, h);
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        let e = x * 0.5 + 2;
+        if (x === 4 && z === 3) e = 0.5;
+        terrain.set(x, z, e);
+      }
+    }
+    const world = new WorldState(terrain);
+    world.soilDepth.fill(2.5);
+    world.vegCover.fill(0);
+    world.ensureStructureFresh();
+    return world;
+  };
+
+  const a = make();
+  const b = make();
+  const pit = 3 * w + 4;
+  if (!(a.depressionDepth.data[pit]! > 0)) {
+    throw new Error("hillslope-deposit: expected Priority-Flood residual at pit");
+  }
+
+  let channelI = 0;
+  let bestA = 0;
+  for (let i = 0; i < w * h; i++) {
+    if (i === pit) continue;
+    const acc = a.flowAccumulation![i]!;
+    if (acc > bestA) {
+      bestA = acc;
+      channelI = i;
+    }
+  }
+  if (bestA < config.erosionMinAccumulation) {
+    throw new Error("hillslope-deposit: no channel cell above accumulation gate");
+  }
+
+  const pitH0 = a.soilDepth.data[pit]!;
+  const chH0 = a.soilDepth.data[channelI]!;
+  const bedPit0 = a.terrain.data[pit]! - pitH0;
+  const bedCh0 = a.terrain.data[channelI]! - chH0;
+  let sum0 = 0;
+  for (let i = 0; i < w * h; i++) sum0 += a.soilDepth.data[i]!;
+
+  for (let n = 0; n < 24; n++) {
+    a.runGeomorphologyStep(1);
+    b.runGeomorphologyStep(1);
+  }
+
+  const pitGain = a.soilDepth.data[pit]! - pitH0;
+  const channelLoss = chH0 - a.soilDepth.data[channelI]!;
+  let sum1 = 0;
+  for (let i = 0; i < w * h; i++) sum1 += a.soilDepth.data[i]!;
+  const bedrockOk =
+    Math.abs(a.terrain.data[pit]! - a.soilDepth.data[pit]! - bedPit0) < 1e-5 &&
+    Math.abs(a.terrain.data[channelI]! - a.soilDepth.data[channelI]! - bedCh0) <
+      1e-5
+      ? 1
+      : 0;
+  const replayMatch = a.stateHash() === b.stateHash() ? 1 : 0;
+  const massOk = sum1 + 1e-6 >= sum0 ? 1 : 0;
+
+  if (!(channelLoss > 0)) {
+    throw new Error(`hillslope-deposit: channel should erode (loss=${channelLoss})`);
+  }
+  if (!(pitGain > 0)) {
+    throw new Error(`hillslope-deposit: pit should gain (gain=${pitGain})`);
+  }
+  if (bedrockOk !== 1) {
+    throw new Error("hillslope-deposit: bedrock invariant failed");
+  }
+  if (replayMatch !== 1) {
+    throw new Error("hillslope-deposit: replay hash mismatch (T-001)");
+  }
+  if (massOk !== 1) {
+    throw new Error(
+      `hillslope-deposit: soil mass shrank without ocean export (${sum0} → ${sum1})`,
+    );
+  }
+
+  return {
+    scenario: "hillslope-deposit",
+    records: [
+      {
+        label: "run",
+        pitGain,
+        channelLoss,
+        sumDelta: sum1 - sum0,
+        bedrockOk,
+        replayMatch,
+        massOk,
+        hashN: Number.parseInt(a.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -3257,6 +3363,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,
+  "hillslope-deposit": probeHillslopeDeposit,
   "cloud-delivery": probeCloudDelivery,
 };
 

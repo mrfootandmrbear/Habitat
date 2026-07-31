@@ -94,6 +94,12 @@ export const config = {
    * Remainder leaves to ledger.shoreErosion (ocean). Geomorphology integrates.
    */
   longshoreRetainFraction: 0.7,
+  /**
+   * Fraction of hillslope/channel erosion retained for Exner-lite inland
+   * deposit (GEO-002). Remainder → ledger.shoreErosion when an ocean exists,
+   * else stays in the on-island pool (closed DEM). Same sole sediment writer.
+   */
+  hillslopeSedimentRetainFraction: 1,
   /** Per sim-day (soil/veg/GW steps scale by dt in days). */
   infiltrationRate: 0.08,
   /**

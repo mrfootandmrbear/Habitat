@@ -93,6 +93,64 @@ describe("geomorphology (Slice 8, S-006, GEO-002)", () => {
     expect(world.daysSinceDecadal).toBe(0);
     expect(world.soilDepth.data[0]!).toBeGreaterThan(before);
   });
+
+  it("redeposits hillslope removals into a depression (Exner-lite)", () => {
+    // Ramp with a closed pit mid-slope: channel cells erode; pit receives.
+    const w = 10;
+    const h = 8;
+    const terrain = new Grid2D(w, h);
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        let e = x * 0.5 + 2;
+        if (x === 4 && z === 3) e = 0.5;
+        terrain.set(x, z, e);
+      }
+    }
+    const world = new WorldState(terrain);
+    world.soilDepth.fill(2.5);
+    world.vegCover.fill(0);
+    world.ensureStructureFresh();
+    expect(world.depressionDepth.get(4, 3)).toBeGreaterThan(0);
+
+    const pit = 3 * w + 4;
+    let channelI = 0;
+    let bestA = 0;
+    for (let i = 0; i < w * h; i++) {
+      if (i === pit) continue;
+      const a = world.flowAccumulation![i]!;
+      if (a > bestA) {
+        bestA = a;
+        channelI = i;
+      }
+    }
+    expect(bestA).toBeGreaterThanOrEqual(config.erosionMinAccumulation);
+
+    const pitH0 = world.soilDepth.data[pit]!;
+    const chH0 = world.soilDepth.data[channelI]!;
+    const bedPit0 = world.terrain.data[pit]! - pitH0;
+    const bedCh0 = world.terrain.data[channelI]! - chH0;
+    let sum0 = 0;
+    for (let i = 0; i < w * h; i++) sum0 += world.soilDepth.data[i]!;
+
+    for (let n = 0; n < 24; n++) world.runGeomorphologyStep(1);
+
+    const pitGain = world.soilDepth.data[pit]! - pitH0;
+    const chLoss = chH0 - world.soilDepth.data[channelI]!;
+    let sum1 = 0;
+    for (let i = 0; i < w * h; i++) sum1 += world.soilDepth.data[i]!;
+
+    expect(chLoss).toBeGreaterThan(0);
+    expect(pitGain).toBeGreaterThan(0);
+    // retain=1, no ocean: relocates sediment; net Σdepth ≥ start (production ≥ 0).
+    expect(sum1).toBeGreaterThanOrEqual(sum0 - 1e-6);
+    expect(world.terrain.data[pit]! - world.soilDepth.data[pit]!).toBeCloseTo(
+      bedPit0,
+      5,
+    );
+    expect(
+      world.terrain.data[channelI]! - world.soilDepth.data[channelI]!,
+    ).toBeCloseTo(bedCh0, 5);
+  });
 });
 
 describe("soil storage · depth (Slice 8 mass balance)", () => {

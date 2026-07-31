@@ -2,15 +2,15 @@
   "scenario": "baseflow-persist",
   "metrics": {
     "withGw.channelWet": {
-      "value": 0.01195672106629821,
+      "value": 0.011902788480694182,
       "abs": 0.00001
     },
     "withGw.gwSum": {
-      "value": 29.63440862146672,
+      "value": 29.579255400574766,
       "abs": 0.001
     },
     "withGw.massResidual": {
-      "value": 0.00005503167551523802,
+      "value": 0.000055033054422892747,
       "abs": 0.001
     },
     "withoutGw.channelWet": {
@@ -22,11 +22,11 @@
       "abs": 0
     },
     "withoutGw.massResidual": {
-      "value": 0.00004254687223692599,
+      "value": 0.000042540901858956204,
       "abs": 0.001
     },
     "delta.channelWetDelta": {
-      "value": 0.01195672106629821,
+      "value": 0.011902788480694182,
       "abs": 0.00001
     },
     "delta.ratio": {

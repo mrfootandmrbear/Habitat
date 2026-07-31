@@ -74,6 +74,10 @@ import {
   SUBSTRATE_ROCK,
   substrateProps,
 } from "./terrain/substrates";
+import {
+  hillslopeDepositWeight,
+  isLocalMinimum,
+} from "./terrain/hillslopeDeposit";
 
 /**
  * Owns authoritative world fields and the field registry.
@@ -1024,9 +1028,11 @@ export class WorldState {
    * Decadal soil production + GEO-002 erosion + coastal wave work (C-017).
    * Production everywhere; channel erosion where accumulation earns cost;
    * coastal retreat on exposed shoreline; Slice 19 lee deposit from the
-   * retained longshore budget — still this owner (no SWE, no second
-   * sediment writer). Elev and depth move together so bedrock = elev − depth
-   * is invariant. `dt` is band units (1 = one full compressed decadal commit).
+   * retained longshore budget; Exner-lite inland redeposit of hillslope
+   * removals into basins/flats (capacity drop) — still this owner (no SWE,
+   * no second sediment writer). Elev and depth move together so
+   * bedrock = elev − depth is invariant. `dt` is band units
+   * (1 = one full compressed decadal commit).
    */
   runGeomorphologyStep(dt: number): void {
     this.ensureStructureFresh();
@@ -1039,6 +1045,7 @@ export class WorldState {
     const strandBio = this.strandBiomass.data;
     const binderBio = this.binderBiomass.data;
     const exposure = this.shoreExposure.data;
+    const depression = this.depressionDepth.data;
     const acc = this.flowAccumulation;
     const filled = this.filledElevation ?? elev;
     const dx = config.cellSizeMeters;
@@ -1047,10 +1054,19 @@ export class WorldState {
     const h0 = config.soilProductionH0;
     const kCoast = config.shoreErosionK * scale;
     const retain = Math.min(1, Math.max(0, config.longshoreRetainFraction));
+    const retainHs = Math.min(
+      1,
+      Math.max(0, config.hillslopeSedimentRetainFraction),
+    );
     const aMin = config.erosionMinAccumulation;
     const minDepth = 1e-3;
     const nCell = this.width * this.height;
     const coastRemoved = new Float32Array(nCell);
+    const hillslopeRemoved = new Float32Array(nCell);
+    // Snapshot bedrock once per band — elev = bed + depth on every write
+    // (recomputing bed mid-step from float32 elev−depth drifts past 1e-6).
+    const bedrock = new Float32Array(nCell);
+    for (let i = 0; i < nCell; i++) bedrock[i] = elev[i]! - depth[i]!;
     let dirty = false;
     let shoreOcean = 0;
 
@@ -1061,7 +1077,7 @@ export class WorldState {
         const h = depth[i]!;
         const prod = p0 * Math.exp(-h / h0);
 
-        let erode = 0;
+        let hillslopeErode = 0;
         const a = acc ? acc[i]! : 0;
         // C-009: living cover stack blunts hillslope + coastal work (not veg.cover alone).
         const physical = physicalCoverFrom(
@@ -1074,25 +1090,27 @@ export class WorldState {
           config.binderBiomassMax,
         );
         const cFactor = 1 - physical * 0.85;
-        if (a >= aMin) {
+        // Ponded cells (Priority-Flood residual): no hillslope incision —
+        // water-surface slope is flat; Exner sinks receive load instead.
+        if (a >= aMin && depression[i]! <= 1e-6) {
           const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
           const aNorm = Math.min(1, a / (this.width * this.height));
           const kE = substrateProps(mat[i]!).erosionK * scale;
-          erode = kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
+          hillslopeErode =
+            kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
         }
 
         // C-017: fetch×wind exposure contributes here — geomorphology integrates.
         // Living mats blunt coastal remobilization (C-009 / thesis payoff #2).
         const coast = kCoast * exposure[i]! * cFactor;
-        erode += coast;
+        const erode = hillslopeErode + coast;
 
-        let dh = prod - erode;
+        const dh = prod - erode;
         let nextH = Math.min(5, Math.max(0, h + dh));
         let actualDh = nextH - h;
-        const nextElev = elev[i]! + actualDh;
-        if (nextElev < zFloor) {
-          actualDh = zFloor - elev[i]!;
-          nextH = Math.min(5, Math.max(0, h + actualDh));
+        const bed = bedrock[i]!;
+        if (bed + nextH < zFloor) {
+          nextH = Math.min(5, Math.max(0, zFloor - bed));
           actualDh = nextH - h;
         }
 
@@ -1102,9 +1120,13 @@ export class WorldState {
           // Conserve column water; spill past porosity to surface (erosion).
           this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
           depth[i]! = nextH;
-          elev[i]! = elev[i]! + actualDh;
-          if (actualDh < 0 && coast > 0 && erode > 0) {
-            coastRemoved[i]! = -actualDh * (coast / erode);
+          elev[i]! = bedrock[i]! + nextH;
+          if (actualDh < 0 && erode > 0) {
+            const removed = -actualDh;
+            if (coast > 0) coastRemoved[i]! = removed * (coast / erode);
+            if (hillslopeErode > 0) {
+              hillslopeRemoved[i]! = removed * (hillslopeErode / erode);
+            }
           }
           dirty = true;
         }
@@ -1157,11 +1179,77 @@ export class WorldState {
           const newH = Math.max(nextH, minDepth);
           this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
           depth[i]! = nextH;
-          elev[i]! = elev[i]! + actual;
+          elev[i]! = bedrock[i]! + nextH;
           dirty = true;
         }
       } else {
         shoreOcean += mobile;
+      }
+    }
+
+    // Exner-lite: retained hillslope removals → basins / flats / local minima.
+    let mobileHs = 0;
+    for (let i = 0; i < nCell; i++) {
+      const c = hillslopeRemoved[i]!;
+      if (c <= 0) continue;
+      mobileHs += c * retainHs;
+      shoreOcean += c * (1 - retainHs);
+    }
+
+    if (mobileHs > 0) {
+      let weightSum = 0;
+      const weights = new Float32Array(nCell);
+      const cellCount = this.width * this.height;
+      for (let z = 0; z < this.height; z++) {
+        for (let x = 0; x < this.width; x++) {
+          const i = z * this.width + x;
+          if (this.oceanCells.has(i)) continue;
+          const a = acc ? acc[i]! : 0;
+          const aNorm = Math.min(1, a / cellCount);
+          const slope = neighborSlope(
+            filled,
+            this.width,
+            this.height,
+            x,
+            z,
+            dx,
+          );
+          const concentrated = a >= aMin && slope > 1e-4;
+          const w = hillslopeDepositWeight({
+            slope,
+            depressionDepth: depression[i]!,
+            aNorm,
+            isLocalMin: isLocalMinimum(elev, this.width, this.height, x, z),
+            concentratedFlow: concentrated,
+          });
+          if (w <= 0) continue;
+          weights[i]! = w;
+          weightSum += w;
+        }
+      }
+      if (weightSum > 0) {
+        for (let i = 0; i < nCell; i++) {
+          const w = weights[i]!;
+          if (w <= 0) continue;
+          const add = (mobileHs * w) / weightSum;
+          if (add <= 0) continue;
+          const h = depth[i]!;
+          const nextH = Math.min(5, h + add);
+          const actual = nextH - h;
+          if (actual <= 0) {
+            shoreOcean += add;
+            continue;
+          }
+          shoreOcean += add - actual;
+          const oldH = Math.max(h, minDepth);
+          const newH = Math.max(nextH, minDepth);
+          this.adjustMoistureForDepthChange(i, oldH, newH, nextH);
+          depth[i]! = nextH;
+          elev[i]! = bedrock[i]! + nextH;
+          dirty = true;
+        }
+      } else {
+        shoreOcean += mobileHs;
       }
     }
 

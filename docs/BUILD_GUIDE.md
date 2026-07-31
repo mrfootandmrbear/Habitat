@@ -109,8 +109,9 @@ Summary only — do not reopen unless fixing regressions.
 | **N3** | Onshore spray stress (**NS-003**) | Windward stalls herb; strand holds | `f_spray`, `spray-arrival` | **Done** — agent (C-017 **Locked**) |
 | **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
+| **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered; **C-005** machine Done (dossier — Lock owner). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-006** CI promote (§4.28) when free; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) incl. C-005 / C-020.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered; **C-005** machine Done (dossier — Lock owner). **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-006** CI promote (§4.28) when free; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) incl. C-005 / C-020.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005** (machine Done), **C-020** (Hold Lock), **C-014** (audio env), **U-006** (unanswered).
 
@@ -839,6 +840,23 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.29 Slice E — Exner-lite inland hillslope deposit *(Done — agent)*
+
+**Why this exists.** Slice 8 eroded near-channel soil but destroyed the mass. NATURAL_PROCESS_MATH §3.8 Exner + GEO-002 require deposition where capacity drops. Mei-class capacity fudge (study) — not Hjulström gates, not a second Process.
+
+**Loops.** Sim: hillslope removals → basin/flat redeposit inside geomorphology; ponds do not incise. Game: same castle, channels cut and hollows silt under one force regime.
+
+**Register / candidates.** GEO-002 Locked; **C-002** Open (spatial cost reading unchanged). D-007 exempt (no new Process).
+
+**Bans.** Virtual-pipe SWE authority; droplet particle sim; second sediment writer; inventing Locked Hjulström multi-grain policy.
+
+- [x] `hillslopeDeposit.ts` weights + pond no-incise; integrate in `runGeomorphologyStep`
+- [x] Tier-M tests + probe `hillslope-deposit`; `docs/slices/E.json` + composition
+- [x] EXTERNAL_REFERENCES study log row (Mei-class capacity fudge)
+- [x] **Next-but-one:** remains C-006 (§4.28)
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -852,6 +870,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N3 / NS-003 | Onshore spray stress | C-017, C-018 | **Done** (§4.25) |
 | N5 / NS-005 | Sandy crest sand-binder | W-003, C-017, C-009 | **Done** (§4.26) |
 | B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Lock owner |
+| E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) |
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
