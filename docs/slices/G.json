@@ -1,0 +1,26 @@
+{
+  "id": "G",
+  "title": "Season + erosion-intensity force dials (C-021 / C-022)",
+  "simLoop": "Season pressure scales how strongly the seasonal establishment tick pushes every guild (day-length/phenology referent, distinct from Heat's temperature gate); erosion intensity scales the existing hillslope + coastal erosion terms only (never soil production) under one GEO-002 law. Both are static force-dial multipliers, neutral at 1, with no cell arguments.",
+  "gameLoop": "If I set the season dial to long and the erosion dial to stormy, growth should push harder across the whole preserve and the same slope should wear down faster — without either dial ever targeting a place or duplicating Heat.",
+  "registerIds": ["C-021", "C-022", "C-004", "C-011", "T-001", "T-004", "H-004", "S-007", "N-004"],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/seasonRegime.test.ts",
+    "src/sim/erosionIntensity.test.ts"
+  ],
+  "probes": ["season-regime", "erosion-intensity"],
+  "fields": [
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "terrain.elevation",
+    "soil.depth",
+    "ledger.shoreErosion"
+  ],
+  "notebookSeed": "Turn the season up and the hollow grows faster; turn the storms up and the same slope wears down quicker — the place answers to how hard each force works, not to where you point.",
+  "tierO": "no owner-only question this closeout — machine half only (CI-judged: no-targeting, paired divergence, mass conservation); Lock taste sitting deferred to the owner (C-021/C-022 dossiers)"
+}

@@ -282,6 +282,10 @@ export class WorldState {
   /** Global wind components (unit-ish) — C-004 / C-017 force dial. */
   private windUx = 0;
   private windUz = 0;
+  /** Phenology-pressure multiplier on the seasonal tick (C-021). 1 = neutral. */
+  private seasonPressureMultiplier = 1;
+  /** Storminess multiplier on hillslope + coastal erosion (C-022). 1 = neutral. */
+  private erosionIntensityMultiplier = 1;
   /** Climate moisture archetype (C-004 / C-020) — no cell targeting. */
   private rainRegimeId: RainRegimeId = "dry";
   /** Atmosphere delivery armed only after setRainRegime (probes may still addRain). */
@@ -355,6 +359,10 @@ export class WorldState {
       /** Global wind (C-004 / C-017) — no cell targeting. */
       windUx?: number;
       windUz?: number;
+      /** Season force dial multiplier (C-021). Default 1 (neutral / "typical"). */
+      seasonPressure?: number;
+      /** Erosion force dial multiplier (C-022). Default 1 (neutral / "moderate"). */
+      erosionIntensity?: number;
       /**
        * Authored island isolation in cells (C-019). Used when seaLevel is set.
        * Larger → lower eligible richness / overseas seed pressure.
@@ -454,6 +462,18 @@ export class WorldState {
       options?.windUz !== undefined && Number.isFinite(options.windUz)
         ? options.windUz
         : 0;
+    this.seasonPressureMultiplier =
+      options?.seasonPressure !== undefined &&
+      Number.isFinite(options.seasonPressure) &&
+      options.seasonPressure > 0
+        ? options.seasonPressure
+        : 1;
+    this.erosionIntensityMultiplier =
+      options?.erosionIntensity !== undefined &&
+      Number.isFinite(options.erosionIntensity) &&
+      options.erosionIntensity >= 0
+        ? options.erosionIntensity
+        : 1;
     this.isolationCells =
       options?.islandIsolation !== undefined &&
       Number.isFinite(options.islandIsolation) &&
@@ -591,6 +611,28 @@ export class WorldState {
     this.windUx = Number.isFinite(ux) ? ux : 0;
     this.windUz = Number.isFinite(uz) ? uz : 0;
     this.recomputeShoreExposure();
+  }
+
+  /** Season force dial multiplier (C-021) — no cell targeting. 1 = neutral. */
+  get seasonPressure(): number {
+    return this.seasonPressureMultiplier;
+  }
+
+  /** Set season pressure multiplier. Non-finite / non-positive is a no-op. */
+  setSeasonPressure(multiplier: number): void {
+    if (!Number.isFinite(multiplier) || multiplier <= 0) return;
+    this.seasonPressureMultiplier = multiplier;
+  }
+
+  /** Erosion force dial multiplier (C-022) — no cell targeting. 1 = neutral. */
+  get erosionIntensity(): number {
+    return this.erosionIntensityMultiplier;
+  }
+
+  /** Set erosion intensity multiplier. Non-finite / negative is a no-op. */
+  setErosionIntensity(multiplier: number): void {
+    if (!Number.isFinite(multiplier) || multiplier < 0) return;
+    this.erosionIntensityMultiplier = multiplier;
   }
 
   /** Climate rainfall archetype (C-004 / C-020) — global only. */
@@ -1128,7 +1170,10 @@ export class WorldState {
     const zFloor = config.elevationFloor;
     const p0 = config.soilProductionP0 * scale;
     const h0 = config.soilProductionH0;
-    const kCoast = config.shoreErosionK * scale;
+    // Erosion intensity (C-022) scales disturbance work only — never
+    // production (weathering is not a storminess referent, N-004).
+    const erosionScale = scale * this.erosionIntensityMultiplier;
+    const kCoast = config.shoreErosionK * erosionScale;
     const retain = Math.min(1, Math.max(0, config.longshoreRetainFraction));
     const retainHs = Math.min(
       1,
@@ -1177,7 +1222,7 @@ export class WorldState {
         if (a >= aMin && depression[i]! <= 1e-6) {
           const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
           const aNorm = Math.min(1, a / (this.width * this.height));
-          const kE = substrateProps(mat[i]!).erosionK * scale;
+          const kE = substrateProps(mat[i]!).erosionK * erosionScale;
           hillslopeErode =
             kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
         }
@@ -1561,7 +1606,10 @@ export class WorldState {
    * (physical contribution via physicalCover in runVegetationStep — Slice 13).
    */
   runHerbEstablishmentStep(dt: number): void {
-    const scale = Math.max(0, dt);
+    // Season pressure (C-021) scales how strongly this tick pushes every
+    // guild's establishment — a day-length / growing-season referent
+    // distinct from Heat's temperature gate (C-011).
+    const scale = Math.max(0, dt) * this.seasonPressureMultiplier;
     const herbSeed = this.herbSeedBank.data;
     const herbHsi = this.habitatSuitability.data;
     const herbBiomass = this.herbBiomass.data;

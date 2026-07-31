@@ -115,12 +115,13 @@ Summary only — do not reopen unless fixing regressions.
 | **N11** | Cryptogam crust bootstrap (**NS-011**) | Damp bare crust; dry/shaded/salty stall | `veg.*.crust`, `crust-arrival` | **Done** — agent (C-007 stage-2) |
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — C-005 Locked as tooling (v2.0.12) |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
+| **G** | Season + erosion-intensity dials (**C-021** / **C-022**) | Long season pushes growth; stormy wears the slope faster | `seasonRegime.ts`, `erosionRegime.ts`, `season-regime`, `erosion-intensity` | **Done** — agent machine half; both Open (owner Lock sitting outstanding) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** residual Lock **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)). **C-010** implement under Open later. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** residual Lock **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)); **C-021** / **C-022** taste Lock sitting. **C-010** implement under Open later. Nutrients / animals stay off tip.
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding).
 
-**Next (executable tip):** residual Lock **C-014** when hearable. **C-010** framing Done — implement later under Open. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** residual Lock **C-014** when hearable; **C-021** / **C-022** taste sitting. **C-010** framing Done — implement later under Open. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -937,6 +938,23 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.35 Slice G — Season + erosion-intensity force dials *(Done — machine; both Open)*
+
+**Why this exists.** The two empty Force-panel stubs named in AGENTS.md, the [gap review](reviews/2026-07-30-sim-gap-review.md), and [ISLAND_FORCES.md](ISLAND_FORCES.md); both gated only on C-006 (Locked); DECISION_CONFORMANCE explicitly permits sharing one slice.
+
+**Register:** C-004 Locked; C-011 Locked; T-001; T-004; H-004; S-007; N-004; C-021 Open; C-022 Open
+**New Process?** no — season scales the existing seasonal `vegetation` tick; erosion scales the existing `geomorphology` erosion terms (never production). D-007 clip gate does not apply.
+
+- [x] Season pressure multiplier (`short`/`typical`/`long`) on `runHerbEstablishmentStep`; `typical` = 1 neutral
+- [x] Erosion intensity multiplier (`calm`/`moderate`/`stormy`) on hillslope + coastal erosion terms only; `moderate` = 1 neutral
+- [x] `ForceSettings` extended; travels through branch/save for free (no `branch.ts` changes)
+- [x] Two new Force-panel selects, no cell arguments
+- [x] Probes `season-regime` / `erosion-intensity`: paired divergence, neutral-default regression guard, mass conservation (erosion), replay determinism
+- [x] Composition + manifest ([G-composition.md](slices/G-composition.md), [G.json](slices/G.json)); dossiers [C-021](candidates/C-021-dossier.md) / [C-022](candidates/C-022-dossier.md) — machine half only, **do not Lock**
+- [x] **Next-but-one:** owner Lock sitting for C-021/C-022 taste (+ residual C-014); if no sitting, file storm-surge / freshwater-lens candidates from [ISLAND_FORCES.md](ISLAND_FORCES.md) owner gaps
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -957,11 +975,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Locked tooling v2.0.12 |
 | E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) — C-002 Locked v2.0.12 |
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
-| — | Season + erosion dials filed | C-021, C-022 | register v2.0.11 |
+| G | Season + erosion-intensity dials | C-021, C-022, T-001, T-004, H-004, S-007, N-004 | **Done** (§4.35) — machine only, both Open |
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** residual Lock **C-014**; **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **Next:** residual Lock **C-014**; **C-021**/**C-022** taste sitting; **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

@@ -18,8 +18,8 @@
 | Salinity / salt spray | **Deferred** (20) | First everyday **C-010** instance (**C-018**). |
 | Overseas seed pressure | **Derived** (shipped; Slice 21) | Shore-biased overseas kernel × \(S_{\text{elig}}=f(A,d)\) on island worlds (**C-019**). Mainland perimeter rain retained when seaLevel absent. |
 | Clouds → rain/snow/sleet | **Dial + Process** (shipped; full **C-020**) | Atmosphere Process + Heat dial; rainfall dial charges cloud; storm discharges; phase from air temp. SWE store optional later. Named Hold-Lock glitches G1–G5 in [C-020-dossier](candidates/C-020-dossier.md). |
-| Season / climate regime (beyond precip mean) | **Dial** (Open **C-021**) | Filed from THESIS §4; seasonal band runs with no player regime today. |
-| Erosion / geomorph intensity | **Dial** (Open **C-022**) | Filed from THESIS §4; geomorph runs at fixed intensity. |
+| Season / climate regime (beyond precip mean) | **Dial** (Open **C-021** — wired, Slice G) | Phenology-pressure multiplier on the seasonal tick; machine half done, owner Lock sitting outstanding. |
+| Erosion / geomorph intensity | **Dial** (Open **C-022** — wired, Slice G) | Storminess multiplier on existing erosion terms; machine half done, owner Lock sitting outstanding. |
 | Storm surge | **Deferred** | Unfiled gap — do not invent a C-id here. |
 | Freshwater lens | **Deferred** | GW × salt; needs C-018 path. |
 | Runoff, infil, GW, ET, erosion, fire, aspect/light | **Inherited** | Terrestrial ladder already shipped. |

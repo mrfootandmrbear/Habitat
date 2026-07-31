@@ -614,6 +614,32 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.replayMatch": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "season-regime": {
+    "short.herbBiomass": { abs: 1e-6 },
+    "short.pressure": { abs: 0 },
+    "typical.herbBiomass": { abs: 1e-6 },
+    "typical.pressure": { abs: 0 },
+    "long.herbBiomass": { abs: 1e-6 },
+    "long.pressure": { abs: 0 },
+    "delta.seasonDelta": { abs: 1e-6 },
+    "delta.neutralMatch": { abs: 0 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.hashN": { abs: 0 },
+  },
+  "erosion-intensity": {
+    "calm.channelLoss": { abs: 1e-6 },
+    "calm.intensity": { abs: 0 },
+    "calm.massOk": { abs: 0 },
+    "moderate.channelLoss": { abs: 1e-6 },
+    "moderate.intensity": { abs: 0 },
+    "stormy.channelLoss": { abs: 1e-6 },
+    "stormy.intensity": { abs: 0 },
+    "stormy.massOk": { abs: 0 },
+    "delta.intensityDelta": { abs: 1e-6 },
+    "delta.neutralMatch": { abs: 0 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.hashN": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

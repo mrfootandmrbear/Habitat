@@ -469,6 +469,8 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
       sea: "none",
       tide: "off",
       wind: "calm",
+      season: "typical",
+      erosion: "moderate",
     };
     const root = new WorldState(generateMountain(12, 12, 4, 9));
     applyForces(root, base);

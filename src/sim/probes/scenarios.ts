@@ -12,6 +12,8 @@ import {
 import { heatById } from "../climate/atmosphere";
 import { fillOrographicRainDepths } from "../climate/orographicPrecip";
 import { windById, type WindId } from "../climate/windRegime";
+import { seasonById, type SeasonId } from "../climate/seasonRegime";
+import { erosionById, type ErosionId } from "../climate/erosionRegime";
 import { meanExposure } from "../climate/shoreExposure";
 import {
   LIMITING_DEPTH,
@@ -508,6 +510,8 @@ export function probeBranchCompare(): ProbeResult {
     sea: "none",
     tide: "off",
     wind: "calm",
+    season: "typical",
+    erosion: "moderate",
   };
 
   const root = new WorldState(generateMountain(16, 16, 5, seed));
@@ -3986,6 +3990,239 @@ export function probeHillslopeDeposit(): ProbeResult {
   };
 }
 
+/**
+ * C-021 — season force dial: phenology-pressure multiplier on the seasonal
+ * establishment tick, distinct from Heat's temperature gate (C-011/C-004).
+ * Long season pressure earns more herb biomass than short under one seed
+ * schedule; typical (=1) reproduces the pre-dial unscaled establishment step
+ * exactly (regression guard — every prior probe never touches this dial).
+ */
+export function probeSeasonRegime(): ProbeResult {
+  const w = 8;
+  const h = 8;
+  const sx = 4;
+  const sz = 4;
+
+  const make = (seasonId?: SeasonId) => {
+    const world = new WorldState(new Grid2D(w, h, 2));
+    world.setAirTemperature(heatById("warm").airTempC);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.runHabitatStep(1);
+    world.herbSeedBank.fill(config.seedSourceStrength);
+    if (seasonId) world.setSeasonPressure(seasonById(seasonId).pressure);
+    world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const untouched = make();
+  const short = make("short");
+  const typical = make("typical");
+  const typicalB = make("typical");
+  const long = make("long");
+
+  const shortBiomass = short.getHerbBiomass(sx, sz);
+  const typicalBiomass = typical.getHerbBiomass(sx, sz);
+  const longBiomass = long.getHerbBiomass(sx, sz);
+  const seasonDelta = longBiomass - shortBiomass;
+  const replayMatch = typical.stateHash() === typicalB.stateHash() ? 1 : 0;
+  const neutralMatch =
+    untouched.getHerbBiomass(sx, sz) === typicalBiomass ? 1 : 0;
+
+  if (replayMatch !== 1) {
+    throw new Error("season-regime: typical replay hash mismatch");
+  }
+  if (neutralMatch !== 1) {
+    throw new Error(
+      "season-regime: untouched dial diverged from explicit typical",
+    );
+  }
+  if (!(shortBiomass > 0)) {
+    throw new Error(
+      `season-regime: short biomass should be positive (${shortBiomass})`,
+    );
+  }
+  if (!(seasonDelta > 0)) {
+    throw new Error(
+      `season-regime: long−short biomass delta too small (${seasonDelta})`,
+    );
+  }
+  if (!(typicalBiomass > shortBiomass && typicalBiomass < longBiomass)) {
+    throw new Error(
+      `season-regime: typical (${typicalBiomass}) not between short/long`,
+    );
+  }
+
+  return {
+    scenario: "season-regime",
+    records: [
+      {
+        label: "short",
+        herbBiomass: shortBiomass,
+        pressure: seasonById("short").pressure,
+      },
+      {
+        label: "typical",
+        herbBiomass: typicalBiomass,
+        pressure: seasonById("typical").pressure,
+      },
+      {
+        label: "long",
+        herbBiomass: longBiomass,
+        pressure: seasonById("long").pressure,
+      },
+      {
+        label: "delta",
+        seasonDelta,
+        neutralMatch,
+        replayMatch,
+        hashN: Number.parseInt(typical.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
+ * C-022 — erosion intensity force dial: storminess multiplier on hillslope +
+ * coastal erosion terms only, never soil production (N-004, GEO-002/T-004 —
+ * one law, dialled intensity). Stormy erodes the channel more than calm on
+ * identical terrain; moderate (=1) reproduces the pre-dial unscaled
+ * geomorphology step exactly; mass conserved under both regimes (H-004).
+ */
+export function probeErosionIntensity(): ProbeResult {
+  const w = 10;
+  const h = 8;
+  const pit = 3 * w + 4;
+
+  const make = (erosionId?: ErosionId) => {
+    const terrain = new Grid2D(w, h);
+    for (let z = 0; z < h; z++) {
+      for (let x = 0; x < w; x++) {
+        let e = x * 0.5 + 2;
+        if (x === 4 && z === 3) e = 0.5;
+        terrain.set(x, z, e);
+      }
+    }
+    const world = new WorldState(terrain);
+    world.soilDepth.fill(2.5);
+    world.vegCover.fill(0);
+    world.ensureStructureFresh();
+    if (erosionId) world.setErosionIntensity(erosionById(erosionId).intensity);
+    return world;
+  };
+
+  const sumDepth = (world: WorldState): number => {
+    let s = 0;
+    for (let i = 0; i < w * h; i++) s += world.soilDepth.data[i]!;
+    return s;
+  };
+
+  const untouched = make();
+  const calm = make("calm");
+  const moderate = make("moderate");
+  const moderateB = make("moderate");
+  const stormy = make("stormy");
+
+  let channelI = 0;
+  let bestA = 0;
+  for (let i = 0; i < w * h; i++) {
+    if (i === pit) continue;
+    const acc = untouched.flowAccumulation![i]!;
+    if (acc > bestA) {
+      bestA = acc;
+      channelI = i;
+    }
+  }
+  if (bestA < config.erosionMinAccumulation) {
+    throw new Error(
+      "erosion-intensity: no channel cell above accumulation gate",
+    );
+  }
+
+  const chH0 = untouched.soilDepth.data[channelI]!;
+  const calmSum0 = sumDepth(calm);
+  const stormySum0 = sumDepth(stormy);
+
+  for (let n = 0; n < 12; n++) {
+    untouched.runGeomorphologyStep(1);
+    calm.runGeomorphologyStep(1);
+    moderate.runGeomorphologyStep(1);
+    moderateB.runGeomorphologyStep(1);
+    stormy.runGeomorphologyStep(1);
+  }
+
+  const calmLoss = chH0 - calm.soilDepth.data[channelI]!;
+  const moderateLoss = chH0 - moderate.soilDepth.data[channelI]!;
+  const stormyLoss = chH0 - stormy.soilDepth.data[channelI]!;
+
+  const replayMatch = moderate.stateHash() === moderateB.stateHash() ? 1 : 0;
+  const neutralMatch =
+    untouched.soilDepth.data[channelI] === moderate.soilDepth.data[channelI]
+      ? 1
+      : 0;
+  const massOkCalm = sumDepth(calm) + 1e-6 >= calmSum0 ? 1 : 0;
+  const massOkStormy = sumDepth(stormy) + 1e-6 >= stormySum0 ? 1 : 0;
+
+  if (replayMatch !== 1) {
+    throw new Error("erosion-intensity: moderate replay hash mismatch");
+  }
+  if (neutralMatch !== 1) {
+    throw new Error(
+      "erosion-intensity: untouched dial diverged from explicit moderate",
+    );
+  }
+  if (!(calmLoss > 0)) {
+    throw new Error(
+      `erosion-intensity: calm channel loss should be positive (${calmLoss})`,
+    );
+  }
+  if (!(stormyLoss > calmLoss)) {
+    throw new Error(
+      `erosion-intensity: stormy loss (${stormyLoss}) not greater than calm (${calmLoss})`,
+    );
+  }
+  if (massOkCalm !== 1) {
+    throw new Error("erosion-intensity: calm run leaked mass (H-004)");
+  }
+  if (massOkStormy !== 1) {
+    throw new Error("erosion-intensity: stormy run leaked mass (H-004)");
+  }
+
+  return {
+    scenario: "erosion-intensity",
+    records: [
+      {
+        label: "calm",
+        channelLoss: calmLoss,
+        intensity: erosionById("calm").intensity,
+        massOk: massOkCalm,
+      },
+      {
+        label: "moderate",
+        channelLoss: moderateLoss,
+        intensity: erosionById("moderate").intensity,
+      },
+      {
+        label: "stormy",
+        channelLoss: stormyLoss,
+        intensity: erosionById("stormy").intensity,
+        massOk: massOkStormy,
+      },
+      {
+        label: "delta",
+        intensityDelta: stormyLoss - calmLoss,
+        neutralMatch,
+        replayMatch,
+        hashN: Number.parseInt(moderate.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -4022,6 +4259,8 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "substrate-deposit": probeSubstrateDeposit,
   "hillslope-deposit": probeHillslopeDeposit,
   "cloud-delivery": probeCloudDelivery,
+  "season-regime": probeSeasonRegime,
+  "erosion-intensity": probeErosionIntensity,
 };
 
 export function runProbe(name: string): ProbeResult {

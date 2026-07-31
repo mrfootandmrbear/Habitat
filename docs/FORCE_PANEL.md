@@ -26,13 +26,11 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 | **Sea** | off / low / mid / high | Global sea datum (**C-015**). |
 | **Tide** | off / neap / mean / spring | MHW/MLW envelope half-range around sea (**C-016**). No per-event phase. |
 | **Wind** | calm / from west / east / south / north | Global wind vector; orographic mean rain (**C-020**) and shore exposure (**C-017**). |
+| **Season** | short / typical / long | Phenology-pressure multiplier on the seasonal establishment tick (**C-021**, Slice G) — day-length / growing-season referent, distinct from Heat's temperature gate. `typical` = 1 is neutral. Machine half only; owner Lock sitting outstanding. |
+| **Erosion intensity** | calm / moderate / stormy | Storminess multiplier on the existing hillslope + coastal erosion terms (**C-022**, Slice G) — never scales soil production, never a second erosion Process. `moderate` = 1 is neutral. Machine half only; owner Lock sitting outstanding. |
 
 Chrome: one **Forces** group containing these selects (exact labels in `src/ui/controls.ts`). No cell arguments on any handler.
 
-## Stubs (empty slots — Open candidates; do not invent Locked policy)
-
-- **Season** — **C-021** (filed; no dial yet)
-- **Erosion intensity** — **C-022** (filed; geomorph runs at fixed intensity)
 ## Geography as modulator
 
 Under a fixed rainfall mean and wind:

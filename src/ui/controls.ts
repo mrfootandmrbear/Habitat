@@ -20,6 +20,14 @@ import {
   type WindId,
 } from "../sim/climate/windRegime";
 import {
+  SEASON_REGIMES,
+  type SeasonId,
+} from "../sim/climate/seasonRegime";
+import {
+  EROSION_REGIMES,
+  type ErosionId,
+} from "../sim/climate/erosionRegime";
+import {
   SUBSTRATE_CLAY,
   SUBSTRATE_ROCK,
   SUBSTRATE_SAND,
@@ -88,6 +96,8 @@ export function mountControls(
     seaLevel: SeaLevelId;
     tide: TideId;
     wind: WindId;
+    season: SeasonId;
+    erosion: ErosionId;
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
@@ -99,6 +109,8 @@ export function mountControls(
     onSeaLevel: (id: SeaLevelId) => void;
     onTide: (id: TideId) => void;
     onWind: (id: WindId) => void;
+    onSeason: (id: SeasonId) => void;
+    onErosion: (id: ErosionId) => void;
     onReset: () => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
@@ -125,6 +137,8 @@ export function mountControls(
   setSeaLevel: (id: SeaLevelId) => void;
   setTide: (id: TideId) => void;
   setWind: (id: WindId) => void;
+  setSeason: (id: SeasonId) => void;
+  setErosion: (id: ErosionId) => void;
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
@@ -230,7 +244,49 @@ export function mountControls(
     handlers.onWind(windSelect.value as WindId);
   });
 
-  forcePanel.append(rainSelect, heatSelect, seaSelect, tideSelect, windSelect);
+  const seasonSelect = document.createElement("select");
+  seasonSelect.id = "season-regime";
+  seasonSelect.setAttribute(
+    "aria-label",
+    "Season (C-021 force dial — phenology pressure, distinct from Heat)",
+  );
+  for (const regime of SEASON_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    seasonSelect.appendChild(opt);
+  }
+  seasonSelect.value = initial.season;
+  seasonSelect.addEventListener("change", () => {
+    handlers.onSeason(seasonSelect.value as SeasonId);
+  });
+
+  const erosionSelect = document.createElement("select");
+  erosionSelect.id = "erosion-intensity";
+  erosionSelect.setAttribute(
+    "aria-label",
+    "Erosion intensity (C-022 force dial — storminess, no cell targeting)",
+  );
+  for (const regime of EROSION_REGIMES) {
+    const opt = document.createElement("option");
+    opt.value = regime.id;
+    opt.textContent = regime.label;
+    erosionSelect.appendChild(opt);
+  }
+  erosionSelect.value = initial.erosion;
+  erosionSelect.addEventListener("change", () => {
+    handlers.onErosion(erosionSelect.value as ErosionId);
+  });
+
+  forcePanel.append(
+    rainSelect,
+    heatSelect,
+    seaSelect,
+    tideSelect,
+    windSelect,
+    seasonSelect,
+    erosionSelect,
+  );
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
@@ -485,6 +541,12 @@ export function mountControls(
     },
     setWind: (id) => {
       windSelect.value = id;
+    },
+    setSeason: (id) => {
+      seasonSelect.value = id;
+    },
+    setErosion: (id) => {
+      erosionSelect.value = id;
     },
     setTimeRate: syncTimeRate,
     setInspector: (layer) => {

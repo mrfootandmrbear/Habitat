@@ -12,6 +12,16 @@ import {
 } from "./climate/seaLevel";
 import { TIDE_REGIMES, tideById, type TideId } from "./climate/tidalEnvelope";
 import { WIND_REGIMES, windById, type WindId } from "./climate/windRegime";
+import {
+  SEASON_REGIMES,
+  seasonById,
+  type SeasonId,
+} from "./climate/seasonRegime";
+import {
+  EROSION_REGIMES,
+  erosionById,
+  type ErosionId,
+} from "./climate/erosionRegime";
 import type { WorldState } from "./WorldState";
 
 export type ForceSettings = {
@@ -20,6 +30,8 @@ export type ForceSettings = {
   sea: SeaLevelId;
   tide: TideId;
   wind: WindId;
+  season: SeasonId;
+  erosion: ErosionId;
 };
 
 export const DEFAULT_FORCE_SETTINGS: ForceSettings = {
@@ -28,6 +40,8 @@ export const DEFAULT_FORCE_SETTINGS: ForceSettings = {
   sea: "mid",
   tide: "off",
   wind: "west",
+  season: "typical",
+  erosion: "moderate",
 };
 
 /** Apply global force dials — no cell targeting (C-004). */
@@ -38,6 +52,8 @@ export function applyForces(world: WorldState, forces: ForceSettings): void {
   world.setTidalAmplitude(tideById(forces.tide).amplitudeMeters);
   const w = windById(forces.wind);
   world.setWind(w.ux, w.uz);
+  world.setSeasonPressure(seasonById(forces.season).pressure);
+  world.setErosionIntensity(erosionById(forces.erosion).intensity);
 }
 
 /**
@@ -51,6 +67,8 @@ export function captureForcesFromWorld(world: WorldState): ForceSettings {
     sea: seaIdFromMeters(world.seaLevel),
     tide: tideIdFromAmplitude(world.tidalAmplitude),
     wind: windIdFromComponents(world.wind.ux, world.wind.uz),
+    season: seasonIdFromPressure(world.seasonPressure),
+    erosion: erosionIdFromIntensity(world.erosionIntensity),
   };
 }
 
@@ -60,7 +78,9 @@ export function forcesEqual(a: ForceSettings, b: ForceSettings): boolean {
     a.heat === b.heat &&
     a.sea === b.sea &&
     a.tide === b.tide &&
-    a.wind === b.wind
+    a.wind === b.wind &&
+    a.season === b.season &&
+    a.erosion === b.erosion
   );
 }
 
@@ -112,6 +132,32 @@ function windIdFromComponents(ux: number, uz: number): WindId {
     if (d < bestDist) {
       bestDist = d;
       best = w.id;
+    }
+  }
+  return best;
+}
+
+function seasonIdFromPressure(pressure: number): SeasonId {
+  let best: SeasonId = SEASON_REGIMES[0]!.id;
+  let bestDist = Infinity;
+  for (const s of SEASON_REGIMES) {
+    const d = Math.abs(s.pressure - pressure);
+    if (d < bestDist) {
+      bestDist = d;
+      best = s.id;
+    }
+  }
+  return best;
+}
+
+function erosionIdFromIntensity(intensity: number): ErosionId {
+  let best: ErosionId = EROSION_REGIMES[0]!.id;
+  let bestDist = Infinity;
+  for (const e of EROSION_REGIMES) {
+    const d = Math.abs(e.intensity - intensity);
+    if (d < bestDist) {
+      bestDist = d;
+      best = e.id;
     }
   }
   return best;

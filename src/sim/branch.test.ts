@@ -21,6 +21,8 @@ const baseForces: ForceSettings = {
   sea: "none",
   tide: "off",
   wind: "calm",
+  season: "typical",
+  erosion: "moderate",
 };
 
 function seededWorld(): WorldState {

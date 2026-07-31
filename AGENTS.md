@@ -41,11 +41,11 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — residual Lock C-014** when hearable. **NS-011 shipped** (N11 / cryptogam crust stage-2). **NS-010 shipped** (N10 / climate-capped woody shrub). **NS-009 shipped** (N9 / salt-marsh engineer). **NS-007 shipped** (N7 / `f_light`). **NS-008 shipped** (N8 / `f_inundation`). **C-006 Locked** (v2.0.11). **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12). **C-020 Locked** (v2.0.13). **C-021** / **C-022** filed. **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-014** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
+**Executable tip — residual Lock C-014** when hearable; **C-021**/**C-022** taste sitting. **Slice G shipped** (season + erosion-intensity dials, machine half; [G-composition.md](docs/slices/G-composition.md)). **NS-011 shipped** (N11 / cryptogam crust stage-2). **NS-010 shipped** (N10 / climate-capped woody shrub). **NS-009 shipped** (N9 / salt-marsh engineer). **NS-007 shipped** (N7 / `f_light`). **NS-008 shipped** (N8 / `f_inundation`). **C-006 Locked** (v2.0.11). **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12). **C-020 Locked** (v2.0.13). **C-021** / **C-022** wired (Force-panel dials + probes) — both **Open**, owner Lock sitting outstanding — [C-021-dossier.md](docs/candidates/C-021-dossier.md) / [C-022-dossier.md](docs/candidates/C-022-dossier.md). **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-014** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
 
-**Owner Lock backlog:** A/B/**C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020** Locked · **W-001** Superseded · remaining **C-014**.
+**Owner Lock backlog:** A/B/**C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020** Locked · **W-001** Superseded · remaining **C-014**, **C-021**, **C-022** (Slice G machine half done, taste sitting outstanding).
 
-**Thesis holes (not tip):** C-012 Δx/mosaic (only if place-reading fails) · C-021/C-022 implement under Open · C-010 framing is on tip after C-013 · optional SWE only if a later snow defect appears.
+**Thesis holes (not tip):** C-012 Δx/mosaic (only if place-reading fails) · C-010 framing is on tip after C-013 · optional SWE only if a later snow defect appears.
 
 ## Cursor Cloud specific instructions
 

@@ -49,6 +49,8 @@ import {
 } from "./sim/climate/seaLevel";
 import { tideById, type TideId } from "./sim/climate/tidalEnvelope";
 import { windById, type WindId } from "./sim/climate/windRegime";
+import { seasonById, type SeasonId } from "./sim/climate/seasonRegime";
+import { erosionById, type ErosionId } from "./sim/climate/erosionRegime";
 import { FormMemory } from "./sim/formMemory";
 import { BranchSession } from "./sim/branch";
 import type { ForceSettings } from "./sim/forceSettings";
@@ -212,6 +214,8 @@ let heatId: HeatId = "warm";
 let windId: WindId = "west";
 let seaLevelId: SeaLevelId = initialSea;
 let tideId: TideId = "off";
+let seasonId: SeasonId = "typical";
+let erosionId: ErosionId = "moderate";
 let timeRate: TimeRate = "1x";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
@@ -238,6 +242,8 @@ world.setAirTemperature(heatById(heatId).airTempC);
   const w0 = windById(windId);
   world.setWind(w0.ux, w0.uz);
 }
+world.setSeasonPressure(seasonById(seasonId).pressure);
+world.setErosionIntensity(erosionById(erosionId).intensity);
 
 function runCompare(): void {
   if (prediction.phase !== "committed" && prediction.phase !== "compared") {
@@ -270,6 +276,8 @@ function currentForces(): ForceSettings {
     sea: seaLevelId,
     tide: tideId,
     wind: windId,
+    season: seasonId,
+    erosion: erosionId,
   };
 }
 
@@ -279,11 +287,15 @@ function syncForceUiFrom(forces: ForceSettings): void {
   seaLevelId = forces.sea;
   tideId = forces.tide;
   windId = forces.wind;
+  seasonId = forces.season;
+  erosionId = forces.erosion;
   ui.setRainRegime(forces.rain);
   ui.setHeat(forces.heat);
   ui.setSeaLevel(forces.sea);
   ui.setTide(forces.tide);
   ui.setWind(forces.wind);
+  ui.setSeason(forces.season);
+  ui.setErosion(forces.erosion);
   windArrow.setWind(forces.wind);
   oceanMesh.setSeaLevel(seaLevelById(forces.sea).meters);
   rebuildExtentCage();
@@ -311,6 +323,8 @@ const ui = mountControls(
     seaLevel: seaLevelId,
     tide: tideId,
     wind: windId,
+    season: seasonId,
+    erosion: erosionId,
     timeRate,
     inspector,
     sitingTool,
@@ -346,6 +360,24 @@ const ui = mountControls(
           : `${w.label} — warm mark is where the wind comes from; tip shows blow`,
       );
       syncMeshes();
+    },
+    onSeason: (id) => {
+      seasonId = id;
+      const s = seasonById(id);
+      world.setSeasonPressure(s.pressure);
+      ui.setSeason(id);
+      ui.setHint(
+        `${s.label} — how strongly the growing season pushes, not how warm it is`,
+      );
+    },
+    onErosion: (id) => {
+      erosionId = id;
+      const e = erosionById(id);
+      world.setErosionIntensity(e.intensity);
+      ui.setErosion(id);
+      ui.setHint(
+        `${e.label} — how hard the landscape-work forces act this run`,
+      );
     },
     onTide: (id) => {
       tideId = id;
