@@ -1,0 +1,16 @@
+{
+  "id": "N2",
+  "title": "Heat dial plant gate (NS-002)",
+  "simLoop": "climate.airTemperature enters Liebig HSI as f_temp; cold Heat stalls herb establishment (C-004 / C-020 hypothesis).",
+  "gameLoop": "Cold should stall green cover in an otherwise wet hollow; warm should let the same site establish.",
+  "registerIds": ["C-004", "C-020", "C-007", "C-011", "N-004", "T-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/heatArrival.test.ts",
+    "src/sim/habitat/hsi.test.ts"
+  ],
+  "probes": ["heat-arrival"],
+  "fields": ["climate.airTemperature", "habitat.suitability", "habitat.limitingFactor"],
+  "notebookSeed": "The cold spell left the hollow empty; warmth let the same wet ground take shoots.",
+  "tierO": "no owner-only question this closeout — C-004 / C-020 Lock remain owner; machine half green"
+}

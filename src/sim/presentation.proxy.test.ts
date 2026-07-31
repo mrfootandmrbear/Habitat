@@ -22,6 +22,7 @@ import {
   defaultTerrainRgb,
   intertidalEncodingDelta,
   salinityEncodingDelta,
+  saltMemoryEncodingDelta,
   substrateEncodingDelta,
 } from "../ui/terrainEncoding";
 import {
@@ -221,6 +222,14 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(
       terrainEncodingDelta(fresh, salty, config.soilPorosity),
     ).toBeGreaterThan(0.08);
+  });
+
+  it("twin-hollow salt memory outcome clears perceptual floor (C-018 engagement)", () => {
+    expect(saltMemoryEncodingDelta(config.soilPorosity)).toBeGreaterThan(0.15);
+    // Occupant wash: freshened biomass vs salt-limited twin (salinity-arrival numbers).
+    expect(
+      occupantEncodingDelta(0.375, 2.5, config.herbBiomassMax),
+    ).toBeGreaterThan(0.15);
   });
 
   it("sand vs clay dry BASE clears the perceptual floor without inspector (C-009)", () => {

@@ -17,6 +17,7 @@ import {
   LIMITING_DEPTH,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
+  LIMITING_TEMPERATURE,
 } from "../habitat/hsiComposition";
 import {
   DEEP_TIME_SIM_YEARS,
@@ -2123,6 +2124,113 @@ export function probeSalinityArrival(): ProbeResult {
 }
 
 /**
+ * C-004 / C-020 — Heat dial gates herb arrival.
+ * Warm twin earns; cold twin is temperature-limited under one seed schedule.
+ */
+export function probeHeatArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 1;
+  const sz = 8;
+
+  const make = (heatId: "warm" | "mild" | "cold") => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.setAirTemperature(heatById(heatId).airTempC);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const warmA = make("warm");
+  const warmB = make("warm");
+  const cold = make("cold");
+  const mild = make("mild");
+
+  const replayMatch =
+    warmA.stateHash() === warmB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("heat-arrival: warm replay hash mismatch");
+  }
+
+  const warmHsi = warmA.getHabitatSuitability(sx, sz);
+  const coldHsi = cold.getHabitatSuitability(sx, sz);
+  const mildHsi = mild.getHabitatSuitability(sx, sz);
+  const warmBiomass = warmA.getHerbBiomass(sx, sz);
+  const coldBiomass = cold.getHerbBiomass(sx, sz);
+  const mildBiomass = mild.getHerbBiomass(sx, sz);
+  const coldLim = cold.getLimitingFactor(sx, sz);
+  const biomassDelta = warmBiomass - coldBiomass;
+
+  if (!(warmHsi > coldHsi)) {
+    throw new Error(
+      `heat-arrival: expected warm HSI (${warmHsi}) > cold (${coldHsi})`,
+    );
+  }
+  if (coldLim !== LIMITING_TEMPERATURE) {
+    throw new Error(
+      `heat-arrival: expected cold limiting=temperature (got ${coldLim})`,
+    );
+  }
+  if (!(warmBiomass > 0.1)) {
+    throw new Error(
+      `heat-arrival: warm biomass too low (${warmBiomass})`,
+    );
+  }
+  if (!(biomassDelta > 0.05)) {
+    throw new Error(
+      `heat-arrival: biomass delta too small (${biomassDelta})`,
+    );
+  }
+  if (!(mildHsi > coldHsi && mildHsi < warmHsi + 1e-9)) {
+    throw new Error(
+      `heat-arrival: mild HSI (${mildHsi}) not between cold and warm`,
+    );
+  }
+
+  return {
+    scenario: "heat-arrival",
+    records: [
+      {
+        label: "warm",
+        hsi: warmHsi,
+        biomass: warmBiomass,
+        limiting: warmA.getLimitingFactor(sx, sz),
+        airTempC: heatById("warm").airTempC,
+      },
+      {
+        label: "mild",
+        hsi: mildHsi,
+        biomass: mildBiomass,
+        limiting: mild.getLimitingFactor(sx, sz),
+        airTempC: heatById("mild").airTempC,
+      },
+      {
+        label: "cold",
+        hsi: coldHsi,
+        biomass: coldBiomass,
+        limiting: coldLim,
+        airTempC: heatById("cold").airTempC,
+        tempLimited: coldLim === LIMITING_TEMPERATURE ? 1 : 0,
+      },
+      {
+        label: "delta",
+        biomassDelta,
+        hsiDelta: warmHsi - coldHsi,
+        mildBetween: mildHsi > coldHsi && mildHsi <= warmHsi + 1e-9 ? 1 : 0,
+        replayMatch,
+        hashN: Number.parseInt(warmA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -2671,6 +2779,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "orographic-wind": probeOrographicWind,
   "scenario-window": probeScenarioWindow,
   "salinity-arrival": probeSalinityArrival,
+  "heat-arrival": probeHeatArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,

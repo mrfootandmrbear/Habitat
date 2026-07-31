@@ -134,6 +134,18 @@ export function salinityEncodingDelta(
 }
 
 /**
+ * Twin-hollow salt memory (C-018 engagement): freshened twin greens while the salty twin
+ * stays pale and sparse — outcome pair, not equal-cover crust alone.
+ */
+export function saltMemoryEncodingDelta(porosity: number): number {
+  return terrainEncodingDelta(
+    { moisture: 0.25, cover: 0.55, salinity: 0 },
+    { moisture: 0.25, cover: 0.08, salinity: 0.85 },
+    porosity,
+  );
+}
+
+/**
  * Color distance between dry sand and dry rock under the same moisture/cover
  * (Tier-P floor for C-009 default-view substrate contrast, including rock).
  */

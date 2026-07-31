@@ -147,6 +147,12 @@ export const config = {
   hsiDepthRefMeters: 1,
   /** Slice 9 HSI — GW storage depth at which f_groundwater saturates (m). */
   hsiGwRefMeters: 0.25,
+  /**
+   * Heat plant gate — herb guild cold tolerance (°C). f_temp = 0 at/below kill,
+   * 1 at/above opt; Heat dial warm sits above opt so default HSI is unchanged.
+   */
+  herbTempKillC: -4,
+  herbTempOptC: 12,
 
   /**
    * Slice 10 — Fire / Fuel (NATURAL_PROCESS_MATH §3.5, ES-002).

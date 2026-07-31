@@ -22,7 +22,7 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 | Control | IDs | Semantics |
 |---|---|---|
 | **Rainfall** | arid / light / moderate / wet | **Climate archetype** — real-scale annual means (~150 / 550 / 1000 / 2200 mm/yr) plus spell cadence (C-020). Arid = rare desert storms; light/moderate = rain events; wet = monsoon block. Not the old cartoon rates that flooded the island. Orography places precip; no cell targeting. |
-| **Heat** | warm / mild / cold | Air temperature → precip phase rain / sleet / snow (**C-020**). |
+| **Heat** | warm / mild / cold | Air temperature → precip phase rain / sleet / snow (**C-020**); also Liebig `f_temp` for herb arrival (**C-004** / NS-002). |
 | **Sea** | off / low / mid / high | Global sea datum (**C-015**). |
 | **Tide** | off / neap / mean / spring | MHW/MLW envelope half-range around sea (**C-016**). No per-event phase. |
 | **Wind** | calm / from west / east / south / north | Global wind vector; orographic mean rain (**C-020**) and shore exposure (**C-017**). |

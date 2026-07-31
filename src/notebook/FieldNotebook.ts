@@ -22,6 +22,7 @@ export const notebookObserver = {
     "fire.scar",
     "habitat.limitingFactor",
     "soil.salinity",
+    "climate.airTemperature",
   ] as const,
   writes: [] as const,
 };

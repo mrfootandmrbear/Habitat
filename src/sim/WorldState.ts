@@ -949,6 +949,7 @@ export class WorldState {
    * Liebig HSI + limiting factor (Slice 9 / NATURAL_PROCESS_MATH §3.3).
    * Composition: docs/slices/9-composition.md — min, not product.
    * Slice 20: soil.salinity is a fourth Liebig arm (C-018).
+   * Heat plant gate: climate.airTemperature is a fifth Liebig arm (C-004 / C-020).
    */
   runHabitatStep(_dt: number): void {
     const m = this.soilMoisture.data;
@@ -961,6 +962,9 @@ export class WorldState {
     const gap = this.habitatLimitingGap.data;
     const depthRef = config.hsiDepthRefMeters;
     const gwRef = config.hsiGwRefMeters;
+    const airTempC = this.airTemperature;
+    const tempKillC = config.herbTempKillC;
+    const tempOptC = config.herbTempOptC;
 
     for (let i = 0; i < hsi.length; i++) {
       const sample = evaluateHsi({
@@ -971,6 +975,9 @@ export class WorldState {
         depthRef,
         gwRef,
         salinity: salt[i]!,
+        airTempC,
+        tempKillC,
+        tempOptC,
       });
       hsi[i] = sample.hsi;
       lim[i] = sample.limiting;

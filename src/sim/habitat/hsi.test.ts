@@ -8,7 +8,9 @@ import {
   LIMITING_GROUNDWATER,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
+  LIMITING_TEMPERATURE,
 } from "./hsiComposition";
+import { heatById } from "../climate/atmosphere";
 
 describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
   it("uses min composition — improving a non-limiting factor does not raise HSI", () => {
@@ -91,6 +93,39 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
     });
     expect(s.limiting).toBe(LIMITING_SALINITY);
     expect(s.hsi).toBeCloseTo(0.1, 8);
+  });
+
+  it("names temperature when Heat is cold (C-004)", () => {
+    const s = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      airTempC: heatById("cold").airTempC,
+      tempKillC: config.herbTempKillC,
+      tempOptC: config.herbTempOptC,
+    });
+    expect(s.limiting).toBe(LIMITING_TEMPERATURE);
+    expect(s.hsi).toBe(0);
+    expect(s.fTemp).toBe(0);
+  });
+
+  it("warm Heat leaves f_temp at 1 so moisture can still limit", () => {
+    const s = evaluateHsi({
+      moisture: 0.1,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      airTempC: heatById("warm").airTempC,
+      tempKillC: config.herbTempKillC,
+      tempOptC: config.herbTempOptC,
+    });
+    expect(s.fTemp).toBe(1);
+    expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 
   it("improving a non-limiting factor does not raise salt-limited HSI", () => {

@@ -143,6 +143,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     ],
     visibleWhen: (s) => s.modalLimitingFactor === 3 && s.landCellCount > 0,
   },
+  {
+    id: "limited-temperature",
+    event: "limited",
+    scale: "preserve",
+    sentence: "The cold spell left the hollow empty; warmth let the same wet ground take shoots.",
+    traces: [
+      {
+        fieldId: "habitat.limitingFactor",
+        evidence: "modal limiting factor is temperature (4)",
+      },
+      {
+        fieldId: "climate.airTemperature",
+        evidence: "Heat dial air temperature is the HSI argmin on land",
+      },
+    ],
+    visibleWhen: (s) => s.modalLimitingFactor === 4 && s.landCellCount > 0,
+  },
 ];
 
 /** Uncertainty preface for what-contributed (U-006 — no certainty claim). */

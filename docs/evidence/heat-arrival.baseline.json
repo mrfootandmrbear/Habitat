@@ -1,0 +1,77 @@
+{
+  "scenario": "heat-arrival",
+  "metrics": {
+    "warm.hsi": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "warm.biomass": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "warm.limiting": {
+      "value": 0,
+      "abs": 0
+    },
+    "warm.airTempC": {
+      "value": 16,
+      "abs": 0
+    },
+    "mild.hsi": {
+      "value": 0.3125,
+      "abs": 0.000001
+    },
+    "mild.biomass": {
+      "value": 0.78125,
+      "abs": 0.000001
+    },
+    "mild.limiting": {
+      "value": 4,
+      "abs": 0
+    },
+    "mild.airTempC": {
+      "value": 1,
+      "abs": 0
+    },
+    "cold.hsi": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "cold.biomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "cold.limiting": {
+      "value": 4,
+      "abs": 0
+    },
+    "cold.airTempC": {
+      "value": -8,
+      "abs": 0
+    },
+    "cold.tempLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.biomassDelta": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "delta.hsiDelta": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "delta.mildBetween": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 3066680954,
+      "abs": 0
+    }
+  }
+}

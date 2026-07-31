@@ -103,12 +103,14 @@ Summary only — do not reopen unless fixing regressions.
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
 | — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — agent (C-020 Lock still owner) |
+| **N** | Salt-memory encoding (**NS-006**) | Freshened green vs salty pale sparse | `saltMemoryEncodingDelta` | **Done** — clip Pass (C-018 Q-A) |
+| **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.**
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.**
 
 **Owner Lock backlog** (dossier / register acts — not the executable tip): **C-009** substrate; **C-015…C-019** maritime (owner halves Pass); **C-004** stewardship reading; **C-020** weather-feel; **C-014** audio; **U-006** notebook Lock (reviewer).
 
-**Next (executable tip):** **Nature P0:** [NS-006](nature-study/cards/NS-006-twin-hollow-salt-memory.md) salt-memory encoding → [NS-002](nature-study/cards/NS-002-heat-dial-plant-gate.md) Heat→plant gate → [NS-004](nature-study/cards/NS-004-strand-splash-pioneer.md) strand guild ([BACKLOG](nature-study/BACKLOG.md)).
+**Next (executable tip):** **Nature P0:** [NS-004](nature-study/cards/NS-004-strand-splash-pioneer.md) strand guild ([BACKLOG](nature-study/BACKLOG.md)).
 
 **Thesis holes (not tip):** **C-005** branch-and-compare (file scaffold after Nature encoding); **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004); **C-010** toxic-site after **C-009** Lock; **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
 
@@ -716,6 +718,51 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.22 Slice N — Twin hollow salt memory encoding (**NS-006**)
+
+**Why this exists.** C-018 machine + Tier-O Pass shipped salt and crust tint; Nature P0 still needed the engagement **outcome** proxy — freshened green vs salty pale sparse under one seed schedule — so the clip reads as salt memory, not weather (D-007 / THESIS §8).
+
+**Clip verdict (D-007).** **Pass (2026-07-30).** Owner [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Question A: pale sparse shore felt like the ground still tasting of the sea. Machine: `saltMemoryEncodingDelta` > 0.15.
+
+**Nature cards:** NS-006. **Register:** C-018 Open; C-007; C-011; D-007. **New Process?** no.
+
+- [x] Composition `docs/slices/N-composition.md`; manifest `docs/slices/N.json`
+- [x] `saltMemoryEncodingDelta` + presentation proxy (terrain + occupant)
+- [x] No new owner ask (C-018 Q-A already Pass)
+- [x] **Next-but-one:** NS-002 Heat→plant (§4.23)
+
+---
+
+### 4.23 Slice N2 — Heat dial plant gate (**NS-002**)
+
+**Why this exists.** Heat dial already drives precip phase (`climate.airTemperature`); plants ignored it. NS-002 adds `f_temp` under Open **C-004** / **C-020** — one field, inspectable limiting label (C-011).
+
+**Clip verdict (D-007).** Exempt — no new Process. Encoding clip (NS-006) already Pass.
+
+**Nature cards:** NS-002. **Register:** C-004 Open; C-020 Open; C-007 Locked. **New Process?** no.
+
+- [x] Composition `docs/slices/N2-composition.md`; `temperatureComposition.ts`; Liebig arm id 4
+- [x] `WorldState.runHabitatStep` reads air temperature; herb kill/opt in `config`
+- [x] Tier-M: cold stalls / warm earns; non-limiting moisture cannot raise temp-limited HSI
+- [x] Probe `heat-arrival`; notebook seed for temperature limiting
+- [x] Study log: island-colonization growing season → `f_temp`
+- [x] **Next-but-one:** NS-004 strand splash pioneer (§4.24 stub)
+
+---
+
+### 4.24 Slice N4 — Strand splash pioneer (**NS-004**) *(stub)*
+
+**Why this exists.** One new guild after Heat gate; couples salt + shore + overseas so strand vs inland herb are two bets (Nature P0 #3).
+
+**Gate.** After NS-002 machine green.
+
+- [ ] Composition + guild fields; shore-biased HSI arm; no ecosystem painter (N-001)
+- [ ] Probe paired strand vs inland under one seed schedule
+- [ ] Tier-P encoding differentiation
+- [ ] **Next-but-one:** NS-003 spray stress (P1) or C-005 scaffold — choose at closeout
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -723,9 +770,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | A+ / AUD-003 | Recovery audible — second ambient bed from `veg.cover` | AUD-003, C-014 | **Done** (§4.19) |
 | — | Field Notebook UI | U-006 | **Done** (§4.20) — Lock still reviewer |
 | — | Full C-020 clouds / precip phase | C-020 | **Done** (§4.21) — Lock still owner |
+| N / NS-006 | Salt-memory encoding | C-018 | **Done** (§4.22) |
+| N2 / NS-002 | Heat→plant | C-004, C-020 | **Done** (§4.23) |
+| N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | §4.24 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **Next:** scenario campaign after C-009/C-010 framing (or SWE store under C-020 remainder).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** Done. **Next:** Nature P0 **NS-004** strand guild.
 
 ---
 

@@ -11,6 +11,8 @@ Last updated: 2026-07-30 (Wave 1 merged).
 | Card | Topic | Notes |
 |---|---|---|
 | [NS-001](cards/NS-001-wet-site-herb.md) | Wet-site herb guild | Slice 12–13; HSI moisture/depth/GW/salinity |
+| [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | Twin hollow salt memory | Slice N; `saltMemoryEncodingDelta`; C-018 Q-A Pass |
+| [NS-002](cards/NS-002-heat-dial-plant-gate.md) | Heat dial plant gate | Slice N2; `f_temp` / `heat-arrival`; C-004/C-020 Open |
 
 ---
 
@@ -18,11 +20,11 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Id | Lane | Title | Merge bucket |
 |---|---|---|---|
-| [NS-002](cards/NS-002-heat-dial-plant-gate.md) | factor | Heat dial plant gate | **P0** |
+| [NS-002](cards/NS-002-heat-dial-plant-gate.md) | factor | Heat dial plant gate | **Shipped** (N2) |
 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | Onshore spray stress gate | P1 |
 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | guild | Strand splash pioneer | **P0** (one new guild) |
 | [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | P1 — hold until strand differentiates |
-| [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | engagement | Twin hollow salt memory | **P0** (clip first) |
+| [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | engagement | Twin hollow salt memory | **Shipped** (N) |
 
 ---
 
@@ -32,9 +34,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| 1 | [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | Sim signal exists (C-018 Pass); encoding / default-view clip is the gap — Tier-P, no new Process |
-| 2 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | Heat dial already player-facing; plants ignore it — add `f_temp` under Open C-004 / C-020 |
-| 3 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | One new guild; couples shipped salt + shore + overseas; differentiates strand vs inland herb |
+| 1 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | One new guild; couples shipped salt + shore + overseas; differentiates strand vs inland herb |
 
 ### P1 — derived field, no new Process
 
@@ -74,3 +74,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | NS-001 exemplar only | — | Protocol seeded |
 | 2026-07-30 | — | — | Doc sync: sourced_from, propose vs land, card→slice checklist |
 | 2026-07-30 | NS-002…NS-006 | NS-006 → NS-002 → NS-004 | Clip first; dial next; one guild (strand). NS-003/NS-005 → P1. No invent-Locked. |
+| 2026-07-30 | NS-006, NS-002 shipped | NS-004 | Slice N encoding + Slice N2 `f_temp`; tip → strand guild |

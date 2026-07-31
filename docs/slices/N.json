@@ -1,0 +1,13 @@
+{
+  "id": "N",
+  "title": "Twin hollow salt memory encoding (NS-006)",
+  "simLoop": "None new — soil.salinity + herb biomass already diverge under one seed schedule (C-018).",
+  "gameLoop": "Same rain, same seeds — salty ground stays pale and sparse while the freshened twin greens first.",
+  "registerIds": ["C-018", "C-007", "C-011", "D-007", "N-001"],
+  "invariantClass": "Monotonicity",
+  "tests": ["src/sim/presentation.proxy.test.ts"],
+  "probes": ["salinity-arrival"],
+  "fields": ["soil.salinity", "veg.biomass.herb"],
+  "notebookSeed": "The hollow still tasted of the sea; the freshened twin took green first.",
+  "tierO": "no new owner ask — C-018 Question A Pass already covers salt-as-cause; NS-006 is encoding closeout"
+}
