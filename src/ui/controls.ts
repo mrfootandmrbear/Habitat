@@ -33,15 +33,10 @@ import {
   SUBSTRATE_SAND,
   type DepositMaterialId,
 } from "../sim/terrain/substrates";
+import { sustainableRates, type TimeRateId } from "./timeRates";
 
-export type TimeRate = "pause" | "1x" | "4x" | "16x";
-
-export const TIME_SCALE: Record<TimeRate, number> = {
-  pause: 0,
-  "1x": 1,
-  "4x": 4,
-  "16x": 16,
-};
+/** Rate ids and their sim-time-per-wall-second meaning live in `timeRates.ts`. */
+export type TimeRate = TimeRateId;
 
 const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "none", label: "View: terrain" },
@@ -402,18 +397,23 @@ export function mountControls(
   const timeGroup = document.createElement("div");
   timeGroup.id = "time-rates";
   timeGroup.setAttribute("role", "group");
-  timeGroup.setAttribute("aria-label", "Simulation time rate");
+  timeGroup.setAttribute(
+    "aria-label",
+    "Simulation time rate — simulated time per second (L6)",
+  );
 
-  const rates: TimeRate[] = ["pause", "1x", "4x", "16x"];
+  // Only rates this machine can actually deliver are offered (L6 / L1).
   const rateButtons = new Map<TimeRate, HTMLButtonElement>();
 
-  for (const rate of rates) {
+  for (const rate of sustainableRates()) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = rate === "pause" ? "Pause" : rate;
-    btn.addEventListener("click", () => handlers.onTimeRate(rate));
+    btn.textContent = rate.label;
+    btn.setAttribute("aria-label", rate.description);
+    btn.title = rate.description;
+    btn.addEventListener("click", () => handlers.onTimeRate(rate.id));
     timeGroup.appendChild(btn);
-    rateButtons.set(rate, btn);
+    rateButtons.set(rate.id, btn);
   }
 
   const syncTimeRate = (rate: TimeRate): void => {

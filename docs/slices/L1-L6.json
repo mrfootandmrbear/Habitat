@@ -1,0 +1,25 @@
+{
+  "id": "L1-L6",
+  "title": "Time throughput defect, and the clock in real-world units",
+  "simLoop": "SimClock defers the steps it cannot fit in a frame instead of draining them from the accumulator, so steps run equals steps demanded once debt is paid; maxStepsPerFrame rises from 5 to a measured 16 and a separate maxTimeDebtSteps guard bounds what may pile up before a rate is admitted unsustainable. The rate control is restated as sim-time per wall-second, derived in one place from eventDtMinutes and wallSecondsPerEventStep, and only rates whose steady demand fits the per-frame ceiling with catch-up left over are offered. No band period, no fixed timestep, and no authoritative outcome changes.",
+  "gameLoop": "When the clock says a day per second it should hand me a day per second, and when I ask for a week per second the button should either deliver it or not be there — not quietly run at a third of what it promised. And the readout should tell me how long the island has been alive in days and years, not in steps.",
+  "registerIds": [
+    "S-009",
+    "T-002",
+    "T-001",
+    "D-006",
+    "U-003",
+    "C-008"
+  ],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/time-invariance.test.ts",
+    "src/ui/timeRates.test.ts"
+  ],
+  "probes": [],
+  "fields": [
+    "clock.simMinutes"
+  ],
+  "notebookSeed": "The clock used to speak in multiples of something nobody could name, and the fastest setting quietly ran at a third of what it claimed. Now it says days and weeks per second, and it only offers what it can actually hand you.",
+  "tierO": "batched, not yet fired — at 1 s/s the rate is honest but the world advances in 15-sim-minute jumps every 15 wall-minutes, because that is the event Δt showing through. Whether true real time is worth offering at that cadence, or should be labelled as stepping, is taste, not measurement (VERIFICATION_POLICY §4)."
+}

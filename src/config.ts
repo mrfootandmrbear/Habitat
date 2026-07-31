@@ -29,14 +29,32 @@ export const config = {
   dailyEventSteps: 96,
 
   /**
-   * Wall-clock seconds per event step at 1× (presentation only; S-009).
+   * Wall-clock seconds the clock charges for one event step at unit time scale
+   * (presentation only; S-009). Rate labels are derived from it in
+   * `sim/timeRates.ts` — never restate the base anywhere else.
    * Alias kept as `simDt` for SimClock.
    */
   wallSecondsPerEventStep: 1 / 60,
   /** @deprecated Use wallSecondsPerEventStep — presentation cadence only. */
   simDt: 1 / 60,
 
-  maxStepsPerFrame: 5,
+  /**
+   * Per-frame catch-up ceiling (SIMULATION_MODEL §6.4, Slice L1). Measured on
+   * the reference machine at the default island: 0.918 ms per event step in the
+   * worst (wet, band-crossing) case, so 18 steps fit a 16.7 ms frame with no
+   * render left. 16 keeps ~1.9 ms of that budget for the frame's own work and
+   * still leaves ~4.8 steps/frame of catch-up above the fastest offered rate
+   * (`1 week/s`, 11.2 steps/frame) so deferred debt can actually be paid down.
+   */
+  maxStepsPerFrame: 16,
+
+  /**
+   * Hard ceiling on carried time debt, in steps — the spiral-of-death guard
+   * (§6.4). Surplus below it is deferred and paid down on later frames rather
+   * than discarded; only debt past it is abandoned, and that is the signal
+   * §6.4 wants surfaced so the rate can be lowered. 4 frames of catch-up.
+   */
+  maxTimeDebtSteps: 64,
 
   /**
    * Flux integrator Δt within one event step (normalized).

@@ -334,7 +334,9 @@ nSub = ceil(Δt_event · cMax / (CFL · Δx))
 
 ### 6.4 Time debt is observable
 
-The wall-clock budget per frame may be exhausted before the tick target is reached. `config.maxStepsPerFrame = 5` currently drops the surplus silently, which dilates simulation time under load (review §1.7). Under S-009 the dropped time must be visible: the scheduler carries a `timeDebt` in ticks, exposes it to the dev HUD, and the correct response to sustained debt is to lower the player's time rate, not to skip ticks. Nothing ecological may read `timeDebt`.
+The wall-clock budget per frame may be exhausted before the tick target is reached. `config.maxStepsPerFrame` dropped the surplus silently, which dilated simulation time under load (review §1.7). Under S-009 the dropped time must be visible: the scheduler carries a `timeDebt` in ticks, exposes it to the dev HUD, and the correct response to sustained debt is to lower the player's time rate, not to skip ticks. Nothing ecological may read `timeDebt`.
+
+**Implemented in Slice L1** ([BUILD_GUIDE §4.36](BUILD_GUIDE.md)). `SimClock` carries the surplus in its accumulator and pays it down on later frames; `maxStepsPerFrame` (16, measured) remains the hard per-frame catch-up ceiling and `maxTimeDebtSteps` (64) is the spiral-of-death guard past which debt is abandoned openly rather than silently. `getTimeDebt()` means *owed*, `getDroppedSteps()` means *abandoned*. Slice L6 supplies the other half §6.4 asks for: the rate control now offers only rates the machine sustains, so "lower the rate" is a choice the player can actually make in stated units — see [evidence/time-throughput.md](evidence/time-throughput.md).
 
 ### 6.5 The event band's cost is unresolved
 

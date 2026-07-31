@@ -43,12 +43,11 @@ Reviews: [sim-gap](docs/reviews/2026-07-30-sim-gap-review.md) (physics) · [livi
 
 **Executable tip — the Living wave, in order** ([BUILD_GUIDE §4.36–§4.43](docs/BUILD_GUIDE.md)):
 
-1. **L1** throughput defect — 16× runs at an effective 5.00×, 6600/9600 steps discarded; SIM §6.4 already documents it. *No baseline may move.*
-2. **L6** real-world time units — "1×" is presently 54,000× real time and true real time is unreachable. T-002 Locked permits it; no candidate.
-3. **L2** local seed rain — established biomass never seeds; 15.6% of the island can never vegetate.
-4. **L3** mortality as a rate — biomass 2.500 → 0.500 in one band; no biological hysteresis anywhere.
-5. **L7** activity-gated event band — SIM §6.2 specifies it, `stepEvent` ignores it; century 39.9 min → 6.7 min. *Ships only on hash-identity.*
-6. **L4** biotic motion — life is static cones; D-007 clip.
+1. ~~**L1** throughput defect~~ + ~~**L6** real-world time units~~ — **shipped together** ([L1-L6-composition.md](docs/slices/L1-L6-composition.md), [time-throughput.md](docs/evidence/time-throughput.md)). Surplus steps are now deferred, not discarded; `maxStepsPerFrame` 5 → 16 (measured 0.918 ms/step worst case). The control speaks in sim-time per wall-second — Pause · `1 s/s` · `1 min/s` · `1 h/s` · `1 day/s` · `1 week/s`, default `1 day/s` — every offered rate measured at **100.0% delivery, zero dropped**. `1 month/s` is withheld, not offered-and-discarded. No baseline moved.
+2. **L2** local seed rain — established biomass never seeds; 15.6% of the island can never vegetate.
+3. **L3** mortality as a rate — biomass 2.500 → 0.500 in one band; no biological hysteresis anywhere.
+4. **L7** activity-gated event band — SIM §6.2 specifies it, `stepEvent` ignores it; century 39.9 min → 6.7 min. *Ships only on hash-identity.*
+5. **L4** biotic motion — life is static cones; D-007 clip.
 
 None registers a new `Process` (D-007 clip gate does not apply); none needs a new candidate — each implements a Locked entry or a written spec section the code falls short of. **Blocked, owner-judged — implement nothing under them:** **L5** on **C-023**; **L8** deep-time ladder on **C-024** + **C-025**. Do not build a partial deep-time shortcut: skipping bands "a little" breaks T-001 replay, P-006 fairness, and C-005 comparison *without going red*.
 
@@ -68,4 +67,4 @@ None registers a new `Process` (D-007 clip gate does not apply); none needs a ne
 - **Green bar must stay green.** `npm run gate` is expected to pass on a clean install. If it fails, fix it — do not document a red gate as normal.
 - Named probes also work individually (`paired-storm`, `berm-reroute`, `basin-fill`); `--all --check` is the CI tripwire.
 - If `conformance:check` says the ledger is out of date, run `npm run conformance` and commit the ledger with the doc change that made it stale — do not leave the check red.
-- Hello-world smoke (optional after gate): `npm run dev` → Rain on → 4×/16× → water pools downhill; inspect water-depth layer. Residual and hashes are Tier-M — report numbers, don’t ask the owner.
+- Hello-world smoke (optional after gate): `npm run dev` → Rain on → `1 day/s` / `1 week/s` → water pools downhill; inspect water-depth layer. Residual and hashes are Tier-M — report numbers, don’t ask the owner.

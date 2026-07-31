@@ -2,15 +2,20 @@ import { describe, expect, it } from "vitest";
 import { config } from "../config";
 import { hashFloat32Buffer } from "./hash";
 import { generateMountain } from "./terrain/generateMountain";
-import { SimClock } from "./SimClock";
+import { SimClock, type SimClockOptions } from "./SimClock";
 import { WorldState } from "./WorldState";
 import { Grid2D } from "./Grid2D";
+import {
+  stepsPerWallSecond,
+  sustainableRates,
+  timeScaleFor,
+} from "../ui/timeRates";
 
 function runWithTimeScale(
   timeScale: number,
   targetSteps: number,
   maxStepsPerFrame: number,
-): { hash: string; dropped: number } {
+): string {
   const terrain = generateMountain(
     config.gridSize,
     config.gridSize,
@@ -35,10 +40,7 @@ function runWithTimeScale(
     }
   }
 
-  return {
-    hash: hashFloat32Buffer(world.water.data),
-    dropped: clock.getDroppedSteps(),
-  };
+  return hashFloat32Buffer(world.water.data);
 }
 
 describe("time-rate invariance (S-009)", () => {
@@ -46,13 +48,8 @@ describe("time-rate invariance (S-009)", () => {
     const steps = config.determinismSteps;
     const at1x = runWithTimeScale(1, steps, config.maxStepsPerFrame);
     const at4x = runWithTimeScale(4, steps, config.maxStepsPerFrame);
-    expect(at1x.hash).toBe(at4x.hash);
-    expect(at1x.hash).toMatch(/^[0-9a-f]{8}$/);
-  });
-
-  it("records timeDebt when maxStepsPerFrame is exceeded", () => {
-    const result = runWithTimeScale(64, 30, 1);
-    expect(result.dropped).toBeGreaterThan(0);
+    expect(at1x).toBe(at4x);
+    expect(at1x).toMatch(/^[0-9a-f]{8}$/);
   });
 
   it("pause (timeScale 0) runs zero sim steps per tick", () => {
@@ -63,6 +60,88 @@ describe("time-rate invariance (S-009)", () => {
     });
     const { stepsRun } = clock.tick(1);
     expect(stepsRun).toBe(0);
+  });
+});
+
+/**
+ * Slice L1 — SIMULATION_MODEL §6.4. Surplus beyond the per-frame ceiling is
+ * owed, not discarded; only debt past the spiral-of-death guard is abandoned.
+ */
+describe("time debt is deferred, not dropped (SIM §6.4)", () => {
+  const makeClock = (over: Partial<SimClockOptions> = {}): SimClock =>
+    new SimClock({
+      simDt: config.simDt,
+      maxStepsPerFrame: config.maxStepsPerFrame,
+      maxDebtSteps: config.maxTimeDebtSteps,
+      timeScale: 1,
+      ...over,
+    });
+
+  it("delivers every demanded step at the fastest offered rate", () => {
+    const fastest = sustainableRates().at(-1)!;
+    const clock = makeClock({ timeScale: timeScaleFor(fastest) });
+    const frames = 600;
+    const wallDt = 1 / 60;
+
+    let stepsRun = 0;
+    for (let f = 0; f < frames; f++) stepsRun += clock.tick(wallDt).stepsRun;
+
+    const demanded = (stepsPerWallSecond(fastest) * frames) / 60;
+    // Within one frame of slack: the tail of the accumulator is still owed.
+    expect(demanded - stepsRun).toBeLessThanOrEqual(
+      config.maxStepsPerFrame + 1,
+    );
+    expect(demanded - stepsRun).toBeGreaterThanOrEqual(0);
+    expect(clock.getDroppedSteps()).toBe(0);
+  });
+
+  it("pays back a stalled frame instead of discarding it", () => {
+    const clock = makeClock({ timeScale: 16 });
+    // One 50 ms frame (main.ts clamps wallDt there) demands 48 steps; the
+    // ceiling runs 16 and the other 32 stay owed.
+    const stalled = clock.tick(0.05);
+    expect(stalled.stepsRun).toBe(config.maxStepsPerFrame);
+    expect(stalled.timeDebt).toBe(32);
+    expect(stalled.droppedSteps).toBe(0);
+
+    // Idle wall time afterwards: the debt is worked off, not forgotten.
+    let paid = 0;
+    for (let f = 0; f < 10; f++) paid += clock.tick(0).stepsRun;
+    expect(paid).toBe(32);
+    expect(clock.getTimeDebt()).toBe(0);
+    expect(clock.getDroppedSteps()).toBe(0);
+  });
+
+  it("total steps run equals steps demanded once the debt is paid", () => {
+    const clock = makeClock({ timeScale: 16 });
+    const wallDt = 1 / 60;
+    const frames = 240;
+
+    let stepsRun = 0;
+    for (let f = 0; f < frames; f++) stepsRun += clock.tick(wallDt).stepsRun;
+    // Drain whatever is still owed.
+    for (let f = 0; f < 64; f++) stepsRun += clock.tick(0).stepsRun;
+
+    expect(stepsRun).toBe(16 * frames);
+    expect(clock.getDroppedSteps()).toBe(0);
+  });
+
+  it("abandons only debt past the guard, and says so", () => {
+    // 64× is four times the per-frame ceiling — unpayable by construction.
+    const clock = makeClock({ timeScale: 64 });
+    for (let f = 0; f < 30; f++) clock.tick(1 / 60);
+
+    expect(clock.getDroppedSteps()).toBeGreaterThan(0);
+    expect(clock.getTimeDebt()).toBeLessThanOrEqual(config.maxTimeDebtSteps);
+  });
+
+  it("the guard still bounds worst-case frame cost", () => {
+    const clock = makeClock({ timeScale: 1024 });
+    for (let f = 0; f < 20; f++) {
+      expect(clock.tick(0.05).stepsRun).toBeLessThanOrEqual(
+        config.maxStepsPerFrame,
+      );
+    }
   });
 });
 

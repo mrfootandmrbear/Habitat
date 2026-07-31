@@ -955,7 +955,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.36 Slice L1 — Time throughput defect *(queued; defect, not a feature)*
+### 4.36 Slice L1 — Time throughput defect *(Done — shipped with L6; defect, not a feature)*
 
 **Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §3. `config.maxStepsPerFrame = 5` caps throughput below what the 16× control demands, and `SimClock.tick` **discards** the excess instead of deferring it (the accumulator is drained by `excess` after the counter increments). Measured: event step **0.774 ms** → 22 steps/frame affordable in a 16.7 ms budget; the 16× button runs **3000 of 9600** steps per 10 wall-s → effective **5.00×**, 6600 discarded. At effective 5× one sim-year takes ~115 wall-seconds. "Run time forward and look" is the mechanism the whole loop routes through ([THESIS.md](THESIS.md) §4), so this throttles the payoff directly. The "wanting rates beyond 16×" note recorded under **C-004** is partly this defect, not product feedback.
 
@@ -966,12 +966,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Register:** S-009; T-002; T-001; C-008 Open (latency budget)
 **New Process?** no — presentation cadence only; fixed timestep is unchanged, so determinism and every probe baseline are untouched. D-007 clip gate does not apply.
 
-- [ ] Raise `maxStepsPerFrame` to a measured value (~16–20) with the measurement in the commit body, not a guessed constant
-- [ ] `SimClock` accrues a **deferred** debt it can pay down on later frames rather than discarding steps; keep the spiral-of-death guard as a hard ceiling on catch-up per frame
-- [ ] `getTimeDebt()` keeps meaning "owed", and the HUD `timeDebt` readout stays honest
-- [ ] Test: at 16× over N frames, steps run = steps demanded (within one frame of slack); the guard still bounds worst-case frame cost
-- [ ] Regression: every probe baseline and `GOLDEN_*` hash **unmoved** — a baseline move here is a defect, not an update (§4.0.1)
-- [ ] **Next-but-one:** L2 local seed rain (§4.37)
+- [x] `maxStepsPerFrame` 5 → **16**, measured: 0.918 ms/event step in the worst realistic case (wet, crossing every band) → 18 fit a 16.67 ms frame with no render left; 16 keeps ~1.9 ms of budget and ~4.8 steps/frame of catch-up above the fastest offered rate ([time-throughput.md](evidence/time-throughput.md))
+- [x] `SimClock` carries the surplus in the accumulator as **deferred** debt paid down on later frames; `maxStepsPerFrame` stays the hard per-frame catch-up ceiling and a separate `config.maxTimeDebtSteps = 64` is the spiral-of-death guard
+- [x] `getTimeDebt()` now means *owed* and `getDroppedSteps()` means *abandoned past the guard* — two counters where there was one; the HUD names the §6.4 response ("lower the rate") when the second is non-zero
+- [x] Test: `time-invariance.test.ts` — steps run = steps demanded within one frame of slack at the fastest offered rate, a stalled frame is paid back rather than discarded, and the guard still bounds worst-case frame cost
+- [x] Regression: every probe baseline and `GOLDEN_*` hash **unmoved** — full gate green, no baseline file touched
+- [x] Composition + manifest ([L1-L6-composition.md](slices/L1-L6-composition.md), [L1-L6.json](slices/L1-L6.json)); **Next-but-one:** L2 local seed rain (§4.37)
 
 ---
 
@@ -1038,7 +1038,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.41 Slice L6 — Real-world time units *(queued; may share a PR with L1)*
+### 4.41 Slice L6 — Real-world time units *(Done — shipped with L1)*
 
 **Why this exists.** [Time-architecture review](reviews/2026-07-31-time-architecture-review.md) §1. The rate control is a multiplier against a base nobody can state. Measured: **"1×" is 54,000× real time** (one 15-sim-minute step per 1/60 wall-second), "4×" is 216,000×, and "16×" — at its effective 5.00× — is 270,000×. **True real time is unreachable**, by a factor of 54,000. Replace the multipliers with rates a person can name: `1 s/s` (real time) · `1 min/s` · `1 h/s` · `1 day/s` · `1 year/s`, with the reachable ceiling stated honestly rather than implied.
 
@@ -1047,13 +1047,13 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Register:** T-002 Locked; S-009 Current; D-006; U-003; C-008 Open
 **New Process?** no — rate values and labels only; the fixed timestep and every band period are untouched, so no baseline may move. D-007 clip gate does not apply.
 
-- [ ] Rate control expressed as **sim-time per wall-second**, derived from `eventDtMinutes` rather than from a hidden base — one place computes it, so the label cannot drift from the clock
-- [ ] True real time (1 sim-s per wall-s) reachable at the slow end; it is currently not
-- [ ] The ceiling is **honest**: the fastest offered rate is one the machine can actually sustain after L1, and rates above it are not offered rather than offered-and-discarded (that was the L1 defect)
-- [ ] HUD shows elapsed **simulation** time in real units (days / years), not step counts — `S-009`: wall-clock in the UI is presentation, sim time is the readout
-- [ ] Test: label ↔ delivered sim-time agree within one frame of slack at every offered rate; every probe baseline and `GOLDEN_*` hash **unmoved**
-- [ ] **Known incoherence to surface, not to fix here:** at `1 year/s` the world advances 360 years of geomorphology per labelled year (§2 of the review). L6 makes this visible; **C-024** decides it. Do not silently rescale bands inside this slice
-- [ ] **Next-but-one:** L7 activity-gated event band (§4.42)
+- [x] Rate control expressed as **sim-time per wall-second** in `src/ui/timeRates.ts`, derived there and nowhere else from `config.eventDtMinutes` + `config.wallSecondsPerEventStep` — the label cannot drift from the clock
+- [x] True real time (`1 s/s`) reachable at the slow end. Offered ladder: Pause · `1 s/s` · `1 min/s` · `1 h/s` · `1 day/s` · `1 week/s`; default `1 day/s`, the nearest nameable rate to the old "1×"
+- [x] The ceiling is **honest**: every offered rate measured at **100.0% delivery, zero dropped**. `1 month/s` is in the ladder but withheld by `sustainableRates()` — measured at **33.3% delivery, 7616 steps dropped**, the same shape as the old "16×" at an effective 5.00× ([time-throughput.md](evidence/time-throughput.md))
+- [x] HUD leads with the rate label and elapsed **simulation** time in real units — `3h 15m` → `2d 12h` → `2y 5d` on the world's own 360-day calendar
+- [x] Test: `timeRates.test.ts` — label ↔ delivered sim-time agree to within the clock's own quantum (one event step) at every offered rate; ceiling asserted against the first withheld rate. Every probe baseline and `GOLDEN_*` hash **unmoved**
+- [x] **Known incoherence surfaced, not fixed:** no band period is rescaled here; the 10×-fast annual and 360×-fast decadal bands are now legible because the clock speaks in real units. **C-024** decides it — recorded in the composition doc and the evidence note
+- [x] **Next-but-one:** L7 activity-gated event band (§4.42) — ships only on hash-identity
 
 ---
 
@@ -1105,12 +1105,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
 | G | Season + erosion-intensity dials | C-021, C-022, T-001, T-004, H-004, S-007, N-004 | **Done** (§4.35) — machine only, both Open |
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
-| L1 | Time throughput defect (16× runs at 5×) | S-009, T-002, C-008 | §4.36 **Queued** — no baseline may move |
-| L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Queued** — after L1 |
+| L1 | Time throughput defect (16× ran at 5×) | S-009, T-002, C-008 | §4.36 **Done** — shipped with L6; no baseline moved |
+| L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Queued** — next |
 | L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Queued** — after L2 |
 | L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Queued** — after L3 |
 | L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
-| L6 | Real-world time units (real time → years/s) | T-002, S-009, D-006, U-003 | §4.41 **Queued** — no candidate needed; may share L1's PR |
+| L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Queued** — ships only on hash-identity |
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |

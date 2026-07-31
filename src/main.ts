@@ -21,7 +21,12 @@ import { OccupantMesh } from "./render/OccupantMesh";
 import { WindArrowMesh } from "./render/WindArrowMesh";
 import { RainCueMesh } from "./render/RainCueMesh";
 import { CloudMesh } from "./render/CloudMesh";
-import { mountControls, TIME_SCALE, type TimeRate } from "./ui/controls";
+import { mountControls, type TimeRate } from "./ui/controls";
+import {
+  formatSimElapsed,
+  rateById,
+  timeScaleFor,
+} from "./ui/timeRates";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
 import { totalWaterVolume } from "./sim/hydrology/fluxStep";
@@ -216,7 +221,9 @@ let seaLevelId: SeaLevelId = initialSea;
 let tideId: TideId = "off";
 let seasonId: SeasonId = "typical";
 let erosionId: ErosionId = "moderate";
-let timeRate: TimeRate = "1x";
+// Nearest nameable rate to the old default "1×" (which delivered 15 sim-hours
+// per wall-second and said none of that out loud) — L6.
+let timeRate: TimeRate = "day";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "none";
 let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
@@ -232,7 +239,8 @@ let lastLifeSilent: boolean | null = null;
 const clock = new SimClock({
   simDt: config.simDt,
   maxStepsPerFrame: config.maxStepsPerFrame,
-  timeScale: TIME_SCALE[timeRate],
+  maxDebtSteps: config.maxTimeDebtSteps,
+  timeScale: timeScaleFor(rateById(timeRate)),
 });
 
 // Atmosphere Process owns delivery — seed force dials on WorldState.
@@ -431,13 +439,13 @@ const ui = mountControls(
     onReset: () => {
       model.resetWater();
       steps = 0;
-      clock.resetDroppedSteps();
+      clock.reset();
       syncMeshes();
       syncWaterDisplay(0, true);
     },
     onTimeRate: (rate) => {
       timeRate = rate;
-      clock.setTimeScale(TIME_SCALE[rate]);
+      clock.setTimeScale(timeScaleFor(rateById(rate)));
       ui.setTimeRate(rate);
     },
     onInspector: (layer) => {
@@ -846,7 +854,8 @@ function frame(now: number): void {
   syncWaterDisplay(wallDt);
 
   const timeDebt = clock.getTimeDebt();
-  const rateLabel = timeRate === "pause" ? "paused" : timeRate;
+  const droppedSteps = clock.getDroppedSteps();
+  const rateLabel = rateById(timeRate).label;
   const toolLabel =
     sitingTool === "none"
       ? "look"
@@ -860,8 +869,10 @@ function frame(now: number): void {
               ? "ignite"
               : "predict";
   ui.setStatus(
-    `${rateLabel} · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
+    `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
+      ` · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
+      (droppedSteps > 0 ? ` · dropped ${droppedSteps} — lower the rate` : "") +
       ` · ${rainRegimeById(rainRegime).label}` +
       ` · ${windById(windId).label}` +
       ` · ${tideById(tideId).label}` +
