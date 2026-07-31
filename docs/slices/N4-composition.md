@@ -22,7 +22,7 @@ One seed schedule → veg.seedBank.herb = veg.seedBank.strand
 establishment / biomass use guild HSI (herb keeps habitat.suitability)
 ```
 
-Spray / burial arms deferred (NS-003 / NS-005). `habitat.*` stays herb inspect; strand limiting labels live on `evaluateStrandHsi`.
+Spray is an herb Liebig arm only (NS-003 / `f_spray`); strand holds via `f_shore`. Burial deferred (NS-005). `habitat.*` stays herb inspect; strand limiting labels live on `evaluateStrandHsi`.
 
 ## Paired expectation
 
@@ -30,4 +30,4 @@ Identical perimeter seed → salty exposed shore earns strand ≫ herb; fresh in
 
 ## Bans
 
-Ecosystem painter / species picker (N-001, E-004) · invent Locked C-018/C-019 · stress.spray store (NS-003) · second Process id owning cover/biomass
+Ecosystem painter / species picker (N-001, E-004) · invent Locked C-018/C-019 · second Process id owning cover/biomass

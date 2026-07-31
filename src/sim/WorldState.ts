@@ -966,6 +966,7 @@ export class WorldState {
    * Composition: docs/slices/9-composition.md — min, not product.
    * Slice 20: soil.salinity is a fourth Liebig arm (C-018).
    * Heat plant gate: climate.airTemperature is a fifth Liebig arm (C-004 / C-020).
+   * Spray gate: shore.exposure is a sixth Liebig arm (C-017) — ≠ soil salt.
    */
   runHabitatStep(_dt: number): void {
     const m = this.soilMoisture.data;
@@ -973,6 +974,7 @@ export class WorldState {
     const depth = this.soilDepth.data;
     const gw = this.groundwaterStorage.data;
     const salt = this.soilSalinity.data;
+    const exposure = this.shoreExposure.data;
     const hsi = this.habitatSuitability.data;
     const lim = this.habitatLimitingFactor.data;
     const gap = this.habitatLimitingGap.data;
@@ -994,6 +996,7 @@ export class WorldState {
         airTempC,
         tempKillC,
         tempOptC,
+        shoreExposure: exposure[i]!,
       });
       hsi[i] = sample.hsi;
       lim[i] = sample.limiting;

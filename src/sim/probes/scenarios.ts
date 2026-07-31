@@ -17,6 +17,7 @@ import {
   LIMITING_DEPTH,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
+  LIMITING_SPRAY,
   LIMITING_TEMPERATURE,
 } from "../habitat/hsiComposition";
 import {
@@ -2231,6 +2232,120 @@ export function probeHeatArrival(): ProbeResult {
 }
 
 /**
+ * C-017 — onshore spray stress gates herb arrival.
+ * Windward (exposed) twin is spray-limited; lee twin earns under one seed
+ * schedule and identical fresh soil. Strand holds on the exposed face.
+ */
+export function probeSprayArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 1;
+  const sz = 8;
+
+  const make = (exposure: number) => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.shoreExposure.set(sx, sz, exposure);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const leeA = make(0);
+  const leeB = make(0);
+  const windward = make(1);
+
+  const replayMatch = leeA.stateHash() === leeB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("spray-arrival: lee replay hash mismatch");
+  }
+
+  const leeHsi = leeA.getHabitatSuitability(sx, sz);
+  const windHsi = windward.getHabitatSuitability(sx, sz);
+  const leeHerb = leeA.getHerbBiomass(sx, sz);
+  const windHerb = windward.getHerbBiomass(sx, sz);
+  const windStrand = windward.getStrandBiomass(sx, sz);
+  const leeStrand = leeA.getStrandBiomass(sx, sz);
+  const windLim = windward.getLimitingFactor(sx, sz);
+  const herbDelta = leeHerb - windHerb;
+  const saltMatch =
+    Math.abs(
+      leeA.soilSalinity.get(sx, sz) - windward.soilSalinity.get(sx, sz),
+    ) < 1e-9
+      ? 1
+      : 0;
+
+  if (saltMatch !== 1) {
+    throw new Error("spray-arrival: salinity not matched (must isolate spray)");
+  }
+  if (!(leeHsi > windHsi)) {
+    throw new Error(
+      `spray-arrival: expected lee HSI (${leeHsi}) > windward (${windHsi})`,
+    );
+  }
+  if (windLim !== LIMITING_SPRAY) {
+    throw new Error(
+      `spray-arrival: expected windward limiting=spray (got ${windLim})`,
+    );
+  }
+  if (!(leeHerb > 0.1)) {
+    throw new Error(`spray-arrival: lee herb too low (${leeHerb})`);
+  }
+  if (!(herbDelta > 0.05)) {
+    throw new Error(`spray-arrival: herb delta too small (${herbDelta})`);
+  }
+  if (!(windStrand > 0.1)) {
+    throw new Error(
+      `spray-arrival: windward strand too low (${windStrand})`,
+    );
+  }
+  if (leeStrand !== 0) {
+    throw new Error(
+      `spray-arrival: lee strand expected 0 (got ${leeStrand})`,
+    );
+  }
+
+  return {
+    scenario: "spray-arrival",
+    records: [
+      {
+        label: "lee",
+        hsi: leeHsi,
+        herbBiomass: leeHerb,
+        strandBiomass: leeStrand,
+        exposure: 0,
+        limiting: leeA.getLimitingFactor(sx, sz),
+        salinity: 0,
+      },
+      {
+        label: "windward",
+        hsi: windHsi,
+        herbBiomass: windHerb,
+        strandBiomass: windStrand,
+        exposure: 1,
+        limiting: windLim,
+        sprayLimited: windLim === LIMITING_SPRAY ? 1 : 0,
+        salinity: 0,
+      },
+      {
+        label: "delta",
+        herbDelta,
+        hsiDelta: leeHsi - windHsi,
+        saltMatch,
+        replayMatch,
+        hashN: Number.parseInt(leeA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * C-018 / Slice N4 — strand vs inland herb under one seed schedule.
  * Salty exposed shore earns strand mats; fresh inland hollow earns herb.
  */
@@ -2308,8 +2423,8 @@ export function probeStrandArrival(): ProbeResult {
       `strand-arrival: inland strand expected 0 (got ${inlandStrand})`,
     );
   }
-  if (a.getLimitingFactor(shoreX, shoreZ) !== LIMITING_SALINITY) {
-    throw new Error("strand-arrival: shore herb not salinity-limited");
+  if (a.getLimitingFactor(shoreX, shoreZ) !== LIMITING_SPRAY) {
+    throw new Error("strand-arrival: shore herb not spray-limited");
   }
 
   return {
@@ -2895,6 +3010,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "salinity-arrival": probeSalinityArrival,
   "heat-arrival": probeHeatArrival,
   "strand-arrival": probeStrandArrival,
+  "spray-arrival": probeSprayArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,

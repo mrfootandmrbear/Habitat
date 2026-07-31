@@ -8,7 +8,7 @@ import {
   STRAND_LIMITING_SALINITY,
   STRAND_LIMITING_SHORE,
 } from "./habitat/strandHsiComposition";
-import { LIMITING_SALINITY } from "./habitat/hsiComposition";
+import { LIMITING_SPRAY } from "./habitat/hsiComposition";
 
 describe("Strand splash pioneer (C-018 / Slice N4)", () => {
   it("tolerant salinity stays high where herb f_salinity collapses", () => {
@@ -97,7 +97,7 @@ describe("Strand splash pioneer (C-018 / Slice N4)", () => {
     const inlandHerb = a.getHerbBiomass(inlandX, inlandZ);
     const inlandStrand = a.getStrandBiomass(inlandX, inlandZ);
 
-    expect(a.getLimitingFactor(shoreX, shoreZ)).toBe(LIMITING_SALINITY);
+    expect(a.getLimitingFactor(shoreX, shoreZ)).toBe(LIMITING_SPRAY);
     expect(shoreStrand).toBeGreaterThan(0.1);
     expect(shoreStrand).toBeGreaterThan(shoreHerb * 4);
     expect(inlandHerb).toBeGreaterThan(0.1);

@@ -177,6 +177,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     ],
     visibleWhen: (s) => s.modalLimitingFactor === 4 && s.landCellCount > 0,
   },
+  {
+    id: "limited-spray",
+    event: "limited",
+    scale: "preserve",
+    sentence: "The windward face took the spray; the lee twin kept its inland green.",
+    traces: [
+      {
+        fieldId: "habitat.limitingFactor",
+        evidence: "modal limiting factor is spray (5)",
+      },
+      {
+        fieldId: "shore.exposure",
+        evidence: "shore exposure is the HSI argmin on land — distinct from soil.salinity",
+      },
+    ],
+    visibleWhen: (s) => s.modalLimitingFactor === 5 && s.landCellCount > 0,
+  },
 ];
 
 /** Uncertainty preface for what-contributed (U-006 — no certainty claim). */

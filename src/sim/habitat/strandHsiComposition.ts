@@ -2,7 +2,8 @@
  * Strand splash pioneer HSI (C-018 / Slice N4).
  * Rule: docs/slices/N4-composition.md — shore × salt-tolerant × temp.
  * Distinct from wet-site herb Liebig (rejects reusing herb f_salinity = 1−S).
- * Spray / burial arms deferred (C-017 / W-003).
+ * Spray is an herb Liebig arm only (C-017); strand holds via f_shore.
+ * Burial deferred (W-003).
  */
 
 import { config } from "../../config";

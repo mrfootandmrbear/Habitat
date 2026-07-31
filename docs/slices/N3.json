@@ -1,0 +1,17 @@
+{
+  "id": "N3",
+  "title": "Onshore spray stress gate (NS-003)",
+  "simLoop": "shore.exposure enters herb Liebig HSI as f_spray; windward stalls inland guilds while strand holds via f_shore (C-017 hypothesis, ≠ soil.salinity).",
+  "gameLoop": "Wind onto the exposed shore should punish inland green on the windward face; strand mats should still take there under the same seed schedule.",
+  "registerIds": ["C-017", "C-018", "C-007", "C-011", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/sprayArrival.test.ts",
+    "src/sim/habitat/hsi.test.ts",
+    "src/sim/strandArrival.test.ts"
+  ],
+  "probes": ["spray-arrival", "strand-arrival"],
+  "fields": ["shore.exposure", "habitat.suitability", "habitat.limitingFactor"],
+  "notebookSeed": "The windward face took the spray; the lee twin kept its inland green.",
+  "tierO": "no owner-only question this closeout — C-017 / C-018 Lock remain owner; machine half green"
+}

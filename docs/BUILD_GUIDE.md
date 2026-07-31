@@ -107,11 +107,11 @@ Summary only — do not reopen unless fixing regressions.
 | **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 Open) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** / **NS-004** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.**
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.**
 
 **Owner Lock backlog** (dossier / register acts — not the executable tip): **C-009** substrate; **C-015…C-019** maritime (owner halves Pass); **C-004** stewardship reading; **C-020** weather-feel; **C-014** audio; **U-006** notebook Lock (reviewer).
 
-**Next (executable tip):** **Nature P1:** [NS-003](nature-study/cards/NS-003-onshore-spray-stress-gate.md) spray stress ([BACKLOG](nature-study/BACKLOG.md)).
+**Next (executable tip):** **Nature P1:** [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) sand-binder ([BACKLOG](nature-study/BACKLOG.md)).
 
 **Thesis holes (not tip):** **C-005** branch-and-compare (file scaffold after Nature encoding); **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004); **C-010** toxic-site after **C-009** Lock; **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
 
@@ -770,15 +770,34 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.25 Slice N3 — Onshore spray stress gate (**NS-003**) *(stub)*
+### 4.25 Slice N3 — Onshore spray stress gate (**NS-003**)
 
 **Why this exists.** Distinct spray stress from `soil.salinity` (island evidence §3); Wind × shoreExposure derived field for canopy / interior filter.
 
 **Gate.** After NS-004 machine green.
 
-- [ ] `proposed:stress.spray` from Wind × shoreExposure; keep distinct from soil salt
-- [ ] HSI arm or strand retune — no new Process
-- [ ] **Next-but-one:** NS-005 sand-binder or C-005 scaffold — choose at closeout
+**Nature cards:** NS-003  
+**Register:** C-017 Open; C-018 Open; C-007 Locked; C-011 Locked; N-004  
+**New Process?** no  
+**Study log:** island-colonization salt-spray gate → `f_spray` (**C-017**); rejected second salt ledger / `stress.spray` store
+
+- [x] `f_spray = 1 − shore.exposure` on herb Liebig (exposure already onshore × fetch); keep distinct from soil salt
+- [x] Strand omits spray arm — holds via `f_shore`; no new Process
+- [x] Probe `spray-arrival` + unit tests; notebook `limited-spray`
+- [x] Composition + manifest: [N3-composition.md](slices/N3-composition.md), [N3.json](slices/N3.json)
+- [x] **Next-but-one:** NS-005 sand-binder (§4.26 stub)
+
+---
+
+### 4.26 Slice N5 — Sandy crest sand-binder (**NS-005**) *(stub)*
+
+**Why this exists.** Second shore guild after spray differentiates windward faces (NS-003).
+
+**Gate.** After NS-003 machine green.
+
+- [ ] Guild HSI / fields per [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) — no ecosystem painter
+- [ ] Probe twin vs strand / herb; burial tolerance if geomorph flux ready
+- [ ] **Next-but-one:** hydroperiod / light-into-HSI or C-005 scaffold — choose at closeout
 
 ---
 
@@ -792,10 +811,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N / NS-006 | Salt-memory encoding | C-018 | **Done** (§4.22) |
 | N2 / NS-002 | Heat→plant | C-004, C-020 | **Done** (§4.23) |
 | N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | **Done** (§4.24) |
-| N3 / NS-003 | Onshore spray stress | C-017, C-018 | §4.25 |
+| N3 / NS-003 | Onshore spray stress | C-017, C-018 | **Done** (§4.25) |
+| N5 / NS-005 | Sandy crest sand-binder | W-003, C-017 | §4.26 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** Done. **Next:** Nature P1 **NS-003** spray stress.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done. **Next:** Nature P1 **NS-005** sand-binder.
 
 ---
 

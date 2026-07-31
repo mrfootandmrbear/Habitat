@@ -1,15 +1,17 @@
 /**
- * Liebig HSI composition (Slice 9 + Slice 20 salinity + Heat plant gate).
+ * Liebig HSI composition (Slice 9 + Slice 20 salinity + Heat + spray).
  * Rule: docs/slices/9-composition.md — NATURAL_PROCESS_MATH §3.3 min form.
  * Salinity: docs/slices/20-composition.md (C-018).
  * Temperature: docs/slices/N2-composition.md (C-004 / C-020 hypothesis).
+ * Spray: docs/slices/N3-composition.md (C-017) — distinct from soil salt.
  *
- * HSI = min(f_moisture, f_depth, f_groundwater, f_salinity, f_temp); limiting = argmin.
+ * HSI = min(f_moisture, f_depth, f_groundwater, f_salinity, f_temp, f_spray); limiting = argmin.
  * Not a health score (N-002); the arrival gate under C-007.
  */
 
 import { config } from "../../config";
 import { factorSalinity } from "./salinityComposition";
+import { factorSpray } from "./sprayComposition";
 import { factorTemperature } from "./temperatureComposition";
 
 export const LIMITING_MOISTURE = 0;
@@ -17,13 +19,15 @@ export const LIMITING_DEPTH = 1;
 export const LIMITING_GROUNDWATER = 2;
 export const LIMITING_SALINITY = 3;
 export const LIMITING_TEMPERATURE = 4;
+export const LIMITING_SPRAY = 5;
 
 export type LimitingFactorId =
   | typeof LIMITING_MOISTURE
   | typeof LIMITING_DEPTH
   | typeof LIMITING_GROUNDWATER
   | typeof LIMITING_SALINITY
-  | typeof LIMITING_TEMPERATURE;
+  | typeof LIMITING_TEMPERATURE
+  | typeof LIMITING_SPRAY;
 
 export const LIMITING_LABELS: Record<LimitingFactorId, string> = {
   [LIMITING_MOISTURE]: "moisture",
@@ -31,6 +35,7 @@ export const LIMITING_LABELS: Record<LimitingFactorId, string> = {
   [LIMITING_GROUNDWATER]: "groundwater",
   [LIMITING_SALINITY]: "salinity",
   [LIMITING_TEMPERATURE]: "temperature",
+  [LIMITING_SPRAY]: "spray",
 };
 
 export type HsiSample = {
@@ -43,6 +48,7 @@ export type HsiSample = {
   fGroundwater: number;
   fSalinity: number;
   fTemp: number;
+  fSpray: number;
 };
 
 export function clamp01(x: number): number {
@@ -78,6 +84,8 @@ export function evaluateHsi(args: {
   tempKillC?: number;
   /** Guild optimum (°C); required with airTempC for a non-default gate. */
   tempOptC?: number;
+  /** Shore exposure [0,1]; default 0 so inland / legacy call sites stay full. */
+  shoreExposure?: number;
 }): HsiSample {
   const fMoisture = factorMoisture(args.moisture, args.porosity);
   const fDepth = factorDepth(args.soilDepth, args.depthRef);
@@ -87,12 +95,14 @@ export function evaluateHsi(args: {
   const opt = args.tempOptC ?? config.herbTempOptC;
   // Missing airTemp → treat as at/above opt so legacy call sites stay full.
   const fTemp = factorTemperature(args.airTempC ?? opt, kill, opt);
+  const fSpray = factorSpray(args.shoreExposure ?? 0);
   const factors: [LimitingFactorId, number][] = [
     [LIMITING_MOISTURE, fMoisture],
     [LIMITING_DEPTH, fDepth],
     [LIMITING_GROUNDWATER, fGroundwater],
     [LIMITING_SALINITY, fSalinity],
     [LIMITING_TEMPERATURE, fTemp],
+    [LIMITING_SPRAY, fSpray],
   ];
   // Stable tie-break: lowest factor id wins.
   let limiting: LimitingFactorId = LIMITING_MOISTURE;
@@ -117,5 +127,6 @@ export function evaluateHsi(args: {
     fGroundwater,
     fSalinity,
     fTemp,
+    fSpray,
   };
 }

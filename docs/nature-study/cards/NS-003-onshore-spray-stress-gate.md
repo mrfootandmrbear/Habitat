@@ -15,5 +15,5 @@
 | steal | • Derived spray stress on existing exposure × Wind dial — separate HSI input from soil.salinity (C-018) · Paired windward vs lee berm under same rain: interior/canopy fails spray side first |
 | reject | • Collapsing spray into soil.salinity or a second salt ledger · Per-species spray tables or wind-targeted placement |
 | legibility | limiting factor: spray (distinct from salinity, moisture) |
-| priority | P1 |
+| priority | P0 (shipped N3) |
 | evidence_grade | abstract |

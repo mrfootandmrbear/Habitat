@@ -6,7 +6,7 @@
       "abs": 0.000001
     },
     "shore.herbBiomass": {
-      "value": 0.3749999403953552,
+      "value": 0,
       "abs": 0.000001
     },
     "shore.salinity": {
@@ -18,7 +18,7 @@
       "abs": 0
     },
     "shore.herbLimiting": {
-      "value": 3,
+      "value": 5,
       "abs": 0
     },
     "inland.strandBiomass": {
@@ -42,7 +42,7 @@
       "abs": 0
     },
     "delta.shoreGuildDelta": {
-      "value": 2.1250000596046448,
+      "value": 2.5,
       "abs": 0.000001
     },
     "delta.inlandGuildDelta": {
@@ -62,7 +62,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 2478701479,
+      "value": 3684153176,
       "abs": 0
     }
   }

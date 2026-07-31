@@ -8,6 +8,7 @@ import {
   LIMITING_GROUNDWATER,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
+  LIMITING_SPRAY,
   LIMITING_TEMPERATURE,
 } from "./hsiComposition";
 import { heatById } from "../climate/atmosphere";
@@ -125,6 +126,35 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       tempOptC: config.herbTempOptC,
     });
     expect(s.fTemp).toBe(1);
+    expect(s.limiting).toBe(LIMITING_MOISTURE);
+  });
+
+  it("names spray when shore exposure is full (C-017)", () => {
+    const s = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      shoreExposure: 1,
+    });
+    expect(s.limiting).toBe(LIMITING_SPRAY);
+    expect(s.hsi).toBe(0);
+    expect(s.fSpray).toBe(0);
+  });
+
+  it("zero exposure leaves f_spray at 1 so moisture can still limit", () => {
+    const s = evaluateHsi({
+      moisture: 0.1,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      shoreExposure: 0,
+    });
+    expect(s.fSpray).toBe(1);
     expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 
