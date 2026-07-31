@@ -134,6 +134,13 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.14 — Living-world and time-architecture reviews; C-023 / C-024 / C-025 filed.**
+
+- Filed **C-023** (guild competition / successional displacement) Open after [reviews/2026-07-31-living-world-review.md](reviews/2026-07-31-living-world-review.md) measured the biological half of the sim. Six guilds share one seed schedule, stack additively into `physicalCover`, and none is ever displaced.
+- The living-world review's other three findings are **defects against Locked entries, not new candidates**, and are queued as [BUILD_GUIDE.md](BUILD_GUIDE.md) §4.36–§4.39: seed pressure never sourced from established biomass (shortfall against **C-007**'s "dispersal pressure is a real path"); biomass mortality as an instantaneous clamp rather than a rate (no biological substrate for **S-007** / **S-008**); and `maxStepsPerFrame = 5` capping the 16× control at an effective 5.00× while discarding 6600 of 9600 steps per 10 wall-seconds (**S-009** / **T-002**, and the measured half of the "faster than 16×" feedback recorded under **C-004**).
+- Filed **C-024** (band calendar coherence) and **C-025** (rate-selected integration floor) Open after [reviews/2026-07-31-time-architecture-review.md](reviews/2026-07-31-time-architecture-review.md) measured the timescale ladder. Against SIMULATION_MODEL §6.1 the annual band runs **10× fast** and the decadal band **360× fast**, so one displayed sim-year delivers 360 years of geomorphology and "sim-year" is not a unit the player can reason in. Separately, a century costs 39.9 min of CPU today and is unreachable without letting the requested rate select the integration floor — which is where **S-009**'s rate-invariance and **T-002** are genuinely at stake, since a decadal-floor century is ten band calls rather than a century of integration.
+- Real-world time units on the rate control (**L6**, [BUILD_GUIDE §4.41](BUILD_GUIDE.md)) are **not** gated on either candidate: **T-002** Locked already states that exact multipliers are tuning parameters rather than constitutional decisions. Recorded because "1×" is presently 54,000× real time and true real time is unreachable.
+
 **v2.0.13 — C-020 Locked (atmospheric precip delivery).**
 
 - Promoted **C-020** Open→Locked after G1–G5 presentation fixes and owner Lock re-ask Pass ([C-020-weather-lock.md](playtests/C-020-weather-lock.md) 2026-07-31): weather the atmosphere made, including cold spells reading as snow. Machine: `cloud-delivery` probe; `stormCue.test.ts` (G1–G5). Artifacts: `docs/candidates/C-020-dossier.md`, `docs/slices/clouds-composition.md`. SWE store remains optional; not required for Lock.
@@ -1312,6 +1319,8 @@ Ordered by how many other decisions depend on them.
 8g. ~~**C-015** + **W-001**~~ **C-015 Locked**; **W-001 Superseded** (ballot B 2026-07-30). ~~**C-016**…**C-019**~~ **Locked** (owner Lock batch A 2026-07-30).
 8h. ~~**C-020** — atmospheric precip delivery~~ **Locked** (owner Lock re-ask Pass 2026-07-31 — weather the atmosphere made; G1–G5 fixed).
 8i. **C-021** / **C-022** — season and erosion-intensity force dials (THESIS §4); filed Open — no player regime control on seasonal band or geomorph intensity yet.
+8j. **C-023** — guild competition / successional displacement; filed Open from the [living-world review](reviews/2026-07-31-living-world-review.md). Six guilds stack and none is ever displaced. Gated behind **L2** / **L3** — a suppressed guild cannot recede while mortality is a clamp.
+8k. **C-024** / **C-025** — band calendar coherence and rate-selected integration floor; filed Open from the [time-architecture review](reviews/2026-07-31-time-architecture-review.md). Annual runs 10× fast and decadal 360× fast against SIMULATION_MODEL §6.1, so "sim-year" is not yet a unit; and deep time is unreachable without letting the rate choose the integration floor, which is where **S-009** rate-invariance and **T-002** are actually at stake. Rises if real-world time units (**L6**) land, because the incoherence becomes player-visible.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1629,6 +1638,39 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** Regimes not smiting (C-004 Locked). One law, dialled intensity (T-004 / GEO-002) — not a second erosion Process. Mass conservation (H-004). Must not become a "smooth this hill" brush. Real-world referent: storminess / disturbance regime, not a magic erode slider with no physical meaning (N-004, C-011).
 
 **Leading direction.** Global intensity multiplier (or storminess archetype) on existing hillslope / channel / shore work. Open until criterion exists and a paired-regime probe shows divergent channel loss under identical terrain.
+
+### C-023 — Guild competition / successional displacement
+**Status:** Open
+
+**Question.** Should a later-successional guild **suppress** an earlier one where both are suitable — so occupancy is decided by competition as well as by tolerance — or do guilds remain independent bars that only ever stack?
+
+**Why now.** Six guilds (herb, strand, binder, marsh, shrub, crust) now share one seed schedule and are differentiated only by HSI shape. They stack additively into `physicalCover` (capped at 1) and **no guild ever loses**: shrub takes facilitation from herb, crust is shade-limited, but nothing is displaced. Every cell converges to "whatever suits it, at maximum, simultaneously" — succession as parallel accumulation rather than as replacement. Named in [reviews/2026-07-31-living-world-review.md](reviews/2026-07-31-living-world-review.md) §4 as the one genuinely new policy question in that review.
+
+**Constraints.** Capacity must stay resource-derived (**ES-006**) — competition may not smuggle in a fixed ecological K. No optimization puzzle with a single dominant strategy (**N-002**); no species collection or tier ladder (**N-003**, **W-003**, **E-004**). Real-world referent required (**C-011** / **N-004**): light interception and rooting space are referents a player already reasons about; an abstract "dominance rank" is not. Determinism (**T-001**); no stochastic tie-breaks while **C-003** is Open. Must not become a second authority on `veg.cover` (**E-005**). The `lightCompetition.ts` Beer–Lambert understory term already exists and is the natural mechanism — competition should ride it rather than add a parallel one.
+
+**Leading direction.** File as Open; implement nothing under it. Likely shape: taller guilds attenuate understory light, and shorter guilds read `light.understory` rather than open-sky `light.insolation` in their HSI — which makes displacement a consequence of the light budget already simulated instead of a new rule. Gate on **L2** (local seed rain) and **L3** (mortality as a rate) landing first: without a mortality rate there is no mechanism by which a suppressed guild can actually recede.
+
+### C-024 — What a sim-year means (band calendar coherence)
+**Status:** Open
+
+**Question.** Should every band advance at the period its name claims — so one displayed sim-year is one year of *every* process — and if so, is the reconciliation to slow the fast bands down, or to rescale their per-call rates?
+
+**Why now.** Measured in [reviews/2026-07-31-time-architecture-review.md](reviews/2026-07-31-time-architecture-review.md) §2: against [SIMULATION_MODEL.md](SIMULATION_MODEL.md) §6.1, daily and seasonal track the calendar, but **annual runs 10× fast** (period 36 days, spec 360) and **decadal runs 360× fast** (period 10 days, spec 3600). Rates are per band call and were never rescaled, so one displayed sim-year delivers one year of hydrology, ten years of seed-bank dynamics, and **360 years of geomorphology**. `config.ts` documents the compression as deliberate and the constants were evidently tuned until the world felt right — this is a defect in the *label*, not in the numbers. It becomes player-visible the moment the time control speaks in real-world units (**L6**), because "run one year" would advance erosion by three and a half centuries. It also silently biases the living-sand-castle balance: nature takes what you built 360× faster than life colonizes it, relative to reality.
+
+**Constraints.** **S-009** — durations with ecological meaning are defined in simulation time; a clock whose bands disagree cannot satisfy it, so this is plausibly S-009's promotion evidence rather than a competing entry. **C-008** Open (response-latency budget) is the cost of the obvious fix: slowing the decadal band to spec means the player waits 360× longer to see erosion, which is the RCT3-immediacy constraint pointing the other way. Rescaling per-call rates instead keeps the wait but coarsens integration — `band-refinement.test.ts` is the existing harness and asserts 5–8% convergence, not bit-identity. Every probe baseline and `GOLDEN_*` hash moves either way (**T-001**, §4.0 step 4). Must not be resolved by relabelling the HUD while leaving the bands incoherent.
+
+**Leading direction.** File as Open; implement nothing under it. The two reconciliations are not equivalent in feel, and the choice is owner taste against **C-008**, not a number. Pair with **C-025** — together they are what makes centuries reachable at all ([review](reviews/2026-07-31-time-architecture-review.md) §3).
+
+### C-025 — Rate-selected integration floor (deep time)
+**Status:** Open
+
+**Question.** May the player's requested time rate select **which band the ladder starts at** — so high rates stop integrating the finer bands entirely — and if so, what invariance replaces bit-identical replay across floors?
+
+**Why now.** Deep time is not reachable by throughput. Measured ([review](reviews/2026-07-31-time-architecture-review.md) §3): a century costs **39.9 min** of CPU today, **6.7 min** with the [SIMULATION_MODEL §6.2](SIMULATION_MODEL.md) activity gate, **39.6 s** at a seasonal floor, **9.2 s** at a decadal floor. THESIS §4 makes running time forward the mechanism the whole payoff routes through; at 0.04 sim-years per wall-second it is the loop's narrowest point.
+
+**Constraints.** This is the entry's whole difficulty: **S-009** (Current) says durations are *"invariant under the player's chosen time rate"* and **T-002** (Locked) says *"authoritative outcomes do not change with the chosen rate."* Both hold today only because the rate control does exactly one thing — run the finest band faster. Under floor selection the same world at `1 day/s` and `1 decade/s` diverges, because a decadal-floor century is **ten band calls**, not a century of integration. That breaks **T-001** replay-from-seed as currently understood and weakens **P-006** prediction fairness and **C-005** comparison, unless the rate schedule becomes part of the run's declared state and travels through save / branch (**T-003**). Any relaxation must be a *stated tolerance* measured by probe, never an unbounded "close enough".
+
+**Leading direction.** File as Open; implement nothing under it. If adopted, the likely shape is: rate schedule saved and replayed as run state, invariance restated as a measured tolerance in the `band-refinement` family, and the HUD honest about which floor is active so the player knows when they are watching a coarser world. **L7** (activity-gated event band) is deliberately **not** under this entry — the gate is outcome-preserving by construction and ships only on hash-identity; only the residue that cannot be made hash-identical belongs here.
 
 ---
 

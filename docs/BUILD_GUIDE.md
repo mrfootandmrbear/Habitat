@@ -955,6 +955,134 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.36 Slice L1 — Time throughput defect *(queued; defect, not a feature)*
+
+**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §3. `config.maxStepsPerFrame = 5` caps throughput below what the 16× control demands, and `SimClock.tick` **discards** the excess instead of deferring it (the accumulator is drained by `excess` after the counter increments). Measured: event step **0.774 ms** → 22 steps/frame affordable in a 16.7 ms budget; the 16× button runs **3000 of 9600** steps per 10 wall-s → effective **5.00×**, 6600 discarded. At effective 5× one sim-year takes ~115 wall-seconds. "Run time forward and look" is the mechanism the whole loop routes through ([THESIS.md](THESIS.md) §4), so this throttles the payoff directly. The "wanting rates beyond 16×" note recorded under **C-004** is partly this defect, not product feedback.
+
+**First, because** L2 and L3 play out over sim-decades; verifying them by eye at effective 5× is the expensive path.
+
+**Already specified.** [SIMULATION_MODEL.md](SIMULATION_MODEL.md) §6.4 documents this exact defect — *"`config.maxStepsPerFrame = 5` currently drops the surplus silently, which dilates simulation time under load… Under S-009 the dropped time must be visible."* This slice is the spec being implemented, not a new idea. §6.4 also states the intended response to *sustained* debt is to lower the player's rate rather than skip ticks; keep that, and make the debt visible and payable rather than discarded.
+
+**Register:** S-009; T-002; T-001; C-008 Open (latency budget)
+**New Process?** no — presentation cadence only; fixed timestep is unchanged, so determinism and every probe baseline are untouched. D-007 clip gate does not apply.
+
+- [ ] Raise `maxStepsPerFrame` to a measured value (~16–20) with the measurement in the commit body, not a guessed constant
+- [ ] `SimClock` accrues a **deferred** debt it can pay down on later frames rather than discarding steps; keep the spiral-of-death guard as a hard ceiling on catch-up per frame
+- [ ] `getTimeDebt()` keeps meaning "owed", and the HUD `timeDebt` readout stays honest
+- [ ] Test: at 16× over N frames, steps run = steps demanded (within one frame of slack); the guard still bounds worst-case frame cost
+- [ ] Regression: every probe baseline and `GOLDEN_*` hash **unmoved** — a baseline move here is a defect, not an update (§4.0.1)
+- [ ] **Next-but-one:** L2 local seed rain (§4.37)
+
+---
+
+### 4.37 Slice L2 — Local seed rain *(queued; the big one)*
+
+**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §1. `runDispersalStep` writes seed pressure as a pure function of distance-to-shore; `veg.biomass.*` is read only for HSI facilitation and is **never a propagule source**. Every seed arrives from off-map forever on a λ = 4 cell kernel. Measured on the default island (3562 land cells, max shore distance 32): **52.1%** of land reaches p_establish ≥ 10% at perfect HSI, **32.4%** sits at 1–10% (decades), **15.6%** below 1% (never). A founded meadow never expands; burned interior never returns, because refugia require local sources; a perfect hollow 25 cells inland reads HSI 1.0 and stays bare with no legible reason — the **C-011** failure mode exactly.
+
+**This implements Locked C-007, it does not depart from it.** C-007's implications already say *"dispersal pressure is a real path — occupancy is never copied from HSI alone."* Today dispersal is a static field, not a path.
+
+**Register:** C-007 Locked; C-019 Locked; C-011 Locked; C-003 Open (no stochastic arrivals); T-001; E-005; W-003; N-004
+**New Process?** no — changes what `dispersalProcess` sources pressure *from*; band, ownership, and field set are unchanged. D-007 clip gate does not apply.
+
+- [ ] Seed pressure = external term + local term: `overseas(d) + Σ_neighbours biomass · kernel`, as a deterministic separable convolution (no RNG — **C-003** is Open)
+- [ ] `dispersalProcess.reads` already lists `veg.biomass.*`; confirm the scheduler edge and whether the read must be `lagged` to avoid a cycle with the seasonal establishment tick
+- [ ] Per-guild dispersal distance where the guild has a real-world referent (**N-004**) — sea-dispersed strand travels differently from crust; do not invent a distance for a guild that has no reason for one
+- [ ] **C-019 guard:** local seed must not swamp the overseas term to the point that island isolation stops mattering. Probe asserts a small isolated island still colonizes more slowly than a large near one, with the same `S_elig` shape as today
+- [ ] New probe `spread-front`: a founded patch expands under good conditions; the front **stalls** at a hostile boundary (salt / inundation / substrate); post-fire interior recovers from a surviving local source where today it cannot
+- [ ] Baselines: `arrival-earned`, `island-arrival`, and the six `*-arrival` probes **will** move. Refresh with the reason stated in the commit body per §4.0 step 4 — an unexplained move is still a defect
+- [ ] Composition + manifest (`docs/slices/L2-composition.md`, `L2.json`); **Next-but-one:** L3 mortality as a rate (§4.38)
+
+---
+
+### 4.38 Slice L3 — Mortality as a rate *(queued)*
+
+**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §2. `nextHerbBiomass` returns `min(capacity, biomass + growth)`, so an HSI collapse from 1.0 → 0.2 takes biomass **2.500 → 0.500 in a single band**. Loss is instantaneous; only recovery has a rate — backwards from real ecology, where loss is fast but finite and recovery is slow. Vegetation is therefore a *render of current HSI* rather than a state with history, and every scrap of ecological memory in the world lives in `soil.depth` / `soil.salinity` / `soil.porosity` with **none in the biota**. That is a bigger hole under **S-007** / **S-008** than the missing contaminant field **C-010** was filed for, and far cheaper to close.
+
+**Register:** S-007 Locked; S-008 Current; ES-006 Locked; ES-002; C-011 Locked; T-001; N-004
+**New Process?** no — changes the biomass update law inside the existing seasonal tick. D-007 clip gate does not apply.
+
+- [ ] Replace the clamp with a first-order decline toward capacity: when `biomass > capacity`, `biomass -= mortalityRate · (biomass − capacity) · dt`
+- [ ] Per-guild mortality rate with a referent (**N-004**) — crust and herb do not die back on the same timescale as woody shrub; keep the numbers in `config.ts` beside the establishment rates
+- [ ] Capacity stays `biomassMax · HSI` — **ES-006**: mortality must not smuggle in a fixed ecological K
+- [ ] Test: a drought pulse shorter than the mortality timescale is **ridden out**; a longer one is not — the asymmetry is the point
+- [ ] New probe `dieback-lag` (or extend `disturbance-recovery`): time-to-half-biomass after an HSI collapse is finite and guild-ordered; recovery still slower than loss
+- [ ] **S-008 check:** the notebook / limiting-factor readout should be able to say *which* past condition the standing biomass is still carrying — this is the first biological hysteresis the register can point at
+- [ ] Baselines: guild `*-arrival` and `disturbance-recovery` will move; state the reason in the commit body
+- [ ] Composition + manifest; **Next-but-one:** L4 biotic motion (§4.39)
+
+---
+
+### 4.39 Slice L4 — Biotic motion *(queued; presentation)*
+
+**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §0 / §5. Water smooths, clouds drift, rain slants with wind — and life is a field of **static cones** (`OccupantMesh`, `ConeGeometry`, colour and height keyed to biomass, zero motion). **D-007** is Locked and the twenty-second clip currently reads as a diorama with weather over it. This is the cheapest item on the list that moves the clip.
+
+**Register:** D-007 Locked; T-006; ART-003; ART-002; C-014 Open (audio residual, adjacent)
+**New Process?** no — presentation only; reads existing fields, writes no WorldState. **T-006** holds: no GPU state is authoritative.
+
+- [ ] Per-instance sway keyed to the existing global wind vector, phase from cell index — one sine, shader-side; sway amplitude scales with guild height and with wind magnitude
+- [ ] Motion must be a **readout of forcing**, not ambient decoration: still air is still, storm wind lays the sward over (**C-011** — the referent is what the player already knows about grass in wind)
+- [ ] Dying biomass under L3 should read differently from absent biomass — standing dead does not sway like green
+- [ ] Presentation proxy in `presentation.proxy.test.ts`: sway amplitude monotone in wind magnitude; zero at zero wind
+- [ ] Record the twenty-second clip verdict in this entry (**D-007** — one sentence, no number, no owner session)
+- [ ] **Next-but-one:** L5 is gated on C-023 judgment; if no sitting, take the residual Lock queue ([owner-lock-batch.md](candidates/owner-lock-batch.md))
+
+---
+
+### 4.40 Slice L5 — Guild competition *(blocked on C-023 — do not implement)*
+
+**Why this exists.** Six guilds stack additively into `physicalCover` and **no guild is ever displaced**. Succession is parallel accumulation, not replacement. Filed as **C-023** Open ([register §16.5](DECISION_REGISTER.md), criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3).
+
+**Status.** Open candidate, owner-judged. Per §4.0.1, **implement nothing under it** — the entry exists so the question is filed rather than answered by an agent. Ordering is also causal, not just procedural: without L3's mortality rate there is no mechanism by which a suppressed guild can recede, so building this first would measure nothing.
+
+**Likely shape (hypothesis only).** Shorter guilds read `light.understory` instead of open-sky `light.insolation` in their HSI, making displacement a consequence of the Beer–Lambert budget `lightCompetition.ts` already computes rather than a new rule or a dominance table.
+
+---
+
+### 4.41 Slice L6 — Real-world time units *(queued; may share a PR with L1)*
+
+**Why this exists.** [Time-architecture review](reviews/2026-07-31-time-architecture-review.md) §1. The rate control is a multiplier against a base nobody can state. Measured: **"1×" is 54,000× real time** (one 15-sim-minute step per 1/60 wall-second), "4×" is 216,000×, and "16×" — at its effective 5.00× — is 270,000×. **True real time is unreachable**, by a factor of 54,000. Replace the multipliers with rates a person can name: `1 s/s` (real time) · `1 min/s` · `1 h/s` · `1 day/s` · `1 year/s`, with the reachable ceiling stated honestly rather than implied.
+
+**No candidate needed.** **T-002** is Locked and says exactly this: *"Exact multipliers are tuning parameters rather than constitutional decisions."* This is permitted tuning plus presentation, and it changes no authoritative outcome.
+
+**Register:** T-002 Locked; S-009 Current; D-006; U-003; C-008 Open
+**New Process?** no — rate values and labels only; the fixed timestep and every band period are untouched, so no baseline may move. D-007 clip gate does not apply.
+
+- [ ] Rate control expressed as **sim-time per wall-second**, derived from `eventDtMinutes` rather than from a hidden base — one place computes it, so the label cannot drift from the clock
+- [ ] True real time (1 sim-s per wall-s) reachable at the slow end; it is currently not
+- [ ] The ceiling is **honest**: the fastest offered rate is one the machine can actually sustain after L1, and rates above it are not offered rather than offered-and-discarded (that was the L1 defect)
+- [ ] HUD shows elapsed **simulation** time in real units (days / years), not step counts — `S-009`: wall-clock in the UI is presentation, sim time is the readout
+- [ ] Test: label ↔ delivered sim-time agree within one frame of slack at every offered rate; every probe baseline and `GOLDEN_*` hash **unmoved**
+- [ ] **Known incoherence to surface, not to fix here:** at `1 year/s` the world advances 360 years of geomorphology per labelled year (§2 of the review). L6 makes this visible; **C-024** decides it. Do not silently rescale bands inside this slice
+- [ ] **Next-but-one:** L7 activity-gated event band (§4.42)
+
+---
+
+### 4.42 Slice L7 — Activity-gated event band *(queued; ships only on hash-identity)*
+
+**Why this exists.** [SIMULATION_MODEL.md](SIMULATION_MODEL.md) §6.2 specifies the event band as **activity-gated** — *"Between storms the ladder starts at `daily`"* — and argues it is determinism-safe because the gate is a pure function of authoritative state. It is **not implemented**: `WorldState.stepEvent` runs the event band unconditionally. Measured payoff ([review](reviews/2026-07-31-time-architecture-review.md) §3): a century falls from **39.9 min to 6.7 min** of CPU at 30 storm-days/year.
+
+**Register:** S-009 Current; T-001 Locked; T-002 Locked; H-001; S-005
+**New Process?** no — a gate predicate in front of an existing band. D-007 clip gate does not apply.
+
+- [ ] Gate predicate exactly as §6.2 specifies: any `water.surfaceDepth > dryEpsilon`, or precipitation anywhere, or any cell burning — a pure function of authoritative state so replay is identical
+- [ ] **The atmosphere caveat:** `atmosphereProcess` is in the event band and charges `climate.cloudWater` between storms. A naive gate would freeze cloud charging and change outcomes. Either exclude atmosphere from the gate or advance it analytically across the skipped span — decide with the measurement, and say which in the composition doc
+- [ ] `clock.simMinutes` still advances across gated spans; the clock is not the thing being skipped
+- [ ] **Ship gate: hash-identity.** New probe asserts `stateHash()` identical for gated vs ungated runs over a wet→dry→wet span crossing daily, seasonal, and annual boundaries. Not a tolerance — identity. If identity cannot be reached, the residue is **C-025**'s, and this slice stops at whatever subset is exact (§4.0.1 blocked note)
+- [ ] Every existing probe baseline **unmoved** — that is the same claim as hash-identity, stated where CI will catch it
+- [ ] Composition + manifest; **Next-but-one:** L8 is blocked on C-024 / C-025; if no owner sitting, take the residual Lock queue
+
+---
+
+### 4.43 Slice L8 — Deep-time ladder *(blocked on C-024 + C-025 — do not implement)*
+
+**Why this exists.** Centuries are not reachable by throughput. Measured cost of one sim-year by integration floor ([review](reviews/2026-07-31-time-architecture-review.md) §3): today **23.95 s** (century = 39.9 min) · activity-gated **3.99 s** (6.7 min) · daily floor **2.03 s** (3.4 min) · seasonal floor **0.40 s** (39.6 s) · decadal floor **0.09 s** (**9.2 s**). Getting to seconds-per-century needs the ladder to start lower at high rates **and** the band calendar fixed — the compressed decadal schedule fires 36× a sim-year where the spec calendar fires 0.1×, and that is where the last two orders of magnitude live.
+
+**Status.** Blocked on two owner-judged Open candidates: **C-024** (what a sim-year means) and **C-025** (may the rate select the integration floor). Per §4.0.1, **implement nothing under them**. The block is real, not procedural: floor selection means the same world at `1 day/s` and `1 decade/s` produces different numbers, because a decadal-floor century is **ten band calls** rather than a century of integration — and that trades directly against **S-009** rate-invariance and **T-002**.
+
+**Do not** attempt a partial version that skips bands "only a little". A silent tolerance is the one failure mode where nothing goes red: **T-001** replay, **P-006** fairness, and **C-005** comparison all break without a test noticing. If deep time is wanted before the candidates are judged, the honest interim is **L1 + L7**, which buys 39.9 min → 6.7 min with outcomes provably unchanged.
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -977,9 +1105,28 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
 | G | Season + erosion-intensity dials | C-021, C-022, T-001, T-004, H-004, S-007, N-004 | **Done** (§4.35) — machine only, both Open |
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
+| L1 | Time throughput defect (16× runs at 5×) | S-009, T-002, C-008 | §4.36 **Queued** — no baseline may move |
+| L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Queued** — after L1 |
+| L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Queued** — after L2 |
+| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Queued** — after L3 |
+| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
+| L6 | Real-world time units (real time → years/s) | T-002, S-009, D-006, U-003 | §4.41 **Queued** — no candidate needed; may share L1's PR |
+| L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Queued** — ships only on hash-identity |
+| L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **Next:** residual Lock **C-014**; **C-021**/**C-022** taste sitting; **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting.
+
+**Executable tip is now the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
+
+```
+L1 throughput defect  →  L6 real-world time units  →  L2 local seed rain
+   →  L3 mortality as a rate  →  L7 activity-gated event band  →  L4 biotic motion
+```
+
+L1 and L6 lead because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
+
+**Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
 
 ---
 
