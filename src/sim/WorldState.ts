@@ -995,6 +995,7 @@ export class WorldState {
     const gw = this.groundwaterStorage.data;
     const salt = this.soilSalinity.data;
     const exposure = this.shoreExposure.data;
+    const elev = this.terrain.data;
     const hsi = this.habitatSuitability.data;
     const lim = this.habitatLimitingFactor.data;
     const gap = this.habitatLimitingGap.data;
@@ -1003,6 +1004,14 @@ export class WorldState {
     const airTempC = this.airTemperature;
     const tempKillC = config.herbTempKillC;
     const tempOptC = config.herbTempOptC;
+    const hasTide =
+      this.seaLevelMeters !== undefined && this.tidalAmplitudeMeters > 0;
+    const mlw = hasTide
+      ? meanLowWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
+      : undefined;
+    const mhw = hasTide
+      ? meanHighWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
+      : undefined;
 
     for (let i = 0; i < hsi.length; i++) {
       const sample = evaluateHsi({
@@ -1017,6 +1026,9 @@ export class WorldState {
         tempKillC,
         tempOptC,
         shoreExposure: exposure[i]!,
+        elevMeters: hasTide ? elev[i]! : undefined,
+        mlwMeters: mlw,
+        mhwMeters: mhw,
       });
       hsi[i] = sample.hsi;
       lim[i] = sample.limiting;

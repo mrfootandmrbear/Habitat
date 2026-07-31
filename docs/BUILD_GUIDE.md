@@ -108,14 +108,15 @@ Summary only — do not reopen unless fixing regressions.
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 **Locked**) |
 | **N3** | Onshore spray stress (**NS-003**) | Windward stalls herb; strand holds | `f_spray`, `spray-arrival` | **Done** — agent (C-017 **Locked**) |
 | **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
+| **N8** | Tidal inundation (**NS-008**) | Foreshore stalls herb; terrace earns | `f_inundation`, `inundation-arrival` | **Done** — agent (C-016 **Locked**) |
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P0: NS-008 inundation hydroperiod → HSI; then NS-007 light→Liebig. Parallel: C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** inundation→HSI Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P1: NS-007 light→Liebig. Parallel: C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005**, **C-013**, **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env), **U-006** (unanswered).
 
-**Next (executable tip):** Nature P0: **NS-008** tidal inundation / hydroperiod → Liebig `f_inundation` (≠ salinity, ≠ spray; no new Process). Then **NS-007** aspect light→Liebig. Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** Nature P1: **NS-007** aspect light→Liebig `f_light` (open-sky insolation; Beer–Lambert stays succession-only; no new Process). Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip. P2 after NS-007: salt-marsh engineer guild (needs NS-008).
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional C-020 SWE store only if G3 presentation hold fails. Scenario campaign (G-002 / C-010) after implement.
 
@@ -857,6 +858,39 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.30 Slice N8 — Tidal inundation hydroperiod gate (**NS-008**) *(Done — agent)*
+
+**Why this exists.** Completes the spray / soil-salt / inundation triad (island evidence §3). Tide dial + form siting already exist (C-016); plants ignored hydroperiod.
+
+**Loops.** Sim: envelope hydroperiod → herb Liebig `f_inundation`; foreshore stalls upland. Game: widen Tide or sit in the wet band — inland green stays out; terrace above can establish.
+
+**Nature cards:** NS-008  
+**Register:** C-016 Locked; C-018 Locked; C-007 Locked; C-011 Locked; N-004  
+**New Process?** no  
+**Study log:** island-colonization tidal inundation → `f_inundation` (**C-016**); rejected salinity collapse / tidal phase
+
+- [x] `tidalHydroperiod` + `f_inundation` on herb Liebig (id 6); keep distinct from soil salt and spray
+- [x] Strand omits inundation arm; no new Process; marsh guild deferred
+- [x] Probe `inundation-arrival` + unit tests; notebook `limited-inundation`
+- [x] Composition + manifest: [N8-composition.md](slices/N8-composition.md), [N8.json](slices/N8.json)
+- [x] **Next-but-one:** NS-007 aspect light→Liebig (§4.31 stub)
+
+---
+
+### 4.31 Slice N7 — Aspect light into Liebig (**NS-007**) *(Next)*
+
+**Why this exists.** `light.insolation` already drives succession; arrival HSI ignores open-sky aspect. NS-007 promotes insolation → inspectable `f_light` without folding Beer–Lambert understory into the arrival gate.
+
+**Nature cards:** NS-007  
+**Register:** C-007 Locked; C-011 Locked; N-004  
+**New Process?** no  
+
+- [ ] `f_light` from `light.insolation` in herb Liebig; understoryLight stays succession-only
+- [ ] Probe twin north vs south face under one seed schedule
+- [ ] Composition + manifest; **Next-but-one:** P2 salt-marsh engineer (needs NS-008)
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -869,6 +903,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | **Done** (§4.24) |
 | N3 / NS-003 | Onshore spray stress | C-017, C-018 | **Done** (§4.25) |
 | N5 / NS-005 | Sandy crest sand-binder | W-003, C-017, C-009 | **Done** (§4.26) |
+| N8 / NS-008 | Tidal inundation hydroperiod | C-016, C-018 | **Done** (§4.30) |
+| N7 / NS-007 | Aspect light into Liebig | C-007, C-011 | §4.31 next |
 | B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Lock owner |
 | E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) |
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
@@ -876,7 +912,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | C-020 glitches named | C-020 G1–G5 | [C-020-dossier](candidates/C-020-dossier.md) |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **C-013** / **C-010** framing Done. **Next:** Nature P0 **NS-008** inundation→HSI → **NS-007** light→Liebig; owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **C-013** / **C-010** framing Done. **Next:** Nature P1 **NS-007** light→Liebig; owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

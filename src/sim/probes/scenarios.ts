@@ -15,6 +15,7 @@ import { windById, type WindId } from "../climate/windRegime";
 import { meanExposure } from "../climate/shoreExposure";
 import {
   LIMITING_DEPTH,
+  LIMITING_INUNDATION,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
   LIMITING_SPRAY,
@@ -2473,6 +2474,137 @@ export function probeSprayArrival(): ProbeResult {
 }
 
 /**
+ * C-016 — tidal inundation gates upland herb arrival.
+ * Tide-off twin earns; spring foreshore is inundation-limited. Salt and spray
+ * matched at 0 so the twin isolates hydroperiod from C-018 / C-017.
+ */
+export function probeInundationArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 8;
+  const sz = 8;
+  const sea = DEFAULT_SEA_LEVEL_METERS;
+  const elev = sea + 0.4;
+  const springAmp = tideById("spring").amplitudeMeters;
+
+  const make = (amplitude: number) => {
+    const world = new WorldState(new Grid2D(w, h, elev), {
+      seaLevel: sea,
+      tidalAmplitude: amplitude,
+    });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.runHabitatStep(1);
+    // Uniform seed schedule — isolate HSI from overseas shore bias (C-019).
+    world.herbSeedBank.fill(config.seedSourceStrength);
+    world.strandSeedBank.fill(config.seedSourceStrength);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const dryA = make(0);
+  const dryB = make(0);
+  const wet = make(springAmp);
+
+  const replayMatch = dryA.stateHash() === dryB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("inundation-arrival: dry replay hash mismatch");
+  }
+
+  const dryHsi = dryA.getHabitatSuitability(sx, sz);
+  const wetHsi = wet.getHabitatSuitability(sx, sz);
+  const dryHerb = dryA.getHerbBiomass(sx, sz);
+  const wetHerb = wet.getHerbBiomass(sx, sz);
+  const wetLim = wet.getLimitingFactor(sx, sz);
+  const herbDelta = dryHerb - wetHerb;
+  const saltMatch =
+    Math.abs(
+      dryA.soilSalinity.get(sx, sz) - wet.soilSalinity.get(sx, sz),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const sprayMatch =
+    Math.abs(
+      dryA.shoreExposure.get(sx, sz) - wet.shoreExposure.get(sx, sz),
+    ) < 1e-9
+      ? 1
+      : 0;
+
+  if (saltMatch !== 1) {
+    throw new Error(
+      "inundation-arrival: salinity not matched (must isolate inundation)",
+    );
+  }
+  if (sprayMatch !== 1) {
+    throw new Error(
+      "inundation-arrival: spray/exposure not matched (must isolate inundation)",
+    );
+  }
+  if (!(dryHsi > wetHsi)) {
+    throw new Error(
+      `inundation-arrival: expected dry HSI (${dryHsi}) > wet (${wetHsi})`,
+    );
+  }
+  if (wetLim !== LIMITING_INUNDATION) {
+    throw new Error(
+      `inundation-arrival: expected wet limiting=inundation (got ${wetLim})`,
+    );
+  }
+  if (!(dryHerb > 0.1)) {
+    throw new Error(`inundation-arrival: dry herb too low (${dryHerb})`);
+  }
+  if (!(herbDelta > 0.05)) {
+    throw new Error(`inundation-arrival: herb delta too small (${herbDelta})`);
+  }
+  if (!wet.isIntertidal(sx, sz)) {
+    throw new Error("inundation-arrival: spring foreshore should be intertidal");
+  }
+  if (dryA.isIntertidal(sx, sz)) {
+    throw new Error("inundation-arrival: tide-off should not be intertidal");
+  }
+
+  return {
+    scenario: "inundation-arrival",
+    records: [
+      {
+        label: "dry",
+        hsi: dryHsi,
+        herbBiomass: dryHerb,
+        amplitude: 0,
+        intertidal: dryA.isIntertidal(sx, sz) ? 1 : 0,
+        limiting: dryA.getLimitingFactor(sx, sz),
+        salinity: 0,
+        exposure: 0,
+      },
+      {
+        label: "wet",
+        hsi: wetHsi,
+        herbBiomass: wetHerb,
+        amplitude: springAmp,
+        intertidal: wet.isIntertidal(sx, sz) ? 1 : 0,
+        limiting: wetLim,
+        inundationLimited: wetLim === LIMITING_INUNDATION ? 1 : 0,
+        salinity: 0,
+        exposure: 0,
+      },
+      {
+        label: "delta",
+        herbDelta,
+        hsiDelta: dryHsi - wetHsi,
+        saltMatch,
+        sprayMatch,
+        replayMatch,
+        hashN: Number.parseInt(dryA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * C-018 / Slice N4 — strand vs inland herb under one seed schedule.
  * Salty exposed shore earns strand mats; fresh inland hollow earns herb.
  */
@@ -3360,6 +3492,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "strand-arrival": probeStrandArrival,
   "binder-arrival": probeBinderArrival,
   "spray-arrival": probeSprayArrival,
+  "inundation-arrival": probeInundationArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,
   "substrate-deposit": probeSubstrateDeposit,

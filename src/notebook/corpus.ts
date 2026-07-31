@@ -211,6 +211,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     ],
     visibleWhen: (s) => s.modalLimitingFactor === 5 && s.landCellCount > 0,
   },
+  {
+    id: "limited-inundation",
+    event: "limited",
+    scale: "preserve",
+    sentence: "The wet shore band kept inland herbs out; the dry terrace above the tide took green.",
+    traces: [
+      {
+        fieldId: "habitat.limitingFactor",
+        evidence: "modal limiting factor is inundation (6)",
+      },
+      {
+        fieldId: "shore.intertidal",
+        evidence: "tidal envelope hydroperiod is the HSI argmin — distinct from salinity and spray",
+      },
+    ],
+    visibleWhen: (s) => s.modalLimitingFactor === 6 && s.landCellCount > 0,
+  },
 ];
 
 /** Uncertainty preface for what-contributed (U-006 — no certainty claim). */

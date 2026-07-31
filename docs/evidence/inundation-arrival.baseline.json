@@ -1,0 +1,89 @@
+{
+  "scenario": "inundation-arrival",
+  "metrics": {
+    "dry.hsi": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "dry.herbBiomass": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "dry.amplitude": {
+      "value": 0,
+      "abs": 0
+    },
+    "dry.intertidal": {
+      "value": 0,
+      "abs": 0
+    },
+    "dry.limiting": {
+      "value": 0,
+      "abs": 0
+    },
+    "dry.salinity": {
+      "value": 0,
+      "abs": 0
+    },
+    "dry.exposure": {
+      "value": 0,
+      "abs": 0
+    },
+    "wet.hsi": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "wet.herbBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "wet.amplitude": {
+      "value": 1.4,
+      "abs": 0
+    },
+    "wet.intertidal": {
+      "value": 1,
+      "abs": 0
+    },
+    "wet.limiting": {
+      "value": 6,
+      "abs": 0
+    },
+    "wet.inundationLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "wet.salinity": {
+      "value": 0,
+      "abs": 0
+    },
+    "wet.exposure": {
+      "value": 0,
+      "abs": 0
+    },
+    "delta.herbDelta": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "delta.hsiDelta": {
+      "value": 1,
+      "abs": 0.000001
+    },
+    "delta.saltMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.sprayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 962215839,
+      "abs": 0
+    }
+  }
+}

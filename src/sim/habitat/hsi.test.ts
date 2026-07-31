@@ -6,6 +6,7 @@ import {
   evaluateHsi,
   LIMITING_DEPTH,
   LIMITING_GROUNDWATER,
+  LIMITING_INUNDATION,
   LIMITING_MOISTURE,
   LIMITING_SALINITY,
   LIMITING_SPRAY,
@@ -155,6 +156,39 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       shoreExposure: 0,
     });
     expect(s.fSpray).toBe(1);
+    expect(s.limiting).toBe(LIMITING_MOISTURE);
+  });
+
+  it("names inundation when elev sits in the tidal envelope (C-016)", () => {
+    const s = evaluateHsi({
+      moisture: config.soilPorosity,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      elevMeters: 2.2,
+      mlwMeters: 1,
+      mhwMeters: 3,
+    });
+    expect(s.limiting).toBe(LIMITING_INUNDATION);
+    expect(s.hsi).toBe(0);
+    expect(s.fInundation).toBe(0);
+  });
+
+  it("elev above MHW leaves f_inundation at 1 so moisture can still limit", () => {
+    const s = evaluateHsi({
+      moisture: 0.1,
+      soilDepth: 2,
+      groundwater: 1,
+      porosity: config.soilPorosity,
+      depthRef: config.hsiDepthRefMeters,
+      gwRef: config.hsiGwRefMeters,
+      elevMeters: 3.5,
+      mlwMeters: 1,
+      mhwMeters: 3,
+    });
+    expect(s.fInundation).toBe(1);
     expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 

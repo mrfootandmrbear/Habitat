@@ -41,7 +41,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Gap review: [docs/reviews/2026-07-30-sim-gap-review.md](docs/reviews/2026-07-30-sim-gap-review.md). Joint ladder largely Done; **Done ≠ Lock**.
 
-**Executable tip — Nature P0: NS-008** (tidal inundation → Liebig `f_inundation`; ≠ salinity / spray; no new Process). Then **NS-007** light→Liebig. Cards: [NS-008](docs/nature-study/cards/NS-008-tidal-inundation-hydroperiod.md), [NS-007](docs/nature-study/cards/NS-007-aspect-light-into-liebig.md). **C-006 Locked** (v2.0.11). **C-021** / **C-022** filed. C-020 G1–G5 named — fix in parallel. **C-013** machine Done (owner question batched). **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-005** / **C-013** / **C-020** / **C-014** / **U-006** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
+**Executable tip — Nature P0: NS-007** (aspect light→Liebig `f_light`; open-sky insolation; Beer–Lambert succession-only; no new Process). Card: [NS-007](docs/nature-study/cards/NS-007-aspect-light-into-liebig.md). **NS-008 shipped** (N8 / `f_inundation`). **C-006 Locked** (v2.0.11). **C-021** / **C-022** filed. C-020 G1–G5 named — fix in parallel. **C-013** machine Done (owner question batched). **C-010** framing written ([C-010-framing.md](docs/candidates/C-010-framing.md)) — implement later under Open. Taste residual: **C-005** / **C-013** / **C-020** / **C-014** / **U-006** — [owner-lock-batch.md](docs/candidates/owner-lock-batch.md). Keep nutrients / animals / SWE off the tip.
 
 **Owner Lock backlog:** A/B/**C-004** Locked · **W-001** Superseded · remaining C-005 / C-020 / C-014 / U-006.
 

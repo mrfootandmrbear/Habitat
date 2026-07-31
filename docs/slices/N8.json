@@ -1,0 +1,16 @@
+{
+  "id": "N8",
+  "title": "Tidal inundation hydroperiod gate (NS-008)",
+  "simLoop": "MHW/MLW envelope hydroperiod enters herb Liebig HSI as f_inundation; foreshore stalls upland guilds while dry terrace earns (C-016; ≠ soil.salinity, ≠ f_spray).",
+  "gameLoop": "Widen Tide or sit a form in the wet shore band; inland herbs should stay out of the intertidal while the terrace above the tide can green under the same seed schedule.",
+  "registerIds": ["C-016", "C-018", "C-007", "C-011", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/inundationArrival.test.ts",
+    "src/sim/habitat/hsi.test.ts"
+  ],
+  "probes": ["inundation-arrival"],
+  "fields": ["shore.intertidal", "habitat.suitability", "habitat.limitingFactor"],
+  "notebookSeed": "The wet shore band kept inland herbs out; the dry terrace above the tide took green.",
+  "tierO": "no owner-only question this closeout — machine half green; salt-marsh engineer guild deferred to P2"
+}

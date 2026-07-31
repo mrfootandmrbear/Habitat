@@ -2,7 +2,7 @@
 
 Authority: [PROTOCOL.md](PROTOCOL.md). Ranked after parent merge of cards. **Hypothesis only** — Open candidates stay Open.
 
-Last updated: 2026-07-31 (P1 factor cards NS-007 / NS-008 merged).
+Last updated: 2026-07-31 (NS-008 shipped as Slice N8).
 
 ---
 
@@ -16,6 +16,7 @@ Last updated: 2026-07-31 (P1 factor cards NS-007 / NS-008 merged).
 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | Strand splash pioneer | Slice N4; `veg.*.strand` / `strand-arrival`; C-018/C-019 Open |
 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | Onshore spray stress | Slice N3; `f_spray` / `spray-arrival`; C-017 Open |
 | [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | Sandy crest sand-binder | Slice N5; `veg.*.binder` / `binder-arrival`; C-009/C-017 Open |
+| [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | Tidal inundation hydroperiod | Slice N8; `f_inundation` / `inundation-arrival`; C-016 |
 
 ---
 
@@ -35,8 +36,8 @@ Last updated: 2026-07-31 (P1 factor cards NS-007 / NS-008 merged).
 
 | Id | Lane | Title | Merge bucket |
 |---|---|---|---|
-| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Aspect light into Liebig | **P1** (after NS-008) |
-| [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | factor | Tidal inundation hydroperiod gate | **P0** |
+| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Aspect light into Liebig | **P0** (tip) |
+| [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | factor | Tidal inundation hydroperiod gate | **Shipped** (N8) |
 
 ---
 
@@ -46,19 +47,19 @@ Last updated: 2026-07-31 (P1 factor cards NS-007 / NS-008 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| 1 | [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | Tide dial + form siting; completes spray / soil salt / inundation triad; no new Process; unlocks salt-marsh engineer path |
+| 1 | [NS-007](cards/NS-007-aspect-light-into-liebig.md) | Promote `light.insolation` → `f_light` in Liebig; keep Beer–Lambert on succession only |
 
 ### P1 — derived field, no new Process
 
 | Card / topic | Lane | Notes |
 |---|---|---|
-| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Promote `light.insolation` → `f_light` in Liebig; keep Beer–Lambert on succession only |
+| — | — | empty |
 
 ### P2 — deferred / new Process / later guilds
 
 | Topic | Lane | Notes |
 |---|---|---|
-| Salt-marsh engineer | guild | After NS-008 inundation factor lands |
+| Salt-marsh engineer | guild | After NS-008 inundation factor — **unblocked** |
 | Woody / shrub | guild | Stage 3; climate-capped (needs NS-002) |
 | Cryptogam / crust | guild | Stage 2 bootstrap |
 | Nutrients / guano | factor | Needs candidate if not covered |
@@ -88,3 +89,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | NS-003 shipped (N3) | NS-005 | Herb `f_spray` from shore.exposure; tip → sand-binder |
 | 2026-07-30 | NS-005 shipped (N5) | — (P0 empty) | Crest binder + physicalCover coastal blunt; tip → C-005 scaffold |
 | 2026-07-31 | NS-007, NS-008 | NS-008 | P1 factors carded. Tip → inundation HSI arm (≠ salinity, ≠ spray). NS-007 light→Liebig next. No new Process; no invent-Locked. |
+| 2026-07-31 | NS-008 shipped (N8) | NS-007 | `f_inundation` / `inundation-arrival`; tip → aspect light→Liebig. Salt-marsh engineer unblocked in P2. |
