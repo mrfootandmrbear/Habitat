@@ -1,6 +1,6 @@
 # C-020 — Atmospheric precip delivery
 
-**Status:** Open (owner-judged; Slice F lite + Slice R mid-path + §4.21 clouds Process — Lock still owner)  
+**Status:** Open (Hold Lock — weather-feel Pass-with-glitches)  
 **Criterion (verbatim from DECISION_CONFORMANCE).** Precipitation phase and placement are attributable to atmospheric state (wind, moisture, heat → cloud → rain/snow/sleet), not to a place the player targeted; mass balance closes (H-004); same seed + same atmospheric forcing → identical hash; the control surface (if any) remains a regime / climate dial with no cell arguments. Existing rain-regime dial may remain as a fallback until this criterion is met.
 
 ## Machine half
@@ -31,6 +31,10 @@
 
 **2026-07-30 §4.21.** Machine half landed (Process + clouds + Heat dial). Owner Lock still open — taste question remains whether precip now feels like weather the atmosphere made.
 
-## Owner-only question (Lock)
+**2026-07-30 stewardship sitting** ([batch-stewardship-alive.md](../playtests/batch-stewardship-alive.md) Q-B): **"the weather read as weather but there's some glitches to work out."** Treat as **Pass-with-glitches / Hold Lock** — do **not** Lock until glitches are named and fixed in a follow-up encoding pass. Leave **Open**.
+
+## Owner-only question (Lock) — Hold
 
 When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow?
+
+**Next agent step:** name the glitches (presentation / phase / cadence) from owner description or a short re-sit, retune, re-measure proxies — then re-ask Lock.

@@ -99,21 +99,23 @@ Summary only — do not reopen unless fixing regressions.
 | **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | `longshoreTendency`, `longshore-drift` | **Done** — Tier-O Pass (batch-maritime-shore 2026-07-30) |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
-| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner legibility Pass 2026-07-30; deposit+rock machine green (Lock still owner) |
+| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner Lock 2026-07-30 |
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
 | — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — agent (C-020 Lock still owner) |
 | **N** | Salt-memory encoding (**NS-006**) | Freshened green vs salty pale sparse | `saltMemoryEncodingDelta` | **Done** — clip Pass (C-018 Q-A) |
 | **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
-| **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 Open) |
+| **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 **Locked**) |
+| **N3** | Onshore spray stress (**NS-003**) | Windward stalls herb; strand holds | `f_spray`, `spray-arrival` | **Done** — agent (C-017 **Locked**) |
+| **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine). **Full C-020 clouds** Done (machine). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done (machine). Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** owner Lock batch ([candidates/owner-lock-batch.md](candidates/owner-lock-batch.md)); Nature NS-005 paused.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-020** Hold Lock (glitches); **C-014** Open (no hear); **U-006** unanswered. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** agent **C-005** scaffold (§4.27); taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md) C / C-020 glitch naming.
 
-**Owner Lock backlog** (dossier / register acts — not the executable tip): **C-009** substrate; **C-015…C-019** maritime (owner halves Pass); **C-004** stewardship reading; **C-020** weather-feel; **C-014** audio; **U-006** notebook Lock (reviewer).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-020** (Hold Lock), **C-014** (audio env), **U-006** (unanswered).
 
-**Next (executable tip):** **Owner Lock batch** — [candidates/owner-lock-batch.md](candidates/owner-lock-batch.md) (ready Pass cluster + W-001); remaining taste sitting [playtests/batch-stewardship-alive.md](playtests/batch-stewardship-alive.md). Nature tip paused: [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) after Lock session.
+**Next (executable tip):** **C-005** branch-and-compare scaffold (§4.27). Parallel: name/fix **C-020** weather glitches when free; re-sit **C-014** when owner can hear; **U-006** when answered.
 
-**Thesis holes (not tip):** **C-005** branch-and-compare (file scaffold after Nature encoding); **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004); **C-010** toxic-site after **C-009** Lock; **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
+**Thesis holes (not tip):** **C-005** queued as §4.27; **C-012** Δx / mosaic (only if clip still fails place-reading); **season** force dial (unfiled — file candidate or expand C-004 Locked surface); **C-010** toxic-site (**C-009** Locked — framing open); **C-006** CI-promotable when free; optional C-020 `snow.waterEquivalent` store. Scenario campaign (G-002 / C-010) gated on C-009 framing.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean; erosion intensity as a regime dial. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -789,15 +791,37 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.26 Slice N5 — Sandy crest sand-binder (**NS-005**) *(stub)*
+### 4.26 Slice N5 — Sandy crest sand-binder (**NS-005**) *(Done — agent)*
 
-**Why this exists.** Second shore guild after spray differentiates windward faces (NS-003).
+**Why this exists.** Second shore guild after spray differentiates windward faces (NS-003). Dry sandy crests earn binding cover that blunts the next storm (thesis payoff #2).
+
+**Loops.** Sim: one seed schedule → binder HSI on drainage × exposure × sand × burial; physicalCover → geomorph cFactor. Game: sandy berm crest greens and holds; wet hollow stays herb.
+
+**Register / candidates.** W-003; E-004; C-007 Locked; C-009 Open; C-017 Open; N-001; N-004; T-004.  
+**Study.** island-colonization dune binder → crest-gated HSI; rejected dune painter / second sediment Process.  
+**Bans.** Ecosystem painter; invent Locked C-009/C-017; second Process owning cover/biomass.  
+**New Process?** no.
 
 **Gate.** After NS-003 machine green.
 
-- [ ] Guild HSI / fields per [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) — no ecosystem painter
-- [ ] Probe twin vs strand / herb; burial tolerance if geomorph flux ready
-- [ ] **Next-but-one:** hydroperiod / light-into-HSI or C-005 scaffold — choose at closeout
+- [x] Guild HSI / fields per [NS-005](nature-study/cards/NS-005-sandy-crest-sand-binder.md) — `evaluateBinderHsi`, `veg.*.binder`
+- [x] Probe `binder-arrival` twin vs herb; burial via `|longshore|` tolerance; coastal cFactor blunting
+- [x] Composition + manifest: [N5-composition.md](slices/N5-composition.md), [N5.json](slices/N5.json)
+- [x] Schema 10 (legacy binder seed bank); Tier-P binder khaki encoding
+- [x] **Next-but-one:** C-005 branch-and-compare scaffold (§4.27 stub) — thesis hole after Nature encoding
+
+---
+
+### 4.27 Slice B — Branch-and-compare scaffold (**C-005**) *(stub)*
+
+**Why this exists.** THESIS §7: same castle, different forces — Habitat's original instrument. Force dials exist (Slice F / C-020); fork + side-by-side is still missing.
+
+**Gate.** After N5 machine green. Owner Lock batch may run in parallel.
+
+- [ ] World fork / restore point API extending P-005 (T-001 hash equality under same seed+forces)
+- [ ] Two branches under different force settings; comparison view without number-reading
+- [ ] Tier-M round-trip + branch isolation; Tier-O whether comparison is *wanted* (owner)
+- [ ] **Next-but-one:** season force dial candidate file, or C-006 CI promote when free
 
 ---
 
@@ -812,10 +836,11 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N2 / NS-002 | Heat→plant | C-004, C-020 | **Done** (§4.23) |
 | N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | **Done** (§4.24) |
 | N3 / NS-003 | Onshore spray stress | C-017, C-018 | **Done** (§4.25) |
-| N5 / NS-005 | Sandy crest sand-binder | W-003, C-017 | §4.26 |
+| N5 / NS-005 | Sandy crest sand-binder | W-003, C-017, C-009 | **Done** (§4.26) |
+| B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | §4.27 |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** Done. **Next:** owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)); Nature **NS-005** paused.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Next:** owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)); executable agent tip **C-005** scaffold (§4.27).
 
 ---
 

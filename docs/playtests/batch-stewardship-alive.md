@@ -29,31 +29,25 @@
 - Water depth → ambient.water; dry grid → true silence (`level === 0`); write/RNG isolation — `audio.test.ts`. Cover → ambient.life independent bed — Slice A+.
 - Notebook corpus every emit has `traces[]`; `corpusAllTraced() === true`; write/RNG isolation — `notebook.test.ts`.
 
-## Verdict (circle one per question)
+## Verdict (owner 2026-07-30)
 
-**A — C-004 stewardship**
-- **Pass** — the regime change felt like something the world did
-- **Hold** — it felt like something you placed (spigot / god-mode)
+**A — C-004 stewardship — Pass → Locked**
+Owner: "felt like island was alive, i wanted to speed it up faster than 16x even." World-did-it reading met. Want-faster-than-16× recorded as **product feedback**, not a Hold.
 
-**B — C-020 weather**
-- **Pass** — spells from the sky felt like weather the atmosphere made, including cold → snow
-- **Hold** — still a faucet, or cold did not read as snow
+**B — C-020 weather — Pass-with-glitches / Hold Lock**
+Owner: "the weather read as weather but there's some glitches to work out." Do **not** Lock C-020 until glitches are named and fixed. Leave Open.
 
-**C — C-014 silence**
-- **Pass** — the quiet felt like the place going still
-- **Hold** — it felt like the sound broke
+**C — C-014 silence — Mixed / leave Open**
+Owner: "cannot hear, by appearance yes it was still." Stillness-by-appearance **Pass**; audible silence **unverified** (no hear). Criterion requires hearing for AUD-002 silence-as-ecological — leave Open / blocked on audio environment.
 
-**D — U-006 notebook**
-- **Pass** — the notebook answered a question you already had
-- **Hold** — it felt like the game explaining itself first
+**D — U-006 notebook — unanswered**
+Owner did not answer. Sitting / Open remains.
 
-**If Hold on A, the agent will:** narrow the Force panel / regime framing so stewardship stays regimes-not-smiting — not add place-targeted weather.
+**If Hold on B (active):** name glitches, retune cloud / phase presentation, re-measure proxies, ask again — not paint rain onto cells.
 
-**If Hold on B, the agent will:** retune cloud / phase presentation (and arid event cadence if still spigot-like), re-measure proxies, ask again — not paint rain onto cells.
+**If C needs a re-sit:** require an environment where the owner can hear; do not Lock on appearance alone.
 
-**If Hold on C, the agent will:** retune the water→gain curve toward quiet-but-alive vs abrupt cut, re-test isolation — not invent a second audio authority.
-
-**If Hold on D, the agent will:** tighten when Notebook surfaces / hedge language so it stays pull-not-push — not expand into authored tutorial prose.
+**If Hold on D later:** tighten when Notebook surfaces / hedge language so it stays pull-not-push — not expand into authored tutorial prose.
 
 Notebook seed: "The spell fell from the sky; the hollow went quiet when the water left."
 

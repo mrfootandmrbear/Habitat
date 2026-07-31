@@ -34,7 +34,7 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; **Slice S** / **Slice R** Done — rain-feel clip **Pass**; **Slice A+** Done (AUD-003 recovery ambient from `veg.cover`); **Field Notebook** Done (U-006 machine; Lock still reviewer); **Full C-020 clouds** Done (machine; Lock still owner); **NS-006** / **NS-002** / **NS-004** / **NS-003** Done. **Next:** owner Lock batch ([docs/candidates/owner-lock-batch.md](docs/candidates/owner-lock-batch.md)); Nature NS-005 paused. Island is the default playable world.
+**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10): C-009 / C-015…C-019 / C-004 Locked; **W-001** Superseded. Open taste: **C-020** Hold Lock (glitches), **C-014** (no hear), **U-006** unanswered. **Next:** agent **C-005** scaffold ([BUILD_GUIDE §4.27](docs/BUILD_GUIDE.md)). Island is the default playable world.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched optional Tier-O: [PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility — fires on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

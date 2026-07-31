@@ -1,6 +1,6 @@
 # C-018 — Salinity as the first mobile legacy substance
 
-**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
+**Status:** **Locked** 2026-07-30 (owner Lock batch A — Lock all ready)  
 **Criterion (verbatim).** One salinity field sources at the ocean boundary, dilutes with freshwater, is save-legacy, and gates HSI / arrival so a salty hollow earns less (or different) occupancy than a freshened twin under one seed schedule. No player cleanup tool. Water-balance residual class unchanged.
 
 ## Machine half (discharged)

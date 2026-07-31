@@ -11,13 +11,13 @@ Authority: [DECISION_CONFORMANCE.md](../DECISION_CONFORMANCE.md) §3.0 — Promo
 
 | Id | One-line claim | Taste evidence | Reply |
 |---|---|---|---|
-| **C-009** | Sand / clay / rock read as different materials to build with | Pass 2026-07-30 — [C-009-dossier](C-009-dossier.md) | ☐ Lock / ☐ Hold |
-| **C-016** | Tide envelope reads as the sea claiming the shore, not a second clock | Pass — [batch-maritime-shore](../playtests/batch-maritime-shore.md) | ☐ Lock / ☐ Hold |
-| **C-017** | Windward wear / lee growth reads as the sea’s work | Pass — same sitting as C-016 | ☐ Lock / ☐ Hold |
-| **C-018** | Pale sparse shore reads as ground still tasting of the sea | Pass — [batch-salt-overseas](../playtests/batch-salt-overseas.md) Q-A | ☐ Lock / ☐ Hold |
-| **C-019** | Shore-first shoots read as life having farther to come | Pass — same sitting Q-B | ☐ Lock / ☐ Hold |
+| **C-009** | Sand / clay / rock read as different materials to build with | Pass 2026-07-30 — [C-009-dossier](C-009-dossier.md) | ☑ **Locked** 2026-07-30 |
+| **C-016** | Tide envelope reads as the sea claiming the shore, not a second clock | Pass — [batch-maritime-shore](../playtests/batch-maritime-shore.md) | ☑ **Locked** 2026-07-30 |
+| **C-017** | Windward wear / lee growth reads as the sea’s work | Pass — same sitting as C-016 | ☑ **Locked** 2026-07-30 |
+| **C-018** | Pale sparse shore reads as ground still tasting of the sea | Pass — [batch-salt-overseas](../playtests/batch-salt-overseas.md) Q-A | ☑ **Locked** 2026-07-30 |
+| **C-019** | Shore-first shoots read as life having farther to come | Pass — same sitting Q-B | ☑ **Locked** 2026-07-30 |
 
-**If Hold on any:** name which id and what felt wrong in one sentence (no numbers). Agent retunes that encoding path — does not invent new policy.
+**Owner reply:** Lock all ready (2026-07-30). Register v2.0.9.
 
 ---
 
@@ -25,25 +25,27 @@ Authority: [DECISION_CONFORMANCE.md](../DECISION_CONFORMANCE.md) §3.0 — Promo
 
 | Id | Question | Reply |
 |---|---|---|
-| **C-015** + **W-001** | Should the island + sea datum supersede Windward Basin as the canonical preserve reference? | ☐ Supersede W-001 / Lock C-015 · ☐ Keep W-001 Current / leave C-015 Open |
+| **C-015** + **W-001** | Should the island + sea datum supersede Windward Basin as the canonical preserve reference? | ☑ **Supersede W-001 / Lock C-015** 2026-07-30 |
 
-Place reading already Pass ([batch-island-brief](../playtests/batch-island-brief.md)). This row is only the reference-preserve call.
+Place reading already Pass ([batch-island-brief](../playtests/batch-island-brief.md)). Owner chose supersession; register v2.0.10.
 
 ---
 
-## C — Still needs a sitting (not on this ballot)
+## C — Stewardship sitting results
 
-| Id | Outstanding owner-only question | Sitting |
+| Id | Outstanding owner-only question | Result |
 |---|---|---|
-| **C-004** | After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed? | [batch-stewardship-alive](../playtests/batch-stewardship-alive.md) |
-| **C-020** | When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow? | same |
-| **C-014** | When the water left, did the quiet feel like the place going still — or like the sound broke? | same |
-| **U-006** | After something on the map changed, did opening the notebook feel like answering a question you already had — or like the game explaining itself first? | same (reviewer corpus sample) |
+| **C-004** | After you set the rainfall regime and ran time, did what happened feel like something the world did — or like something you placed? | ☑ **Pass → Locked** — alive / world-did-it; want-faster-than-16× = product feedback |
+| **C-020** | When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow? | ☐ **Hold Lock** — weather-feel Pass-with-glitches; leave Open until glitches named + fixed |
+| **C-014** | When the water left, did the quiet feel like the place going still — or like the sound broke? | ☐ **Open** — cannot hear (env); stillness-by-appearance Pass; audible silence unverified |
+| **U-006** | After something on the map changed, did opening the notebook feel like answering a question you already had — or like the game explaining itself first? | ☐ Unanswered — sitting remains |
+
+Sitting file: [batch-stewardship-alive](../playtests/batch-stewardship-alive.md).
 
 ---
 
 ## Agent actions after your reply
 
-1. **Lock** rows → flip Open→Locked (U-006 Current→Locked), strike §16 queue where listed, version-history line, `npm run conformance`, evidence in commit body.
-2. **Supersede W-001** → W-001 Superseded; C-015 Locked; SIMULATION_MODEL / BUILD_GUIDE tip refresh.
-3. **Hold** → dossier note + next encoding retune; Nature tip stays paused until you say otherwise.
+1. **Lock** rows → flip Open→Locked (U-006 Current→Locked), strike §16 queue where listed, version-history line, `npm run conformance`, evidence in commit body. ✅ **A done** (v2.0.9). ✅ **B + C-004** (v2.0.10).
+2. **Supersede W-001** → W-001 Superseded; C-015 Locked; SIMULATION_MODEL / BUILD_GUIDE tip refresh. ✅ done.
+3. **Hold** → dossier note + next encoding retune; Nature tip stays paused until you say otherwise. **C-020** Hold Lock; **C-014** / **U-006** still Open.

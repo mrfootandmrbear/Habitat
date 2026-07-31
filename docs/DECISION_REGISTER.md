@@ -134,6 +134,15 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.10 — Ballot B + stewardship sitting (C-015 / W-001 / C-004).**
+
+- Owner **Supersede W-001 / Lock C-015** (2026-07-30): island + sea datum is the canonical preserve reference; **W-001** Superseded by **C-015**.
+- Stewardship sitting ([batch-stewardship-alive.md](playtests/batch-stewardship-alive.md)): **C-004** Pass → Locked (alive island / world-did-it; want-faster-than-16× noted as product feedback, not Hold). **C-020** weather reads as weather but glitches remain → **Hold Lock** (Open). **C-014** cannot hear; stillness-by-appearance Pass → leave Open (audible silence unverified). **U-006** unanswered → sitting remains.
+
+**v2.0.9 — Owner Lock batch A (C-009 / C-016…C-019).**
+
+- Owner **Lock all ready** on [owner-lock-batch.md](candidates/owner-lock-batch.md) (2026-07-30). Promoted **C-009** (substrate), **C-016** (tidal envelope), **C-017** (wave exposure / longshore), **C-018** (salinity), **C-019** (overseas arrival) Open→Locked. Taste Passes already recorded; machine probes named in each entry.
+
 **v2.0.8 — U-006 MVP Field Notebook contract shipped.**
 
 - Filed MVP question set, event vocabulary, scale, and uncertainty language in `docs/slices/notebook-composition.md` with observer chrome (`src/notebook/`, `src/ui/notebookChrome.ts`). §16 item 12 struck as contract-complete; **U-006** remains Current until reviewer Lock (criterion + [docs/candidates/U-006-dossier.md](candidates/U-006-dossier.md)).
@@ -860,7 +869,7 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 ## 10. World and Preserve Scope
 
 ### W-001 — Windward Basin is the reference preserve
-**Status:** Current
+**Status:** Superseded by C-015
 
 **Decision.** Windward Basin is the first environment used to prove the simulation, interaction loop, readability, and scenario structure.
 
@@ -869,6 +878,8 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 **Implications.** Core systems demonstrate value in Windward Basin first. Additional preserves are deferred, not removed (F-003). The reference preserve should not rely on disposable prototype rules.
 
 **Rejected alternatives.** Building many preserves simultaneously. Designing abstract systems before a complete playable place. Treating the first preserve as throwaway content.
+
+**Superseded by.** **C-015** (2026-07-30) — island + global sea datum is the canonical preserve reference; Windward Basin remains a valid closed-basin / mainland probe mode, not the playable default.
 
 ### W-002 — A preserve is one continuous landscape with emergent regions
 **Status:** Locked
@@ -1267,7 +1278,7 @@ Ordered by how many other decisions depend on them.
 
 **Reordered 2026-07-28** after [THESIS.md](THESIS.md) was written. The thesis candidates lead because they decide what the remaining slices are *for*; introduction-shaped questions fall until C-007 settles whether introduction is even the primary verb.
 
-1. **C-004** — force control as an intervention axis (the post-build verb; no entry currently records it).
+1. ~~**C-004** — force control as an intervention axis~~ **Locked** (stewardship sitting Pass 2026-07-30).
 2. ~~**C-007** — arrival vs introduction as the primary biological verb~~ **Locked** (Slice 12 / owner Pass — earned conditions).
 3. **C-005** — branch-and-compare as a core instrument rather than deferred tooling.
 4. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
@@ -1275,13 +1286,13 @@ Ordered by how many other decisions depend on them.
 6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
 7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
 8. **C-006** / **C-008** — sculpting abundance and the response-latency budget; both Tier-P measurable before they need an owner.
-8b. **C-009** — substrate differentiation (the "sand" of the thesis); gated behind the displaced-mass closeout.
-8c. **C-010** — legacy substances / contaminant load; gated behind C-009, but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise, so C-009's material table must not foreclose it.
+8b. ~~**C-009** — substrate differentiation~~ **Locked** (owner Lock batch A 2026-07-30).
+8c. **C-010** — legacy substances / contaminant load; gated behind C-009 (**now Locked**), but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
-8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 is overdue: three Locked entries with no plan.
-8g. **C-015**…**C-019** — island maritime direction (sea as base level; tidal envelope; wave exposure; salinity; island biogeography). Filed 2026-07-30. C-015 place reading Pass (2026-07-30); **W-001** supersession still an owner call.
-8h. **C-020** — atmospheric precip delivery (clouds → rain/snow/sleet from wind, moisture, heat). Filed 2026-07-30 from island-brief Pass notes. **Slice F** lands a lite path (climate-mean rain + orographic wind); full phase/clouds later — keep C-004 force panel until then.
+8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 sitting: stillness-by-appearance Pass; audible silence unverified (no hear) — remains Open.
+8g. ~~**C-015** + **W-001**~~ **C-015 Locked**; **W-001 Superseded** (ballot B 2026-07-30). ~~**C-016**…**C-019**~~ **Locked** (owner Lock batch A 2026-07-30).
+8h. **C-020** — atmospheric precip delivery. Machine green; owner: weather-feel Pass with glitches → **Hold Lock** until glitches named and fixed.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
@@ -1334,13 +1345,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Remaining to close.** The criterion in DECISION_CONFORMANCE §3 also requires evaluating the choice against P-006 prediction fairness on one scenario. Until then: still no free-running stochastic storm arrivals, not even behind a flag.
 
 ### C-004 — Force control as an intervention axis
-**Status:** Open
+**Status:** Locked
 
-**Question.** After the initial build, is the player's primary verb **setting which natural forces operate and at what intensity** (rainfall regime, erosion, fire, season, time rate) rather than acting at a place? Every existing intervention entry — A-005 siting, A-006 pulses — describes a *spatial* act. [THESIS.md](THESIS.md) §4 describes a *process* axis that no entry records.
+**Decision.** After the initial build, the player's primary non-spatial verb is **setting which natural forces operate and at what intensity** (rainfall / climate mean, wind, heat, sea, tide, time rate; pulses such as authored ignition) — regimes and pulses, never targeted smiting. Spatial siting (A-005) remains alongside the force panel.
 
-**Constraints.** D-001 (nature is the protagonist) and N-001 (no ecosystem painter) survive only if forces are **regimes and pulses, not targeted smiting** — set the rainfall, site an ignition, never drag a storm onto a chosen hill. RC-004 already rejects an action economy, so dials need not be rationed. T-001 determinism must hold across force changes.
+**Why.** THESIS §4: build the form, then choose the forces. D-001 / N-001 survive only if forces are not dragged onto a chosen hill. Owner Pass (batch-stewardship-alive 2026-07-30): regime change felt like the island was alive — something the world did. Wanting time rates beyond 16× is product feedback, not a Hold on stewardship.
 
-**Leading direction.** Yes — a force/regime control surface alongside spatial siting, with the targeting ban stated explicitly. Not Locked until a slice demonstrates the surface without collapsing into god-mode.
+**Implications.** Force panel / climate dials have no cell arguments. Paired-regime divergence is required (T-001). **C-020** remains Open for weather-feel / glitch cleanup; Locked C-004 does not require perfect atmospheric presentation.
+
+**Rejected alternatives.** Place-targeted storms. Force dial as god-mode score optimization. Collapsing stewardship into painting outcomes.
+
+**Evidence.** Probe `regime-divergence`: `light.replayMatch = 1`, `delta.hashDiverged = 1`, precip Δ ≈ 190.3; rain API has no cell args. Owner Pass: world-did-it / alive. Artifacts: `docs/candidates/C-004-dossier.md`, `docs/playtests/batch-stewardship-alive.md`, `docs/evidence/regime-divergence.baseline.json`.
+
+**Constraints.** D-001, N-001, A-005, RC-004, T-001, THESIS §9.
 
 ### C-005 — Branch-and-compare as a core instrument
 **Status:** Open
@@ -1385,26 +1402,30 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** State a budget per interaction class (sculpt, force change) and make it a Tier-P check on observable slices. No value proposed yet; measure first.
 
 ### C-009 — Substrate differentiation
-**Status:** Open
+**Status:** Locked
 
-**Question.** Should the single undifferentiated soil (depth + moisture, bedrock derived — SIMULATION_MODEL §3.1) gain a **material class** — sand, clay, loam, gravel, rock, organic — so that the same rain, the same slope, and the same berm behave differently depending on what they are made of? [THESIS.md](THESIS.md) §2.1: "sand" in the thesis means every substrate nature has to work with.
+**Decision.** Soil carries a **material class** (`soil.material`) with a data-driven property table (porosity, infiltration, erodibility) so the same rain, slope, and berm behave differently on sand, clay, loam, and rock. Geological **deposit** raises elev+depth and stamps material; berm/dig stay shape-only. One infiltration / erosion law reads the table (T-004) — no per-material process forks.
 
-**Constraints.** GEO-002 earn-its-cost: one added per-cell field is cheap, but each process that reads it (infiltration, erosion resistance, slope stability, soil production, rooting) must justify the coupling rather than sprinkle multipliers. S-006 already establishes that geological history sets the substrate ecology inherits, and the tools entries already list substrate among player-influenceable levers — so the concept is sanctioned; only the differentiation is new. T-004 wants the material table data-driven, not hard-coded. Must not become a paint-a-material tool (N-001) — substrate is inherited from geology and redistributed by processes.
+**Why.** THESIS §2.1: “sand” means every substrate nature has to work with. Owner Pass (2026-07-30): sand and clay read as different materials to build with. S-006 already sanctions geological inheritance; differentiation makes it playable.
 
-**Leading direction.** Yes, minimally: one owned per-cell material class plus a small data-driven property table (infiltration rate, erodibility, cohesion, water retention), consumed first by the processes that already exist rather than by new ones. Not Locked until a slice shows two substrates producing visibly different outcomes from the same intervention.
+**Implications.** **C-010** may attach mobile substances to the material column. Deposit is a cause, not an ecosystem painter (N-001). Properties live in `substrates.ts`, not process constants.
 
-**Coupled work.** Berm/dig ↔ `soil.depth` displaced mass (BUILD_GUIDE §4.1) is a prerequisite in spirit: if substrates are the material, an edit must move material. Design the material table so **C-010** can attach a mobile substance to it later.
+**Rejected alternatives.** Undifferentiated soil forever. Paint-a-wetland / paint-ecosystem material tools. Per-material second erosion or infiltration laws (GEO-002).
+
+**Evidence.** Probe `substrate-contrast`: sand infil 56.3 vs clay 6.4; channel loss diverges. Probe `substrate-deposit`; Tier-P `substrateEncodingDelta` > 0.12. Owner Pass. Artifacts: `docs/candidates/C-009-dossier.md`, `docs/evidence/substrate-contrast.baseline.json`, `src/sim/terrain/substrates.ts`.
+
+**Constraints.** GEO-002, T-004, N-001, S-006.
 
 ### C-010 — Legacy substances (contaminant load)
 **Status:** Open
 
 **Question.** Should the soil column carry one or more **mobile, transformable substances** — a contaminant load being the motivating case — that travel with water, are taken up or immobilised by vegetation, degrade or sequester over decades, and gate habitat suitability until they fall?
 
-**Motivation.** The scenario premise behind much of the older restoration language: *clean up a toxic waste site using natural processes* ([THESIS.md](THESIS.md) §3.1). It is also the missing substrate for two Locked entries — **S-007** (hysteresis is fundamental) and **S-008** (hysteresis must be legible) — whose promotion criterion requires a legacy condition that blocks recovery after its cause is gone. Today the only such field is `soil.porosity`'s compaction memory.
+**Motivation.** The scenario premise behind much of the older restoration language: *clean up a toxic waste site using natural processes* ([THESIS.md](THESIS.md) §3.1). It is also the missing substrate for two Locked entries — **S-007** (hysteresis is fundamental) and **S-008** (hysteresis must be legible) — whose promotion criterion requires a legacy condition that blocks recovery after its cause is gone. Today the only such field is `soil.porosity`'s compaction memory. **C-018** Locked supplies salinity as the first everyday legacy load; contaminant load remains the toxic-site instance.
 
 **Constraints.** Legacy by SIMULATION_MODEL §12's definition — not reconstructible from current forcing — so it is save-invalidating (T-003) and belongs in the decadal band. Transport must ride the existing water mass balance rather than introduce a second one (H-004, GEO-002 earn-its-cost). Uptake couples to vegetation, which already exists. Must not become a cleanup *tool* the player applies to a cell (N-001, D-001): the player sets conditions; the landscape processes the substance. Scenario objectives read it through arrival and persistence (**C-007**, G-005), never as a raw score (N-002).
 
-**Leading direction.** Yes, but not before **C-009** — substance and substrate are one design, and a material table that cannot carry a mobile quantity would have to be rebuilt. Deliberately deferred until scenarios are near; recorded now so the substrate work does not foreclose it.
+**Leading direction.** Yes — **C-009** Locked supplies the material table to attach to. Deliberately deferred until scenarios are near; recorded so substrate work does not foreclose it.
 
 ### C-011 — Real-world intuition is the instrument
 **Status:** Open
@@ -1455,59 +1476,81 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** Sampled sources selected and mixed **from field values**, with silence as a first-class state rather than an absence of assets. Audio remains a pure observer of the registry. Not Locked until one field audibly drives one source and dropping that field produces meaningful silence.
 
 ### C-015 — The world is an island; sea level is global base level
-**Status:** Open
+**Status:** Locked
 
-**Question.** Is the preserve an **island** whose drainage exits through a global sea level (a force dial), rather than a closed map edge with heuristic perimeter pour points — and does that reframe supersede **W-001**'s Windward Basin reference?
+**Decision.** The preserve is an **island** whose drainage exits through a global **sea level** (force dial): ocean cells absorb surface water into `ledger.oceanExchange`; Priority-Flood seeds from the ocean; `generateIsland` is the default playable terrain. This supersedes **W-001**'s Windward Basin as the canonical preserve reference. Closed-basin / no-`seaLevel` mode remains for probes and mainland fixtures.
 
-**Why now.** SIMULATION_MODEL §10.1 treats the map edge as an artifact; §10.2's authored outlets were never built; Slice 8c shipped provisional perimeter minima instead. An island supplies an honest outlet every player already understands (C-011), answers C-012 with geometry (shore → slope → ridge), and gives C-004 a second non-spatial dial. THESIS §8's clip test favors a silhouette against water.
+**Why.** Honest outlet every player already understands (C-011); shore→slope→ridge mosaic; THESIS §8 silhouette against water. Owner Lock (ballot B 2026-07-30): supersede W-001. Place reading Pass (batch-island-brief).
 
-**Constraints.** Sea level is a **regime**, never aimed at a cell (THESIS §9 / C-004). Opt-in on WorldState so existing closed-basin probes and golden hashes stay untouched. Sea datum stays **above** `elevationFloor` so dig/soil clamps do not change. No waves, tides, salt, or coastal erosion under this entry alone — those are C-016…C-018. W-001 is Current, not Locked: supersession is an **owner call**.
+**Implications.** Sea level is a regime, never aimed at a cell (C-004 Locked / THESIS §9). Opt-in on WorldState so probes without seaLevel keep prior baselines. Sea datum above `elevationFloor`. Tide / exposure / salinity / overseas are **C-016…C-019** (Locked).
 
-**Leading direction.** Yes. `seaLevel` as a global option; ocean cells absorb surface water into `ledger.oceanExchange`; Priority-Flood seeds from the ocean; `generateIsland` is the default playable terrain. Not Locked until `island-drainage` proves conservation and shoreline legibility without inspector, and the owner ratifies W-001.
+**Rejected alternatives.** Closed map-edge as the only outlet. Heuristic perimeter pour points as the long-term model. Treating Windward Basin as throwaway while keeping it as the named product reference.
+
+**Evidence.** Probe `island-drainage`: oceanExchange ≈ 921, `conserved = 1`, `replayMatch = 1`, `oceanCellDelta > 0`. Owner supersession of W-001. Artifacts: `docs/candidates/C-015-dossier.md`, `docs/evidence/island-drainage.baseline.json`, SIMULATION_MODEL §10.
+
+**Constraints.** C-004 Locked, T-001, H-004, C-011, F-003 (additional preserves still deferred).
+
+**Supersedes.** **W-001**.
 
 ### C-016 — Tidal forcing as a band-appropriate envelope
-**Status:** Open
+**Status:** Locked
 
-**Question.** When tides enter, do they arrive as a **mean high / mean low water envelope** (and intertidal zone derived from it), rather than as an instantaneous tidal phase advanced every event step?
+**Decision.** Tides enter as a **mean high / mean low water envelope** with an intertidal mask derived from it — not as an instantaneous tidal phase advanced every event step. Envelope is a force dial (C-004); no cell targeting.
 
-**Why now.** A semidiurnal tide is ~50 event steps at 15 min/event: resolvable at 1×, invisible at 16×, meaningless at decadal. Phase-at-all-bands is not buildable under S-009. The thesis already uses "the tide" as a metaphor for fast-forward (THESIS §4) — a literal tide must not muddy that metaphor without an explicit owner call.
+**Why.** A semidiurnal tide is invisible or meaningless across offered time rates (S-009). Owner Pass (batch-maritime-shore 2026-07-30): the envelope reads as the sea claiming the shore, not a second clock.
 
-**Constraints.** C-015 must land first. Envelope is authored / player-set (C-003 direction), deterministic (T-001), and a force dial with no cell targeting (C-004). Must not require a second hydrology engine.
+**Implications.** MHW / MLW globals; `shore.intertidal` between them. Instantaneous phase rejected. Presentation may cue the envelope (MHW cage ring) without becoming a second clock UI.
 
-**Leading direction.** Envelope only — MHW / MLW as globals; intertidal cells are those between them. Instantaneous phase is rejected. Owner half Pass (batch-maritime-shore 2026-07-30); remains Open until Lock.
+**Rejected alternatives.** Phase-at-all-bands tidal animation. Second hydrology engine for tides.
+
+**Evidence.** Probe `tidal-envelope`; owner Pass on [batch-maritime-shore.md](playtests/batch-maritime-shore.md). Artifacts: `docs/candidates/C-016-dossier.md`, `src/sim/climate/tidalEnvelope.ts`.
+
+**Constraints.** C-015 Locked, C-003 authored schedules, T-001, C-004 Locked, S-009.
 
 ### C-017 — Wave exposure contributes to geomorphology; never a second sediment authority
-**Status:** Open
+**Status:** Locked
 
-**Question.** Is coastal wave work a **derived exposure field** (fetch × `climate.windVector`) that **contributes** erosion/deposition into the existing geomorphology owner, rather than a shallow-water-equations coastal engine?
+**Decision.** Coastal wave work is a **derived exposure field** (fetch × onshore wind) that **contributes** erosion and longshore lee deposit into the existing geomorphology owner — never a shallow-water-equations coastal engine or second sediment writer.
 
-**Why now.** Full maritime direction needs beaches and shore change (Slices 18–19), and EXTERNAL_REFERENCES bans coastal SWE suites as fidelity Habitat does not need. `climate.windVector` is already registered (SIM §3.8) and unused — the hook exists.
+**Why.** EXTERNAL_REFERENCES bans coastal SWE as fidelity Habitat does not need. Owner Pass (batch-maritime-shore): windward wear / lee growth reads as the sea’s work.
 
-**Constraints.** T-006 / GEO-002: one sediment authority. Ban shallow-water equations in-browser the way C-001 banned Richards. Exposure is directional and derived, not painted. C-015 required.
+**Implications.** `shore.exposure` and `shore.longshore` feed `runGeomorphologyStep` only. One-line coastline / CEM rule-shape study; GEO-002 sole sediment authority.
 
-**Leading direction.** Yes — one-line coastline / fetch-exposure rule shape only; contribute Δelev / Δdepth through the geomorphology inbox (§11.2). Slice 18 ships exposure + retreat; Slice 19 ships signed longshore tendency + lee deposit budget. Owner half Pass (batch-maritime-shore 2026-07-30); remains Open until Lock.
+**Rejected alternatives.** ANUGA / coastal SWE as WorldState authority. Painted beaches. Second sediment Process.
+
+**Evidence.** Probes `shore-exposure`, `longshore-drift`; owner Pass same sitting as C-016. Artifacts: `docs/candidates/C-017-dossier.md`, `src/sim/climate/shoreExposure.ts`, `longshoreTendency.ts`.
+
+**Constraints.** T-006, GEO-002, C-015 Locked, T-001.
 
 ### C-018 — Salinity as the first mobile legacy substance
-**Status:** Open
+**Status:** Locked
 
-**Question.** Is **salinity** the first instance of C-010's mobile, transformable soil-column substance — gating habitat near the shore and providing the hysteresis substrate S-007 / S-008 need — before a contaminant scenario is built?
+**Decision.** **Salinity** is the first instance of C-010’s mobile soil-column substance: one `soil.salinity` field, ocean-sourced at the shoreline, diluted by freshwater, gating habitat / arrival near shore and providing hysteresis S-007 / S-008 need — before a contaminant scenario is built.
 
-**Why now.** C-010's motivating case is poison; an island makes salt the everyday legacy load. It unblocks S-008 legibility ("the ground still tastes of the sea") without waiting on the toxic-site campaign, and couples naturally to C-015 / C-016.
+**Why.** An island makes salt the everyday legacy load. Owner Pass (batch-salt-overseas Q-A): pale sparse shore reads as ground still tasting of the sea. Unblocks S-008 legibility without waiting on the toxic-site campaign.
 
-**Constraints.** Same as C-010: rides the water ledger (H-004), save-legacy (T-003), no cleanup tool (N-001), gates arrival (C-007) rather than scoring (N-002). Prefer after C-009's material table if that lands first; may proceed with a single salt field if C-009 remains Open.
+**Implications.** Rides the water ledger (H-004); save-legacy (T-003); no cleanup tool (N-001); gates arrival (C-007), never a score (N-002). Contaminant load (**C-010**) remains Open for the toxic-site instance.
 
-**Leading direction.** Yes — one `soil.salinity` (or equivalent) field, ocean source at the shoreline, dilution by freshwater, suitability penalty. Not Locked until a paired freshened-vs-salty hollow shows divergent arrival under one seed schedule.
+**Rejected alternatives.** Player desalinate tool. Second salt mass-balance. Salt-as-mangrove-theater only.
+
+**Evidence.** Probe `salinity-arrival`; NS-006 `saltMemoryEncodingDelta`; owner Pass. Artifacts: `docs/candidates/C-018-dossier.md`, `docs/evidence/salinity-arrival.baseline.json`, `src/sim/habitat/salinityComposition.ts`.
+
+**Constraints.** H-004, T-003, N-001, N-002, C-007, C-009 Locked, C-010 Open for contaminants.
 
 ### C-019 — Island biogeography reframes the fixed species pool
-**Status:** Open
+**Status:** Locked
 
-**Question.** On an island preserve, is pool richness **derived from area and isolation** (MacArthur–Wilson), with overseas dispersal as the arrival path, rather than W-003's fixed curated pool copied from a continental preserve?
+**Decision.** On an island preserve, pool **eligibility and overseas seed pressure** derive from area and isolation (MacArthur–Wilson shape), with shore-biased over-water dispersal — rather than mainland-perimeter seed rain. W-003’s curated catalogue remains the universe of types.
 
-**Why now.** Slice 12's perimeter seed source (`seedSourceStrength: 40`) assumes an off-map mainland ring of seed rain. That is wrong on an island: seeds arrive over water, sparsely, and richness should track island size. C-007 Locked already prefers earned arrival; this entry asks what the *source* looks like when the world is surrounded by sea.
+**Why.** Slice 12’s perimeter source assumes an off-map mainland ring; that is wrong on an island. Owner Pass (batch-salt-overseas Q-B): shore-first shoots read as life having farther to come. C-007 Locked already prefers earned arrival.
 
-**Constraints.** W-003 is Locked — this reframes how the pool is *sized and sourced*, not whether a pool exists. T-001: overseas arrivals stay seeded/authored (C-003). No random spawn table (N-004). C-015 required.
+**Implications.** Overseas kernel replaces mainland rain when `seaLevel` is set; \(S_{\text{elig}}=f(A,d)\) sizes pressure; no random spawn table (N-004); arrivals stay seeded/authored (C-003).
 
-**Leading direction.** Fixed functional-type catalogue still curated; which types are *eligible* and how hard seed pressure arrives depends on island area / isolation parameters. Machine half landed Slice 21 (overseas kernel + `island-arrival`); remains Open until owner sparse-earned feel (dossier).
+**Rejected alternatives.** Species simulator. Equilibrium paint-on-load. Perimeter mainland rain as sole island source. Stochastic spawn tables.
+
+**Evidence.** Probe `island-arrival`; owner Pass. Artifacts: `docs/candidates/C-019-dossier.md`, `docs/evidence/island-arrival.baseline.json`, `docs/slices/21-composition.md`.
+
+**Constraints.** W-003 Locked, C-007 Locked, T-001, C-003, N-004, C-015 Locked.
 
 ### C-020 — Atmospheric precip delivery (clouds from wind, moisture, heat)
 **Status:** Open
@@ -1516,9 +1559,11 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Why now.** Owner Pass on the island brief batch (2026-07-30): the rain dial **works for now** but does not feel natural. THESIS §2 / C-011 want everyday weather intuition as the instrument; uniform regime rain fails that test even when mass balance and force-dial mechanics are correct.
 
-**Constraints.** Must not become cell-targeted smiting (C-004 / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until a slice demonstrates atmospheric delivery without collapsing stewardship into a cloud painter.
+**Owner sitting (2026-07-30).** Weather read as weather, **but glitches remain** — Hold Lock until glitches are named and fixed ([batch-stewardship-alive.md](playtests/batch-stewardship-alive.md); [C-020-dossier.md](candidates/C-020-dossier.md)). Do not promote on Pass-with-glitches alone.
 
-**Leading direction.** Yes — a **lite** path may land in **Slice F** (climate-mean rainfall dial + orographic wind modulation so geography places precip; no cell targeting). Full cloud / snow / sleet phase remains later and does not claim Locked until that criterion is met. Not Locked until one build shows precip phase and placement attributable to atmospheric state (not to a place the player clicked), with mass balance closed and no cell targeting.
+**Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Keep the existing rain-regime surface until atmospheric delivery is Lock-ready.
+
+**Leading direction.** Yes — lite path shipped (climate-mean + orographic + atmosphere Process + clouds). Full Lock waits on named glitch cleanup + owner re-Pass. Not Locked until precip phase and placement read cleanly as weather the atmosphere made, with mass balance closed and no cell targeting.
 
 ---
 

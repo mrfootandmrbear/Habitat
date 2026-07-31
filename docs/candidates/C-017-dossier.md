@@ -1,6 +1,6 @@
 # C-017 — Wave exposure contributes to geomorphology
 
-**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
+**Status:** **Locked** 2026-07-30 (owner Lock batch A — Lock all ready)  
 **Criterion (verbatim).** A derived exposure field (fetch × wind) changes shoreline elev/depth only by contributing into the geomorphology owner; no second sediment writer; no SWE solver in-tree. Sheltered vs exposed paired shores diverge under one wind regime; mass of displaced soil closes.
 
 ## Machine half (discharged)

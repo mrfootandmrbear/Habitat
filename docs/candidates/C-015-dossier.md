@@ -1,6 +1,6 @@
 # C-015 — The world is an island; sea level is global base level
 
-**Status:** Open (W-001 supersession still owner)  
+**Status:** Locked (owner ballot B 2026-07-30 — Supersede W-001 / Lock C-015)  
 **Criterion (verbatim).** With `seaLevel` set, surface water leaves through ocean cells into `ledger.oceanExchange` (not perimeter-minima outlets); mass balance closes (H-004); same seed + same sea level → identical hash; different sea level → divergent shoreline / wet fraction. Sea-level API has no cell/place arguments. Priority-Flood seeds from ocean cells. Existing probes without `seaLevel` keep prior baselines and golden hashes.
 
 ## Machine half (discharged — Slice 16)
@@ -19,12 +19,8 @@
 
 **Baseline note.** Adding `ledger.oceanExchange` to the registry changed full `stateHash` fingerprints for worlds that never set sea level. Depth golden hash unchanged. `deep-time`, `regime-divergence`, and `burn-recover` baselines refreshed for `hashN` / `p005.hashFirstN` only — reason: new registry ledger field at zero; physics unchanged.
 
-## Owner half (partial — 2026-07-30)
+## Owner half (discharged — 2026-07-30)
 
 **Place reading:** Pass ([docs/playtests/batch-island-brief.md](../playtests/batch-island-brief.md)) — island + brief felt like the same sculpt–forces–time loop on a place that reads as an island.
 
-**W-001** (Windward Basin, Current) supersession remains an explicit owner register act — not discharged by this Pass alone.
-
-## Remaining owner question
-
-Should **W-001** be superseded so the island + sea datum is the canonical preserve reference?
+**W-001 supersession:** Owner chose **Supersede W-001 / Lock C-015** ([owner-lock-batch.md](owner-lock-batch.md) ballot B). Island + global sea datum is the canonical preserve reference; Windward Basin remains valid closed-basin / mainland probe mode.

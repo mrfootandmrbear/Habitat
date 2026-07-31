@@ -23,6 +23,8 @@
 
 Sample sentences the notebook emits after play (not only the static corpus file). For each sentence, locate the contributing field state.
 
+**2026-07-30 stewardship sitting:** owner did **not** answer Q-D. Leave **Current** / Open sitting — no Lock.
+
 ## Owner-only question
 
 After something on the map changed, did opening the notebook feel like answering a question you already had — or like the game explaining itself first?

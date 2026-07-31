@@ -1,6 +1,6 @@
 # C-016 — Tidal forcing as a band-appropriate envelope
 
-**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
+**Status:** **Locked** 2026-07-30 (owner Lock batch A — Lock all ready)  
 **Criterion (verbatim).** Mean high / mean low water are global scalars; intertidal cells are those with elevation between them; no per-event tidal phase advances the sim. Same envelope → identical hash; widening the envelope grows the intertidal cell count monotonically.
 
 ## Machine half (discharged)

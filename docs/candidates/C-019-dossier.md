@@ -1,6 +1,6 @@
 # C-019 — Island biogeography reframes the fixed species pool
 
-**Status:** Open (owner half **Pass** 2026-07-30 — Lock still an owner register act)  
+**Status:** **Locked** 2026-07-30 (owner Lock batch A — Lock all ready)  
 **Criterion (verbatim).** Overseas seed pressure replaces mainland-perimeter rain on island worlds; smaller island area (or greater isolation) yields lower eligible richness / establishment under identical regimes; W-003's curated catalogue remains the universe of types. Deterministic under T-001.
 
 ## Machine half (discharged)
