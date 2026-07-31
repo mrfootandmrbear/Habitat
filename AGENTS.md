@@ -41,7 +41,7 @@ Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on
 
 Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17** / **18** / **19** / **20** / **21** Done. C-018 / C-019 Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](docs/playtests/batch-salt-overseas.md)). Maritime C-016…C-019 Open (owner halves Pass; Lock still owner); **C-020** machine path via F+R+clouds — Lock still owner. **Slice A+** Done (AUD-003). **Field Notebook** Done (U-006 machine; Lock still reviewer). W-001 supersession still owner.
 
-**Queue tip:** Scenario campaign / toxic-site premise (G-002 / C-010) after C-009 framing. Optional C-020 SWE store. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
+**Queue tip:** **Nature P0:** NS-006 salt-memory encoding → NS-002 Heat→plant → NS-004 strand ([docs/nature-study/BACKLOG.md](docs/nature-study/BACKLOG.md)). Scenario campaign / toxic-site premise (G-002 / C-010) after C-009 framing. Optional C-020 SWE store. C-009 Lock still owner. C-016…C-019 halves Pass; Lock still owner. **C-012:** 960 m at 10 m cells; Δx is the suspect.
 
 ## Cursor Cloud specific instructions
 

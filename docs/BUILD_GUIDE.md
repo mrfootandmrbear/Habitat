@@ -106,7 +106,7 @@ Summary only — do not reopen unless fixing regressions.
 
 **Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass** ([docs/playtests/batch-salt-overseas.md](playtests/batch-salt-overseas.md)). **C-016…C-019 owner halves Pass; remain Open until owner Lock — BUILD_GUIDE “Done” ≠ Lock.** Slice **A** / **A+** audio wired (C-014 Open). C-004 stewardship reading still Open. **Slice S** / **Slice R** Done; D-007 rain-feel clip **Pass** (2026-07-30). **Field Notebook UI** Done (machine; U-006 Current — Lock still reviewer). **Full C-020 clouds** Done (machine; C-020 Open — Lock still owner).
 
-**Next:** Scenario campaign / toxic-site premise (G-002 / C-010) — gated on C-009 framing. Optional C-020 remainder: persistent `snow.waterEquivalent` store. C-009 Lock still owner. C-016…C-019 Lock still owner.
+**Next:** **Nature P0:** [NS-006](nature-study/cards/NS-006-twin-hollow-salt-memory.md) salt-memory encoding → [NS-002](nature-study/cards/NS-002-heat-dial-plant-gate.md) Heat→plant gate → [NS-004](nature-study/cards/NS-004-strand-splash-pioneer.md) strand guild ([BACKLOG](nature-study/BACKLOG.md)). Scenario campaign / toxic-site premise (G-002 / C-010) — gated on C-009 framing. Optional C-020 remainder: persistent `snow.waterEquivalent` store. C-009 Lock still owner. C-016…C-019 Lock still owner.
 
 **The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Missing dials, unfiled beyond candidates: season beyond precip mean. Closing a sim edge is the mechanism; adding a dial is the reason.
 
@@ -118,7 +118,7 @@ Summary only — do not reopen unless fixing regressions.
 
 ### 4.0 Autonomous session protocol
 
-Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
+Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
 
 Every agent session that advances the sim or build plan:
 

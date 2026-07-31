@@ -24,6 +24,7 @@ Copy the template below. Do not add free-form sections. Prefer short phrases ove
 | hsi_or_growth_rule | one-line min/product shape |
 | physics_feedback | what veg changes if established (or "n/a") |
 | register | Locked ID(s) and/or Open C-00x |
+| sourced_from | path §section (or "none — recalled/abstract only") |
 | steal | ≤2 bullets |
 | reject | ≤2 bullets |
 | legibility | inspectable limiting label, or "none yet" |
@@ -37,12 +38,13 @@ Copy the template below. Do not add free-form sections. Prefer short phrases ove
 |---|---|
 | `lane` | Exactly one of `factor`, `guild`, `engagement` |
 | `player_bet` | What the player expects from real-world intuition; never a HUD number |
-| `maps_to_fields` | Prefer existing WorldState ids (`habitat.suitability`, `veg.biomass.herb`, `soil.salinity`, …). Proposed ids use `proposed:` prefix |
+| `maps_to_fields` | Prefer existing WorldState ids (`habitat.suitability`, `veg.biomass.herb`, `soil.salinity`, …). Proposed ids use `proposed:` prefix. Engagement encoding-only cards must list fields that **already exist** |
 | `hsi_or_growth_rule` | e.g. `HSI = min(..., f_temp)`; engagement cards may say `n/a — needs cards: NS-…` |
 | `physics_feedback` | Roughness / infil / fuel / erosion — or `n/a` for factor-only until a guild uses it |
 | `register` | At least one Locked/Current ID or Open **C-00x**. No invented Locked policy |
-| `steal` / `reject` | Rule-shape only; bans must be explicit |
-| `priority` | P0 = controllable dial or two-bet differentiation; P1 = new derived field, no new Process; P2 = new Process / deferred |
+| `sourced_from` | Cite in-repo evidence when the topic was already researched (e.g. `docs/evidence/island-colonization.md §3`). Do not re-derive island stages without this cite |
+| `steal` / `reject` | Rule-shape only; bans must be explicit. Cards **propose**; code lands use `/study-steal` |
+| `priority` | P0 = controllable dial or two-bet differentiation; P1 = new derived field, no new Process; P2 = new Process / deferred. Card `priority` is a suggestion — BACKLOG after merge is authoritative |
 | `evidence_grade` | Honesty grade — see PROTOCOL token caps |
 
 ## Exemplar

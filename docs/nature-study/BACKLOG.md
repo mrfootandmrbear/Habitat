@@ -2,7 +2,7 @@
 
 Authority: [PROTOCOL.md](PROTOCOL.md). Ranked after parent merge of cards. **Hypothesis only** — Open candidates stay Open.
 
-Last updated: 2026-07-30 (Wave 1 launch seeded; cards pending except exemplar).
+Last updated: 2026-07-30 (Wave 1 merged).
 
 ---
 
@@ -14,44 +14,34 @@ Last updated: 2026-07-30 (Wave 1 launch seeded; cards pending except exemplar).
 
 ---
 
-## Wave 1 — launch set (uncarded → run five Tasks)
+## Wave 1 — merged
 
-Launch in one parent turn using [`.cursor/skills/nature-study/SKILL.md`](../../.cursor/skills/nature-study/SKILL.md). Assign ids NS-002…NS-006 as cards return.
-
-| Agent | Lane | Topic | Why first | Expected id |
-|---|---|---|---|---|
-| F-temp | factor | Temperature → growth / establishment | Heat dial exists; plants ignore it | NS-002 |
-| F-wind | factor | Wind → stress / spray / burial | Wind + C-017 exposure exist; plants ignore them | NS-003 |
-| G-strand | guild | Strand / splash pioneer | Island stage 1; salt+shore shipped | NS-004 |
-| G-binder | guild | Sand-binder / dune | Berms “come alive” vs bare (thesis payoff #2) | NS-005 |
-| E-freshen | engagement | Freshened vs salty hollow | C-018 owner half Pass — deepen felt loop | NS-006 |
-
-Paste PROTOCOL ban block + stages 0–3 table into each Task. One topic per agent.
+| Id | Lane | Title | Merge bucket |
+|---|---|---|---|
+| [NS-002](cards/NS-002-heat-dial-plant-gate.md) | factor | Heat dial plant gate | **P0** |
+| [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | Onshore spray stress gate | P1 |
+| [NS-004](cards/NS-004-strand-splash-pioneer.md) | guild | Strand splash pioneer | **P0** (one new guild) |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | P1 — hold until strand differentiates |
+| [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | engagement | Twin hollow salt memory | **P0** (clip first) |
 
 ---
 
-## Expected P0 merge targets (after Wave 1 — hypothesis)
-
-Not Locked. Do not implement until cards exist and D-007 is considered for any new Process.
-
-1. **Temperature and/or wind as HSI (or growth) factors** — under Open **C-004** / **C-020** adjacency; Heat/Wind dials already player-facing.
-2. **Second guild** (strand pioneer **or** sand-binder) — under **W-003** / **C-019**; still arrival-gated; still single vegetation owner.
-3. **Engagement encoding** for freshened-vs-salty (and later windward-vs-lee) — prefer Tier-P / presentation over a new Process when the sim signal already exists (**C-018**).
-
-Any slice that registers a new `Process` records a twenty-second clip verdict (**D-007**) in BUILD_GUIDE first.
-
----
-
-## Priority buckets (fill after merge)
+## Priority buckets (authoritative after merge)
 
 ### P0 — next engagement ROI
 
-_Empty until Wave 1 cards merge. Expect F-temp, F-wind, G-strand or G-binder, E-freshen._
+| Order | Card | Why |
+|---|---|---|
+| 1 | [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | Sim signal exists (C-018 Pass); encoding / default-view clip is the gap — Tier-P, no new Process |
+| 2 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | Heat dial already player-facing; plants ignore it — add `f_temp` under Open C-004 / C-020 |
+| 3 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | One new guild; couples shipped salt + shore + overseas; differentiates strand vs inland herb |
 
 ### P1 — derived field, no new Process
 
-| Topic | Lane | Notes |
+| Card / topic | Lane | Notes |
 |---|---|---|
+| [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | `proposed:stress.spray` from Wind × shoreExposure; keep distinct from `soil.salinity` |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Second guild — hold until NS-004 differentiates two bets |
 | Light / aspect into Liebig vs competition-only | factor | `lightCompetition.ts` already ships; card before promoting to HSI |
 | Hydroperiod / inundation gate (≠ soil.salinity) | factor | Island evidence separates spray / soil salt / inundation |
 
@@ -60,10 +50,20 @@ _Empty until Wave 1 cards merge. Expect F-temp, F-wind, G-strand or G-binder, E-
 | Topic | Lane | Notes |
 |---|---|---|
 | Salt-marsh engineer | guild | After strand + inundation factor |
-| Woody / shrub | guild | Stage 3; climate-capped |
+| Woody / shrub | guild | Stage 3; climate-capped (needs NS-002) |
 | Cryptogam / crust | guild | Stage 2 bootstrap |
 | Nutrients / guano | factor | Needs candidate if not covered |
 | Animals / F-001 engineers | — | Deferred; out of protocol scope |
+
+---
+
+## Merge → queue tip
+
+After merge, parent updates in the **same session**:
+
+1. This file’s P0/P1/P2 + merge log
+2. [BUILD_GUIDE.md](../BUILD_GUIDE.md) Current gate / Next — one line `Nature P0: NS-00x …`
+3. [AGENTS.md](../../AGENTS.md) queue tip — same Nature P0 line
 
 ---
 
@@ -71,4 +71,6 @@ _Empty until Wave 1 cards merge. Expect F-temp, F-wind, G-strand or G-binder, E-
 
 | Date | Cards merged | P0 set | Notes |
 |---|---|---|---|
-| 2026-07-30 | NS-001 exemplar only | — | Protocol seeded; Wave 1 not yet run |
+| 2026-07-30 | NS-001 exemplar only | — | Protocol seeded |
+| 2026-07-30 | — | — | Doc sync: sourced_from, propose vs land, card→slice checklist |
+| 2026-07-30 | NS-002…NS-006 | NS-006 → NS-002 → NS-004 | Clip first; dial next; one guild (strand). NS-003/NS-005 → P1. No invent-Locked. |

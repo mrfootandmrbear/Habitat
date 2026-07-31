@@ -94,7 +94,20 @@ Examples: strand pioneer · sand-binder · salt-marsh engineer · woody/shrub ·
 
 One *felt* loop, not a taxon. Output: clip-test sentence (THESIS §8) + which factor/guild cards it needs. No numbers for the owner.
 
+**Encoding-only rule.** If the sim signal already exists (probe / owner half Pass), `maps_to_fields` must list **existing** fields and `hsi_or_growth_rule` may be `n/a — needs cards: …`. Prefer Tier-P / presentation over a new Process (**D-007**).
+
 Examples: bare→pioneer after first wet season; salty twin stays sparse; north slope holds cover; windward berm sheds cover.
+
+---
+
+## Propose vs land
+
+| Skill | When | Artifact |
+|---|---|---|
+| `/nature-study` | Pre-code hypotheses (guild / factor / engagement) | Card under `cards/` — **propose** only |
+| `/study-steal` | Steal lands in **code** or an EXTERNAL_REFERENCES Study log row | Same-commit Study log — **land** |
+
+Cards are not a Study-log substitute. Study log is not a place to invent guilds.
 
 ---
 
@@ -103,9 +116,10 @@ Examples: bare→pioneer after first wet season; salty twin stays sparse; north 
 1. Open [BACKLOG.md](BACKLOG.md); pick 3–5 uncarded Wave topics.
 2. For each topic, Task with `generalPurpose` (or explore if reading one known file) using the matching prompt template in the nature-study skill.
 3. Write each returned card to `docs/nature-study/cards/NS-###-<slug>.md`.
-4. Parent merge (checklist below) → update BACKLOG priorities.
-5. Implementation slices cite cards + register IDs; new `Process` requires **D-007** clip gate first.
-6. When a steal lands in **code**, same-commit Study log row via `/study-steal`. Study cards alone do not invent Locked policy.
+4. Parent merge (checklist below) → fill BACKLOG **P0/P1/P2** from cards (not from any “expected” preview).
+5. **Same session:** one-line Nature P0 tip in [BUILD_GUIDE.md](../BUILD_GUIDE.md) **Current gate** / **Next** and [AGENTS.md](../../AGENTS.md) queue tip (`Nature P0: NS-00x …`).
+6. Implementation slices use the **card → slice checklist** below; new `Process` requires **D-007** clip gate first.
+7. When a steal lands in **code**, same-commit Study log row via `/study-steal`.
 
 ---
 
@@ -113,11 +127,27 @@ Examples: bare→pioneer after first wet season; salty twin stays sparse; north 
 
 - [ ] Drop cards that invent product policy without a Locked ID or Open **C-00x**
 - [ ] Collapse duplicates (same factor/guild under two titles → keep clearer player_bet)
-- [ ] **P0** = factor already player-controllable (temp/wind) **or** guild that differentiates two player bets under one seed schedule
+- [ ] Require `sourced_from` when the topic already appears in [island-colonization.md](../evidence/island-colonization.md) (or other evidence)
+- [ ] **P0** = factor already player-controllable (temp/wind) **or** guild that differentiates two player bets under one seed schedule — **or** engagement when the sim signal already exists and encoding is the gap
 - [ ] **P1** = needs a new derived field but no new Process
 - [ ] **P2** = needs new Process / deferred (nutrients, animals, F-001)
+- [ ] Prefer clip payoff (engagement / encoding) over catalogue growth when both are P0-eligible
 - [ ] Any slice registering a new Process: D-007 clip verdict in BUILD_GUIDE first
-- [ ] Rank into [BACKLOG.md](BACKLOG.md); do not write a synthesis essay
+- [ ] Rank into [BACKLOG.md](BACKLOG.md); update BUILD_GUIDE + AGENTS tip; do not write a synthesis essay
+
+---
+
+## Card → slice checklist
+
+Copy into the slice BUILD_GUIDE entry / composition when implementing from cards:
+
+```
+Nature cards: NS-###, …
+Register: Locked ID(s) and/or Open C-00x (hypothesis only if Open)
+New Process? yes → D-007 clip verdict in BUILD_GUIDE first / no → presentation or field gate only
+Tiers: M … / P … / O …
+Study log: /study-steal same commit if code steal / n/a if encoding-only
+```
 
 ---
 

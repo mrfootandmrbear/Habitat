@@ -11,6 +11,8 @@ description: >-
 
 Authority: [EXTERNAL_REFERENCES.md](../../../docs/EXTERNAL_REFERENCES.md), BUILD_GUIDE §4.0 step 7.
 
+**Propose vs land.** Pre-code guild / factor / engagement hypotheses use `/nature-study` (cards under `docs/nature-study/cards/`). This skill records a steal that **landed** in code or an EXTERNAL_REFERENCES Study log row — same commit. Do not use Study log rows as a substitute for nature-study cards, and do not treat cards as a Study log.
+
 ## Policy
 
 Prefer **study clones and offline oracles** over vendoring. Integrating third-party simulation packages fights **T-001** (determinism), **T-004** (data-driven content), **T-006** (sim/render separation), and single-writer field ownership.

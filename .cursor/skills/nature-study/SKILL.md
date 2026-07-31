@@ -16,7 +16,9 @@ Authority: [docs/nature-study/PROTOCOL.md](../../../docs/nature-study/PROTOCOL.m
 - Study **guilds + factor gates + engagement loops**, not named-species lists (**N-003**, **E-004**).
 - One Task = one topic = one card file under `docs/nature-study/cards/`.
 - Cite Locked ID or Open **C-00x** only; do not invent Locked policy.
-- When a steal later lands in **code**, use `/study-steal` for EXTERNAL_REFERENCES Study log — cards alone are not a study-log substitute.
+- **Propose vs land:** cards **propose** steals. When a steal later lands in **code**, use `/study-steal` for the EXTERNAL_REFERENCES Study log — cards alone are not a study-log substitute.
+- Prefer `sourced_from` citing [island-colonization.md](../../../docs/evidence/island-colonization.md) when the topic is already researched there.
+- After parent merge: fill BACKLOG P0/P1/P2, then one-line Nature P0 in BUILD_GUIDE Current gate / Next **and** AGENTS queue tip.
 
 ## Parent procedure
 
@@ -64,6 +66,7 @@ You are a Habitat nature-study factor lane. One topic only. Return ONE markdown 
 TOPIC: <e.g. Temperature as Liebig / growth factor for plant establishment>
 ASSIGNED_ID: <NS-###>
 REGISTER_HINT: <e.g. C-004, C-020, C-007>
+SOURCED_FROM_HINT: <e.g. docs/evidence/island-colonization.md §2 growing season>
 
 CONTEXT (≤40 lines — parent pastes):
 <Heat dial / wind / existing HSI factors / relevant file names only>
@@ -89,13 +92,14 @@ SCHEMA — fill every row:
 | hsi_or_growth_rule | one line |
 | physics_feedback | or n/a |
 | register | |
+| sourced_from | path §section or none |
 | steal | ≤2 bullets |
 | reject | ≤2 bullets |
 | legibility | |
 | priority | P0 or P1 or P2 |
 | evidence_grade | abstract | recalled | Habitat-already |
 
-Honesty: state evidence_grade truthfully. Recalled/abstract-only is fine.
+Honesty: state evidence_grade truthfully. Recalled/abstract-only is fine. Prefer sourced_from when island-colonization already covers the topic.
 ```
 
 ---
@@ -108,6 +112,7 @@ You are a Habitat nature-study guild lane. One plant functional type only. Retur
 TOPIC: <e.g. Strand / splash pioneer guild>
 ASSIGNED_ID: <NS-###>
 REGISTER_HINT: <e.g. W-003, C-007, C-018, C-019>
+SOURCED_FROM_HINT: <e.g. docs/evidence/island-colonization.md §1 stage 1>
 
 CONTEXT (≤40 lines — parent pastes):
 <What HSI factors exist; herb already shipped; shore/salt if relevant>
@@ -122,7 +127,7 @@ ISLAND STAGES:
 <paste stages excerpt>
 
 SCHEMA — same table as CARD_SCHEMA; set lane | guild |
-Must include: limiting factors that unlock it; physics_feedback (roughness/infil/fuel/erosion); player_bet with no numbers.
+Must include: sourced_from; limiting factors that unlock it; physics_feedback (roughness/infil/fuel/erosion); player_bet with no numbers.
 ```
 
 ---
@@ -135,6 +140,7 @@ You are a Habitat nature-study engagement lane. One felt loop only — not a tax
 TOPIC: <e.g. Freshened vs salty hollow under one seed schedule>
 ASSIGNED_ID: <NS-###>
 REGISTER_HINT: <e.g. C-018, C-007, C-011>
+SOURCED_FROM_HINT: <e.g. island-colonization §3 paired expectation; playtests/batch-salt-overseas>
 
 CONTEXT (≤40 lines):
 <What is already visible / probed>
@@ -144,8 +150,10 @@ BAN BLOCK:
 
 SCHEMA — lane | engagement |
 player_bet: clip-test sentence a stranger could follow (THESIS §8), no numbers.
+maps_to_fields: existing fields only when encoding-only (sim signal already exists).
 hsi_or_growth_rule: n/a — needs cards: NS-… (list factor/guild cards this loop depends on)
 physics_feedback: n/a unless the loop is about veg changing terrain feel
+sourced_from: required when playtest/evidence already names the loop
 priority: usually P0 if sim signal exists and encoding is the gap
 ```
 
@@ -154,5 +162,6 @@ priority: usually P0 if sim signal exists and encoding is the gap
 ## After cards return
 
 1. Write files under `docs/nature-study/cards/`.
-2. Update BACKLOG: move topics into P0/P1/P2; append merge log row.
-3. Stop unless the user asked to implement. Implementation cites card ids + register; new Process → D-007 first.
+2. Update BACKLOG: move topics into P0/P1/P2 from the merge checklist (not from Wave “expected” preview); append merge log row.
+3. Same session: Nature P0 one-liner in BUILD_GUIDE Current gate/Next and AGENTS queue tip.
+4. Stop unless the user asked to implement. Implementation uses PROTOCOL card→slice checklist; new Process → D-007 first.

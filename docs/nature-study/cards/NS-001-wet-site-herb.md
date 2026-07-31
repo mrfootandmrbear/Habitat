@@ -11,6 +11,7 @@
 | hsi_or_growth_rule | establishment ∝ seedBank × HSI; HSI = min(f_moisture, f_depth, f_gw, f_salinity) |
 | physics_feedback | physicalCover → roughness / infiltration (Slice 13); fuel for fire |
 | register | C-007 Locked; E-004; W-003; ES-006; N-001; N-004 |
+| sourced_from | Slice 12–13 composition; docs/evidence/island-colonization.md §1 stage 2–3 herb track |
 | steal | • Condition-earned arrival (Viva Piñata shape) via HSI × perimeter seed — not unlock checklists |
 | reject | • Place-species tool as primary verb · occupancy copied from HSI with no dispersal path |
 | legibility | limiting factor labels: moisture, depth, groundwater, salinity |
