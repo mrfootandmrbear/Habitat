@@ -16,6 +16,7 @@ export type CutawaySample = {
   limiting?: number;
   herbBiomass?: number;
   strandBiomass?: number;
+  binderBiomass?: number;
   salinity?: number;
 };
 
@@ -37,6 +38,9 @@ export function formatCutaway(sample: CutawaySample | null): string {
   }
   if (sample.strandBiomass !== undefined && sample.strandBiomass > 0) {
     line += ` · strand ${sample.strandBiomass.toFixed(2)}`;
+  }
+  if (sample.binderBiomass !== undefined && sample.binderBiomass > 0) {
+    line += ` · binder ${sample.binderBiomass.toFixed(2)}`;
   }
   if (sample.salinity !== undefined && sample.salinity > 0) {
     line += ` · salt ${sample.salinity.toFixed(2)}`;

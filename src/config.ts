@@ -206,6 +206,18 @@ export const config = {
   strandTempOptC: 12,
 
   /**
+   * Sandy crest sand-binder (C-009 / Slice N5) — drained sand + exposure.
+   * Same seed schedule as herb/strand; HSI uses drainage × crest × sand × burial.
+   */
+  binderEstablishmentScale: 0.08,
+  binderEstablishmentRate: 0.35,
+  binderBiomassMax: 2.5,
+  /** Loam still admits sparse binder; clay/rock stay at 0. */
+  binderLoamSandFactor: 0.25,
+  /** How much remobilization (|longshore|) binders tolerate before HSI falls. */
+  binderBurialTolerance: 0.9,
+
+  /**
    * Wall-clock seconds for display water depth to catch ~63% of a step change.
    * Observer only — sim depths stay authoritative (T-006). Stops 16× event
    * strobing from reading as a broken framerate.
@@ -251,6 +263,7 @@ export type InspectorLayer =
   | "actualEt"
   | "herbBiomass"
   | "strandBiomass"
+  | "binderBiomass"
   | "seedBank"
   | "intertidal"
   | "shoreExposure"

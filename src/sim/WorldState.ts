@@ -38,6 +38,7 @@ import {
 } from "./climate/longshoreTendency";
 import { evaluateHsi, LIMITING_SPRAY } from "./habitat/hsiComposition";
 import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
+import { evaluateBinderHsi } from "./habitat/binderHsiComposition";
 import {
   concentrateSalinity,
   diluteSalinity,
@@ -182,6 +183,18 @@ export class WorldState {
    * Owner: vegetation, band: seasonal.
    */
   readonly strandBiomass: Grid2D;
+  /**
+   * Sand-binder seed bank — C-009 crest guild (same overseas/perimeter schedule).
+   * Owner: dispersal, band: annual. Legacy colonization memory.
+   */
+  readonly binderSeedBank: Grid2D;
+  /** Binder establishment probability [0,1] from seed × binder HSI. */
+  readonly binderEstablishment: Grid2D;
+  /**
+   * Binder biomass (kg DM·m⁻²) — C-009 sandy crest mats.
+   * Owner: vegetation, band: seasonal.
+   */
+  readonly binderBiomass: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -353,6 +366,9 @@ export class WorldState {
     this.strandSeedBank = new Grid2D(this.width, this.height);
     this.strandEstablishment = new Grid2D(this.width, this.height);
     this.strandBiomass = new Grid2D(this.width, this.height);
+    this.binderSeedBank = new Grid2D(this.width, this.height);
+    this.binderEstablishment = new Grid2D(this.width, this.height);
+    this.binderBiomass = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
     this.shoreExposure = new Grid2D(this.width, this.height);
@@ -1019,6 +1035,9 @@ export class WorldState {
     const depth = this.soilDepth.data;
     const mat = this.soilMaterial.data;
     const cover = this.vegCover.data;
+    const herbBio = this.herbBiomass.data;
+    const strandBio = this.strandBiomass.data;
+    const binderBio = this.binderBiomass.data;
     const exposure = this.shoreExposure.data;
     const acc = this.flowAccumulation;
     const filled = this.filledElevation ?? elev;
@@ -1044,16 +1063,27 @@ export class WorldState {
 
         let erode = 0;
         const a = acc ? acc[i]! : 0;
+        // C-009: living cover stack blunts hillslope + coastal work (not veg.cover alone).
+        const physical = physicalCoverFrom(
+          cover[i]!,
+          herbBio[i]!,
+          config.herbBiomassMax,
+          strandBio[i]!,
+          config.strandBiomassMax,
+          binderBio[i]!,
+          config.binderBiomassMax,
+        );
+        const cFactor = 1 - physical * 0.85;
         if (a >= aMin) {
           const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
           const aNorm = Math.min(1, a / (this.width * this.height));
-          const cFactor = 1 - cover[i]! * 0.85;
           const kE = substrateProps(mat[i]!).erosionK * scale;
           erode = kE * Math.sqrt(Math.max(aNorm, 1e-6)) * slope * cFactor;
         }
 
         // C-017: fetch×wind exposure contributes here — geomorphology integrates.
-        const coast = kCoast * exposure[i]!;
+        // Living mats blunt coastal remobilization (C-009 / thesis payoff #2).
+        const coast = kCoast * exposure[i]! * cFactor;
         erode += coast;
 
         let dh = prod - erode;
@@ -1178,7 +1208,7 @@ export class WorldState {
         insolation[i] = committedLight.insolation;
         lai[i] = committedLight.leafAreaIndex;
         understory[i] = committedLight.understoryLight;
-        // Slice 13 / N4: herb + strand stack into physical writes only (E-005).
+        // Slice 13 / N4 / N5: herb + strand + binder → physical writes only (E-005).
         // physicalCover is local — never dual-writes veg.cover.
         const physical = physicalCoverFrom(
           cover,
@@ -1186,6 +1216,8 @@ export class WorldState {
           config.herbBiomassMax,
           this.strandBiomass.data[i]!,
           config.strandBiomassMax,
+          this.binderBiomass.data[i]!,
+          config.binderBiomassMax,
         );
         rough[i] = config.baseRoughness + physical * config.vegRoughnessBonus;
         infilContrib[i] = physical * config.vegInfiltrationBonus;
@@ -1194,21 +1226,27 @@ export class WorldState {
   }
 
   /**
-   * Annual seed bank (Slice 12 / C-007; Slice 21 / C-019; N4 / C-018).
+   * Annual seed bank (Slice 12 / C-007; Slice 21 / C-019; N4 / C-018; N5 / C-009).
    * Mainland: fixed preserve-perimeter source.
    * Island (seaLevel set): overseas shore-biased kernel × S_elig(A,d).
-   * One seed schedule fills herb + strand banks; establishment uses guild HSI.
+   * One seed schedule fills herb + strand + binder banks; establishment uses guild HSI.
    */
   runDispersalStep(_dt: number): void {
     const herbSeed = this.herbSeedBank.data;
     const herbEst = this.herbEstablishment.data;
     const strandSeed = this.strandSeedBank.data;
     const strandEst = this.strandEstablishment.data;
+    const binderSeed = this.binderSeedBank.data;
+    const binderEst = this.binderEstablishment.data;
     const herbHsi = this.habitatSuitability.data;
     const exposure = this.shoreExposure.data;
     const salt = this.soilSalinity.data;
+    const moisture = this.soilMoisture.data;
+    const mat = this.soilMaterial.data;
+    const longshore = this.shoreLongshore.data;
     const herbScale = config.herbEstablishmentScale;
     const strandScale = config.strandEstablishmentScale;
+    const binderScale = config.binderEstablishmentScale;
     const airTempC = this.airTemperature;
 
     const writeCell = (i: number, pressure: number) => {
@@ -1224,6 +1262,20 @@ export class WorldState {
         pressure,
         strand.hsi,
         strandScale,
+      );
+      binderSeed[i] = pressure;
+      const porosity = substrateProps(mat[i]!).porosity;
+      const binder = evaluateBinderHsi({
+        moisture: moisture[i]!,
+        porosity,
+        shoreExposure: exposure[i]!,
+        materialClassId: mat[i]!,
+        longshoreTendency: longshore[i]!,
+      });
+      binderEst[i] = establishmentProbability(
+        pressure,
+        binder.hsi,
+        binderScale,
       );
     };
 
@@ -1254,6 +1306,8 @@ export class WorldState {
         herbEst[i] = 0;
         strandSeed[i] = 0;
         strandEst[i] = 0;
+        binderSeed[i] = 0;
+        binderEst[i] = 0;
         continue;
       }
       writeCell(i, overseasSeedPressure(dist[i]!, strength, mean));
@@ -1261,7 +1315,7 @@ export class WorldState {
   }
 
   /**
-   * Seasonal guild establishment — herb (wet hollow) + strand (shore mats).
+   * Seasonal guild establishment — herb + strand + binder (C-009).
    * Zero guild HSI blocks that guild. Does not write veg.cover
    * (physical contribution via physicalCover in runVegetationStep — Slice 13).
    */
@@ -1272,8 +1326,13 @@ export class WorldState {
     const herbBiomass = this.herbBiomass.data;
     const strandSeed = this.strandSeedBank.data;
     const strandBiomass = this.strandBiomass.data;
+    const binderSeed = this.binderSeedBank.data;
+    const binderBiomass = this.binderBiomass.data;
     const exposure = this.shoreExposure.data;
     const salt = this.soilSalinity.data;
+    const moisture = this.soilMoisture.data;
+    const mat = this.soilMaterial.data;
+    const longshore = this.shoreLongshore.data;
     const airTempC = this.airTemperature;
     const herbEstScale = config.herbEstablishmentScale;
     const herbRate = config.herbEstablishmentRate;
@@ -1281,6 +1340,9 @@ export class WorldState {
     const strandEstScale = config.strandEstablishmentScale;
     const strandRate = config.strandEstablishmentRate;
     const strandMax = config.strandBiomassMax;
+    const binderEstScale = config.binderEstablishmentScale;
+    const binderRate = config.binderEstablishmentRate;
+    const binderMax = config.binderBiomassMax;
 
     for (let i = 0; i < herbBiomass.length; i++) {
       herbBiomass[i] = nextHerbBiomass({
@@ -1304,6 +1366,22 @@ export class WorldState {
         establishmentScale: strandEstScale,
         establishmentRate: strandRate,
         biomassMax: strandMax,
+        dt: scale,
+      });
+      const binderHsi = evaluateBinderHsi({
+        moisture: moisture[i]!,
+        porosity: substrateProps(mat[i]!).porosity,
+        shoreExposure: exposure[i]!,
+        materialClassId: mat[i]!,
+        longshoreTendency: longshore[i]!,
+      }).hsi;
+      binderBiomass[i] = nextHerbBiomass({
+        biomass: binderBiomass[i]!,
+        seedBank: binderSeed[i]!,
+        habitatSuitability: binderHsi,
+        establishmentScale: binderEstScale,
+        establishmentRate: binderRate,
+        biomassMax: binderMax,
         dt: scale,
       });
     }
@@ -1739,6 +1817,21 @@ export class WorldState {
     return this.strandEstablishment.get(x, z);
   }
 
+  getBinderBiomass(x: number, z: number): number {
+    if (!this.binderBiomass.inBounds(x, z)) return 0;
+    return this.binderBiomass.get(x, z);
+  }
+
+  getBinderSeedBank(x: number, z: number): number {
+    if (!this.binderSeedBank.inBounds(x, z)) return 0;
+    return this.binderSeedBank.get(x, z);
+  }
+
+  getBinderEstablishment(x: number, z: number): number {
+    if (!this.binderEstablishment.inBounds(x, z)) return 0;
+    return this.binderEstablishment.get(x, z);
+  }
+
   raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
     this.applyTerrainBrush(cx, cz, amount);
   }
@@ -1925,7 +2018,7 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.habitatLimitingFactor.data,
-        // Liebig arm ids through LIMITING_SPRAY (5) — NS-002 temp + NS-003 spray.
+        // Liebig arm ids through LIMITING_SPRAY (5) — C-004 temp + C-017 spray.
         range: [0, LIMITING_SPRAY] as const,
       },
       {
@@ -2128,6 +2221,36 @@ export class WorldState {
         legacy: false,
         data: this.strandBiomass.data,
         range: [0, config.strandBiomassMax] as const,
+      },
+      {
+        id: "veg.seedBank.binder",
+        units: "seeds/m²",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: true,
+        data: this.binderSeedBank.data,
+        range: [0, 1e5] as const,
+      },
+      {
+        id: "veg.establishment.binder",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.binderEstablishment.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "veg.biomass.binder",
+        units: "kg DM/m²",
+        shape: "cell" as const,
+        owner: "vegetation",
+        band: "seasonal" as const,
+        legacy: false,
+        data: this.binderBiomass.data,
+        range: [0, config.binderBiomassMax] as const,
       },
       {
         id: "ledger.fuelConsumed",

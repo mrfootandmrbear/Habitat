@@ -15,6 +15,7 @@ export const vegetationProcess: Process = {
     "terrain.elevation",
     "veg.biomass.herb",
     "veg.biomass.strand",
+    "veg.biomass.binder",
   ],
   writes: [
     "veg.cover",

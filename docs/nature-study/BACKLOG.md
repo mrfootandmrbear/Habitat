@@ -15,6 +15,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | Heat dial plant gate | Slice N2; `f_temp` / `heat-arrival`; C-004/C-020 Open |
 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | Strand splash pioneer | Slice N4; `veg.*.strand` / `strand-arrival`; C-018/C-019 Open |
 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | Onshore spray stress | Slice N3; `f_spray` / `spray-arrival`; C-017 Open |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | Sandy crest sand-binder | Slice N5; `veg.*.binder` / `binder-arrival`; C-009/C-017 Open |
 
 ---
 
@@ -25,7 +26,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 | [NS-002](cards/NS-002-heat-dial-plant-gate.md) | factor | Heat dial plant gate | **Shipped** (N2) |
 | [NS-003](cards/NS-003-onshore-spray-stress-gate.md) | factor | Onshore spray stress gate | **Shipped** (N3) |
 | [NS-004](cards/NS-004-strand-splash-pioneer.md) | guild | Strand splash pioneer | **Shipped** (N4) |
-| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | **P0** (next) |
+| [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | guild | Sandy crest sand-binder | **Shipped** (N5) |
 | [NS-006](cards/NS-006-twin-hollow-salt-memory.md) | engagement | Twin hollow salt memory | **Shipped** (N) |
 
 ---
@@ -36,7 +37,7 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 | Order | Card | Why |
 |---|---|---|
-| 1 | [NS-005](cards/NS-005-sandy-crest-sand-binder.md) | Second shore guild — spray now differentiates windward faces |
+| — | *(empty)* | Nature Wave 1 P0 complete; agent tip → C-005 scaffold |
 
 ### P1 — derived field, no new Process
 
@@ -77,3 +78,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | NS-006, NS-002 shipped | NS-004 | Slice N encoding + Slice N2 `f_temp`; tip → strand guild |
 | 2026-07-30 | NS-004 shipped (N4) | NS-003 | Strand vs inland under one seed; tip → spray stress |
 | 2026-07-30 | NS-003 shipped (N3) | NS-005 | Herb `f_spray` from shore.exposure; tip → sand-binder |
+| 2026-07-30 | NS-005 shipped (N5) | — (P0 empty) | Crest binder + physicalCover coastal blunt; tip → C-005 scaffold |

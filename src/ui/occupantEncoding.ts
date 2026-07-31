@@ -11,6 +11,8 @@ const BARE: OccupantRgb = [0x8b / 255, 0x73 / 255, 0x55 / 255];
 const SHOOT: OccupantRgb = [0x2e / 255, 0xc4 / 255, 0x4e / 255];
 /** Strand splash mats — olive so salty shore reads apart from inland herb (C-018). */
 const STRAND: OccupantRgb = [0x6b / 255, 0xa3 / 255, 0x2f / 255];
+/** Sand-binder mats — sandy khaki so crest cover reads apart from strand olive (C-009). */
+const BINDER: OccupantRgb = [0xc4 / 255, 0xa2 / 255, 0x4e / 255];
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -61,6 +63,20 @@ export function strandBiomassRgb(
   ];
 }
 
+/** Binder mat tint — sandy khaki vs strand olive (C-009 Tier-P). */
+export function binderBiomassRgb(
+  biomass: number,
+  biomassMax: number,
+): OccupantRgb {
+  const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
+  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  return [
+    lerp(BARE[0], BINDER[0], u),
+    lerp(BARE[1], BINDER[1], u),
+    lerp(BARE[2], BINDER[2], u),
+  ];
+}
+
 /** Encoding Δ between herb shoot green and strand olive at equal biomass. */
 export function guildOccupantEncodingDelta(
   biomass: number,
@@ -69,6 +85,17 @@ export function guildOccupantEncodingDelta(
 ): number {
   const a = herbBiomassRgb(biomass, herbMax);
   const b = strandBiomassRgb(biomass, strandMax);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+/** Encoding Δ between strand olive and binder khaki at equal biomass. */
+export function binderOccupantEncodingDelta(
+  biomass: number,
+  strandMax: number,
+  binderMax: number,
+): number {
+  const a = strandBiomassRgb(biomass, strandMax);
+  const b = binderBiomassRgb(biomass, binderMax);
   return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 

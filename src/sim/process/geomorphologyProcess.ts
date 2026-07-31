@@ -15,12 +15,15 @@ export const geomorphologyProcess: Process = {
     "soil.depth",
     "soil.material",
     "veg.cover",
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
     "depression.depth",
     "shore.exposure",
     "shore.longshore",
   ],
   writes: ["terrain.elevation", "soil.depth", "soil.material", "ledger.shoreErosion"],
-  lagged: ["veg.cover"],
+  lagged: ["veg.cover", "veg.biomass.herb", "veg.biomass.strand", "veg.biomass.binder"],
   step(world, dt) {
     world.runGeomorphologyStep(dt);
   },

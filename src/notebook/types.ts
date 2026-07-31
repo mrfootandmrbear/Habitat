@@ -21,6 +21,7 @@ export type NotebookSnapshot = {
   meanCover: number;
   meanHerbBiomass: number;
   meanStrandBiomass: number;
+  meanBinderBiomass: number;
   scarFraction: number;
   /** Modal habitat.limitingFactor on land cells, or -1 if none. */
   modalLimitingFactor: number;

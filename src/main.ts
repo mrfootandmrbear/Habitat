@@ -166,6 +166,7 @@ function syncNotebookChrome(): void {
     cover: world.vegCover.data,
     herbBiomass: world.herbBiomass.data,
     strandBiomass: world.strandBiomass.data,
+    binderBiomass: world.binderBiomass.data,
     fireScar: world.fireScar.data,
     limitingFactor: world.habitatLimitingFactor.data,
     oceanCells: world.oceanCells,
@@ -520,6 +521,7 @@ function sampleCutaway(cell: { x: number; z: number }): CutawaySample {
     limiting: world.getLimitingFactor(cell.x, cell.z),
     herbBiomass: world.getHerbBiomass(cell.x, cell.z),
     strandBiomass: world.getStrandBiomass(cell.x, cell.z),
+    binderBiomass: world.getBinderBiomass(cell.x, cell.z),
     salinity: world.getSoilSalinity(cell.x, cell.z),
   };
 }

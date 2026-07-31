@@ -174,8 +174,9 @@ export function herbCoverFraction(
 }
 
 /**
- * Local physical cover for roughness / infiltration — not a registered field.
- * Herb + strand stack (C-018); capped at 1 — never dual-writes veg.cover.
+ * Local physical cover for roughness / infiltration / erosion blunting —
+ * not a registered field. Herb + strand + binder stack (C-018 / C-009);
+ * capped at 1 — never dual-writes veg.cover.
  */
 export function physicalCoverFrom(
   vegCover: number,
@@ -183,11 +184,14 @@ export function physicalCoverFrom(
   herbBiomassMax: number,
   strandBiomass = 0,
   strandBiomassMax = 1,
+  binderBiomass = 0,
+  binderBiomassMax = 1,
 ): number {
   return Math.min(
     1,
     clamp01(vegCover) +
       herbCoverFraction(herbBiomass, herbBiomassMax) +
-      herbCoverFraction(strandBiomass, strandBiomassMax),
+      herbCoverFraction(strandBiomass, strandBiomassMax) +
+      herbCoverFraction(binderBiomass, binderBiomassMax),
   );
 }

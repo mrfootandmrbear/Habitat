@@ -1,0 +1,24 @@
+{
+  "id": "N5",
+  "title": "Sandy crest sand-binder (NS-005)",
+  "simLoop": "One seed schedule fills herb + strand + binder banks; binder HSI = min(drainage, exposure, sand, burial) so dry sandy crests earn binder while wet loam hollows earn herb; physicalCover blunts coastal/hillslope erosion (C-007 / C-009 / C-017).",
+  "gameLoop": "If I leave a sandy berm crest open to wind, binding cover should arrive there and hold the slope through the next storm — not in the wet hollow.",
+  "registerIds": ["W-003", "E-004", "C-007", "C-009", "C-017", "N-001", "N-004", "T-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/binderArrival.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["binder-arrival"],
+  "fields": [
+    "veg.seedBank.binder",
+    "veg.establishment.binder",
+    "veg.biomass.binder",
+    "shore.exposure",
+    "shore.longshore",
+    "soil.material",
+    "soil.moisture"
+  ],
+  "notebookSeed": "Sandy khaki mats bound the dry crest while the hollow stayed green with herbs.",
+  "tierO": "no owner-only question this closeout — C-009 / C-017 Lock remain owner; machine half green"
+}

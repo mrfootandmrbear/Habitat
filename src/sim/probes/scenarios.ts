@@ -30,6 +30,7 @@ import {
 } from "./deepTime";
 import {
   SUBSTRATE_CLAY,
+  SUBSTRATE_LOAM,
   SUBSTRATE_ROCK,
   SUBSTRATE_SAND,
   substrateProps,
@@ -2460,6 +2461,120 @@ export function probeStrandArrival(): ProbeResult {
 }
 
 /**
+ * C-009 / Slice N5 — sand-binder on dry crest vs herb in wet hollow.
+ * One seed schedule; crest sand+exposure+dry earns binder; hollow earns herb.
+ */
+export function probeBinderArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const crestX = 1;
+  const crestZ = 4;
+  const hollowX = 1;
+  const hollowZ = 12;
+
+  const make = () => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.shoreLongshore.fill(0);
+    world.soilMaterial.fill(SUBSTRATE_LOAM);
+    world.soilMaterial.set(crestX, crestZ, SUBSTRATE_SAND);
+    world.soilMoisture.set(crestX, crestZ, 0);
+    world.shoreExposure.set(crestX, crestZ, 1);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const a = make();
+  const b = make();
+  const replayMatch = a.stateHash() === b.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("binder-arrival: replay hash mismatch");
+  }
+
+  const crestBinder = a.getBinderBiomass(crestX, crestZ);
+  const crestHerb = a.getHerbBiomass(crestX, crestZ);
+  const hollowHerb = a.getHerbBiomass(hollowX, hollowZ);
+  const hollowBinder = a.getBinderBiomass(hollowX, hollowZ);
+  const seedMatch =
+    Math.abs(
+      a.getHerbSeedBank(crestX, crestZ) - a.getHerbSeedBank(hollowX, hollowZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const guildSeedMatch =
+    Math.abs(
+      a.getBinderSeedBank(crestX, crestZ) - a.getHerbSeedBank(crestX, crestZ),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const crestGuildDelta = crestBinder - crestHerb;
+  const hollowGuildDelta = hollowHerb - hollowBinder;
+
+  if (seedMatch !== 1 || guildSeedMatch !== 1) {
+    throw new Error("binder-arrival: seed schedule not matched");
+  }
+  if (!(crestBinder > 0.1)) {
+    throw new Error(`binder-arrival: crest binder too low (${crestBinder})`);
+  }
+  if (!(crestGuildDelta > 0.05)) {
+    throw new Error(
+      `binder-arrival: crest guild delta too small (${crestGuildDelta})`,
+    );
+  }
+  if (!(hollowHerb > 0.1)) {
+    throw new Error(`binder-arrival: hollow herb too low (${hollowHerb})`);
+  }
+  if (!(hollowGuildDelta > 0.05)) {
+    throw new Error(
+      `binder-arrival: hollow guild delta too small (${hollowGuildDelta})`,
+    );
+  }
+  if (hollowBinder !== 0) {
+    throw new Error(
+      `binder-arrival: hollow binder expected 0 (got ${hollowBinder})`,
+    );
+  }
+
+  return {
+    scenario: "binder-arrival",
+    records: [
+      {
+        label: "crest",
+        binderBiomass: crestBinder,
+        herbBiomass: crestHerb,
+        moisture: a.getSoilMoisture(crestX, crestZ),
+        exposure: 1,
+        material: SUBSTRATE_SAND,
+      },
+      {
+        label: "hollow",
+        binderBiomass: hollowBinder,
+        herbBiomass: hollowHerb,
+        moisture: a.getSoilMoisture(hollowX, hollowZ),
+        exposure: 0,
+        material: SUBSTRATE_LOAM,
+      },
+      {
+        label: "delta",
+        crestGuildDelta,
+        hollowGuildDelta,
+        seedMatch,
+        guildSeedMatch,
+        replayMatch,
+        hashN: Number.parseInt(a.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -3010,6 +3125,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "salinity-arrival": probeSalinityArrival,
   "heat-arrival": probeHeatArrival,
   "strand-arrival": probeStrandArrival,
+  "binder-arrival": probeBinderArrival,
   "spray-arrival": probeSprayArrival,
   "island-arrival": probeIslandArrival,
   "substrate-contrast": probeSubstrateContrast,

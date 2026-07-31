@@ -118,6 +118,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     visibleWhen: (s) => s.meanStrandBiomass > BIOMASS_EPS,
   },
   {
+    id: "colonized-binder",
+    event: "colonized",
+    scale: "preserve",
+    sentence: "Sandy khaki mats bound the dry crest while the hollow stayed green with herbs.",
+    traces: [
+      {
+        fieldId: "veg.biomass.binder",
+        evidence: "mean binder biomass above epsilon",
+      },
+      {
+        fieldId: "shore.exposure",
+        evidence: "crest exposure where binder establishes",
+      },
+    ],
+    visibleWhen: (s) => s.meanBinderBiomass > BIOMASS_EPS,
+  },
+  {
     id: "recovered-green",
     event: "recovered",
     scale: "preserve",

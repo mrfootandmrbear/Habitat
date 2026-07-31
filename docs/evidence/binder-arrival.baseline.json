@@ -1,51 +1,51 @@
 {
-  "scenario": "strand-arrival",
+  "scenario": "binder-arrival",
   "metrics": {
-    "shore.strandBiomass": {
+    "crest.binderBiomass": {
       "value": 2.5,
       "abs": 0.000001
     },
-    "shore.herbBiomass": {
+    "crest.herbBiomass": {
       "value": 0,
       "abs": 0.000001
     },
-    "shore.salinity": {
-      "value": 0.85,
-      "abs": 0
+    "crest.moisture": {
+      "value": 0,
+      "abs": 0.000001
     },
-    "shore.exposure": {
+    "crest.exposure": {
       "value": 1,
       "abs": 0
     },
-    "shore.herbLimiting": {
-      "value": 5,
+    "crest.material": {
+      "value": 1,
       "abs": 0
     },
-    "inland.strandBiomass": {
+    "hollow.binderBiomass": {
       "value": 0,
       "abs": 0.000001
     },
-    "inland.herbBiomass": {
+    "hollow.herbBiomass": {
       "value": 2.5,
       "abs": 0.000001
     },
-    "inland.salinity": {
+    "hollow.moisture": {
+      "value": 0.44999998807907104,
+      "abs": 0.000001
+    },
+    "hollow.exposure": {
       "value": 0,
       "abs": 0
     },
-    "inland.exposure": {
+    "hollow.material": {
       "value": 0,
       "abs": 0
     },
-    "inland.herbLimiting": {
-      "value": 0,
-      "abs": 0
-    },
-    "delta.shoreGuildDelta": {
+    "delta.crestGuildDelta": {
       "value": 2.5,
       "abs": 0.000001
     },
-    "delta.inlandGuildDelta": {
+    "delta.hollowGuildDelta": {
       "value": 2.5,
       "abs": 0.000001
     },
@@ -62,7 +62,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 2496022803,
+      "value": 2628002469,
       "abs": 0
     }
   }

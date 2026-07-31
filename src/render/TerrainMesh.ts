@@ -5,7 +5,7 @@ import type { WaterStateView } from "../sim/types";
 import { compareClassName } from "../sim/prediction/PredictionSession";
 import { understoryLightRgb } from "../ui/lightEncoding";
 import { defaultTerrainRgb } from "../ui/terrainEncoding";
-import { herbBiomassRgb, strandBiomassRgb } from "../ui/occupantEncoding";
+import { herbBiomassRgb, strandBiomassRgb, binderBiomassRgb } from "../ui/occupantEncoding";
 import { elevChangeEncodingStrength } from "../sim/formMemory";
 import { substrateProps } from "../sim/terrain/substrates";
 
@@ -261,6 +261,14 @@ export class TerrainMesh {
         const [r, g, b] = strandBiomassRgb(
           world.getStrandBiomass(x, z),
           config.strandBiomassMax,
+        );
+        col.setRGB(r, g, b);
+        break;
+      }
+      case "binderBiomass": {
+        const [r, g, b] = binderBiomassRgb(
+          world.getBinderBiomass(x, z),
+          config.binderBiomassMax,
         );
         col.setRGB(r, g, b);
         break;

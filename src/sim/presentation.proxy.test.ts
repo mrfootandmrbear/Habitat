@@ -29,6 +29,7 @@ import {
   occupantEncodingDelta,
   shoreInteriorOccupantDelta,
   guildOccupantEncodingDelta,
+  binderOccupantEncodingDelta,
 } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -239,6 +240,16 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         config.herbBiomassMax,
         config.herbBiomassMax,
         config.strandBiomassMax,
+      ),
+    ).toBeGreaterThan(0.08);
+  });
+
+  it("binder vs strand guild tint clears perceptual floor (C-009)", () => {
+    expect(
+      binderOccupantEncodingDelta(
+        config.binderBiomassMax,
+        config.strandBiomassMax,
+        config.binderBiomassMax,
       ),
     ).toBeGreaterThan(0.08);
   });
