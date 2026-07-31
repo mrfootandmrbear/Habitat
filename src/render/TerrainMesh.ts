@@ -139,7 +139,7 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
   float cover = clamp(sampleFieldBilinear(uVegCoverTex, fUv, uFieldSize), 0.0, 1.0);
   float scar = clamp(sampleFieldBilinear(uFireScarTex, fUv, uFieldSize), 0.0, 1.0);
   float salinity = clamp(sampleFieldBilinear(uSalinityTex, fUv, uFieldSize), 0.0, 1.0);
-  int materialId = int(sampleFieldBilinear(uMaterialTex, fUv, uFieldSize) + 0.5);
+  int materialId = int(sampleFieldNearest(uMaterialTex, fUv, uFieldSize) + 0.5);
   float porosity = max(materialPorosity(materialId), 1e-6);
   vec3 base = materialDryRgb(materialId);
 
@@ -172,6 +172,21 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
 const EROSION_PULSE_DECAY = 0.88;
 
 /**
+ * Inject GLSL right after a three.js shader chunk `#include`. Throws instead
+ * of silently no-op'ing if the chunk marker isn't present, so a three.js
+ * upgrade that renames/removes a chunk fails loudly at material compile time
+ * rather than shipping flat, uncolored terrain with no error.
+ */
+function injectAfterInclude(source: string, marker: string, injected: string): string {
+  if (!source.includes(marker)) {
+    throw new Error(
+      `TerrainMesh: shader chunk "${marker}" not found — three.js internals changed; update the injection point.`,
+    );
+  }
+  return source.replace(marker, `${marker}\n${injected}`);
+}
+
+/**
  * Terrain mesh: a Group wrapping two sub-meshes.
  * - gpuMesh: default view — GPU-displaced/colored, smooth, upsampled past
  *   the sim grid. Fast path: field textures updated via native memcpy, no
@@ -193,7 +208,10 @@ export class TerrainMesh {
   private readonly cpuMesh: THREE.Mesh;
   private readonly cpuGeometry: THREE.PlaneGeometry;
   private readonly colors: THREE.BufferAttribute;
-  private lastNormalElevSum = Number.NaN;
+  private readonly scratchColor = new THREE.Color();
+  /** Elevation as of the last normals rebuild, for the per-cell dirty check below. */
+  private readonly lastNormalElevGrid: Float32Array;
+  private readonly pendingElevGrid: Float32Array;
 
   // GPU default path.
   private readonly gpuMesh: THREE.Mesh;
@@ -222,6 +240,8 @@ export class TerrainMesh {
     this.width = width;
     this.height = height;
     this.worldSize = worldSize;
+    this.lastNormalElevGrid = new Float32Array(width * height).fill(Number.NaN);
+    this.pendingElevGrid = new Float32Array(width * height);
     this.palette = options?.palette ?? defaultTerrainPalette();
     const upsample = Math.max(1, Math.round(options?.upsample ?? 2));
 
@@ -296,18 +316,21 @@ export class TerrainMesh {
     this.gpuMaterial.defines = { USE_UV: "" };
     this.gpuMaterial.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, this.gpuUniforms);
-      shader.vertexShader = `${TERRAIN_VERTEX_HEADER}\n${shader.vertexShader
-        .replace(
-          "#include <beginnormal_vertex>",
-          `#include <beginnormal_vertex>\n${TERRAIN_NORMAL_INJECT}`,
-        )
-        .replace(
-          "#include <begin_vertex>",
-          `#include <begin_vertex>\n${TERRAIN_DISPLACE_INJECT}`,
-        )}`;
-      shader.fragmentShader = `${TERRAIN_FRAGMENT_HEADER}\n${shader.fragmentShader.replace(
+      let vertexShader = injectAfterInclude(
+        shader.vertexShader,
+        "#include <beginnormal_vertex>",
+        TERRAIN_NORMAL_INJECT,
+      );
+      vertexShader = injectAfterInclude(
+        vertexShader,
+        "#include <begin_vertex>",
+        TERRAIN_DISPLACE_INJECT,
+      );
+      shader.vertexShader = `${TERRAIN_VERTEX_HEADER}\n${vertexShader}`;
+      shader.fragmentShader = `${TERRAIN_FRAGMENT_HEADER}\n${injectAfterInclude(
+        shader.fragmentShader,
         "#include <color_fragment>",
-        `#include <color_fragment>\n${TERRAIN_COLOR_INJECT}`,
+        TERRAIN_COLOR_INJECT,
       )}`;
     };
 
@@ -427,14 +450,21 @@ export class TerrainMesh {
     }
 
     let i = 0;
-    let elevSum = 0;
+    let maxElevDelta = 0;
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const elev = model.getTerrainHeight(x, z);
-        elevSum += elev;
+        this.pendingElevGrid[i] = elev;
+        const prevElev = this.lastNormalElevGrid[i]!;
+        if (Number.isFinite(prevElev)) {
+          const d = Math.abs(elev - prevElev);
+          if (d > maxElevDelta) maxElevDelta = d;
+        } else {
+          maxElevDelta = Infinity;
+        }
         pos.setXYZ(i, ox + x * cellW, elev, oz + z * cellW);
 
-        const col = new THREE.Color();
+        const col = this.scratchColor;
         if (world && overlay !== "none") {
           this.applyOverlay(col, world, x, z, overlay, maxAcc);
         } else if (world) {
@@ -472,13 +502,13 @@ export class TerrainMesh {
     pos.needsUpdate = true;
     this.colors.needsUpdate = true;
     // Recomputing normals every event at 16× makes flat-shaded lighting strobe
-    // as coastal elev ticks — only rebuild when the field moved meaningfully.
-    if (
-      !Number.isFinite(this.lastNormalElevSum) ||
-      Math.abs(elevSum - this.lastNormalElevSum) > 0.05
-    ) {
+    // as coastal elev ticks — only rebuild when some cell moved meaningfully.
+    // Gated on the largest single-cell delta, not the grid-wide sum: mass-
+    // conserving changes (erosion moving soil from one cell to another) sum
+    // to ~0 while still reshaping the surface enough to need new normals.
+    if (maxElevDelta > 0.02) {
       this.cpuGeometry.computeVertexNormals();
-      this.lastNormalElevSum = elevSum;
+      this.lastNormalElevGrid.set(this.pendingElevGrid);
     }
   }
 

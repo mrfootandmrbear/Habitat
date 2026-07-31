@@ -49,12 +49,21 @@ export function updateFieldTexture(
  *   increasing z, so sampling needs an explicit V flip to land on the same
  *   cell the CPU path indexes via z * width + x.
  * - sampleFieldBilinear: manual bilinear tap (see createFieldTexture note).
+ * - sampleFieldNearest: single-texel tap for categorical fields (material
+ *   id) where interpolating across a cell boundary would blend two ids into
+ *   a value that decodes as a third, phantom substrate.
  * - fieldHeightNormal: analytic heightfield normal via central difference —
  *   replaces the CPU geometry.computeVertexNormals() pass.
  */
 export const FIELD_SAMPLE_GLSL = /* glsl */ `
 vec2 fieldUv(vec2 planeUv) {
   return vec2(planeUv.x, 1.0 - planeUv.y);
+}
+
+float sampleFieldNearest(sampler2D tex, vec2 uv, vec2 texSize) {
+  vec2 texel = floor(uv * texSize);
+  vec2 uv00 = (texel + 0.5) / texSize;
+  return texture2D(tex, uv00).r;
 }
 
 float sampleFieldBilinear(sampler2D tex, vec2 uv, vec2 texSize) {
