@@ -45,7 +45,7 @@ describe("probe baseline harness", () => {
         true,
       );
     }
-  });
+  }, 20_000);
 
   it("a deliberately perturbed baseline metric fails compare (Tier-M tripwire)", () => {
     const result = runProbe("basin-fill");

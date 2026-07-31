@@ -1,0 +1,24 @@
+{
+  "id": "N10",
+  "title": "Climate-capped woody shrub (NS-010)",
+  "simLoop": "One seed schedule fills herb + strand + binder + marsh + shrub banks; shrub HSI = min(warmer f_temp, cover facilitation, moisture, salinity, upland inundation) so warm herb-covered inland escalates while cold/mild and bare stay empty; physicalCover blunts erosion (C-007 / W-003).",
+  "gameLoop": "If I warm an inland hollow that already holds herb cover, shrub should escalate there — not under cold, and not on bare ground.",
+  "registerIds": ["W-003", "E-004", "C-007", "C-011", "C-004", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/shrubArrival.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": ["shrub-arrival"],
+  "fields": [
+    "veg.seedBank.shrub",
+    "veg.establishment.shrub",
+    "veg.biomass.shrub",
+    "climate.airTemperature",
+    "veg.biomass.herb",
+    "soil.moisture",
+    "soil.salinity"
+  ],
+  "notebookSeed": "Deep green scrub filled the warm herb hollow; the cold twin stayed grass-only.",
+  "tierO": "no owner-only question this closeout — climate-cap and cover filter are machine-verifiable; C-004 Lock already settled Heat"
+}

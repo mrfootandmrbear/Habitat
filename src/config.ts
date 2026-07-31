@@ -235,6 +235,20 @@ export const config = {
   marshTempOptC: 14,
 
   /**
+   * Climate-capped woody shrub (Slice N10) — stage-3 inland.
+   * Same seed schedule; warmer f_temp than herb so mild/cold stall woody;
+   * cover facilitation from herb fraction (no timers — ES-001).
+   */
+  shrubEstablishmentScale: 0.08,
+  shrubEstablishmentRate: 0.3,
+  shrubBiomassMax: 2.5,
+  /** Mild (1°C) zeros shrub; warm (16°C) opens — stricter than herb (−4/12). */
+  shrubTempKillC: 1,
+  shrubTempOptC: 16,
+  /** Michaelis half-saturation on herb cover fraction for facilitation. */
+  shrubCoverHalfSat: 0.25,
+
+  /**
    * Wall-clock seconds for display water depth to catch ~63% of a step change.
    * Observer only — sim depths stay authoritative (T-006). Stops 16× event
    * strobing from reading as a broken framerate.
@@ -282,6 +296,7 @@ export type InspectorLayer =
   | "strandBiomass"
   | "binderBiomass"
   | "marshBiomass"
+  | "shrubBiomass"
   | "seedBank"
   | "intertidal"
   | "shoreExposure"

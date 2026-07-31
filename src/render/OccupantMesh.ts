@@ -7,13 +7,14 @@ import {
   herbBiomassRgb,
   marshBiomassRgb,
   shootVisibility,
+  shrubBiomassRgb,
   strandBiomassRgb,
 } from "../ui/occupantEncoding";
 
 /**
  * First-occupant shoots — presentation only (T-006).
- * Reads herb + strand + binder + marsh biomass; does not create population state.
- * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal).
+ * Reads herb + strand + binder + marsh + shrub biomass; does not create population state.
+ * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal / shrub forest).
  */
 export class OccupantMesh {
   readonly object: THREE.InstancedMesh;
@@ -61,6 +62,7 @@ export class OccupantMesh {
     const strandMax = config.strandBiomassMax;
     const binderMax = config.binderBiomassMax;
     const marshMax = config.marshBiomassMax;
+    const shrubMax = config.shrubBiomassMax;
     let n = 0;
 
     for (let z = 0; z < this.height; z++) {
@@ -69,19 +71,32 @@ export class OccupantMesh {
         const strand = world.getStrandBiomass(x, z);
         const binder = world.getBinderBiomass(x, z);
         const marsh = world.getMarshBiomass(x, z);
+        const shrub = world.getShrubBiomass(x, z);
         const herbVis = shootVisibility(herb, herbMax);
         const strandVis = shootVisibility(strand, strandMax);
         const binderVis = shootVisibility(binder, binderMax);
         const marshVis = shootVisibility(marsh, marshMax);
-        const vis = Math.max(herbVis, strandVis, binderVis, marshVis);
+        const shrubVis = shootVisibility(shrub, shrubMax);
+        const vis = Math.max(herbVis, strandVis, binderVis, marshVis, shrubVis);
         if (vis <= 0) continue;
-        let guild: "herb" | "strand" | "binder" | "marsh" = "herb";
+        let guild: "herb" | "strand" | "binder" | "marsh" | "shrub" = "herb";
         let tintBiomass = herb;
         let tintMax = herbMax;
         if (
+          shrubVis >= herbVis &&
+          shrubVis >= strandVis &&
+          shrubVis >= binderVis &&
+          shrubVis >= marshVis &&
+          shrubVis > 0
+        ) {
+          guild = "shrub";
+          tintBiomass = shrub;
+          tintMax = shrubMax;
+        } else if (
           marshVis >= herbVis &&
           marshVis >= strandVis &&
           marshVis >= binderVis &&
+          marshVis >= shrubVis &&
           marshVis > 0
         ) {
           guild = "marsh";
@@ -91,6 +106,7 @@ export class OccupantMesh {
           strandVis >= herbVis &&
           strandVis >= binderVis &&
           strandVis >= marshVis &&
+          strandVis >= shrubVis &&
           strandVis > 0
         ) {
           guild = "strand";
@@ -100,6 +116,7 @@ export class OccupantMesh {
           binderVis >= herbVis &&
           binderVis >= strandVis &&
           binderVis >= marshVis &&
+          binderVis >= shrubVis &&
           binderVis > 0
         ) {
           guild = "binder";
@@ -107,7 +124,9 @@ export class OccupantMesh {
           tintMax = binderMax;
         }
         const y = model.getTerrainHeight(x, z);
-        const scaleY = 0.35 + vis * 1.4;
+        // Woody reads slightly taller than mats (presentation only — T-006).
+        const woodyBoost = guild === "shrub" ? 1.35 : 1;
+        const scaleY = (0.35 + vis * 1.4) * woodyBoost;
         const scaleXZ = 0.45 + vis * 0.9;
         this.dummy.position.set(ox + x * cellW, y, oz + z * cellW);
         this.dummy.scale.set(scaleXZ, scaleY, scaleXZ);
@@ -115,13 +134,15 @@ export class OccupantMesh {
         this.dummy.updateMatrix();
         this.object.setMatrixAt(n, this.dummy.matrix);
         const [r, g, b] =
-          guild === "marsh"
-            ? marshBiomassRgb(tintBiomass, tintMax)
-            : guild === "strand"
-              ? strandBiomassRgb(tintBiomass, tintMax)
-              : guild === "binder"
-                ? binderBiomassRgb(tintBiomass, tintMax)
-                : herbBiomassRgb(tintBiomass, tintMax);
+          guild === "shrub"
+            ? shrubBiomassRgb(tintBiomass, tintMax)
+            : guild === "marsh"
+              ? marshBiomassRgb(tintBiomass, tintMax)
+              : guild === "strand"
+                ? strandBiomassRgb(tintBiomass, tintMax)
+                : guild === "binder"
+                  ? binderBiomassRgb(tintBiomass, tintMax)
+                  : herbBiomassRgb(tintBiomass, tintMax);
         this.color.setRGB(r, g, b);
         this.object.setColorAt(n, this.color);
         n++;

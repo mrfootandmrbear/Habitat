@@ -3104,6 +3104,119 @@ export function probeMarshArrival(): ProbeResult {
 }
 
 /**
+ * Slice N10 — climate-capped woody shrub.
+ * Warm inland with herb cover escalates; cold / mild / bare stay empty under
+ * one seed schedule (stage-3 climate + cover filter; no timers).
+ */
+export function probeShrubArrival(): ProbeResult {
+  const w = 16;
+  const h = 16;
+  const sx = 8;
+  const sz = 8;
+
+  const make = (heatId: "warm" | "mild" | "cold", herbFrac: number, bareSeed = false) => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.setAirTemperature(heatById(heatId).airTempC);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
+    world.runHabitatStep(1);
+    const herbSeed = bareSeed ? 0 : config.seedSourceStrength;
+    world.herbSeedBank.fill(herbSeed);
+    world.strandSeedBank.fill(config.seedSourceStrength);
+    world.binderSeedBank.fill(config.seedSourceStrength);
+    world.marshSeedBank.fill(config.seedSourceStrength);
+    world.shrubSeedBank.fill(config.seedSourceStrength);
+    for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
+    return world;
+  };
+
+  const warmA = make("warm", 0.6);
+  const warmB = make("warm", 0.6);
+  const cold = make("cold", 0.6);
+  const mild = make("mild", 0.6);
+  const bare = make("warm", 0, true);
+
+  const replayMatch = warmA.stateHash() === warmB.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("shrub-arrival: warm replay hash mismatch");
+  }
+
+  const warmShrub = warmA.getShrubBiomass(sx, sz);
+  const coldShrub = cold.getShrubBiomass(sx, sz);
+  const mildShrub = mild.getShrubBiomass(sx, sz);
+  const bareShrub = bare.getShrubBiomass(sx, sz);
+  const warmHerb = warmA.getHerbBiomass(sx, sz);
+  const guildSeedMatch =
+    Math.abs(
+      warmA.getShrubSeedBank(sx, sz) - warmA.getHerbSeedBank(sx, sz),
+    ) < 1e-9
+      ? 1
+      : 0;
+  const climateDelta = warmShrub - coldShrub;
+
+  if (guildSeedMatch !== 1) {
+    throw new Error("shrub-arrival: seed schedule not matched");
+  }
+  if (!(warmShrub > 0.1)) {
+    throw new Error(`shrub-arrival: warm shrub too low (${warmShrub})`);
+  }
+  if (!(climateDelta > 0.05)) {
+    throw new Error(
+      `shrub-arrival: warm−cold shrub delta too small (${climateDelta})`,
+    );
+  }
+  if (coldShrub !== 0) {
+    throw new Error(`shrub-arrival: cold shrub expected 0 (got ${coldShrub})`);
+  }
+  if (mildShrub !== 0) {
+    throw new Error(`shrub-arrival: mild shrub expected 0 (got ${mildShrub})`);
+  }
+  if (bareShrub !== 0) {
+    throw new Error(`shrub-arrival: bare shrub expected 0 (got ${bareShrub})`);
+  }
+
+  return {
+    scenario: "shrub-arrival",
+    records: [
+      {
+        label: "warmCovered",
+        shrubBiomass: warmShrub,
+        herbBiomass: warmHerb,
+        airTempC: heatById("warm").airTempC,
+      },
+      {
+        label: "coldCovered",
+        shrubBiomass: coldShrub,
+        airTempC: heatById("cold").airTempC,
+        tempLimited: coldShrub === 0 ? 1 : 0,
+      },
+      {
+        label: "mildCovered",
+        shrubBiomass: mildShrub,
+        airTempC: heatById("mild").airTempC,
+      },
+      {
+        label: "warmBare",
+        shrubBiomass: bareShrub,
+        coverLimited: bareShrub === 0 ? 1 : 0,
+      },
+      {
+        label: "delta",
+        climateDelta,
+        guildSeedMatch,
+        replayMatch,
+        hashN: Number.parseInt(warmA.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
+/**
  * Slice S / C-009 — sand vs clay under identical storm + slope diverge on
  * infiltration and hillslope erosion; properties from substrates.ts table.
  */
@@ -3763,6 +3876,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "strand-arrival": probeStrandArrival,
   "binder-arrival": probeBinderArrival,
   "marsh-arrival": probeMarshArrival,
+  "shrub-arrival": probeShrubArrival,
   "spray-arrival": probeSprayArrival,
   "inundation-arrival": probeInundationArrival,
   "light-arrival": probeLightArrival,

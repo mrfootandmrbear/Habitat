@@ -15,6 +15,8 @@ const STRAND: OccupantRgb = [0x6b / 255, 0xa3 / 255, 0x2f / 255];
 const BINDER: OccupantRgb = [0xc4 / 255, 0xa2 / 255, 0x4e / 255];
 /** Salt-marsh turf — cool teal so mid-tide cover reads apart from strand olive (C-016). */
 const MARSH: OccupantRgb = [0x2f / 255, 0x8f / 255, 0x7a / 255];
+/** Woody shrub — deep forest green so inland scrub reads apart from herb shoot (Slice N10). */
+const SHRUB: OccupantRgb = [0x1a / 255, 0x5c / 255, 0x38 / 255];
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -93,6 +95,20 @@ export function marshBiomassRgb(
   ];
 }
 
+/** Woody shrub tint — deep forest green vs herb shoot (Slice N10 Tier-P). */
+export function shrubBiomassRgb(
+  biomass: number,
+  biomassMax: number,
+): OccupantRgb {
+  const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
+  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  return [
+    lerp(BARE[0], SHRUB[0], u),
+    lerp(BARE[1], SHRUB[1], u),
+    lerp(BARE[2], SHRUB[2], u),
+  ];
+}
+
 /** Encoding Δ between herb shoot green and strand olive at equal biomass. */
 export function guildOccupantEncodingDelta(
   biomass: number,
@@ -123,6 +139,17 @@ export function marshOccupantEncodingDelta(
 ): number {
   const a = binderBiomassRgb(biomass, binderMax);
   const b = marshBiomassRgb(biomass, marshMax);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+/** Encoding Δ between marsh teal and shrub forest-green at equal biomass. */
+export function shrubOccupantEncodingDelta(
+  biomass: number,
+  marshMax: number,
+  shrubMax: number,
+): number {
+  const a = marshBiomassRgb(biomass, marshMax);
+  const b = shrubBiomassRgb(biomass, shrubMax);
   return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 

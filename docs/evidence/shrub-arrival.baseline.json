@@ -1,0 +1,61 @@
+{
+  "scenario": "shrub-arrival",
+  "metrics": {
+    "warmCovered.shrubBiomass": {
+      "value": 2,
+      "abs": 0.000001
+    },
+    "warmCovered.herbBiomass": {
+      "value": 2.5,
+      "abs": 0.000001
+    },
+    "warmCovered.airTempC": {
+      "value": 16,
+      "abs": 0
+    },
+    "coldCovered.shrubBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "coldCovered.airTempC": {
+      "value": -8,
+      "abs": 0
+    },
+    "coldCovered.tempLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "mildCovered.shrubBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "mildCovered.airTempC": {
+      "value": 1,
+      "abs": 0
+    },
+    "warmBare.shrubBiomass": {
+      "value": 0,
+      "abs": 0.000001
+    },
+    "warmBare.coverLimited": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.climateDelta": {
+      "value": 2,
+      "abs": 0.000001
+    },
+    "delta.guildSeedMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 1839417747,
+      "abs": 0
+    }
+  }
+}

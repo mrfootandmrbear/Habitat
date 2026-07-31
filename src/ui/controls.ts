@@ -55,6 +55,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "strandBiomass", label: "Inspect: strand biomass" },
   { id: "binderBiomass", label: "Inspect: binder biomass" },
   { id: "marshBiomass", label: "Inspect: marsh biomass" },
+  { id: "shrubBiomass", label: "Inspect: shrub biomass" },
   { id: "seedBank", label: "Inspect: herb seed bank" },
   { id: "intertidal", label: "Inspect: intertidal" },
   { id: "shoreExposure", label: "Inspect: shore exposure" },

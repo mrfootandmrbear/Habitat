@@ -111,14 +111,15 @@ Summary only — do not reopen unless fixing regressions.
 | **N8** | Tidal inundation (**NS-008**) | Foreshore stalls herb; terrace earns | `f_inundation`, `inundation-arrival` | **Done** — agent (C-016 **Locked**) |
 | **N7** | Aspect light into Liebig (**NS-007**) | South earns; steep north light-limited | `f_light`, `light-arrival` | **Done** — agent (C-007 / C-011 **Locked**) |
 | **N9** | Salt-marsh engineer (**NS-009**) | Mid-foreshore marsh; dry terrace herb | `veg.*.marsh`, `marsh-arrival` | **Done** — agent (C-016 **Locked**) |
+| **N10** | Climate-capped woody shrub (**NS-010**) | Warm herb hollow escalates; cold/bare stall | `veg.*.shrub`, `shrub-arrival` | **Done** — agent (C-007 / NS-002) |
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — C-005 Locked as tooling (v2.0.12) |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: woody/shrub guild (climate-capped; needs NS-002). Parallel: **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: cryptogam/crust guild (stage 2 bootstrap). Parallel: **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env).
 
-**Next (executable tip):** Nature P2: **woody/shrub** guild (stage 3; climate-capped). Parallel: **C-014** when hearable. **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** Nature P2: **cryptogam/crust** guild (stage 2 bootstrap). Parallel: **C-014** when hearable. **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -907,6 +908,20 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.33 Slice N10 — Climate-capped woody shrub *(Done — machine)*
+
+**Why this exists.** Stage-3 structural escalation needs a climate-capped inland guild distinct from herb/marsh — warm herb-covered hollows escalate; frost and bare substrate lock woody out (NS-002 floor; island-colonization stage 3).
+
+**Nature cards:** NS-010  
+**Register:** C-007 Locked; C-011 Locked; C-004 Locked; W-003; E-004; N-004  
+**New Process?** no — new guild HSI + establishment; physicalCover feedback only
+
+- [x] Warmer f_temp floor + cover facilitation + upland inundation zero
+- [x] Probe warm covered vs cold/mild/bare under one seed (`shrub-arrival`)
+- [x] Composition + manifest; **Next-but-one:** cryptogam/crust guild (P2)
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -929,7 +944,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** Nature P2 woody/shrub; residual Lock **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** Nature P2 cryptogam/crust; residual Lock **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

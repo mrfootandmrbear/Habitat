@@ -152,6 +152,23 @@ export const NOTEBOOK_CORPUS: readonly CorpusEntry[] = [
     visibleWhen: (s) => s.meanMarshBiomass > BIOMASS_EPS,
   },
   {
+    id: "colonized-shrub",
+    event: "colonized",
+    scale: "preserve",
+    sentence: "Deep green scrub filled the warm herb hollow; the cold twin stayed grass-only.",
+    traces: [
+      {
+        fieldId: "veg.biomass.shrub",
+        evidence: "mean shrub biomass above epsilon",
+      },
+      {
+        fieldId: "climate.airTemperature",
+        evidence: "warmth floor that unlocks woody escalation",
+      },
+    ],
+    visibleWhen: (s) => s.meanShrubBiomass > BIOMASS_EPS,
+  },
+  {
     id: "recovered-green",
     event: "recovered",
     scale: "preserve",

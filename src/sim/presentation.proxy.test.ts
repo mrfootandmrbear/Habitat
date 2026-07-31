@@ -36,6 +36,7 @@ import {
   guildOccupantEncodingDelta,
   binderOccupantEncodingDelta,
   marshOccupantEncodingDelta,
+  shrubOccupantEncodingDelta,
 } from "../ui/occupantEncoding";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -266,6 +267,16 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         config.marshBiomassMax,
         config.binderBiomassMax,
         config.marshBiomassMax,
+      ),
+    ).toBeGreaterThan(0.08);
+  });
+
+  it("shrub vs marsh guild tint clears perceptual floor (Slice N10)", () => {
+    expect(
+      shrubOccupantEncodingDelta(
+        config.shrubBiomassMax,
+        config.marshBiomassMax,
+        config.shrubBiomassMax,
       ),
     ).toBeGreaterThan(0.08);
   });
