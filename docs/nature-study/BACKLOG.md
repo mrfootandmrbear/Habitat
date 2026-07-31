@@ -2,7 +2,7 @@
 
 Authority: [PROTOCOL.md](PROTOCOL.md). Ranked after parent merge of cards. **Hypothesis only** — Open candidates stay Open.
 
-Last updated: 2026-07-30 (Wave 1 merged).
+Last updated: 2026-07-31 (P1 factor cards NS-007 / NS-008 merged).
 
 ---
 
@@ -31,27 +31,34 @@ Last updated: 2026-07-30 (Wave 1 merged).
 
 ---
 
+## Wave 2 — P1 factors (merged 2026-07-31)
+
+| Id | Lane | Title | Merge bucket |
+|---|---|---|---|
+| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Aspect light into Liebig | **P1** (after NS-008) |
+| [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | factor | Tidal inundation hydroperiod gate | **P0** |
+
+---
+
 ## Priority buckets (authoritative after merge)
 
 ### P0 — next engagement ROI
 
 | Order | Card | Why |
 |---|---|---|
-| — | *(empty)* | C-006 / C-013 framing / C-010 framing Done; agent tip → Nature P1 (hydroperiod, light→Liebig) |
-
+| 1 | [NS-008](cards/NS-008-tidal-inundation-hydroperiod.md) | Tide dial + form siting; completes spray / soil salt / inundation triad; no new Process; unlocks salt-marsh engineer path |
 
 ### P1 — derived field, no new Process
 
 | Card / topic | Lane | Notes |
 |---|---|---|
-| Light / aspect into Liebig vs competition-only | factor | `lightCompetition.ts` already ships; card before promoting to HSI |
-| Hydroperiod / inundation gate (≠ soil.salinity) | factor | Island evidence separates spray / soil salt / inundation |
+| [NS-007](cards/NS-007-aspect-light-into-liebig.md) | factor | Promote `light.insolation` → `f_light` in Liebig; keep Beer–Lambert on succession only |
 
 ### P2 — deferred / new Process / later guilds
 
 | Topic | Lane | Notes |
 |---|---|---|
-| Salt-marsh engineer | guild | After strand + inundation factor |
+| Salt-marsh engineer | guild | After NS-008 inundation factor lands |
 | Woody / shrub | guild | Stage 3; climate-capped (needs NS-002) |
 | Cryptogam / crust | guild | Stage 2 bootstrap |
 | Nutrients / guano | factor | Needs candidate if not covered |
@@ -80,3 +87,4 @@ After merge, parent updates in the **same session**:
 | 2026-07-30 | NS-004 shipped (N4) | NS-003 | Strand vs inland under one seed; tip → spray stress |
 | 2026-07-30 | NS-003 shipped (N3) | NS-005 | Herb `f_spray` from shore.exposure; tip → sand-binder |
 | 2026-07-30 | NS-005 shipped (N5) | — (P0 empty) | Crest binder + physicalCover coastal blunt; tip → C-005 scaffold |
+| 2026-07-31 | NS-007, NS-008 | NS-008 | P1 factors carded. Tip → inundation HSI arm (≠ salinity, ≠ spray). NS-007 light→Liebig next. No new Process; no invent-Locked. |

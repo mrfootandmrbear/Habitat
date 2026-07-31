@@ -111,11 +111,11 @@ Summary only — do not reopen unless fixing regressions.
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P1; parallel fix C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P0: NS-008 inundation hydroperiod → HSI; then NS-007 light→Liebig. Parallel: C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005**, **C-013**, **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env), **U-006** (unanswered).
 
-**Next (executable tip):** Nature P1 (hydroperiod, light→Liebig). Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** Nature P0: **NS-008** tidal inundation / hydroperiod → Liebig `f_inundation` (≠ salinity, ≠ spray; no new Process). Then **NS-007** aspect light→Liebig. Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional C-020 SWE store only if G3 presentation hold fails. Scenario campaign (G-002 / C-010) after implement.
 
@@ -876,7 +876,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | C-020 glitches named | C-020 G1–G5 | [C-020-dossier](candidates/C-020-dossier.md) |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **Next:** C-013 → C-010 framing → Nature P1; owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **C-013** / **C-010** framing Done. **Next:** Nature P0 **NS-008** inundation→HSI → **NS-007** light→Liebig; owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 
