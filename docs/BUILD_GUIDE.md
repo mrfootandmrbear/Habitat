@@ -110,14 +110,14 @@ Summary only — do not reopen unless fixing regressions.
 | **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
 | **N8** | Tidal inundation (**NS-008**) | Foreshore stalls herb; terrace earns | `f_inundation`, `inundation-arrival` | **Done** — agent (C-016 **Locked**) |
 | **N7** | Aspect light into Liebig (**NS-007**) | South earns; steep north light-limited | `f_light`, `light-arrival` | **Done** — agent (C-007 / C-011 **Locked**) |
-| **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — agent; C-005 Lock owner |
+| **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — C-005 Locked as tooling (v2.0.12) |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship sitting: **C-004 Locked**; **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear); **U-006** unanswered; **C-005** / **C-013** machine Done (dossiers — Lock owner). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: salt-marsh engineer guild (needs NS-008). Parallel: C-020 G1–G5; taste residual [owner-lock-batch.md](candidates/owner-lock-batch.md).
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006 Locked** (v2.0.12); **C-006 Locked** (CI); **C-020** Hold Lock (glitches **named** G1–G5); **C-014** Open (no hear). **C-021** / **C-022** filed; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Nature P2: salt-marsh engineer guild (needs NS-008). Parallel: C-020 G1–G5; taste residual **C-020** / **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-005**, **C-013**, **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env), **U-006** (unanswered).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-020** (Hold Lock — G1–G5 named), **C-014** (audio env).
 
-**Next (executable tip):** Nature P2: **salt-marsh engineer** guild (NS-008 unblocked; hydroperiod hump — not upland zero). Parallel: C-020 glitch fix G1–G5; owner Lock batch (C-005 / **C-013** / C-020 / C-014 / U-006). **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** Nature P2: **salt-marsh engineer** guild (NS-008 unblocked; hydroperiod hump — not upland zero). Parallel: C-020 glitch fix G1–G5; **C-014** when hearable. **C-010** framing Done — implement later. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional C-020 SWE store only if G3 presentation hold fails. Scenario campaign (G-002 / C-010) after implement.
 
@@ -687,7 +687,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Loops.** Sim: none — notebook is an observer of existing events / fields. Game: after something noticeable happens, the player can open a short notebook answer that names causes already visible in the world.
 
-**Register / candidates.** U-006 Current (Lock still reviewer); U-004; T-006.
+**Register / candidates.** U-006 Locked (v2.0.12); U-004; T-006.
 
 **Bans.** Charts as primary readout. Guaranteed next-move advice. Inventing events not backed by sim state. Cloud / precip-phase `Process` (full C-020, later).
 
@@ -825,7 +825,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] World fork / restore point API extending P-005 (T-001 hash equality under same seed+forces) — `src/sim/branch.ts` + `forceSettings.ts`
 - [x] Two branches under different force settings; comparison view without number-reading — Show A/B + moisture tint
 - [x] Tier-M round-trip + branch isolation — probe `branch-compare` (encoding ≈ 0.191, isolated = 1); Tier-O deferred to dossier
-- [x] `docs/slices/B.json` + `B-composition.md` + [C-005-dossier.md](candidates/C-005-dossier.md) (owner Lock)
+- [x] `docs/slices/B.json` + `B-composition.md` + [C-005-dossier.md](candidates/C-005-dossier.md) (Locked tooling v2.0.12)
 - [x] **Next-but-one:** C-006 CI promote (§4.28)
 
 ---
@@ -848,7 +848,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Loops.** Sim: hillslope removals → basin/flat redeposit inside geomorphology; ponds do not incise. Game: same castle, channels cut and hollows silt under one force regime.
 
-**Register / candidates.** GEO-002 Locked; **C-002** Open (spatial cost reading unchanged). D-007 exempt (no new Process).
+**Register / candidates.** GEO-002 Locked; **C-002 Locked** (v2.0.12 — ratify Slice 8 reading). D-007 exempt (no new Process).
 
 **Bans.** Virtual-pipe SWE authority; droplet particle sim; second sediment writer; inventing Locked Hjulström multi-grain policy.
 
@@ -911,7 +911,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | Slice | Focus | Register | Gate |
 |---|---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed from `veg.cover` | AUD-003, C-014 | **Done** (§4.19) |
-| — | Field Notebook UI | U-006 | **Done** (§4.20) — Lock still reviewer |
+| — | Field Notebook UI | U-006 | **Done** (§4.20) — Locked v2.0.12 |
 | — | Full C-020 clouds / precip phase | C-020 | **Done** (§4.21) — Lock still owner |
 | N / NS-006 | Salt-memory encoding | C-018 | **Done** (§4.22) |
 | N2 / NS-002 | Heat→plant | C-004, C-020 | **Done** (§4.23) |
@@ -921,14 +921,14 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N8 / NS-008 | Tidal inundation hydroperiod | C-016, C-018 | **Done** (§4.30) |
 | N7 / NS-007 | Aspect light into Liebig | C-007, C-011 | **Done** (§4.31) |
 | N9 | Salt-marsh engineer guild | C-016, W-003 | §4.32 next |
-| B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Lock owner |
-| E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) |
+| B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Locked tooling v2.0.12 |
+| E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) — C-002 Locked v2.0.12 |
 | C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
 | — | Season + erosion dials filed | C-021, C-022 | register v2.0.11 |
 | — | C-020 glitches named | C-020 G1–G5 | [C-020-dossier](candidates/C-020-dossier.md) |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (machine; U-006 Current). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** Done. **Slice B** Done (machine; C-005 dossier). **C-006 Locked**. **C-013** / **C-010** framing Done. **Next:** Nature P2 salt-marsh engineer (§4.32); owner Lock batch ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (machine; C-020 Open — G1–G5 named). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Next:** Nature P2 salt-marsh engineer (§4.32); residual Lock **C-020** / **C-014** ([owner-lock-batch.md](candidates/owner-lock-batch.md)).
 
 ---
 

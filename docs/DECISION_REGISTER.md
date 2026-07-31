@@ -134,6 +134,13 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.12 — Owner Lock: C-005 tooling / C-013 / C-002 / U-006.**
+
+- **C-005** Locked as **debug / optional tooling**, not a core play instrument (owner 2026-07-31: Compare felt like a debug panel). Scaffold may remain; F-002 advanced comparison stays Deferred. Artifacts: `docs/candidates/C-005-dossier.md`, `docs/evidence/branch-compare.baseline.json`.
+- **C-013** Locked — undo of edits only; after time advances, fair (not punishment). Machine: `sessionPersist.test.ts` hash cases. Artifact: `docs/candidates/C-013-dossier.md`.
+- **C-002** Locked — ratify Slice 8 reading: geomorphology near-channel / high-A; soil pools everywhere. Artifacts: `docs/candidates/C-002-dossier.md`, `src/sim/geomorphology.test.ts`.
+- **U-006** Current→Locked — notebook answers a question the player already had. Artifacts: `docs/candidates/U-006-dossier.md`, `docs/slices/notebook-composition.md`.
+
 **v2.0.11 — C-006 Locked; season / erosion dials filed.**
 
 - Promoted **C-006** (abundant sculpting) Open→Locked — CI criterion met: no per-edit economy; 100 berm/dig/deposit edits write no veg/biomass; heavy sculpt without elapsed time leaves biomass = 0. Artifact: `src/sim/c006-abundant-sculpting.test.ts`.
@@ -1001,15 +1008,17 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 **Rejected alternatives.** First-person navigation. Unrestricted flight as the default. Flat strategic map presentation.
 
 ### U-006 — The Field Notebook provides bounded causal explanation
-**Status:** Current
+**Status:** Locked
 
-**Decision.** The Field Notebook begins with trustworthy event chronology and simulated contributing conditions. It may use cautious inferred-driver language, but it does not claim certainty the simulation cannot support.
+**Decision.** The Field Notebook begins with trustworthy event chronology and simulated contributing conditions. It may use cautious inferred-driver language, but it does not claim certainty the simulation cannot support. It answers curiosity the player already has — it does not explain the game first (U-004).
 
-**Why.** Habitat needs a way to answer "what changed?" and eventually "why?" without inventing omniscient explanations. A bounded layer preserves trust while letting ecological history become legible.
+**Why.** Habitat needs a way to answer "what changed?" and eventually "why?" without inventing omniscient explanations. A bounded layer preserves trust while letting ecological history become legible. Owner Lock 2026-07-31: opening the notebook felt like answering a question already formed.
 
-**Implications.** MVP explanations prioritize chronology: burned, flooded, colonized, fragmented, recovered. Later maturity may rank likely drivers and eventually use counterfactual replay. Explanations identify scale and uncertainty. Counterfactual causal attribution is deferred until the local response model is stable.
+**Implications.** MVP explanations prioritize chronology: burned, flooded, colonized, fragmented, recovered. Later maturity may rank likely drivers and eventually use counterfactual replay. Explanations identify scale and uncertainty. Counterfactual causal attribution is deferred until the local response model is stable (F-005).
 
-**Rejected alternatives.** A static encyclopedia as the primary notebook. Confident template-generated causal claims. Opaque raw debug logs. Counterfactual replay as an MVP dependency.
+**Rejected alternatives.** A static encyclopedia as the primary notebook. Confident template-generated causal claims. Opaque raw debug logs. Counterfactual replay as an MVP dependency. Proactive tutorial prose that answers before the player wonders.
+
+**Evidence.** Corpus every emit sentence traced (`corpusAllTraced`); write/RNG isolation; chrome starts closed. Owner: answers existing question. Artifacts: `docs/candidates/U-006-dossier.md`, `docs/slices/notebook-composition.md`, `src/notebook/`.
 
 ### ART-001 — Scientific impressionism
 **Status:** Current
@@ -1254,8 +1263,8 @@ Restored in v1.3. These are binding prohibitions, not summaries. They exist as a
 ### F-002 — Advanced save comparison tools
 **Status:** Deferred
 
-*Why deferred:* basic reliable saving matters more than side-by-side timelines and diff views.
-*Why preserved:* comparison directly supports experimentation, and its architecture depends on T-001 and T-003.
+*Why deferred:* basic reliable saving matters more than dual-viewport timelines and diff views. **C-005** Locked 2026-07-31 as tooling, not a core instrument — the shipped branch scaffold is enough; polished side-by-side stays here.
+*Why preserved:* richer comparison can still support optional experimentation; architecture depends on T-001 and T-003.
 
 ### F-003 — Additional preserves
 **Status:** Deferred
@@ -1285,28 +1294,28 @@ Ordered by how many other decisions depend on them.
 
 1. ~~**C-004** — force control as an intervention axis~~ **Locked** (stewardship sitting Pass 2026-07-30).
 2. ~~**C-007** — arrival vs introduction as the primary biological verb~~ **Locked** (Slice 12 / owner Pass — earned conditions).
-3. **C-005** — branch-and-compare as a core instrument rather than deferred tooling.
+3. ~~**C-005** — branch-and-compare~~ **Locked** as tooling / debug panel, not a core instrument (owner 2026-07-31).
 4. **G-007** — whether completion is permanent history, revocable state, or separate from ongoing stewardship.
 5. ~~**C-001** — cheap GW/baseflow store~~ **Locked** (Slice 8b / `baseflow-persist`).
 6. **C-003** — stochastic vs authored climate; owner direction recorded, P-006 fairness evaluation outstanding.
-7. **C-002** — GEO-002 spatial cost test (ratify or replace Slice 8 reading).
+7. ~~**C-002** — GEO-002 spatial cost test~~ **Locked** (owner ratify Slice 8 reading 2026-07-31).
 8. ~~**C-006**~~ **Locked** (CI promote 2026-07-31 — no edit economy; no siting→ecology write). **C-008** — response-latency budget; Tier-P measurable once the owner names the number.
 8b. ~~**C-009** — substrate differentiation~~ **Locked** (owner Lock batch A 2026-07-30).
 8c. **C-010** — legacy substances / contaminant load; gated behind C-009 (**now Locked**), but it is the missing substrate for S-007 and S-008 and the toxic-site scenario premise.
 8d. **C-011** — real-world intuition as the design contract; binds every future mechanic, so decide it early and cheaply.
 8e. **C-012** — preserve extent and resolution from the habitat-mosaic criterion; blocks Slice 9, which needs distinguishable habitats to arrive into.
-8f. **C-013** / **C-014** — undo boundary, and how audio derives from state. C-014 sitting: stillness-by-appearance Pass; audible silence unverified (no hear) — remains Open.
+8f. ~~**C-013**~~ **Locked** (fair undo boundary 2026-07-31). **C-014** — how audio derives from state; stillness-by-appearance Pass; audible silence unverified (no hear) — remains Open.
 8g. ~~**C-015** + **W-001**~~ **C-015 Locked**; **W-001 Superseded** (ballot B 2026-07-30). ~~**C-016**…**C-019**~~ **Locked** (owner Lock batch A 2026-07-30).
 8h. **C-020** — atmospheric precip delivery. Machine green; owner: weather-feel Pass with glitches → **Hold Lock**. Glitches named 2026-07-31 ([C-020-dossier.md](candidates/C-020-dossier.md)); fix then re-ask Lock.
 8i. **C-021** / **C-022** — season and erosion-intensity force dials (THESIS §4); filed Open — no player regime control on seasonal band or geomorph intensity yet.
 9. **RC-003** — consequence of failed biological introduction; owner direction recorded (Allee); **priority lowered** — introduction is secondary after C-007 Locked.
 10. **A-005 and A-006** — siting interaction prototype and the legibility boundary against N-001; now also bounded by C-004's regimes-not-smiting line.
 11. **U-005** — camera and scale prototype proving whole-preserve readability and local inspection.
-12. ~~**U-006** — MVP Field Notebook contract: event vocabulary, scale selection, uncertainty language, and supported questions~~ **Contract shipped** (Field Notebook UI / `docs/slices/notebook-composition.md`); **Lock** still reviewer corpus sample ([docs/candidates/U-006-dossier.md](candidates/U-006-dossier.md)).
+12. ~~**U-006** — MVP Field Notebook~~ **Locked** (owner 2026-07-31 — answers a question already had).
 13. **ART-001** — visual prototype validating scientific impressionism against hydrology and ecological-state readability.
 14. **E-008 and E-009** — role-resolution and inferred-readiness prototypes; E-009 rises if C-007 makes readiness the arrival gate.
 
-Until resolved, these are Open or hypothesis-Current and must not be treated as locked implementation requirements. Situation-Current entries (**T-007**, **W-001**) are not on this queue; they carry review triggers in DECISION_CONFORMANCE.md.
+Until resolved, these are Open or hypothesis-Current and must not be treated as locked implementation requirements. Situation-Current entries (**T-007**) are not on this queue; they carry review triggers in DECISION_CONFORMANCE.md.
 
 ---
 
@@ -1331,13 +1340,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** T-001 determinism; T-006 headless authority; GEO-002 earn-its-cost; EXTERNAL_REFERENCES ban on in-browser Richards/Celia/MODFLOW and ML water-cycle cores as authority.
 ### C-002 — GEO-002 spatial cost test
-**Status:** Open
+**Status:** Locked
 
-**Question.** Does dynamic geomorphology run only where contributing area / intervention justifies cost, while soil pools run everywhere? (NATURAL_PROCESS_MATH §9.5.)
+**Decision.** Dynamic geomorphology (channel-style erosion / transport) runs where contributing area or intervention justifies cost — accumulation ≥ `erosionMinAccumulation` / near-channel — while soil **production** (and soil pools) run **everywhere**. This ratifies the Slice 8 reading as policy (NATURAL_PROCESS_MATH §9.5; GEO-002).
 
-**Constraints.** GEO-002 Locked requires a spatial answer; Slice 8 already *implemented* channel-gated erosion + everywhere production as a reading.
+**Why.** GEO-002 requires dynamic terrain to earn its cost; a second erosion law would fight the shipped Exner-lite path. Owner Lock 2026-07-31: ratify the written near-channel rule.
 
-**Leading direction.** Promote the Slice 8 reading to an explicit decision after a short review, or supersede with a different spatial rule. Until then agents must not invent a second erosion law.
+**Implications.** Agents must not invent an alternate spatial erosion gate. High-A bare cells erode more than low-A; production still raises elev+depth on thin soil. Berm/dig move `soil.depth` with elevation (bedrock invariant).
+
+**Rejected alternatives.** Geomorphology on every cell at full cost. Production only in channels. A second conflicting erosion law while this entry was Open.
+
+**Evidence.** `geomorphology.test.ts` (bare channel > vegetated; thin soil produces; production raises elev+depth). Artifacts: `docs/candidates/C-002-dossier.md`, SIMULATION_MODEL / BUILD_GUIDE rule note.
+
+**Constraints.** GEO-002 Locked; T-004 data-driven properties; THESIS §2.1.
 
 ### C-003 — Stochastic vs authored climate forcing
 **Status:** Open *(owner direction recorded 2026-07-28; evaluation outstanding)*
@@ -1366,13 +1381,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** D-001, N-001, A-005, RC-004, T-001, THESIS §9.
 
 ### C-005 — Branch-and-compare as a core instrument
-**Status:** Open
+**Status:** Locked
 
-**Question.** Should forking one world and running it twice under different forces ("same castle, more rain") be a **core mechanic** rather than the deferred convenience currently filed as F-002 and F-005? THESIS §7.
+**Decision.** Branch-and-compare is **debug / optional tooling**, not a core play instrument. The primary loop remains build → choose forces → run time → look; re-running under different forces uses the same world, save/restore, or the existing branch scaffold without requiring side-by-side branch play. Advanced dual-viewport comparison stays Deferred (**F-002**). Forks must not become a scoring surface (N-002).
 
-**Constraints.** T-001 determinism and T-003 save compatibility already supply the hard part; P-005 (hypothesis-Current) exists precisely for experimentation. A branch must not become a scoring or optimization surface (N-002) — comparison is for understanding, not for finding the best run.
+**Why.** Owner Lock 2026-07-31: Compare felt like a debug panel, not something wanted as core play. Machine half (fork isolation, force divergence, moisture compare encoding) still stands for tooling correctness. THESIS §7's "run it again differently" is satisfied by changing forces and running time — not by mandating branch UI.
 
-**Leading direction.** Promote from Deferred to a real mechanic; a run should be reproducible and shareable from seed + force settings. Blocked from Locked until P-005's criterion is discharged and one comparison UI exists.
+**Implications.** Agents must not treat dual-branch as an MVP requirement or gate other work on polished compare chrome. Scaffold may remain for developers and optional use. Undo-after-time still routes through explicit restore (**C-013**), not history rewind.
+
+**Rejected alternatives.** Branch-and-compare as a mandatory core mechanic. Dual physical viewport as MVP. Using forks to optimize or score runs.
+
+**Evidence.** Probe `branch-compare`: same.hashMatch = 1, precipDelta ≈ 18.2, delta.isolated = 1; `src/sim/branch.test.ts`. Owner: debug panel. Artifacts: `docs/candidates/C-005-dossier.md`, `docs/evidence/branch-compare.baseline.json`.
+
+**Constraints.** T-001, T-003, P-005, N-002, F-002 Deferred.
 
 ### C-006 — Sculpting is abundant; scarcity lives in ecological time
 **Status:** Locked
@@ -1466,15 +1487,19 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Leading direction.** Confirm extent against the mosaic criterion — 960 m is defensible and may already be enough — then derive cell size from the **smallest feature that must read**, likely channel width or wetland margin, and accept whatever grid that implies subject to a measured step-time budget rather than a guessed one. The correction above moves the suspicion from extent to **resolution**: Δx is the value most likely wrong. Note the cost shape before proposing a number — refining Δx at fixed extent grows cell count quadratically, so 10 m → 2 m is 96² → 480², a 25× step cost that the current main-thread loop has never been measured against. Neither value should change without the probe that shows the new size still steps fast enough (**C-008**).
 
 ### C-013 — Undo as an affordance of abundant sculpting
-**Status:** Open
+**Status:** Locked
 
-**Question.** Does abundant sculpting (**C-006**) require an undo, and what exactly may be undone?
+**Decision.** Abundant sculpting (**C-006**) includes free undo of **edits** (no confirm, no cost). After simulation time advances, undo is unavailable — the route back is an explicit restore (save/load or branch tooling under **C-005**), never a rewind of ecological history.
 
-**Why now.** **C-006** is Locked — abundance without a free take-back still fights the RCT3 origin. Machine half is shipped (`sessionPersist` sculpt undo; `sessionPersist.test.ts` hash cases). Owner half outstanding: whether losing undo after time advances feels fair ([C-013-dossier.md](candidates/C-013-dossier.md)).
+**Why.** RCT3-style take-back for the build phase; S-007 / RC-004 forbid un-running the tide. Owner Lock 2026-07-31: losing undo after time felt **fair**, not like punishment.
 
-**Constraints and the hard part.** Undo of an **edit** is uncontroversial. Undo of **elapsed ecological time** is not: S-007 makes hysteresis fundamental and RC-004 makes time the real constraint, so a world where the tide can be un-run contradicts the thesis directly — the sand castle whose collapse you can rewind is not the same object. T-001 determinism and the P-005 save machinery supply the natural mechanism, since a restore point is the same construct as a branch (**C-005**).
+**Implications.** `sessionPersist` clears undo on time advance. Agents must not add time-rewind. Branch/restore remains the explicit back-path (tooling, not a core compare loop — **C-005**).
 
-**Leading direction.** Undo applies to **edits before time advances**; once the world has run, the way "back" is restoring a branch point, not rewinding history. Machine half discharged; Lock waits on owner taste.
+**Rejected alternatives.** Undo of elapsed simulation time. Confirm/cost gates on sculpt undo. No undo at all under abundant sculpting.
+
+**Evidence.** `sessionPersist.test.ts`: sculpt+undo hash equality; after `stepEvent` + `noteTimeAdvanced`, `canUndo = false`. Owner: fair. Artifact: `docs/candidates/C-013-dossier.md`.
+
+**Constraints.** C-006 Locked, S-007, RC-004, T-001, P-005.
 
 ### C-014 — How audio derives from simulation state
 **Status:** Open

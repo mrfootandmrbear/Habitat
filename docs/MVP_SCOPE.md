@@ -53,13 +53,13 @@ The outer ring — **build → forces → time → look** — is the thesis loop
 | Build the form — abundant sculpting | A-005, **C-006** | **Yes** | Shipped Slice 5b (berm/dig); island canvas retuned Slice F. Unrationed; scarcity is ecological time (RC-004) |
 | Choose the forces — regime control | **C-004** | **Yes (Locked)** | Force panel: climate-mean rainfall, sea level, wind (Slice F). Full weather phase (**C-020** Open — Hold Lock on glitches). Not a dashboard — look at the world |
 | Return visit — see what became of it | **C-008**, GEO-002 | **Done** | Slice 8c Tier-O **Pass** (batch-living-return 2026-07-30). C-008 budget number still owner |
-| Run it again, different forces | **C-005** | **Post-MVP** | Slice B scaffold Done (machine); Lock owner — dossier |
+| Run it again, different forces | **C-005** | **Post-MVP tooling** | Locked tooling (not core) — scaffold Done |
 | Observe ↔ readable change | P-003, U-003, ART-001 | **Yes** | World is primary visualization |
 | Expect → commit prediction | P-006 | **Yes** | Load-bearing; not polish |
 | Intervene as cause, not outcome | A-005, N-001 | **Yes** | One siting verb on water/terrain is enough |
 | Time rate as attention scale | T-002, S-009 | **Yes** | Already in prototype |
 | Layered inspect | T-005, U-001 | **Dev yes / player selective** | Dev overlays now; player overlays later |
-| Field Notebook | U-006 | **No** | Post-MVP unless playtest demands one honest sentence |
+| Field Notebook | U-006 | **No** | Locked v2.0.12 — post-MVP unless playtest demands more |
 | Roles / introductions | E-007, RC-003 | **No** | Needs Slice 11-class systems |
 | Scenarios / completion | G-002, G-007 | **No** | After sandbox loop works |
 
@@ -96,7 +96,7 @@ flowchart TB
 | Soil → vegetation (one-way) | ES-001 | **MVP stretch** | Slice 5 — first green |
 | Vegetation → water (return) | D-003, E-005 partial | **MVP core** | Slice 6 — first true two-way ecology |
 | Priority-flood / depressions | H-003 | **Yes** | Slice 4b Done (agent) |
-| Soil depth / geomorphology | S-006, S-007, GEO-002, C-002 | **Post-MVP** | Slice 8 Tier-M |
+| Soil depth / geomorphology | S-006, S-007, GEO-002, C-002 | **Post-MVP** | Slice 8 Tier-M; **C-002 Locked** |
 | Groundwater / baseflow | H-001, H-004, **C-001** | **Done** (Locked) | Slice 8b — `baseflow-persist` |
 | Fire / succession / populations | ES-*, E-* | **No** | After limiting-factor spine (Slice 9+) |
 | Full beaver write-back | E-005, F-001 | **Architecture yes, breadth no** | Path must exist; one later engineer |
@@ -139,10 +139,10 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | **Done** — owner legibility Pass; Lock still owner |
 | **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | **Done** — D-007 clip Pass 2026-07-30 (full clouds later) |
 | **A+** | Recovery audible (**AUD-003**) | Second ambient bed from `veg.cover` | **Done** — BUILD_GUIDE §4.19 (agent; C-014 still Open) |
-| — | Field Notebook UI (**U-006**) | Bounded causal explanation chrome | **Done** — BUILD_GUIDE §4.20 (machine; Lock still reviewer) |
+| — | Field Notebook UI (**U-006**) | Bounded causal explanation chrome | **Done** — BUILD_GUIDE §4.20; **Locked** v2.0.12 |
 | — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Done** — BUILD_GUIDE §4.21 (machine; Lock still owner) |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** Done (machine); **Full C-020 clouds** Done (machine); **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** Done; **Slice B** (C-005) Done (machine); **Slice E** Exner-lite Done; **C-006 Locked**. Gap review: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **Next:** Nature P2 salt-marsh engineer; owner Lock batch (incl. C-005); C-020 G1–G5 fix; **C-021** / **C-022** filed Open.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** **U-006 Locked**; **Full C-020 clouds** Done (machine); **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** Done; **Slice B** (**C-005 Locked tooling**); **Slice E** Exner-lite Done; **C-006** / **C-013** / **C-002 Locked**. Gap review: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **Next:** Nature P2 salt-marsh engineer; C-020 G1–G5 fix; **C-014**; **C-021** / **C-022** filed Open.
 
 ---
 

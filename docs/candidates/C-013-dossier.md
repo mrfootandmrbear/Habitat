@@ -1,7 +1,7 @@
 # C-013 — Undo as an affordance of abundant sculpting
 
-**Status:** Open (machine half discharged; owner taste outstanding)  
-**Criterion (verbatim).** Repeated sculpt-and-undo leaves the world **bit-identical** to never having sculpted (T-001 hash equality), undo is available without confirmation or cost, and **elapsed simulation time is not undoable** — after time advances, the only route back is restoring an explicit branch point (**C-005**), never a rewind of history.
+**Status:** Locked 2026-07-31 — fair (not punishment)  
+**Criterion (verbatim).** Repeated sculpt-and-undo leaves the world **bit-identical** to never having sculpted (T-001 hash equality), undo is available without confirmation or cost, and **elapsed simulation time is not undoable** — after time advances, the only route back is restoring an explicit branch point (**C-005** tooling), never a rewind of history.
 
 ## Machine half (discharged)
 
@@ -19,4 +19,4 @@
 
 After you ran time and the undo button went away, did that feel fair — or like the game punished you for looking?
 
-(Not a playtest request by itself; joins the next Tier-O batch with C-005 / C-020 re-Pass / U-006 when that session fires.)
+**Owner 2026-07-31:** **Fair** → **Lock**. Register v2.0.12.

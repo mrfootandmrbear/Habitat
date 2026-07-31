@@ -626,7 +626,7 @@ Filed as candidate register entries per §0.2, not as decided policy. Each is a 
 
 9. **Plants are typed by functional type, four of them, resolved to species by preserve data.** §3.5. E-004 makes roles rather than species the player's vocabulary for *animals*; nothing extends that to vegetation, and the number of plant functional types is a real fidelity decision under U-002.
 
-10. **Dynamic geomorphology runs only where contributing area or intervention justifies it; soil pools run everywhere.** §3.1, survey §9.5. GEO-002 requires dynamic terrain to earn its cost but gives no spatial test. This is a defensible reading, not a decision.
+10. **Dynamic geomorphology runs only where contributing area or intervention justifies it; soil pools run everywhere.** §3.1, survey §9.5. **C-002 Locked** (owner 2026-07-31): ratifies Slice 8 — channel / high-A erosion (`erosionMinAccumulation`); production everywhere.
 
 11. **The determinism compatibility boundary is one engine family at one major version on one architecture, declared in the save and checked on load.** §9. T-001 requires boundaries to be declared rather than silently diverge; it does not say what the boundary is or what happens when a load crosses it. The replay-divergent session state is this document's invention.
 
