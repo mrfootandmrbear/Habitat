@@ -32,6 +32,7 @@ Intentional probe baseline refresh: `npm run probe -- <scenario> --write-baselin
 | `/write-playtest` | Tier-O request after ask gate |
 | `/promote-candidate` | Criterion met or dossier needed |
 | `/study-steal` | Acting on EXTERNAL_REFERENCES |
+| `/nature-study` | Guild / factor / engagement cards ([docs/nature-study/PROTOCOL.md](docs/nature-study/PROTOCOL.md)) — not species catalogs |
 | `/blocked-note` | §4.0.1 stop conditions |
 
 Always-on rules in `.cursor/rules/` (vision, verify-before-asking, build-plan-on-commit) override when they conflict with convenience.

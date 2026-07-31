@@ -161,6 +161,7 @@ The tables below are a **reading list** — what might be worth studying. This s
 - Field ownership, bands, structural vs dynamic water → [SIMULATION_MODEL.md](SIMULATION_MODEL.md)  
 - What the build must prove → [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md)  
 - Execution order + autonomous protocol → [BUILD_GUIDE.md](BUILD_GUIDE.md)  
+- Low-token guild / factor / engagement study (subagent cards, not species lists) → [nature-study/PROTOCOL.md](nature-study/PROTOCOL.md), skill `/nature-study`  
 
 **Research ↔ decisions.** Every **Helpful now/later** steal must cite a Locked/Current register ID or an Open candidate (**C-001**…**C-019**), and must add its row to the **Study log** in the same commit. Bans cite the fight (T-001, T-006, T-007, GEO-002). Agents must not treat Open candidates as Locked policy.
 
