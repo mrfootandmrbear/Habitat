@@ -41,6 +41,11 @@ import {
   crustOccupantEncodingDelta,
   binderBiomassRgb,
 } from "../ui/occupantEncoding";
+import {
+  guildFlex,
+  livingVitality,
+  swayAmplitude,
+} from "../ui/occupantSway";
 import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -567,5 +572,34 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         answer: null,
       }),
     ).toBe(false);
+  });
+
+  it("occupant sway amplitude is zero at calm wind and rises with wind (L4)", () => {
+    const flex = guildFlex("herb");
+    const calm = swayAmplitude(0, flex, 1);
+    const breeze = swayAmplitude(0.5, flex, 1);
+    const gale = swayAmplitude(1, flex, 1);
+    expect(calm).toBe(0);
+    expect(breeze).toBeGreaterThan(calm);
+    expect(gale).toBeGreaterThan(breeze);
+    expect(swayAmplitude(1, guildFlex("shrub"), 1)).toBeLessThan(
+      swayAmplitude(1, guildFlex("herb"), 1),
+    );
+    expect(swayAmplitude(1, guildFlex("crust"), 1)).toBeLessThan(
+      swayAmplitude(1, guildFlex("shrub"), 1),
+    );
+  });
+
+  it("standing-dead vitality damps sway while absent vitality is zero (L4 / L3)", () => {
+    const max = config.herbBiomassMax;
+    expect(livingVitality(0, max, 1)).toBe(0);
+    expect(livingVitality(max, max, 1)).toBe(1);
+    // HSI collapse leaves standing excess — capacity 0.2·max, biomass still full.
+    const dead = livingVitality(max, max, 0.2);
+    expect(dead).toBeGreaterThan(0);
+    expect(dead).toBeLessThan(1);
+    expect(swayAmplitude(1, guildFlex("herb"), dead)).toBeLessThan(
+      swayAmplitude(1, guildFlex("herb"), 1),
+    );
   });
 });

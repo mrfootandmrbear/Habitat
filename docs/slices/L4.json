@@ -1,0 +1,30 @@
+{
+  "id": "L4",
+  "title": "Biotic motion (wind sway)",
+  "simLoop": "No sim change — OccupantMesh is presentation-only (T-006). Sway amplitude is wind magnitude × guild flex × living vitality; tilt is one sine with phase from cell index. Standing excess (biomass above max·HSI after L3 dieback) still draws a shoot but barely leans.",
+  "gameLoop": "The meadow leans when the wind dial is up and goes still when it is calm — life reads as forced by the same weather the water and clouds already answer to, not as a painted prop under moving sky.",
+  "registerIds": [
+    "D-007",
+    "T-006",
+    "ART-003",
+    "ART-002",
+    "C-014",
+    "C-011"
+  ],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": [],
+  "fields": [
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "habitat.suitability"
+  ],
+  "notebookSeed": "The grass is leaning the way the wind is going — and when the dial is calm, it stops.",
+  "tierO": "no owner-only question — D-007 clip verdict recorded in the composition (agent self-check, no owner session). L5 remains blocked on C-023."
+}

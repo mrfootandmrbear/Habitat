@@ -783,6 +783,9 @@ function syncMeshes(nowWall?: number): void {
     flowCue.updateFrom(model, world);
     if (nowWall !== undefined) lastFlowCueWall = nowWall;
   }
+  occupantMesh.setSwayTime(
+    nowWall !== undefined ? nowWall : performance.now() * 0.001,
+  );
   occupantMesh.updateFrom(model, world);
   syncAudio();
 }

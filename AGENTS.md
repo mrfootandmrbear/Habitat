@@ -50,7 +50,9 @@ Reviews: [sim-gap](docs/reviews/2026-07-30-sim-gap-review.md) (physics) · [livi
 3. ~~**W0** Locked presentation debt~~ — **shipped** ([W0-composition.md](docs/slices/W0-composition.md)): live audio beds, fire kills guild biomass, pause+dig defaults, seed regenerate. **C-014** now hearable (still Open).
 4. ~~**L3** mortality as a rate~~ — **shipped** ([L3-composition.md](docs/slices/L3-composition.md), [dieback-lag](docs/evidence/dieback-lag.md)): first-order dieback; crust 1 / herb 2 / shrub 7 bands-to-half; short drought ridden out.
 5. ~~**L7** activity-gated event band~~ — **shipped** ([L7-composition.md](docs/slices/L7-composition.md), [event-band-gate](docs/evidence/event-band-gate.md)): surface+fire sleep when dry; atmosphere always runs; hash-identity vs ungated; skipFrac **0.3**.
-6. **L4** biotic motion — life is static cones; D-007 clip. **← tip**
+6. ~~**L4** biotic motion~~ — **shipped** ([L4-composition.md](docs/slices/L4-composition.md)): wind sway; calm is still; standing dead barely leans; D-007 clip Pass.
+
+**Executable tip now:** **§4.45** fuel/scar numeric fix (parallel review queue). Living-wave remainder blocked: **L5** on **C-023**; **L8** on **C-024** + **C-025**.
 
 None registers a new `Process` (D-007 clip gate does not apply); none needs a new candidate — each implements a Locked entry or a written spec section the code falls short of. **Blocked, owner-judged — implement nothing under them:** **L5** on **C-023**; **L8** deep-time ladder on **C-024** + **C-025**. Do not build a partial deep-time shortcut: skipping bands "a little" breaks T-001 replay, P-006 fairness, and C-005 comparison *without going red*.
 

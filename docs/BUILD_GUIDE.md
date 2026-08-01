@@ -122,12 +122,13 @@ Summary only — do not reopen unless fixing regressions.
 | **W0** | Locked presentation debt | Live audio beds; fire kills guild biomass; pause+dig defaults; seed regenerate | `webAudioHook.ts`, `runFireStep`, `controls.ts` | **Done** — agent ([W0-composition](slices/W0-composition.md); no baseline moved; C-014 still Open) |
 | **L3** | Mortality as a rate, not a clamp | Short drought ridden out; long drought takes the stand; crust dies first, woody last | `nextHerbBiomass`, `dieback-lag` | **Done** — agent ([L3-composition](slices/L3-composition.md); deep-time + arrival hashes moved) |
 | **L7** | Activity-gated event band (SIM §6.2) | Dry spans skip surface+fire; storms unchanged; hash-identical | `eventBandActive`, `event-band-gate` | **Done** — agent ([L7-composition](slices/L7-composition.md); skipFrac 0.3, all baselines unmoved) |
+| **L4** | Biotic motion (wind sway) | Shoots lean with wind; calm is still; standing dead barely leans | `occupantSway`, OccupantMesh | **Done** — presentation ([L4-composition](slices/L4-composition.md); D-007 clip Pass) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **§4.44** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **L4** biotic motion (§4.39); §4.45–§4.48 run in parallel; owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.45** fuel/scar numeric fix (Living wave tip blocked: L5 on C-023, L8 on C-024/C-025); §4.46–§4.48 follow; owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette).
 
-**Next (executable tip):** **L4** biotic motion (§4.39); **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. Parallel: §4.45–§4.48 (§4.44 / §4.53 Done). **W0** / **L3** / **L7** Done. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **§4.45** fuel/scar numeric fix → §4.46–§4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **W0** / **L3** / **L7** / **L4** Done. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -1018,19 +1019,19 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.39 Slice L4 — Biotic motion *(queued; presentation)*
+### 4.39 Slice L4 — Biotic motion *(Done — presentation)*
 
 **Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §0 / §5. Water smooths, clouds drift, rain slants with wind — and life is a field of **static cones** (`OccupantMesh`, `ConeGeometry`, colour and height keyed to biomass, zero motion). **D-007** is Locked and the twenty-second clip currently reads as a diorama with weather over it. This is the cheapest item on the list that moves the clip.
 
 **Register:** D-007 Locked; T-006; ART-003; ART-002; C-014 Open (audio residual, adjacent)
 **New Process?** no — presentation only; reads existing fields, writes no WorldState. **T-006** holds: no GPU state is authoritative.
 
-- [ ] Per-instance sway keyed to the existing global wind vector, phase from cell index — one sine, shader-side; sway amplitude scales with guild height and with wind magnitude
-- [ ] Motion must be a **readout of forcing**, not ambient decoration: still air is still, storm wind lays the sward over (**C-011** — the referent is what the player already knows about grass in wind)
-- [ ] Dying biomass under L3 should read differently from absent biomass — standing dead does not sway like green
-- [ ] Presentation proxy in `presentation.proxy.test.ts`: sway amplitude monotone in wind magnitude; zero at zero wind
-- [ ] Record the twenty-second clip verdict in this entry (**D-007** — one sentence, no number, no owner session)
-- [ ] **Next-but-one:** L5 is gated on C-023 judgment; if no sitting, take the residual Lock queue ([owner-lock-batch.md](candidates/owner-lock-batch.md))
+- [x] Per-instance sway keyed to the existing global wind vector, phase from cell index — one sine (`occupantSway.ts`); sway amplitude scales with guild flex and wind magnitude
+- [x] Motion is a **readout of forcing**, not ambient decoration: calm wind → amplitude 0; storm wind lays the sward over (**C-011**)
+- [x] Dying biomass under L3 reads differently from absent — `livingVitality` from biomass vs max·HSI; standing excess barely leans, absent draws no shoot
+- [x] Presentation proxy in `presentation.proxy.test.ts`: sway amplitude monotone in wind magnitude; zero at zero wind; standing-dead damps sway
+- [x] **D-007 clip verdict:** The shoots lean with the wind and go still when the dial is calm — the meadow is no longer a painted diorama under moving weather.
+- [x] Composition + manifest ([L4-composition.md](slices/L4-composition.md), [L4.json](slices/L4.json)); **Next-but-one:** L5 blocked on C-023; take §4.45 fuel/scar numeric fix (parallel queue) or residual Lock backlog
 
 ---
 
@@ -1285,7 +1286,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L1 | Time throughput defect (16× ran at 5×) | S-009, T-002, C-008 | §4.36 **Done** — shipped with L6; no baseline moved |
 | L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Done** |
 | L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Done** — agent (`dieback-lag`) |
-| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Queued** — tip |
+| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass |
 | L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
 | L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Done** — hash-identity; skipFrac 0.3; baselines unmoved |
@@ -1309,7 +1310,8 @@ Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / *
 
 ```
 L1 throughput defect [Done]  →  L6 real-world time units [Done]  →  L2 local seed rain [Done]
-   →  L3 mortality as a rate [Done]  →  L7 activity-gated event band [Done]  →  L4 biotic motion [next]
+   →  L3 mortality as a rate [Done]  →  L7 activity-gated event band [Done]  →  L4 biotic motion [Done]
+   (L5 / L8 blocked — tip moves to §4.45 fuel/scar)
 ```
 
 L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L3** shipped next: first-order dieback, `dieback-lag` probe, guild-ordered half-lives. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
