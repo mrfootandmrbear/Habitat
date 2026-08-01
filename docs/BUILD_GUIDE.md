@@ -120,12 +120,13 @@ Summary only — do not reopen unless fixing regressions.
 | §4.49–§4.52 | Flat routing, flux stability, coastal base level, encoding delta | Correctness under the existing loops (no new verb) | `flowRouting.ts`, `fluxStep.ts`, `colorDistance.ts` | **Done** — agent (baselines refreshed with stated reasons) |
 | **L2** | Standing biomass is a propagule source; seed = overseas + local convolution | A founded meadow spreads, stalls at salt, and regrows from a refugium | `localSeedPressureField`, `seedRain.test.ts`, `spread-front` | **Done** — agent (Symmetry; only `deep-time` moved) |
 | **W0** | Locked presentation debt | Live audio beds; fire kills guild biomass; pause+dig defaults; seed regenerate | `webAudioHook.ts`, `runFireStep`, `controls.ts` | **Done** — agent ([W0-composition](slices/W0-composition.md); no baseline moved; C-014 still Open) |
+| **L3** | Mortality as a rate, not a clamp | Short drought ridden out; long drought takes the stand; crust dies first, woody last | `nextHerbBiomass`, `dieback-lag` | **Done** — agent ([L3-composition](slices/L3-composition.md); deep-time + arrival hashes moved) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **§4.44** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done — live ambient beds, fire→guild-biomass kill, pause+dig on arrival, seed regenerate; no baseline moved. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **L3** mortality as a rate (§4.38), then **L7** / **L4**; §4.45–§4.48 run in parallel; owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **§4.44** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **L7** activity-gated event band (§4.42), then **L4**; §4.45–§4.48 run in parallel; owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette).
 
-**Next (executable tip):** **L3** mortality as a rate (§4.38) → **L7** activity-gated event band (§4.42) → **L4** biotic motion (§4.39); **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. Parallel: §4.45–§4.48 (§4.44 / §4.53 Done). **W0** Done — C-014 owner half is now hearable. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **L7** activity-gated event band (§4.42) → **L4** biotic motion (§4.39); **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. Parallel: §4.45–§4.48 (§4.44 / §4.53 Done). **W0** / **L3** Done. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -998,21 +999,21 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.38 Slice L3 — Mortality as a rate *(queued)*
+### 4.38 Slice L3 — Mortality as a rate *(Done — agent)*
 
-**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §2. `nextHerbBiomass` returns `min(capacity, biomass + growth)`, so an HSI collapse from 1.0 → 0.2 takes biomass **2.500 → 0.500 in a single band**. Loss is instantaneous; only recovery has a rate — backwards from real ecology, where loss is fast but finite and recovery is slow. Vegetation is therefore a *render of current HSI* rather than a state with history, and every scrap of ecological memory in the world lives in `soil.depth` / `soil.salinity` / `soil.porosity` with **none in the biota**. That is a bigger hole under **S-007** / **S-008** than the missing contaminant field **C-010** was filed for, and far cheaper to close.
+**Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §2. `nextHerbBiomass` returned `min(capacity, biomass + growth)`, so an HSI collapse from 1.0 → 0.2 took biomass **2.500 → 0.500 in a single band**. Loss was instantaneous; only recovery had a rate — backwards from real ecology, where loss is fast but finite and recovery is slow. Vegetation was therefore a *render of current HSI* rather than a state with history, and every scrap of ecological memory in the world lived in `soil.depth` / `soil.salinity` / `soil.porosity` with **none in the biota**. That is a bigger hole under **S-007** / **S-008** than the missing contaminant field **C-010** was filed for, and far cheaper to close.
 
 **Register:** S-007 Locked; S-008 Current; ES-006 Locked; ES-002; C-011 Open; T-001; N-004
 **New Process?** no — changes the biomass update law inside the existing seasonal tick. D-007 clip gate does not apply.
 
-- [ ] Replace the clamp with a first-order decline toward capacity: when `biomass > capacity`, `biomass -= mortalityRate · (biomass − capacity) · dt`
-- [ ] Per-guild mortality rate with a referent (**N-004**) — crust and herb do not die back on the same timescale as woody shrub; keep the numbers in `config.ts` beside the establishment rates
-- [ ] Capacity stays `biomassMax · HSI` — **ES-006**: mortality must not smuggle in a fixed ecological K
-- [ ] Test: a drought pulse shorter than the mortality timescale is **ridden out**; a longer one is not — the asymmetry is the point
-- [ ] New probe `dieback-lag` (or extend `disturbance-recovery`): time-to-half-biomass after an HSI collapse is finite and guild-ordered; recovery still slower than loss
-- [ ] **S-008 check:** the notebook / limiting-factor readout should be able to say *which* past condition the standing biomass is still carrying — this is the first biological hysteresis the register can point at
-- [ ] Baselines: guild `*-arrival` and `disturbance-recovery` will move; state the reason in the commit body
-- [ ] Composition + manifest; **Next-but-one:** L4 biotic motion (§4.39)
+- [x] Replace the clamp with a first-order decline toward capacity: when `biomass > capacity`, `biomass -= mortalityRate · (biomass − capacity) · dt`
+- [x] Per-guild mortality rate with a referent (**N-004**) — crust 0.9 (NS-011), herbaceous 0.5 (NS-002), shrub 0.15 (NS-010); beside establishment rates in `config.ts`
+- [x] Capacity stays `biomassMax · HSI` — **ES-006**: mortality must not smuggle in a fixed ecological K
+- [x] Test: a drought pulse shorter than the mortality timescale is **ridden out** (1.84 after one band); a longer one is not (0.508 after eight) — the asymmetry is the point
+- [x] New probe `dieback-lag`: time-to-half-biomass after an HSI collapse is finite and guild-ordered (crust 1 / herb 2 / shrub 7); recovery 3 bands > loss 2
+- [x] **S-008 check:** standing excess after one band while `habitat.limitingFactor` names the collapsed factor — first biological hysteresis; notebook already pairs limiting-factor + biomass sentences
+- [x] Baselines: `deep-time` hash, `disturbance-recovery` moisture, and eight `*-arrival` hashes moved (stated in [L3-composition.md](slices/L3-composition.md)); `spread-front` / `arrival-earned` / marsh / crust / inundation did not
+- [x] Composition + manifest ([L3-composition.md](slices/L3-composition.md), [L3.json](slices/L3.json)); **Next-but-one:** L7 activity-gated event band (§4.42) — already specified; L4 (§4.39) remains specified to §4.3 depth after L7
 
 ---
 
@@ -1281,9 +1282,9 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | G | Season + erosion-intensity dials | C-021, C-022, T-001, T-004, H-004, S-007, N-004 | **Done** (§4.35) — machine only, both Open |
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
 | L1 | Time throughput defect (16× ran at 5×) | S-009, T-002, C-008 | §4.36 **Done** — shipped with L6; no baseline moved |
-| L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Queued** — next |
-| L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Queued** — after L2 |
-| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Queued** — after L3 |
+| L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Done** |
+| L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Done** — agent (`dieback-lag`) |
+| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Queued** — after L7 |
 | L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
 | L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Queued** — ships only on hash-identity |
@@ -1306,11 +1307,11 @@ Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / *
 **Executable tip is the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
 
 ```
-L1 throughput defect [Done]  →  L6 real-world time units [Done]  →  L2 local seed rain [next]
-   →  L3 mortality as a rate  →  L7 activity-gated event band  →  L4 biotic motion
+L1 throughput defect [Done]  →  L6 real-world time units [Done]  →  L2 local seed rain [Done]
+   →  L3 mortality as a rate [Done]  →  L7 activity-gated event band [next]  →  L4 biotic motion
 ```
 
-L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
+L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L3** shipped next: first-order dieback, `dieback-lag` probe, guild-ordered half-lives. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
 
 **Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
 

@@ -1,0 +1,38 @@
+{
+  "id": "L3",
+  "title": "Mortality as a rate (S-007 / S-008)",
+  "simLoop": "nextHerbBiomass returned min(capacity, biomass + growth), so an HSI collapse from 1.0 → 0.2 snapped biomass 2.500 → 0.500 in one seasonal band — loss was instantaneous while only recovery had a rate. Biomass now declines first-order toward capacity = biomassMax · HSI when over it (biomass -= mortalityRate · (biomass − capacity) · dt), with per-guild rates beside the establishment rates: crust 0.9 (NS-011 desiccation), herbaceous guilds 0.5 (NS-002 dieback), shrub 0.15 (NS-010 woody persistence). Capacity stays resource-derived (ES-006 — no fixed K).",
+  "gameLoop": "A meadow that loses its water no longer vanishes in one tick — a short dry spell leaves standing green that the limiting-factor readout can still name as moisture-limited, and a long one takes it down over weeks of sim time, faster than it grew. Crust goes first, woody last. That lag is the first ecological memory that lives in the biota rather than only in the soil.",
+  "registerIds": [
+    "S-007",
+    "S-008",
+    "ES-006",
+    "ES-002",
+    "C-011",
+    "T-001",
+    "N-004"
+  ],
+  "invariantClass": "Conservation",
+  "tests": [
+    "src/sim/arrival.test.ts",
+    "src/sim/probes/baseline.test.ts"
+  ],
+  "probes": [
+    "dieback-lag",
+    "deep-time",
+    "disturbance-recovery",
+    "spread-front"
+  ],
+  "fields": [
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "habitat.suitability",
+    "habitat.limitingFactor"
+  ],
+  "notebookSeed": "The hollow still shows green even though the ground has gone dry — water is limiting, but the stand has not caught up yet.",
+  "tierO": "no owner-only question this slice — the machine half is fully CI-judged (standing excess after one band, guild-ordered bands-to-half crust 1 / herb 2 / shrub 7, short drought ridden out at 1.84 vs long at 0.508, recovery 3 bands > loss 2); D-007 clip gate does not apply since no new Process was registered. Deferred to L4 biotic motion (§4.39), which is where standing dead should read differently from absent."
+}

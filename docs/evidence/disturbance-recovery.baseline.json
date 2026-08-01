@@ -14,7 +14,7 @@
       "abs": 0.00001
     },
     "pulse.finalMoisture": {
-      "value": 0.10094833404946257,
+      "value": 0.10097952529395116,
       "abs": 0.00001
     },
     "pulse.recoveredDay": {
@@ -26,7 +26,7 @@
       "abs": 0.00001
     },
     "pulse.lateDrop": {
-      "value": 0.0065702018910087645,
+      "value": 0.006563429778907448,
       "abs": 0.00001
     },
     "pulse.risingDays": {
@@ -34,7 +34,7 @@
       "abs": 0
     },
     "pulse.relResidual": {
-      "value": 1.1169510409173993e-7,
+      "value": 1.121309034513023e-7,
       "abs": 0.00001
     },
     "pulse.bounded": {

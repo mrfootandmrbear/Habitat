@@ -1743,21 +1743,27 @@ export class WorldState {
     const airTempC = this.airTemperature;
     const herbEstScale = config.herbEstablishmentScale;
     const herbRate = config.herbEstablishmentRate;
+    const herbMort = config.herbMortalityRate;
     const herbMax = config.herbBiomassMax;
     const strandEstScale = config.strandEstablishmentScale;
     const strandRate = config.strandEstablishmentRate;
+    const strandMort = config.strandMortalityRate;
     const strandMax = config.strandBiomassMax;
     const binderEstScale = config.binderEstablishmentScale;
     const binderRate = config.binderEstablishmentRate;
+    const binderMort = config.binderMortalityRate;
     const binderMax = config.binderBiomassMax;
     const marshEstScale = config.marshEstablishmentScale;
     const marshRate = config.marshEstablishmentRate;
+    const marshMort = config.marshMortalityRate;
     const marshMax = config.marshBiomassMax;
     const shrubEstScale = config.shrubEstablishmentScale;
     const shrubRate = config.shrubEstablishmentRate;
+    const shrubMort = config.shrubMortalityRate;
     const shrubMax = config.shrubBiomassMax;
     const crustEstScale = config.crustEstablishmentScale;
     const crustRate = config.crustEstablishmentRate;
+    const crustMort = config.crustMortalityRate;
     const crustMax = config.crustBiomassMax;
     const hasTide =
       this.seaLevelMeters !== undefined && this.tidalAmplitudeMeters > 0;
@@ -1775,6 +1781,7 @@ export class WorldState {
         habitatSuitability: herbHsi[i]!,
         establishmentScale: herbEstScale,
         establishmentRate: herbRate,
+        mortalityRate: herbMort,
         biomassMax: herbMax,
         dt: scale,
       });
@@ -1789,6 +1796,7 @@ export class WorldState {
         habitatSuitability: strandHsi,
         establishmentScale: strandEstScale,
         establishmentRate: strandRate,
+        mortalityRate: strandMort,
         biomassMax: strandMax,
         dt: scale,
       });
@@ -1805,6 +1813,7 @@ export class WorldState {
         habitatSuitability: binderHsi,
         establishmentScale: binderEstScale,
         establishmentRate: binderRate,
+        mortalityRate: binderMort,
         biomassMax: binderMax,
         dt: scale,
       });
@@ -1821,6 +1830,7 @@ export class WorldState {
         habitatSuitability: marshHsi,
         establishmentScale: marshEstScale,
         establishmentRate: marshRate,
+        mortalityRate: marshMort,
         biomassMax: marshMax,
         dt: scale,
       });
@@ -1840,6 +1850,7 @@ export class WorldState {
         habitatSuitability: shrubHsi,
         establishmentScale: shrubEstScale,
         establishmentRate: shrubRate,
+        mortalityRate: shrubMort,
         biomassMax: shrubMax,
         dt: scale,
       });
@@ -1862,6 +1873,7 @@ export class WorldState {
         habitatSuitability: crustHsi,
         establishmentScale: crustEstScale,
         establishmentRate: crustRate,
+        mortalityRate: crustMort,
         biomassMax: crustMax,
         dt: scale,
       });

@@ -234,6 +234,13 @@ export const config = {
   herbEstablishmentScale: 0.08,
   /** Biomass increment per seasonal band at p = 1 (kg DM·m⁻² / band). */
   herbEstablishmentRate: 0.35,
+  /**
+   * Fraction of (biomass − capacity) closed per seasonal band when over
+   * capacity (L3). Herbaceous green tissue dies over weeks under drought
+   * (nature-study heat-dial / winter dieback) — faster than woody, slower
+   * than crust mats.
+   */
+  herbMortalityRate: 0.5,
   /** Resource-derived capacity at HSI = 1 (kg DM·m⁻²) — not fixed K (ES-006). */
   herbBiomassMax: 2.5,
 
@@ -243,6 +250,8 @@ export const config = {
    */
   strandEstablishmentScale: 0.08,
   strandEstablishmentRate: 0.35,
+  /** Herbaceous shore guild — same dieback timescale as herb (winter dieback). */
+  strandMortalityRate: 0.5,
   strandBiomassMax: 2.5,
   /** Pore salt at/below which strand f_salinity stays 1 (herb fails earlier). */
   strandSalinityFullThrough: 0.9,
@@ -255,6 +264,8 @@ export const config = {
    */
   binderEstablishmentScale: 0.08,
   binderEstablishmentRate: 0.35,
+  /** Herbaceous binder — same dieback timescale as herb (winter dieback). */
+  binderMortalityRate: 0.5,
   binderBiomassMax: 2.5,
   /** Loam still admits sparse binder; clay/rock stay at 0. */
   binderLoamSandFactor: 0.25,
@@ -266,6 +277,8 @@ export const config = {
    */
   marshEstablishmentScale: 0.08,
   marshEstablishmentRate: 0.35,
+  /** Herbaceous marsh — same dieback timescale as herb (winter dieback). */
+  marshMortalityRate: 0.5,
   marshBiomassMax: 2.5,
   /** Pore salt at/below which marsh f_salinity stays 1 (herb fails earlier). */
   marshSalinityFullThrough: 0.9,
@@ -279,6 +292,11 @@ export const config = {
    */
   shrubEstablishmentScale: 0.08,
   shrubEstablishmentRate: 0.3,
+  /**
+   * Woody stems persist across seasons; dieback is leaf/fine-twig, not
+   * structural (Slice N10 woody shrub card) — slower than herbaceous guilds.
+   */
+  shrubMortalityRate: 0.15,
   shrubBiomassMax: 2.5,
   /** Mild (1°C) zeros shrub; warm (16°C) opens — stricter than herb (−4/12). */
   shrubTempKillC: 1,
@@ -293,6 +311,11 @@ export const config = {
    */
   crustEstablishmentScale: 0.08,
   crustEstablishmentRate: 0.4,
+  /**
+   * Living crust / moss mats desiccate and lose cover within days–weeks when
+   * moisture collapses (Slice N11 crust card) — fastest guild dieback.
+   */
+  crustMortalityRate: 0.9,
   crustBiomassMax: 1.5,
 
   /**

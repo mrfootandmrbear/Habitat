@@ -1,0 +1,85 @@
+{
+  "scenario": "dieback-lag",
+  "metrics": {
+    "lag.afterOneBand": {
+      "value": 1.5,
+      "abs": 0.00001
+    },
+    "lag.capacityLow": {
+      "value": 0.5,
+      "abs": 1e-9
+    },
+    "lag.excess": {
+      "value": 1,
+      "abs": 0.00001
+    },
+    "lag.worldAfterOne": {
+      "value": 1.25,
+      "abs": 0.00001
+    },
+    "lag.worldCapacity": {
+      "value": 0,
+      "abs": 0.00001
+    },
+    "lag.hsiBefore": {
+      "value": 1,
+      "abs": 0.00001
+    },
+    "lag.hsiAfter": {
+      "value": 0,
+      "abs": 0.00001
+    },
+    "order.crustBands": {
+      "value": 1,
+      "abs": 0
+    },
+    "order.herbBands": {
+      "value": 2,
+      "abs": 0
+    },
+    "order.shrubBands": {
+      "value": 7,
+      "abs": 0
+    },
+    "pulse.shortLived": {
+      "value": 1.8357332286075718,
+      "abs": 0.00001
+    },
+    "pulse.longLived": {
+      "value": 0.5078125,
+      "abs": 0.00001
+    },
+    "asym.lossBands": {
+      "value": 2,
+      "abs": 0
+    },
+    "asym.recoveryBands": {
+      "value": 3,
+      "abs": 0
+    },
+    "delta.hasLag": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.guildOrdered": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.ridesShort": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.losesLong": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.recoverySlower": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashMatch": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

@@ -57,7 +57,7 @@ import {
 } from "../scenario/ScenarioSession";
 import { soilEncodingDelta } from "../../ui/cutaway";
 import { intertidalEncodingDelta } from "../../ui/terrainEncoding";
-import { seedPressureAt } from "../habitat/arrivalComposition";
+import { seedPressureAt, nextHerbBiomass } from "../habitat/arrivalComposition";
 import {
   BranchSession,
   branchMoistureEncodingDelta,
@@ -4623,6 +4623,232 @@ export function probeSpreadFront(): ProbeResult {
   };
 }
 
+/**
+ * Slice L3 — dieback-lag (S-007 Locked; S-008 Current; ES-006 Locked; N-004).
+ *
+ * Death used to be `min(capacity, biomass + growth)`, so an HSI collapse snapped
+ * biomass to the new capacity in one seasonal band. Loss is now a first-order
+ * rate toward capacity. This probe measures that the lag is real, guild-ordered,
+ * and asymmetric with recovery — the first biological hysteresis (S-008).
+ *
+ *  1. lag     — after HSI 1→0.2, standing biomass still exceeds capacity for
+ *               at least one band (the old clamp would already be at capacity).
+ *  2. order   — bands-to-half-biomass: crust < herb < shrub (N-004 referents).
+ *  3. pulse   — a one-band drought is ridden out; an eight-band drought is not.
+ *  4. asym    — recovery bands from the drought floor past half-max exceed loss
+ *               bands from full down to half.
+ */
+export function probeDiebackLag(): ProbeResult {
+  const max: number = config.herbBiomassMax;
+  const hsiLow = 0.2;
+  const capacityLow = max * hsiLow;
+
+  const step = (args: {
+    biomass: number;
+    hsi: number;
+    mortalityRate: number;
+    establishmentRate?: number;
+    seedBank?: number;
+    biomassMax?: number;
+  }): number =>
+    nextHerbBiomass({
+      biomass: args.biomass,
+      seedBank: args.seedBank ?? 40,
+      habitatSuitability: args.hsi,
+      establishmentScale: 0.08,
+      establishmentRate: args.establishmentRate ?? config.herbEstablishmentRate,
+      mortalityRate: args.mortalityRate,
+      biomassMax: args.biomassMax ?? max,
+      dt: 1,
+    });
+
+  const bandsToHalf = (
+    start: number,
+    mortalityRate: number,
+    biomassMax: number = max,
+  ): number => {
+    let b = start;
+    const half = start * 0.5;
+    for (let n = 1; n <= 200; n++) {
+      b = step({ biomass: b, hsi: hsiLow, mortalityRate, biomassMax });
+      if (b <= half) return n;
+    }
+    throw new Error("dieback-lag: never reached half biomass");
+  };
+
+  // --- 1. Lag: one band after collapse still carries excess.
+  const afterOne = step({
+    biomass: max,
+    hsi: hsiLow,
+    mortalityRate: config.herbMortalityRate,
+  });
+  if (!(afterOne > capacityLow)) {
+    throw new Error(
+      `dieback-lag: no standing excess after one band (${afterOne} ≤ ${capacityLow}) — clamp regress`,
+    );
+  }
+  if (!(afterOne < max)) {
+    throw new Error(`dieback-lag: biomass did not decline (${afterOne})`);
+  }
+
+  // --- 2. Guild order.
+  const crustBands = bandsToHalf(
+    config.crustBiomassMax,
+    config.crustMortalityRate,
+    config.crustBiomassMax,
+  );
+  const herbBands = bandsToHalf(max, config.herbMortalityRate);
+  const shrubBands = bandsToHalf(max, config.shrubMortalityRate);
+  if (!(crustBands < herbBands && herbBands < shrubBands)) {
+    throw new Error(
+      `dieback-lag: guild order broken (crust=${crustBands}, herb=${herbBands}, shrub=${shrubBands})`,
+    );
+  }
+
+  // --- 3. Short vs long drought pulse.
+  let shortLived = max;
+  shortLived = step({
+    biomass: shortLived,
+    hsi: hsiLow,
+    mortalityRate: config.herbMortalityRate,
+  });
+  shortLived = step({
+    biomass: shortLived,
+    hsi: 1,
+    mortalityRate: config.herbMortalityRate,
+  });
+  if (!(shortLived > capacityLow + 0.5)) {
+    throw new Error(
+      `dieback-lag: short drought not ridden out (${shortLived})`,
+    );
+  }
+
+  let longLived = max;
+  for (let i = 0; i < 8; i++) {
+    longLived = step({
+      biomass: longLived,
+      hsi: hsiLow,
+      mortalityRate: config.herbMortalityRate,
+    });
+  }
+  if (!(longLived < capacityLow + 0.15 && longLived >= capacityLow)) {
+    throw new Error(
+      `dieback-lag: long drought did not settle near capacity (${longLived})`,
+    );
+  }
+
+  // --- 4. Recovery slower than loss.
+  let recovering = capacityLow;
+  const halfMax = max * 0.5;
+  let recoveryBands = 0;
+  for (let n = 1; n <= 200; n++) {
+    recovering = step({
+      biomass: recovering,
+      hsi: 1,
+      mortalityRate: config.herbMortalityRate,
+      seedBank: 1e6,
+    });
+    if (recovering >= halfMax) {
+      recoveryBands = n;
+      break;
+    }
+  }
+  if (recoveryBands === 0) {
+    throw new Error("dieback-lag: recovery never reached half-max");
+  }
+  if (!(recoveryBands > herbBands)) {
+    throw new Error(
+      `dieback-lag: recovery (${recoveryBands}) not slower than loss (${herbBands})`,
+    );
+  }
+
+  // WorldState path: moisture collapse drives HSI, then establishment declines.
+  const world = new WorldState(generateMountain(8, 8, 2, 1));
+  world.vegCover.fill(0);
+  world.herbBiomass.fill(max);
+  world.soilDepth.fill(config.hsiDepthRefMeters);
+  world.groundwaterStorage.fill(config.hsiGwRefMeters);
+  world.soilMoisture.fill(config.soilPorosity);
+  world.runHabitatStep(1);
+  const hsiBefore = world.getHabitatSuitability(4, 4);
+  if (!(hsiBefore > 0.9)) {
+    throw new Error(`dieback-lag: setup HSI too low (${hsiBefore})`);
+  }
+  world.soilMoisture.fill(0);
+  world.runHabitatStep(1);
+  const hsiAfter = world.getHabitatSuitability(4, 4);
+  if (!(hsiAfter < 0.25)) {
+    throw new Error(`dieback-lag: drought did not collapse HSI (${hsiAfter})`);
+  }
+  const capacityWorld = max * hsiAfter;
+  world.runHerbEstablishmentStep(1);
+  const worldAfterOne = world.getHerbBiomass(4, 4);
+  if (!(worldAfterOne > capacityWorld)) {
+    throw new Error(
+      `dieback-lag: WorldState path snapped to capacity (${worldAfterOne})`,
+    );
+  }
+
+  // Determinism: identical collapse schedule → identical biomass trajectory.
+  const run = () => {
+    let b = max;
+    for (let i = 0; i < 5; i++) {
+      b = step({
+        biomass: b,
+        hsi: hsiLow,
+        mortalityRate: config.herbMortalityRate,
+      });
+    }
+    return b;
+  };
+  const a = run();
+  const b = run();
+  if (a !== b) {
+    throw new Error("dieback-lag: non-deterministic decline");
+  }
+
+  return {
+    scenario: "dieback-lag",
+    records: [
+      {
+        label: "lag",
+        afterOneBand: afterOne,
+        capacityLow,
+        excess: afterOne - capacityLow,
+        worldAfterOne,
+        worldCapacity: capacityWorld,
+        hsiBefore,
+        hsiAfter,
+      },
+      {
+        label: "order",
+        crustBands,
+        herbBands,
+        shrubBands,
+      },
+      {
+        label: "pulse",
+        shortLived,
+        longLived,
+      },
+      {
+        label: "asym",
+        lossBands: herbBands,
+        recoveryBands,
+      },
+      {
+        label: "delta",
+        hasLag: afterOne > capacityLow ? 1 : 0,
+        guildOrdered: crustBands < herbBands && herbBands < shrubBands ? 1 : 0,
+        ridesShort: shortLived > capacityLow + 0.5 ? 1 : 0,
+        losesLong: longLived < capacityLow + 0.15 ? 1 : 0,
+        recoverySlower: recoveryBands > herbBands ? 1 : 0,
+        hashMatch: a === b ? 1 : 0,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -4638,6 +4864,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "disturbance-recovery": probeDisturbanceRecovery,
   "arrival-earned": probeArrivalEarned,
   "spread-front": probeSpreadFront,
+  "dieback-lag": probeDiebackLag,
   "living-hollow": probeLivingHollow,
   "island-drainage": probeIslandDrainage,
   "tidal-envelope": probeTidalEnvelope,

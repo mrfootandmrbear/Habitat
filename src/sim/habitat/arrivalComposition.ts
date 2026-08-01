@@ -242,8 +242,13 @@ export function establishmentProbability(
 }
 
 /**
- * Continuous biomass increment toward resource-derived capacity (ES-006).
- * Capacity = herbBiomassMax · HSI — never a fixed ecological K.
+ * Continuous biomass toward resource-derived capacity (ES-006).
+ * Capacity = biomassMax · HSI — never a fixed ecological K.
+ *
+ * Below capacity: establishment growth (unchanged).
+ * Above capacity: first-order decline
+ *   biomass -= mortalityRate · (biomass − capacity) · dt
+ * so loss is fast but finite (L3 / S-007) — not an instant clamp.
  */
 export function nextHerbBiomass(args: {
   biomass: number;
@@ -251,20 +256,31 @@ export function nextHerbBiomass(args: {
   habitatSuitability: number;
   establishmentScale: number;
   establishmentRate: number;
+  /** Fraction of excess closed per seasonal band when biomass > capacity. */
+  mortalityRate: number;
   biomassMax: number;
   dt: number;
 }): number {
   const hsi = clamp01(args.habitatSuitability);
   const capacity = Math.max(0, args.biomassMax) * hsi;
+  const biomass = Math.max(0, args.biomass);
+  const dt = Math.max(0, args.dt);
+
+  if (biomass > capacity) {
+    const excess = biomass - capacity;
+    const declined =
+      biomass - Math.max(0, args.mortalityRate) * excess * dt;
+    // Euler can overshoot when m·dt > 1; never fall below capacity in one step.
+    return Math.max(capacity, declined);
+  }
+
   const p = establishmentProbability(
     args.seedBank,
     hsi,
     args.establishmentScale,
   );
-  const growth =
-    p * Math.max(0, args.establishmentRate) * Math.max(0, args.dt);
-  const next = Math.min(capacity, Math.max(0, args.biomass + growth));
-  return next;
+  const growth = p * Math.max(0, args.establishmentRate) * dt;
+  return Math.min(capacity, biomass + growth);
 }
 
 /**
