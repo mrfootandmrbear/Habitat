@@ -18,6 +18,7 @@ import {
   formatSimElapsed,
   isSustainable,
   rateById,
+  rateDescription,
   stepsPerFrame,
   sustainableRates,
   timeScaleFor,
@@ -121,6 +122,24 @@ describe("the ceiling is honest (L6 / L1)", () => {
   it("the fastest offered rate is a week per second", () => {
     expect(sustainableRates().at(-1)!.id).toBe("week");
     expect(stepsPerFrame(rateById("week"))).toBeCloseTo(11.2, 6);
+  });
+
+  it("the 'fastest sustains' suffix is derived from sustainableRates, not typed onto week (BUILD_GUIDE §4.52)", () => {
+    expect(rateDescription(rateById("week"))).toContain(
+      "the fastest this machine sustains",
+    );
+    expect(rateDescription(rateById("day"))).not.toContain("sustains");
+    // At a lower fps the ceiling drops below week — the suffix must move
+    // with it, not stay hardcoded to whichever rate held it at 60fps.
+    const lowFps = 5;
+    expect(sustainableRates(lowFps).at(-1)!.id).not.toBe("week");
+    const slowerFastest = sustainableRates(lowFps).at(-1)!;
+    expect(rateDescription(slowerFastest, lowFps)).toContain(
+      "the fastest this machine sustains",
+    );
+    expect(rateDescription(rateById("week"), lowFps)).not.toContain(
+      "sustains",
+    );
   });
 });
 

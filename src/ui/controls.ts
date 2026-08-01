@@ -33,7 +33,7 @@ import {
   SUBSTRATE_SAND,
   type DepositMaterialId,
 } from "../sim/terrain/substrates";
-import { sustainableRates, type TimeRateId } from "./timeRates";
+import { sustainableRates, rateDescription, type TimeRateId } from "./timeRates";
 
 /** Rate ids and their sim-time-per-wall-second meaning live in `timeRates.ts`. */
 export type TimeRate = TimeRateId;
@@ -409,8 +409,9 @@ export function mountControls(
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = rate.label;
-    btn.setAttribute("aria-label", rate.description);
-    btn.title = rate.description;
+    const description = rateDescription(rate);
+    btn.setAttribute("aria-label", description);
+    btn.title = description;
     btn.addEventListener("click", () => handlers.onTimeRate(rate.id));
     timeGroup.appendChild(btn);
     rateButtons.set(rate.id, btn);

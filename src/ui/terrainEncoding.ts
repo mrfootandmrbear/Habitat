@@ -7,12 +7,11 @@
  */
 
 import {
-  SUBSTRATE_CLAY,
   SUBSTRATE_LOAM,
-  SUBSTRATE_ROCK,
-  SUBSTRATE_SAND,
+  SUBSTRATES,
   substrateProps,
 } from "../sim/terrain/substrates";
+import { rgbDistance } from "./colorDistance";
 
 export type TerrainRgb = readonly [number, number, number];
 
@@ -22,8 +21,16 @@ export type TerrainRgb = readonly [number, number, number];
 export const WET: TerrainRgb = [0x4a / 255, 0x5c / 255, 0x3a / 255];
 export const VEG: TerrainRgb = [0x3a / 255, 0x7a / 255, 0x3a / 255];
 export const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
-/** Wet sand / mud foreshore — readable against dry land (Slice 17). */
-export const INTERTIDAL: TerrainRgb = [0xc4 / 255, 0x9a / 255, 0x5e / 255];
+/**
+ * Wet sand / mud foreshore — readable against dry land (Slice 17). Darker
+ * and cooler than the old `0xc49a5e`, which sat ~0.07 unit-RGB from
+ * occupantEncoding.ts's BINDER (`0xc4a24e`) — two different quantities
+ * (terrain tidal state vs. occupant guild cover) that co-occur on the shore
+ * and read as the same khaki. Physically defensible too: wet mud is darker
+ * and greyer than dry sand. Minimal collision fix only — the full six-guild
+ * CVD-safe palette redesign is C-026, filed separately (BUILD_GUIDE §4.52).
+ */
+export const INTERTIDAL: TerrainRgb = [0x9c / 255, 0x88 / 255, 0x68 / 255];
 /** Pale salt crust — ground still tasting of the sea (C-018). */
 export const SALT: TerrainRgb = [0xe8 / 255, 0xde / 255, 0xc4 / 255];
 
@@ -63,17 +70,31 @@ export function defaultTerrainRgb(
   // Stronger green only where soil is also wet — dry vegetation reads muted.
   // Salt washes the green so a salty hollow does not read as a healthy lawn.
   const vegAmount = coverT * (0.28 + 0.62 * soilT) * (1 - saltT * 0.9);
-  let rgb = lerpRgb(wetBase, VEG, vegAmount);
-  if (scarT > 0) {
-    rgb = lerpRgb(rgb, SCAR, Math.min(0.85, scarT * 0.9));
+  const baseRgb = lerpRgb(wetBase, VEG, vegAmount);
+
+  // Categorical overlays (burned / foreshore / salty) blend proportionally
+  // to their own weight instead of layering sequentially. Sequential lerps
+  // let whichever overlay applies last (salt, up to 0.78) wash out an
+  // earlier one (scar) almost entirely even though both states are still
+  // true — two things the player is meant to read, masked by a third. A
+  // single active overlay reproduces the old lerp exactly (BUILD_GUIDE §4.52).
+  const overlays: { color: TerrainRgb; weight: number }[] = [];
+  if (scarT > 0) overlays.push({ color: SCAR, weight: Math.min(0.85, scarT * 0.9) });
+  if (intertidal) overlays.push({ color: INTERTIDAL, weight: 0.62 });
+  if (saltT > 0) overlays.push({ color: SALT, weight: Math.min(0.78, saltT * 0.7) });
+  if (overlays.length === 0) return baseRgb;
+
+  const sumWeight = overlays.reduce((sum, o) => sum + o.weight, 0);
+  let overlayColor: TerrainRgb = [0, 0, 0];
+  for (const o of overlays) {
+    const share = o.weight / sumWeight;
+    overlayColor = [
+      overlayColor[0] + o.color[0] * share,
+      overlayColor[1] + o.color[1] * share,
+      overlayColor[2] + o.color[2] * share,
+    ];
   }
-  if (intertidal) {
-    rgb = lerpRgb(rgb, INTERTIDAL, 0.62);
-  }
-  if (saltT > 0) {
-    rgb = lerpRgb(rgb, SALT, Math.min(0.78, saltT * 0.7));
-  }
-  return rgb;
+  return lerpRgb(baseRgb, overlayColor, sumWeight);
 }
 
 export type TerrainEncodingSample = {
@@ -108,7 +129,7 @@ export function terrainEncodingDelta(
     b.salinity ?? 0,
     b.material ?? SUBSTRATE_LOAM,
   );
-  return Math.hypot(ca[0] - cb[0], ca[1] - cb[1], ca[2] - cb[2]);
+  return rgbDistance(ca, cb);
 }
 
 /** Color distance between dry land and intertidal foreshore tint (Tier-P floor). */
@@ -149,36 +170,25 @@ export function saltMemoryEncodingDelta(porosity: number): number {
 }
 
 /**
- * Color distance between dry sand and dry rock under the same moisture/cover
- * (Tier-P floor for C-009 default-view substrate contrast, including rock).
+ * Color distance between the driest-reading pair of substrates under the
+ * same moisture/cover, each read at its OWN porosity — not sand-vs-clay and
+ * sand-vs-rock alone (clay↔rock went unchecked, so two of four substrates
+ * could have been indistinguishable and this floor would still pass), and
+ * not a hardcoded porosity shared by every sample (the real render computes
+ * `soilT = moisture / porosity` per-cell from that cell's own material — a
+ * low-porosity rock at a given moisture reads far wetter than a hardcoded
+ * 0.4 simulated, BUILD_GUIDE §4.52).
  */
 export function substrateEncodingDelta(): number {
-  const porosity = 0.4;
-  const sandClay = terrainEncodingDelta(
-    {
-      moisture: 0.05,
-      cover: 0,
-      material: SUBSTRATE_SAND,
-    },
-    {
-      moisture: 0.05,
-      cover: 0,
-      material: SUBSTRATE_CLAY,
-    },
-    porosity,
-  );
-  const sandRock = terrainEncodingDelta(
-    {
-      moisture: 0.05,
-      cover: 0,
-      material: SUBSTRATE_SAND,
-    },
-    {
-      moisture: 0.05,
-      cover: 0,
-      material: SUBSTRATE_ROCK,
-    },
-    porosity,
-  );
-  return Math.min(sandClay, sandRock);
+  let minDelta = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < SUBSTRATES.length; i++) {
+    for (let j = i + 1; j < SUBSTRATES.length; j++) {
+      const matA = SUBSTRATES[i]!;
+      const matB = SUBSTRATES[j]!;
+      const rgbA = defaultTerrainRgb(0.05, matA.porosity, 0, 0, false, 0, matA.id);
+      const rgbB = defaultTerrainRgb(0.05, matB.porosity, 0, 0, false, 0, matB.id);
+      minDelta = Math.min(minDelta, rgbDistance(rgbA, rgbB));
+    }
+  }
+  return minDelta;
 }

@@ -5,6 +5,8 @@
  * contrast is measured via occupantEncodingDelta / shoreInteriorOccupantDelta.
  */
 
+import { rgbDistance } from "./colorDistance";
+
 export type OccupantRgb = readonly [number, number, number];
 
 const BARE: OccupantRgb = [0x8b / 255, 0x73 / 255, 0x55 / 255];
@@ -30,8 +32,10 @@ export function herbBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  // Emphasize early shoots so first arrival clears the perceptual floor.
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  // Emphasize early shoots (concave sqrt) so first arrival clears the
+  // perceptual floor, but stay injective all the way to t=1 — no overshoot
+  // multiplier, or the ramp saturates before biomass does (BUILD_GUIDE §4.52).
+  const u = Math.sqrt(t);
   return [lerp(BARE[0], SHOOT[0], u), lerp(BARE[1], SHOOT[1], u), lerp(BARE[2], SHOOT[2], u)];
 }
 
@@ -42,7 +46,7 @@ export function occupantEncodingDelta(
 ): number {
   const a = herbBiomassRgb(beforeBiomass, biomassMax);
   const b = herbBiomassRgb(afterBiomass, biomassMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /**
@@ -52,7 +56,7 @@ export function occupantEncodingDelta(
 export function shootVisibility(biomass: number, biomassMax: number): number {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
   if (t < 0.008) return 0;
-  return Math.min(1, Math.sqrt(t) * 1.35);
+  return Math.sqrt(t);
 }
 
 /** Strand mat tint — olive vs herb shoot green (C-018 Tier-P). */
@@ -61,7 +65,7 @@ export function strandBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  const u = Math.sqrt(t);
   return [
     lerp(BARE[0], STRAND[0], u),
     lerp(BARE[1], STRAND[1], u),
@@ -75,7 +79,7 @@ export function binderBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  const u = Math.sqrt(t);
   return [
     lerp(BARE[0], BINDER[0], u),
     lerp(BARE[1], BINDER[1], u),
@@ -89,7 +93,7 @@ export function marshBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  const u = Math.sqrt(t);
   return [
     lerp(BARE[0], MARSH[0], u),
     lerp(BARE[1], MARSH[1], u),
@@ -103,7 +107,7 @@ export function shrubBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  const u = Math.sqrt(t);
   return [
     lerp(BARE[0], SHRUB[0], u),
     lerp(BARE[1], SHRUB[1], u),
@@ -117,7 +121,7 @@ export function crustBiomassRgb(
   biomassMax: number,
 ): OccupantRgb {
   const t = Math.min(1, Math.max(0, biomass / Math.max(biomassMax, 1e-6)));
-  const u = Math.min(1, Math.sqrt(t) * 1.35);
+  const u = Math.sqrt(t);
   return [
     lerp(BARE[0], CRUST[0], u),
     lerp(BARE[1], CRUST[1], u),
@@ -133,7 +137,7 @@ export function guildOccupantEncodingDelta(
 ): number {
   const a = herbBiomassRgb(biomass, herbMax);
   const b = strandBiomassRgb(biomass, strandMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /** Encoding Δ between strand olive and binder khaki at equal biomass. */
@@ -144,7 +148,7 @@ export function binderOccupantEncodingDelta(
 ): number {
   const a = strandBiomassRgb(biomass, strandMax);
   const b = binderBiomassRgb(biomass, binderMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /** Encoding Δ between binder khaki and marsh teal at equal biomass. */
@@ -155,7 +159,7 @@ export function marshOccupantEncodingDelta(
 ): number {
   const a = binderBiomassRgb(biomass, binderMax);
   const b = marshBiomassRgb(biomass, marshMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /** Encoding Δ between marsh teal and shrub forest-green at equal biomass. */
@@ -166,7 +170,7 @@ export function shrubOccupantEncodingDelta(
 ): number {
   const a = marshBiomassRgb(biomass, marshMax);
   const b = shrubBiomassRgb(biomass, shrubMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /** Encoding Δ between shrub forest-green and crust sage at equal biomass. */
@@ -177,7 +181,7 @@ export function crustOccupantEncodingDelta(
 ): number {
   const a = shrubBiomassRgb(biomass, shrubMax);
   const b = crustBiomassRgb(biomass, crustMax);
-  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  return rgbDistance(a, b);
 }
 
 /**

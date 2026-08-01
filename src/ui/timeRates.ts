@@ -98,8 +98,7 @@ export const TIME_RATE_LADDER: TimeRateSpec[] = [
   {
     id: "week",
     label: "1 week/s",
-    description:
-      "Seven simulated days per second — the fastest this machine sustains",
+    description: "Seven simulated days per second",
     simSecondsPerWallSecond: 7 * SIM_SECONDS_PER_DAY,
   },
   {
@@ -141,6 +140,23 @@ export function isSustainable(rate: TimeRateSpec, fps = 60): boolean {
 /** The offered ladder — the honest ceiling, not a hand-picked end of the list. */
 export function sustainableRates(fps = 60): TimeRateSpec[] {
   return TIME_RATE_LADDER.filter((r) => isSustainable(r, fps));
+}
+
+/**
+ * Button copy for a rate, including the "fastest sustainable" suffix when
+ * this rate actually is the fastest one currently offered — derived from
+ * `sustainableRates()` like every other label here, not hardcoded to a
+ * specific rate id (BUILD_GUIDE §4.52). On a machine that only sustains
+ * `month` instead of `week`, the suffix moves with it instead of going stale.
+ */
+export function rateDescription(rate: TimeRateSpec, fps = 60): string {
+  const offered = sustainableRates(fps);
+  const fastest = offered[offered.length - 1];
+  const isFastestSustained =
+    fastest?.id === rate.id && rate.simSecondsPerWallSecond > 0;
+  return isFastestSustained
+    ? `${rate.description} — the fastest this machine sustains`
+    : rate.description;
 }
 
 export function rateById(id: TimeRateId): TimeRateSpec {

@@ -1,0 +1,18 @@
+{
+  "id": "encoding-delta",
+  "title": "Encoding delta correctness (U-003 / D-007)",
+  "simLoop": "none new — presentation/verification-proxy correctness only; no WorldState field changes (T-006)",
+  "gameLoop": "A guild's color keeps changing as its cover fills in past half of biomassMax instead of flattening to one shade at ~55%; a sand-binder mat on the crest reads as a visibly different color than the wet foreshore below it, not the same khaki.",
+  "registerIds": ["U-003", "D-007"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/presentation.proxy.test.ts",
+    "src/ui/timeRates.test.ts"
+  ],
+  "probes": [
+    "tidal-envelope"
+  ],
+  "fields": [],
+  "notebookSeed": "The ground keeps changing color as it fills in — it doesn't stop mid-way and hold one shade for the rest of the range.",
+  "tierO": "no owner-only question this closeout — machine half only (CI-judged: ramp injectivity, luminance-weighted delta floors, cross-file collision check, overlay-order proportionality, substrate all-pairs check, derived rate label); D-007 clip gate does not apply since no new Process was registered. C-026 (CVD-safe palette redesign) stays Open, owner-judged, not closed by this slice."
+}

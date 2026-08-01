@@ -147,15 +147,19 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
   vec3 wetBase = mix(base, uWetColor, soilT);
   float vegAmount = clamp(cover * (0.28 + 0.62 * soilT) * (1.0 - salinity * 0.9), 0.0, 1.0);
   vec3 col = mix(wetBase, uVegColor, vegAmount);
-  if (scar > 0.0) {
-    col = mix(col, uScarColor, min(0.85, scar * 0.9));
-  }
+
+  // Categorical overlays blend proportionally to their own weight instead of
+  // layering sequentially, so a later one (salt) can't wash an earlier one
+  // (scar) out almost entirely when both are true at once. A single active
+  // overlay reproduces the old sequential mix exactly (BUILD_GUIDE §4.52).
   bool isForeshore = uHasSea > 0.5 && vFieldElev >= uSeaLevel && vFieldElev < uMeanHighWater;
-  if (isForeshore) {
-    col = mix(col, uIntertidalColor, 0.62);
-  }
-  if (salinity > 0.0) {
-    col = mix(col, uSaltColor, min(0.78, salinity * 0.7));
+  float scarW = scar > 0.0 ? min(0.85, scar * 0.9) : 0.0;
+  float intertidalW = isForeshore ? 0.62 : 0.0;
+  float saltW = salinity > 0.0 ? min(0.78, salinity * 0.7) : 0.0;
+  float overlaySum = scarW + intertidalW + saltW;
+  if (overlaySum > 0.0) {
+    vec3 overlayColor = (scarW * uScarColor + intertidalW * uIntertidalColor + saltW * uSaltColor) / overlaySum;
+    col = mix(col, overlayColor, min(1.0, overlaySum));
   }
 
   float pulse = sampleFieldBilinear(uErosionPulseTex, fUv, uFieldSize);

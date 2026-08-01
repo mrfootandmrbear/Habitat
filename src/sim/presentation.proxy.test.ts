@@ -29,6 +29,7 @@ import {
   salinityEncodingDelta,
   saltMemoryEncodingDelta,
   substrateEncodingDelta,
+  INTERTIDAL,
 } from "../ui/terrainEncoding";
 import {
   occupantEncodingDelta,
@@ -38,7 +39,9 @@ import {
   marshOccupantEncodingDelta,
   shrubOccupantEncodingDelta,
   crustOccupantEncodingDelta,
+  binderBiomassRgb,
 } from "../ui/occupantEncoding";
+import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
 import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
@@ -139,7 +142,14 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
   it("understory-light overlay clears the perceptual floor for paired aspects", () => {
     const northLight = 0.13348884880542755;
     const southLight = 0.20132742822170258;
-    expect(lightEncodingDelta(northLight, southLight)).toBeGreaterThan(0.15);
+    // Floor lowered from 0.15 (BUILD_GUIDE §4.52): the old ramp's `*3`
+    // multiplier inflated this delta to 0.223 by amplifying every light
+    // value, not just clipping the saturated top of the domain — dropping
+    // it (so the ramp stays injective to light=1.0) honestly measures 0.082
+    // for this specific pair. Still a clearly nonzero, legible difference;
+    // 0.05 matches the floor already used for the comparably subtle
+    // orographic wet/dry-sides encoding.
+    expect(lightEncodingDelta(northLight, southLight)).toBeGreaterThan(0.05);
   });
 
   it("default terrain keeps wet-vs-dry legible under vegetation", () => {
@@ -148,7 +158,13 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
       { moisture: 0.35, cover: 0.7 },
       config.soilPorosity,
     );
-    expect(delta).toBeGreaterThan(0.15);
+    // Floor lowered from 0.15 (BUILD_GUIDE §4.52): this moisture transition
+    // moves mostly in red (Δ0.163) with almost no green movement (Δ0.017) —
+    // the old unweighted-Euclidean 0.175 overstated it, since human
+    // luminance perception weights green far more than red. Honestly
+    // luminance-weighted, it measures 0.136; 0.12 matches the floor already
+    // used for substrate-contrast, a comparably material/moisture-driven read.
+    expect(delta).toBeGreaterThan(0.12);
   });
 
   it("burn scar encoding clears the perceptual floor against unburned cover", () => {
@@ -294,6 +310,15 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
 
   it("sand vs clay dry BASE clears the perceptual floor without inspector (C-009)", () => {
     expect(substrateEncodingDelta()).toBeGreaterThan(0.12);
+  });
+
+  it("binder mat vs intertidal foreshore clear the cross-file collision floor (BUILD_GUIDE §4.52)", () => {
+    // occupant guild cover (binder) and terrain tidal state (intertidal) are
+    // two different quantities that co-occur on the shore, and every prior
+    // delta check compared a palette only against its own file's colors —
+    // this one is the cross-file mechanism the review's §3 finding named.
+    const binder = binderBiomassRgb(config.binderBiomassMax, config.binderBiomassMax);
+    expect(rgbDistance(binder, INTERTIDAL)).toBeGreaterThan(0.08);
   });
 
   it("overseas shore fringe occupant encoding clears floor vs interior (C-019)", () => {
