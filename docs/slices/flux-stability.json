@@ -1,0 +1,18 @@
+{
+  "id": "flux-stability",
+  "title": "Surface-flux stability guard (T-001 / H-004)",
+  "simLoop": "fluxStep's per-face flux had no cap relative to the head difference driving it, so two deep adjacent columns with a modest head difference could equalize past level and reverse sign next step (checkerboard sloshing, the standard failure mode of an explicit virtual-pipe scheme with no CFL-style bound). Separately, localFlow's roughness term had no floor, so a zero or uninitialized roughness cell could run at up to 300x base flow. Fixed by capping per-face flux at diff*0.5 (the exact one-step equalization bound, independent of tuning) ahead of the existing total-outflow cap, and flooring effective roughness at baseRoughness — which every production write to surface.roughness already respects, so the floor is a structural guard, not a behavior change.",
+  "gameLoop": "A pond next to a lower, nearly-full neighbor should settle toward a shared level and stay there, not keep sloshing back and forth between the two cells every tick the way an unstable numerical scheme would.",
+  "registerIds": ["T-001", "H-004"],
+  "invariantClass": "Equilibrium",
+  "tests": [
+    "src/sim/fluxStability.test.ts"
+  ],
+  "probes": [],
+  "fields": [
+    "water.surfaceDepth",
+    "surface.roughness"
+  ],
+  "notebookSeed": "Water settles toward a shared level with its lower neighbor and stays there — it doesn't overshoot and slosh back.",
+  "tierO": "no owner-only question this closeout — machine half only (CI-judged: two-column equalization case does not overshoot or oscillate over repeated steps; degenerate roughness input floors to baseRoughness); D-007 clip gate does not apply since no new Process was registered."
+}

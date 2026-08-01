@@ -1187,17 +1187,19 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.50 Slice — Surface-flux stability guard *(queued)*
+### 4.50 Slice — Surface-flux stability guard *(Done)*
 
 **Why this exists.** [Hydrology/geomorphology review](reviews/2026-07-31-hydrology-geomorphology-review.md) §2. Per-face flux (`fluxStep.ts:78`, `diff · localFlow · dt`) has no cap relative to the head difference driving it — `maxOutflowFraction` (`:89`) prevents negative depth but not overshoot, so two deep adjacent columns with a small height difference can equilibrate past level and reverse sign next step (checkerboard sloshing, the standard failure mode of an explicit virtual-pipe scheme with no CFL-style bound). This compounds with `localFlow = flowRate·(baseRoughness/max(n, 1e-4))` (`:51`): a zero or uninitialized roughness cell hits the floor and runs at 300× base flow, with nothing enforcing `n ≥ baseRoughness`.
 
 **Register:** T-001 Locked; H-004 Locked (watersheds retain history — an unstable flux scheme corrupts the storage state H-004 requires to persist correctly)
 **New Process?** no — adds a stability bound inside the existing flux step. D-007 clip gate does not apply.
 
-- [ ] Cap per-face flux to a fraction of the driving head difference (CFL-style bound: flux magnitude cannot exceed what would equalize the two columns in one step)
-- [ ] Clamp roughness at `n ≥ baseRoughness` before it enters `localFlow`, or floor `localFlow` itself, so no cell can run at the 300× degenerate rate
-- [ ] Test: a synthetic two-column head-difference case does not oscillate past equilibrium over repeated steps at the fastest offered rate
-- [ ] Composition + manifest; **Next-but-one:** §4.51 Coastal base-level & substrate coupling
+- [x] Cap per-face flux to a fraction of the driving head difference — `Math.min(diff · localFlow · dt, diff · 0.5)`; `diff · 0.5` is the exact one-step equalization bound for a same-footprint pair, not a tuned margin
+- [x] Roughness floored at `nCell = Math.max(roughness?.[i] ?? baseRoughness, Math.fround(baseRoughness))` — flooring against the raw f64 constant (the review's literal suggestion) instead moved the T-001 golden hash: `surface.roughness` is `Float32Array`-backed, so an ordinary bare-ground write of exactly `baseRoughness` rounds to a hair below the f64 constant on storage, and the raw-constant floor bumped every such cell. `Math.fround(baseRoughness)` matches what's actually stored, leaving real writes untouched and still catching a genuinely degenerate (zero/uninitialized) input. Full account: [flux-stability-composition.md](slices/flux-stability-composition.md).
+- [x] Test: a synthetic two-column head-difference case (`2.0`/`0.6`, `flowRate 10 · dt 1` — ~64× production) equalizes exactly, stays put over 5 repeated steps, a local reproduction of the pre-fix formula is shown to slosh sign every step on the same inputs, and the float32-rounding failure mode above is pinned directly — `src/sim/fluxStability.test.ts`
+- [x] Composition + manifest: [flux-stability-composition.md](slices/flux-stability-composition.md), [flux-stability.json](slices/flux-stability.json); **Next-but-one:** §4.51 Coastal base-level & substrate coupling
+
+**Baselines.** None moved in the shipped fix — traced both bounds against `fluxStep`'s only production call site (`flowRate 0.156`, `dt 1`, bare-ground roughness) and confirmed `localFlow · dt = 0.156 ≪ 0.5`, so the per-face cap cannot engage at any parameter combination the game exercises today. The roughness floor's first draft (raw-constant comparison) *did* move the T-001 golden hash and every `aNorm`-adjacent probe by ~1e-9, caught before commit, not after — see the float32-rounding note above. Full probe suite green and unchanged after the corrected floor.
 
 ---
 
@@ -1272,12 +1274,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Queued** — after HSI curves |
 | — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |
 | — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Done** |
-| — | Surface-flux stability guard | T-001, H-004 | §4.50 **Queued** — after flat-routing |
+| — | Surface-flux stability guard | T-001, H-004 | §4.50 **Done** |
 | — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Queued** — after flux guard |
 | — | Encoding delta correctness | U-003, D-007 | §4.52 **Queued** |
 | C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — not blocking §4.52 |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed. **§4.50 surface-flux stability guard** Done — per-face CFL cap + roughness floor inside `fluxStep`; no baseline moved (traced inert against every parameter the game currently exercises).
 
 **Executable tip is now the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
 

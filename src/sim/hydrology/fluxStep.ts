@@ -4,6 +4,22 @@
  * except at authored / derived outlet cells where off-map is absorbing (§10.2).
  * Ocean cells (C-015): land→ocean transfers and residual ocean depth go to
  * oceanExchange rather than accumulating on the ocean store.
+ *
+ * Per-face flux is capped at `diff * 0.5` — transferring more than half a
+ * head difference in one step would overshoot equalization and reverse the
+ * sign next step (hydrology/geomorphology review §2: explicit virtual-pipe
+ * schemes need a CFL-style bound or they checkerboard-slosh). Effective
+ * roughness is floored at `Math.fround(baseRoughness)`: every production
+ * write to `surface.roughness` (`WorldState.runVegetationStep`) is
+ * `baseRoughness + physical * vegRoughnessBonus` with `physical >= 0`, so
+ * real cells never fall below `baseRoughness` in exact arithmetic — but
+ * `surface.roughness` is Float32Array-backed, and storing an f64 value
+ * intended as exactly `baseRoughness` can round to a hair below the f64
+ * constant. Flooring against the raw constant would therefore misfire on
+ * ordinary bare-ground cells; flooring against its float32 rounding
+ * (`Math.fround`) matches what's actually stored and only catches a
+ * genuinely degenerate (zero / uninitialized) roughness input running at up
+ * to 300× base flow, not the everyday case.
  */
 const DX = [0, 1, 0, -1] as const;
 const DZ = [-1, 0, 1, 0] as const;
@@ -47,8 +63,12 @@ export function fluxStep(
     const x = i % width;
     const z = (i / width) | 0;
     const s = terrain[i]! + w;
-    const nCell = roughness?.[i] ?? baseRoughness;
-    const localFlow = flowRate * (baseRoughness / Math.max(nCell, 1e-4));
+    // `roughness` is Float32Array-backed, so a value the write path intends
+    // as exactly baseRoughness can round to a hair below the f64 constant on
+    // storage. Float baseRoughness itself before flooring so that rounding
+    // isn't mistaken for a genuinely degenerate (near-zero) input.
+    const nCell = Math.max(roughness?.[i] ?? baseRoughness, Math.fround(baseRoughness));
+    const localFlow = flowRate * (baseRoughness / nCell);
     const isOutlet = outletCells?.has(i) === true;
 
     let d0 = 0;
@@ -75,7 +95,8 @@ export function fluxStep(
       }
       const diff = s - neighborSurface;
       if (diff > 0) {
-        const d = diff * localFlow * dt;
+        // CFL-style bound: never move more than what equalizes this pair.
+        const d = Math.min(diff * localFlow * dt, diff * 0.5);
         if (dir === 0) d0 = d;
         else if (dir === 1) d1 = d;
         else if (dir === 2) d2 = d;
