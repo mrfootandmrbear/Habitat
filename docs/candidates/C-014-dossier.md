@@ -11,16 +11,17 @@
 | Raising the field raises the source | depth 0 → 0; 0.05 → 0.2; 0.125 → 0.5; ≥0.25 → 1 (saturation) | `src/audio/audio.test.ts` |
 | Removing the field → meaningful silence | dry grid → `level === 0`, `silent === true` (true 0, not a quiet floor) | same |
 | Write isolation | `audioObserver.writes === []`; sample + mutate snapshot copy leaves `stateHash` unchanged | same |
-| RNG isolation | AudioBus / webAudioHook contain no `Math.random` / sim RNG; same depths → identical mix | same |
-| No Web Audio in CI | Mix is pure data; `applyMixToGain(null)` is a no-op | `src/audio/webAudioHook.ts` |
+| RNG isolation | AudioBus mix path contains no `Math.random` / sim RNG; same depths → identical mix | same |
+| No Web Audio in CI | Mix is pure data; `applyMixToGain(null)` / `createAmbientBeds()` without AudioContext are no-ops | `src/audio/webAudioHook.ts` |
+| Live beds (Wave 0) | First user gesture creates `AudioContext` + two looping beds; gains driven by existing mixes; text-hint stand-ins retired | `webAudioHook.ts`, `main.ts`; composition `docs/slices/W0-composition.md` |
 
 **Notebook seed.** The hollow went quiet when the water left.
 
-**Slice.** A — Audio scaffold (`docs/slices/A.json`). C-014 remains **Open**; do not promote.
+**Slice.** A — Audio scaffold (`docs/slices/A.json`); live wire — Wave 0 (`docs/slices/W0.json`). C-014 remains **Open**; do not promote.
 
 ## AUD-003 recovery bed (Slice A+ — machine)
 
-Second bed, same contract: `veg.cover` mean → `ambient.life`. Bare → silent; 0.25 → 0.25; 0.5 → 0.5; ≥1 → 1. Independent of the water bed. Composition: `docs/slices/A-plus-composition.md`. Does **not** close C-014 owner half.
+Second bed, same contract: `veg.cover` mean → `ambient.life`. Bare → silent; 0.25 → 0.25; 0.5 → 0.5; ≥1 → 1. Independent of the water bed. Composition: `docs/slices/A-plus-composition.md`. Does **not** close C-014 owner half. Wave 0 feeds this mix into a real gain node.
 
 ## Owner half (2026-07-30 stewardship sitting) — partial
 
@@ -29,10 +30,10 @@ Second bed, same contract: `veg.cover` mean → `ambient.life`. Bare → silent;
 | Half | Result |
 |---|---|
 | Stillness-by-appearance | **Pass** (visual still when water left) |
-| Audible silence (AUD-002 / criterion) | **Unverified** — owner environment cannot hear |
+| Audible silence (AUD-002 / criterion) | **Unverified** — owner environment could not hear (beds were unwired) |
 | Lock | **Do not Lock** — DECISION_CONFORMANCE owner half for silence-as-ecological needs hearing |
 
-**Blocked on:** audio hardware / hearing environment for a future sitting. Leave **Open**.
+**Unblocked (Wave 0):** live ambient beds now exist. Owner sitting can hear. Leave **Open** until the question below is answered.
 
 ## Owner-only question (still outstanding)
 

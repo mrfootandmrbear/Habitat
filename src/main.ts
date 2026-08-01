@@ -64,7 +64,7 @@ import {
   snapshotCoverReader,
   snapshotSurfaceDepthReader,
 } from "./audio/AudioBus";
-import { applyMixToGain, type GainTarget } from "./audio/webAudioHook";
+import { applyMixToGain, unlockAmbientAudio, type GainTarget } from "./audio/webAudioHook";
 import { mountBriefChrome } from "./ui/briefChrome";
 import { mountNotebookChrome } from "./ui/notebookChrome";
 import {
@@ -87,12 +87,9 @@ viewport.id = "viewport";
 app.appendChild(viewport);
 
 const n = config.gridSize;
-const terrain = generateIsland(
-  n,
-  n,
-  config.mountainPeak,
-  config.terrainSeed,
-);
+/** Mutable island seed — T-001 artifact; default matches config.terrainSeed. */
+let islandSeed: number = config.terrainSeed;
+const terrain = generateIsland(n, n, config.mountainPeak, islandSeed);
 
 const initialSea: SeaLevelId = "mid";
 let world = new WorldState(terrain, {
@@ -105,7 +102,7 @@ paintSubstrateMosaic(
   world.width,
   world.height,
   world.oceanCells,
-  config.terrainSeed,
+  islandSeed,
 );
 let model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
@@ -118,6 +115,53 @@ let branchSession: BranchSession | null = null;
 function adoptWorld(next: typeof world): void {
   world = next;
   model = world.hydrologyModel;
+}
+
+/** Rebuild the island from a seed — same preserve type, new (or same) form (T-001 / F-003). */
+function regenerateIsland(seed: number): void {
+  islandSeed = seed | 0;
+  const nextTerrain = generateIsland(n, n, config.mountainPeak, islandSeed);
+  const next = new WorldState(nextTerrain, {
+    seaLevel: seaLevelById(seaLevelId).meters,
+    windUx: windById(windId).ux,
+    windUz: windById(windId).uz,
+  });
+  paintSubstrateMosaic(
+    next.soilMaterial.data,
+    next.width,
+    next.height,
+    next.oceanCells,
+    islandSeed,
+  );
+  next.setRainRegime(rainRegime);
+  next.setAirTemperature(heatById(heatId).airTempC);
+  next.setWind(windById(windId).ux, windById(windId).uz);
+  next.setSeasonPressure(seasonById(seasonId).pressure);
+  next.setErosionIntensity(erosionById(erosionId).intensity);
+  next.setTidalAmplitude(tideById(tideId).amplitudeMeters);
+  adoptWorld(next);
+  branchSession = null;
+  scenarioSession = null;
+  prediction.clear();
+  formMemory.clear();
+  editUndo.noteEditEpoch();
+  steps = 0;
+  clock.reset();
+  timeRate = "pause";
+  clock.setTimeScale(0);
+  ui.setTimeRate("pause");
+  ui.setBranchMode(false);
+  ui.setTerrainSeed(islandSeed);
+  oceanMesh.setSeaLevel(world.seaLevel);
+  windArrow.setWind(windId);
+  rebuildExtentCage();
+  syncMeshes();
+  syncWaterDisplay(0, true);
+  syncBriefChrome();
+  ui.setHint(
+    `Island seed ${islandSeed} — dig a channel, then run time`,
+  );
+  ui.setUndoEnabled(false);
 }
 
 const { scene, camera, renderer, controls } = createScene(viewport);
@@ -221,20 +265,20 @@ let seaLevelId: SeaLevelId = initialSea;
 let tideId: TideId = "off";
 let seasonId: SeasonId = "typical";
 let erosionId: ErosionId = "moderate";
-// Nearest nameable rate to the old default "1×" (which delivered 15 sim-hours
-// per wall-second and said none of that out loud) — L6.
-let timeRate: TimeRate = "day";
+// Wave 0: pause on arrival so the player meets a still world and undo stays
+// reachable (C-008 / C-013). Default tool dig so the first click does something.
+let timeRate: TimeRate = "pause";
 let inspector: InspectorLayer = "none";
-let sitingTool: SitingTool = "none";
+let sitingTool: SitingTool = "dig";
 let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
 let cutawayCell: { x: number; z: number } | null = null;
-/** Optional Web Audio gain — null until unlocked; mix still computed (C-014). */
+/** Optional Web Audio gain — null until unlocked on first gesture (Wave 0 / C-014). */
 let waterGainTarget: GainTarget | null = null;
 let lifeGainTarget: GainTarget | null = null;
-let lastAudioSilent: boolean | null = null;
-let lastLifeSilent: boolean | null = null;
+let audioUnlocked = false;
+let audioUnlocking = false;
 
 const clock = new SimClock({
   simDt: config.simDt,
@@ -337,12 +381,14 @@ const ui = mountControls(
     inspector,
     sitingTool,
     depositMaterial,
+    terrainSeed: islandSeed,
   },
   {
     onRainRegime: (id) => {
       rainRegime = id;
       world.setRainRegime(id);
       ui.setRainRegime(id);
+      tryUnlockAudio();
       ui.setHint(
         `Climate: ${rainRegimeById(id).label} — watch the sky build a spell`,
       );
@@ -442,21 +488,29 @@ const ui = mountControls(
       clock.reset();
       syncMeshes();
       syncWaterDisplay(0, true);
+      tryUnlockAudio();
+    },
+    onNewIsland: (seed) => {
+      tryUnlockAudio();
+      regenerateIsland(seed);
     },
     onTimeRate: (rate) => {
       timeRate = rate;
       clock.setTimeScale(timeScaleFor(rateById(rate)));
       ui.setTimeRate(rate);
+      tryUnlockAudio();
     },
     onInspector: (layer) => {
       inspector = layer;
       ui.setInspector(layer);
       syncMeshes();
+      tryUnlockAudio();
     },
     onSitingTool: (tool) => {
       sitingTool = tool;
       ui.setSitingTool(tool);
       controls.enabled = true;
+      tryUnlockAudio();
       if (tool === "none") {
         sitingCursor.setVisible(false);
         ui.setHint(
@@ -583,7 +637,12 @@ const ui = mountControls(
 
 const canvas = renderer.domElement;
 
+// Wave 0: dig is the default — show the site cursor and a still-world hint.
+sitingCursor.setVisible(true);
+ui.setHint("Paused · dig a channel, then run time — click unlocks sound");
+
 canvas.addEventListener("pointermove", (e) => {
+  tryUnlockAudio();
   if (sitingTool === "none") return;
   const cell = pickTerrainCell(e, canvas, camera, terrainMesh.mesh);
   if (!cell) {
@@ -603,11 +662,13 @@ canvas.addEventListener("pointermove", (e) => {
 });
 
 canvas.addEventListener("pointerdown", (e) => {
+  tryUnlockAudio();
   if (sitingTool === "none" || e.button !== 0) return;
   pointerDown = { x: e.clientX, y: e.clientY };
 });
 
 canvas.addEventListener("pointerup", (e) => {
+  tryUnlockAudio();
   if (sitingTool === "none" || e.button !== 0 || !pointerDown) {
     pointerDown = null;
     return;
@@ -678,18 +739,21 @@ function syncAudio(): void {
   );
   applyMixToGain(scape.water, waterGainTarget);
   applyMixToGain(scape.life, lifeGainTarget);
-  if (lastAudioSilent !== scape.water.silent) {
-    lastAudioSilent = scape.water.silent;
-    if (scape.water.silent && rainRegime === "dry") {
-      ui.setHint("The hollow went quiet when the water left.");
-    }
-  }
-  if (lastLifeSilent !== scape.life.silent) {
-    lastLifeSilent = scape.life.silent;
-    if (!scape.life.silent && scape.life.level >= 0.2) {
-      ui.setHint("The green came back, and the place sounded fuller.");
-    }
-  }
+  // Text hints that stood in for AUD-001/003 retired once beds exist (Wave 0).
+}
+
+/** First user gesture unlocks Web Audio (browser autoplay policy). */
+function tryUnlockAudio(): void {
+  if (audioUnlocked || audioUnlocking) return;
+  audioUnlocking = true;
+  void unlockAmbientAudio().then((beds) => {
+    audioUnlocking = false;
+    if (!beds) return;
+    waterGainTarget = beds.water;
+    lifeGainTarget = beds.life;
+    audioUnlocked = true;
+    syncAudio();
+  });
 }
 
 function rebuildExtentCage(): void {
@@ -870,6 +934,7 @@ function frame(now: number): void {
               : "predict";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
+      ` · seed ${islandSeed}` +
       ` · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
       (droppedSteps > 0 ? ` · dropped ${droppedSteps} — lower the rate` : "") +

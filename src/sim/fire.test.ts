@@ -60,6 +60,7 @@ describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
       expect(fireProcess.writes).not.toContain("veg.cover");
       expect(fireProcess.writes).not.toContain("fire.fuelLoad");
       expect(fireProcess.contributes).toContain("veg.cover");
+      expect(fireProcess.contributes).toContain("veg.biomass.herb");
       expect(fireProcess.contributes).toContain("fire.fuelLoad");
     });
   });
@@ -209,6 +210,53 @@ describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
       expect(Math.abs(fuelDelta - world.fuelConsumedLedger)).toBeLessThan(1e-4);
       // Cover reduced
       expect(totalCoverAfter).toBeLessThan(totalCoverBefore);
+    });
+
+    it("fire kills guild biomass at the same mortality as cover (Wave 0 / ES-004)", () => {
+      const world = new WorldState(new Grid2D(8, 8, 2));
+      world.fuelLoad.fill(4.0);
+      world.soilMoisture.fill(0.05);
+      world.vegCover.fill(1);
+      world.herbBiomass.fill(config.herbBiomassMax);
+      world.strandBiomass.fill(config.strandBiomassMax);
+      world.binderBiomass.fill(config.binderBiomassMax);
+      world.marshBiomass.fill(config.marshBiomassMax);
+      world.shrubBiomass.fill(config.shrubBiomassMax);
+      world.crustBiomass.fill(config.crustBiomassMax);
+
+      world.fireBurning.set(4, 4, 1);
+      world.runFireStep(1);
+
+      const survive = 1 - config.fireVegMortality;
+      const i = 4 * 8 + 4;
+      expect(world.vegCover.data[i]).toBeCloseTo(survive, 5);
+      expect(world.herbBiomass.data[i]).toBeCloseTo(
+        config.herbBiomassMax * survive,
+        5,
+      );
+      expect(world.strandBiomass.data[i]).toBeCloseTo(
+        config.strandBiomassMax * survive,
+        5,
+      );
+      expect(world.binderBiomass.data[i]).toBeCloseTo(
+        config.binderBiomassMax * survive,
+        5,
+      );
+      expect(world.marshBiomass.data[i]).toBeCloseTo(
+        config.marshBiomassMax * survive,
+        5,
+      );
+      expect(world.shrubBiomass.data[i]).toBeCloseTo(
+        config.shrubBiomassMax * survive,
+        5,
+      );
+      expect(world.crustBiomass.data[i]).toBeCloseTo(
+        config.crustBiomassMax * survive,
+        5,
+      );
+      // Corner is outside the one-step ring front — keeps full biomass.
+      expect(world.herbBiomass.data[0]).toBe(config.herbBiomassMax);
+      expect(world.vegCover.data[0]).toBe(1);
     });
 
     it("bounds: no NaN or out-of-range after fire", () => {

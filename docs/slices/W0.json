@@ -1,0 +1,41 @@
+{
+  "id": "W0",
+  "title": "Locked presentation debt (audio, fire→biomass, pause+dig, seed)",
+  "simLoop": "runFireStep already applied fireVegMortality to veg.cover but left all six veg.biomass.* fields untouched, so OccupantMesh (which reads guild biomass) kept every shoot standing on a burned cell. The same survive factor now multiplies herb/strand/binder/marsh/shrub/crust biomass on the active front; fireProcess.contributes lists those vegetation-owned fields. No new Process.",
+  "gameLoop": "The page loads paused with dig selected so the first click shapes ground and undo stays reachable; a first gesture unlocks two ambient beds driven by the existing AudioBus mixes; a seed field and New island button regenerate the same preserve type under T-001; a burn clears the cones you can see, not only the cover tint.",
+  "registerIds": [
+    "AUD-001",
+    "AUD-002",
+    "AUD-003",
+    "C-014",
+    "C-008",
+    "C-013",
+    "T-001",
+    "T-006",
+    "ES-004",
+    "N-004",
+    "F-003"
+  ],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/fire.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/audio/audio.test.ts"
+  ],
+  "probes": [
+    "burn-recover"
+  ],
+  "fields": [
+    "veg.cover",
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "fire.burning",
+    "fire.scar"
+  ],
+  "notebookSeed": "I lit the dry crest and the green that had been standing there was gone with the smoke — not just the tint on the ground.",
+  "tierO": "C-014 owner half remains Open and batched — When the water left, did the quiet feel like the place going still — or like the sound broke? — now hearable after 0a; do not promote. No other owner-only question this slice (pause/dig/seed/fire→biomass are machine or Locked-debt discharge). D-007 clip gate does not apply — no new Process."
+}

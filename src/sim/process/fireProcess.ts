@@ -11,8 +11,10 @@ import type { Process } from "./Process";
  * Gated on fuel load, fuel moisture (soil.moisture), and a slope factor that
  * saturates rather than growing without bound on sculpted relief.
  * Authored ignition only while C-003 is Open.
- * Cover kill is a contribute into vegetation-owned `veg.cover` (SIM §11),
- * not a second owner of that field.
+ * Cover + guild-biomass kill are contributes into vegetation-owned fields
+ * (SIM §11), not a second owner of those fields. Biomass must die with cover
+ * so OccupantMesh (which reads guild biomass) does not leave standing shoots
+ * on a burned cell (Wave 0 / ES-004 disturbance legibility).
  */
 export const fireProcess: Process = {
   id: "fire",
@@ -24,7 +26,16 @@ export const fireProcess: Process = {
     "fire.scar",
     "ledger.fuelConsumed",
   ],
-  contributes: ["veg.cover", "fire.fuelLoad"],
+  contributes: [
+    "veg.cover",
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "fire.fuelLoad",
+  ],
   step(world, dt) {
     world.runFireStep(dt);
   },

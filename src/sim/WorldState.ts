@@ -1911,11 +1911,18 @@ export class WorldState {
     const fuel = this.fuelLoad.data;
     const moisture = this.soilMoisture.data;
     const cover = this.vegCover.data;
+    const herbBio = this.herbBiomass.data;
+    const strandBio = this.strandBiomass.data;
+    const binderBio = this.binderBiomass.data;
+    const marshBio = this.marshBiomass.data;
+    const shrubBio = this.shrubBiomass.data;
+    const crustBio = this.crustBiomass.data;
     const intensity = this.fireIntensity.data;
     const scar = this.fireScar.data;
     const threshold = config.fuelSpreadThreshold;
     const consumption = config.fireFuelConsumption;
     const mortality = config.fireVegMortality;
+    const survive = 1 - mortality;
 
     // Single pass over the grid builds the active front *and* clears intensity
     // on cells that stopped burning. The clear has to happen on this side of
@@ -1969,7 +1976,15 @@ export class WorldState {
       const consumed = fuel[i]! * consumption;
       intensity[i] = Math.min(10, consumed);
       fuel[i] = Math.max(0, fuel[i]! - consumed);
-      cover[i] = Math.max(0, cover[i]! * (1 - mortality));
+      cover[i] = Math.max(0, cover[i]! * survive);
+      // Same mortality on guild biomass — OccupantMesh reads these fields, not
+      // veg.cover, so a cover-only kill left every visible shoot standing.
+      herbBio[i] = Math.max(0, herbBio[i]! * survive);
+      strandBio[i] = Math.max(0, strandBio[i]! * survive);
+      binderBio[i] = Math.max(0, binderBio[i]! * survive);
+      marshBio[i] = Math.max(0, marshBio[i]! * survive);
+      shrubBio[i] = Math.max(0, shrubBio[i]! * survive);
+      crustBio[i] = Math.max(0, crustBio[i]! * survive);
       // Persistent scar for presentation — decays on daily band.
       scar[i] = Math.min(1, Math.max(scar[i]!, Math.min(1, consumed / 2)));
       this.fuelConsumedLedger += consumed;

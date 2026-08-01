@@ -237,4 +237,11 @@ describe("webAudioHook no-op without context", () => {
     applyMixToGain({ level: 0.55, silent: false, source: "ambient.life" }, target);
     expect(target.gain.value).toBe(0.55);
   });
+
+  it("createAmbientBeds returns null without AudioContext (Wave 0 / CI)", async () => {
+    const { createAmbientBeds, unlockAmbientAudio } = await import("./webAudioHook");
+    // Vitest/Node has no Web Audio — beds must stay optional (T-006 CI path).
+    expect(createAmbientBeds()).toBeNull();
+    expect(await unlockAmbientAudio()).toBeNull();
+  });
 });

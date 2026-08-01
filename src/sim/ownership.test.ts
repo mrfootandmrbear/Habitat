@@ -62,6 +62,8 @@ describe("process ownership (§4 / §5 / §11)", () => {
   it("fire contributes veg.cover kill instead of owning it", () => {
     expect(fireProcess.writes).not.toContain("veg.cover");
     expect(fireProcess.contributes).toContain("veg.cover");
+    expect(fireProcess.contributes).toContain("veg.biomass.herb");
+    expect(fireProcess.writes).not.toContain("veg.biomass.herb");
     expect(vegetationProcess.writes).toContain("veg.cover");
   });
 });

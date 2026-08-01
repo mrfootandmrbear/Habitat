@@ -97,6 +97,8 @@ export function mountControls(
     inspector: InspectorLayer;
     sitingTool: SitingTool;
     depositMaterial: DepositMaterialId;
+    /** Island terrain seed (T-001 — regenerates the exact landscape). */
+    terrainSeed: number;
   },
   handlers: {
     onRainRegime: (id: RainRegimeId) => void;
@@ -107,6 +109,7 @@ export function mountControls(
     onSeason: (id: SeasonId) => void;
     onErosion: (id: ErosionId) => void;
     onReset: () => void;
+    onNewIsland: (seed: number) => void;
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
@@ -138,6 +141,7 @@ export function mountControls(
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
   setDepositMaterial: (id: DepositMaterialId) => void;
+  setTerrainSeed: (seed: number) => void;
   setStatus: (text: string) => void;
   setHint: (text: string) => void;
   setCutaway: (text: string) => void;
@@ -287,6 +291,39 @@ export function mountControls(
   resetBtn.type = "button";
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
+
+  const seedGroup = document.createElement("div");
+  seedGroup.id = "seed-actions";
+  seedGroup.setAttribute("role", "group");
+  seedGroup.setAttribute(
+    "aria-label",
+    "Island seed (T-001 — same seed, same landscape)",
+  );
+
+  const seedInput = document.createElement("input");
+  seedInput.type = "number";
+  seedInput.id = "terrain-seed";
+  seedInput.setAttribute("aria-label", "Terrain seed");
+  seedInput.title = "Copyable seed — regenerates this exact island";
+  seedInput.value = String(initial.terrainSeed);
+  seedInput.step = "1";
+
+  const newIslandBtn = document.createElement("button");
+  newIslandBtn.type = "button";
+  newIslandBtn.id = "new-island";
+  newIslandBtn.textContent = "New island";
+  newIslandBtn.setAttribute(
+    "aria-label",
+    "Generate island from the seed field (same preserve type — not a second biome)",
+  );
+  newIslandBtn.addEventListener("click", () => {
+    const parsed = Number.parseInt(seedInput.value, 10);
+    const seed = Number.isFinite(parsed) ? parsed : initial.terrainSeed;
+    seedInput.value = String(seed);
+    handlers.onNewIsland(seed);
+  });
+
+  seedGroup.append(seedInput, newIslandBtn);
 
   const briefBtn = document.createElement("button");
   briefBtn.type = "button";
@@ -511,6 +548,7 @@ export function mountControls(
     briefBtn,
     notebookBtn,
     resetBtn,
+    seedGroup,
     rememberBtn,
     branchGroup,
     saveBtn,
@@ -558,6 +596,9 @@ export function mountControls(
     },
     setDepositMaterial: (id) => {
       materialSelect.value = String(id);
+    },
+    setTerrainSeed: (seed) => {
+      seedInput.value = String(seed);
     },
     setStatus: (text: string) => {
       status.textContent = text;
