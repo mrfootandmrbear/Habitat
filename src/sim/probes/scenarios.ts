@@ -811,6 +811,80 @@ export function probeBurnRecover(): ProbeResult {
 }
 
 /**
+ * §4.45 — fuel/scar Refinement: same sim-time via one large step vs many small
+ * must agree (analytic Olson / exponential scar).
+ */
+export function probeFuelScarRefine(): ProbeResult {
+  const T = 12;
+  const cover = 0.7;
+
+  const one = new WorldState(new Grid2D(4, 4, 2));
+  one.vegCover.fill(cover);
+  one.fuelLoad.fill(0);
+  one.runFuelAccumulationStep(T);
+
+  const many = new WorldState(new Grid2D(4, 4, 2));
+  many.vegCover.fill(cover);
+  many.fuelLoad.fill(0);
+  for (let i = 0; i < T; i++) many.runFuelAccumulationStep(1);
+
+  const fuelOne = one.fuelLoad.data[0]!;
+  const fuelMany = many.fuelLoad.data[0]!;
+  const fuelDelta = Math.abs(fuelOne - fuelMany);
+  if (fuelDelta > 1e-9) {
+    throw new Error(
+      `fuel-scar-refine: fuel step-size drift ${fuelDelta} (one=${fuelOne} many=${fuelMany})`,
+    );
+  }
+
+  const scarOne = new WorldState(new Grid2D(4, 4, 2));
+  scarOne.fireScar.fill(1);
+  scarOne.decayFireScar(20);
+
+  const scarMany = new WorldState(new Grid2D(4, 4, 2));
+  scarMany.fireScar.fill(1);
+  for (let i = 0; i < 20; i++) scarMany.decayFireScar(1);
+
+  const sOne = scarOne.fireScar.data[0]!;
+  const sMany = scarMany.fireScar.data[0]!;
+  const scarDelta = Math.abs(sOne - sMany);
+  if (scarDelta > 1e-9) {
+    throw new Error(
+      `fuel-scar-refine: scar step-size drift ${scarDelta} (one=${sOne} many=${sMany})`,
+    );
+  }
+  if (!(sOne > 0)) {
+    throw new Error(
+      `fuel-scar-refine: scar hard-zeroed over 20 days (Euler defect regressing)`,
+    );
+  }
+
+  return {
+    scenario: "fuel-scar-refine",
+    records: [
+      {
+        label: "fuel",
+        oneStep: fuelOne,
+        manySteps: fuelMany,
+        delta: fuelDelta,
+      },
+      {
+        label: "scar",
+        oneStep: sOne,
+        manySteps: sMany,
+        delta: scarDelta,
+      },
+      {
+        label: "delta",
+        fuelMatch: fuelDelta <= 1e-9 ? 1 : 0,
+        scarMatch: scarDelta <= 1e-9 ? 1 : 0,
+        scarAlive: sOne > 0 ? 1 : 0,
+      },
+    ],
+  };
+}
+
+/**
  * Slice 11 / ES-001: paired north/south aspects diverge under the same
  * moisture, initial cover, and vegetation rules. Slope/aspect sets incoming
  * light; Beer–Lambert canopy attenuation shapes the succession trajectory.
@@ -4956,6 +5030,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "branch-compare": probeBranchCompare,
   "limiting-shift": probeLimitingShift,
   "burn-recover": probeBurnRecover,
+  "fuel-scar-refine": probeFuelScarRefine,
   "succession-diverge": probeSuccessionDiverge,
   "drydown-feedback": probeDrydownFeedback,
   "disturbance-recovery": probeDisturbanceRecovery,

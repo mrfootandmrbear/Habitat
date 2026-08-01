@@ -124,11 +124,11 @@ Summary only — do not reopen unless fixing regressions.
 | **L7** | Activity-gated event band (SIM §6.2) | Dry spans skip surface+fire; storms unchanged; hash-identical | `eventBandActive`, `event-band-gate` | **Done** — agent ([L7-composition](slices/L7-composition.md); skipFrac 0.3, all baselines unmoved) |
 | **L4** | Biotic motion (wind sway) | Shoots lean with wind; calm is still; standing dead barely leans | `occupantSway`, OccupantMesh | **Done** — presentation ([L4-composition](slices/L4-composition.md); D-007 clip Pass) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.45** fuel/scar numeric fix (Living wave tip blocked: L5 on C-023, L8 on C-024/C-025); §4.46–§4.48 follow; owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.46** HSI curve-shape corrections; §4.47–§4.48 follow; Living remainder blocked (L5 / L8); owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette).
 
-**Next (executable tip):** **§4.45** fuel/scar numeric fix → §4.46–§4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **W0** / **L3** / **L7** / **L4** Done. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **§4.46** HSI curve-shape corrections → §4.47–§4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **W0** / **L3** / **L7** / **L4** / **§4.45** Done. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -1110,18 +1110,18 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.45 Slice — Fuel / scar numeric fix *(queued)*
+### 4.45 Slice — Fuel / scar numeric fix *(Done — agent)*
 
 **Why this exists.** [Fire/fuel review](reviews/2026-07-31-fire-fuel-review.md) §4. `runFuelAccumulationStep` is explicit Euler for `dF/dt = I − kF` with the decay coefficient clamped (`k = min(1, fuelDecayK·dt)`) but the input left unclamped — for `dt ≥ 1/fuelDecayK` the equilibrium becomes `cover·I·dt`, growing without bound until it pins at `fuelLoadMax`, so fuel load on the decadal band becomes a function of tick size rather than of climate. `decayFireScar` has the identical shape: it advertises "exponential fade" but implements `scar·(1 − 0.08·dt)`, which hard-zeroes at `dt ≥ 12.5` instead of decaying. This is a **Refinement-class** invariant failure in the §2.1 sense (dead `dt` / non-convergent schedule) — the exact bug class the deferred-time-debt work in **L1** exists to make visible by running variable/catch-up timesteps in the first place.
 
 **Register:** T-001 Locked; S-009 Current (durations invariant under chosen rate — a `dt`-dependent equilibrium violates this directly)
 **New Process?** no — replaces the update law inside the existing fuel/scar steps. D-007 clip gate does not apply.
 
-- [ ] Replace both explicit-Euler updates with the analytic, unconditionally stable form: `F' = F·e^(−k·dt) + (I/k)(1 − e^(−k·dt))`
-- [ ] Move the scar decay rate (currently hardcoded `0.08` at `WorldState.ts:1879`) into `config.ts` beside `fuelDecayK` and `fuelInputMax` (AGENTS.md: numbers in config are generated, not typed)
-- [ ] Test: fuel load and scar value at a fixed sim-time are within tolerance regardless of whether that time was reached in one large step or many small ones (the Refinement invariant, stated as a probe)
-- [ ] Baselines: any probe touching fuel load or scar decay under variable timestep will move — state the reason in the commit body
-- [ ] Composition + manifest; **Next-but-one:** §4.46 HSI curve-shape corrections
+- [x] Replace both explicit-Euler updates with the analytic, unconditionally stable form: `F' = F·e^(−k·dt) + (I/k)(1 − e^(−k·dt))` / `S' = S·e^(−κ·dt)`
+- [x] Move the scar decay rate into `config.ts` as `fireScarDecayK` beside `fuelDecayK` and `fuelInputMax`
+- [x] Test + probe `fuel-scar-refine`: fuel and scar at fixed sim-time agree for one large step vs many small (delta **0**); scar stays alive over 20 days
+- [x] Baselines refreshed with reason: `burn-recover` (fuelBefore/After/consumed/hashN), `deep-time` (`p005` hashes), `orographic-wind` / `event-band-gate` (fuel in stateHash). Wet/dry recovery scalars unmoved
+- [x] Composition + manifest ([fuel-scar-composition.md](slices/fuel-scar-composition.md), [fuel-scar.json](slices/fuel-scar.json)); **Next-but-one:** §4.46 HSI curve-shape corrections (already specified)
 
 ---
 
@@ -1293,7 +1293,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |
 | — | Scenario campaign / toxic-site premise | G-002, C-010 | After C-009 framing for C-010 |
 | — | Fire spread as a rate | T-001, T-006, C-003, ES-002 | §4.44 **Done** — agent ([composition](slices/fire-spread-rate-composition.md)) |
-| — | Fuel / scar numeric fix | T-001, S-009 | §4.45 **Queued** — after fire spread |
+| — | Fuel / scar numeric fix | T-001, S-009 | §4.45 **Done** — analytic Olson + scar; `fuel-scar-refine` |
 | — | HSI curve-shape corrections | C-007, C-011, S-007, N-004 | §4.46 **Queued** |
 | — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Queued** — after HSI curves |
 | — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |

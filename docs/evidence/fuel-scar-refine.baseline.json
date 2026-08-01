@@ -1,0 +1,41 @@
+{
+  "scenario": "fuel-scar-refine",
+  "metrics": {
+    "fuel.oneStep": {
+      "value": 4.31974983215332,
+      "abs": 1e-9
+    },
+    "fuel.manySteps": {
+      "value": 4.31974983215332,
+      "abs": 1e-9
+    },
+    "fuel.delta": {
+      "value": 0,
+      "abs": 1e-12
+    },
+    "scar.oneStep": {
+      "value": 0.2018965184688568,
+      "abs": 1e-9
+    },
+    "scar.manySteps": {
+      "value": 0.2018965184688568,
+      "abs": 1e-9
+    },
+    "scar.delta": {
+      "value": 0,
+      "abs": 1e-12
+    },
+    "delta.fuelMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.scarMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.scarAlive": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "fuel-scar",
+  "title": "Fuel / scar numeric fix (analytic Olson + scar fade)",
+  "simLoop": "runFuelAccumulationStep and decayFireScar used explicit Euler with a clamped decay coefficient, so fuel equilibrium and scar lifetime depended on tick size. Both now use the analytic exponential form; fireScarDecayK lives in config.ts.",
+  "gameLoop": "Fuel load and burn scars no longer jump or vanish when the clock takes a large step — a decade of litter and a fading scar mean the same thing whether the band fired once or many times.",
+  "registerIds": ["T-001", "S-009"],
+  "invariantClass": "Refinement",
+  "tests": [
+    "src/sim/fire/fuelScarUpdate.test.ts",
+    "src/sim/fire.test.ts"
+  ],
+  "probes": ["fuel-scar-refine", "burn-recover", "deep-time"],
+  "fields": ["fire.fuelLoad", "fire.scar"],
+  "notebookSeed": "The scar is fading, not snapping off — and the litter under the stand does not care how big the last time step was.",
+  "tierO": "no owner-only question — Refinement is CI-judged."
+}

@@ -187,6 +187,12 @@ export const config = {
   fuelInputMax: 0.8,
   /** First-order decomposition rate (1/band) — Olson k per decadal step. */
   fuelDecayK: 0.08,
+  /**
+   * Fire scar exponential fade rate (1/sim-day) on the daily band (§4.45).
+   * Was hardcoded `0.08` beside `decayFireScar`; same referent as fuelDecayK's
+   * order of magnitude (weeks-to-season of visible scar, not a hard zero).
+   */
+  fireScarDecayK: 0.08,
   /** Fuel load threshold for fire spread (kg/m²). Below this, fire cannot carry. */
   fuelSpreadThreshold: 0.3,
   /** Fuel moisture extinction — soil.moisture fraction above which fire cannot spread. */

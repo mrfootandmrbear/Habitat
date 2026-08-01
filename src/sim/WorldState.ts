@@ -16,6 +16,7 @@ import { dispersalProcess } from "./process/dispersalProcess";
 import { atmosphereProcess } from "./process/atmosphereProcess";
 import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
 import { spreadFireRings } from "./fire/spreadRings";
+import { nextFireScar, nextFuelLoad } from "./fire/fuelScarUpdate";
 import {
   stepAtmosphere,
   type PrecipPhase,
@@ -1956,21 +1957,26 @@ export class WorldState {
 
   /**
    * Olson litter model (NATURAL_PROCESS_MATH §3.5): dL/dt = I − k·L.
+   * Analytic step (§4.45) — equilibrium is I/k, not a function of tick size.
    * Input I proportional to veg.cover; runs on decadal band.
    * `dt` is band units (1 = one full compressed decadal commit).
    */
   runFuelAccumulationStep(dt: number): void {
-    const scale = Math.max(0, dt);
     const fuel = this.fuelLoad.data;
     const cover = this.vegCover.data;
-    const iMax = config.fuelInputMax * scale;
-    const k = Math.min(1, config.fuelDecayK * scale);
+    const iRate = config.fuelInputMax;
+    const k = config.fuelDecayK;
     const maxFuel = config.fuelLoadMax;
+    const scale = Math.max(0, dt);
 
     for (let i = 0; i < fuel.length; i++) {
-      const input = cover[i]! * iMax;
-      const decay = k * fuel[i]!;
-      fuel[i] = Math.min(maxFuel, Math.max(0, fuel[i]! + input - decay));
+      fuel[i] = nextFuelLoad(
+        fuel[i]!,
+        cover[i]! * iRate,
+        k,
+        scale,
+        maxFuel,
+      );
     }
   }
 
@@ -2084,11 +2090,10 @@ export class WorldState {
   /** Daily exponential fade of burn scar (presentation + recovery memory). */
   decayFireScar(dt: number): void {
     const scale = Math.max(0, dt);
-    const decay = Math.min(1, 0.08 * scale);
+    const k = config.fireScarDecayK;
     const scar = this.fireScar.data;
     for (let i = 0; i < scar.length; i++) {
-      scar[i] = Math.max(0, scar[i]! * (1 - decay));
-      if (scar[i]! < 1e-4) scar[i] = 0;
+      scar[i] = nextFireScar(scar[i]!, k, scale);
     }
   }
 

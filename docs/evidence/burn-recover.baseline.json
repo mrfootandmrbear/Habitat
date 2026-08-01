@@ -6,19 +6,19 @@
       "abs": 0
     },
     "fire.fuelBefore": {
-      "value": 872.311767578125,
+      "value": 847.0919189453125,
       "abs": 0.0001
     },
     "fire.fuelAfter": {
-      "value": 487.09753119945526,
+      "value": 473.0148047506809,
       "abs": 0.0001
     },
     "fire.consumed": {
-      "value": 385.21423954963615,
+      "value": 374.07711498737393,
       "abs": 0.001
     },
     "fire.accountingError": {
-      "value": 0.000003170966408561071,
+      "value": 7.927423553155677e-7,
       "abs": 0.001
     },
     "fire.determinismMatch": {
@@ -26,7 +26,7 @@
       "abs": 0
     },
     "fire.hashN": {
-      "value": 31881457,
+      "value": 1035629849,
       "abs": 0
     },
     "wetSector.coverAfterBurn": {

@@ -154,6 +154,17 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.recoveryGap": { abs: 1e-4 },
     "delta.wetVsDry": { abs: 0.1 },
   },
+  "fuel-scar-refine": {
+    "fuel.oneStep": { abs: 1e-9 },
+    "fuel.manySteps": { abs: 1e-9 },
+    "fuel.delta": { abs: 1e-12 },
+    "scar.oneStep": { abs: 1e-9 },
+    "scar.manySteps": { abs: 1e-9 },
+    "scar.delta": { abs: 1e-12 },
+    "delta.fuelMatch": { abs: 0 },
+    "delta.scarMatch": { abs: 0 },
+    "delta.scarAlive": { abs: 0 },
+  },
   "succession-diverge": {
     "south.meanInsolation": { abs: 1e-6 },
     "south.meanUnderstoryLight": { abs: 1e-6 },
