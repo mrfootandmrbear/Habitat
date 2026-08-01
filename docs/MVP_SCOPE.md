@@ -59,9 +59,9 @@ The outer ring — **build → forces → time → look** — is the thesis loop
 | Intervene as cause, not outcome | A-005, N-001 | **Yes** | One siting verb on water/terrain is enough |
 | Time rate as attention scale | T-002, S-009 | **Yes** | Already in prototype |
 | Layered inspect | T-005, U-001 | **Dev yes / player selective** | Dev overlays now; player overlays later |
-| Field Notebook | U-006 | **No** | Locked v2.0.12 — post-MVP unless playtest demands more |
-| Roles / introductions | E-007, RC-003 | **No** | Needs Slice 11-class systems |
-| Scenarios / completion | G-002, G-007 | **No** | After sandbox loop works |
+| Field Notebook | U-006 | **No** | Locked v2.0.12; UI shipped post-MVP (BUILD_GUIDE §4.20) |
+| Roles / introductions | E-007, RC-003 | **No** | Still out of MVP; RC-003 priority lowered after **C-007** Locked made arrival the primary verb |
+| Scenarios / completion | G-002, G-007 | **No** | Objective scaffold + brief chrome Done post-MVP (Slices 14 / 15); campaign out of scope, G-007 Open |
 
 ---
 
@@ -98,8 +98,8 @@ flowchart TB
 | Priority-flood / depressions | H-003 | **Yes** | Slice 4b Done (agent) |
 | Soil depth / geomorphology | S-006, S-007, GEO-002, C-002 | **Post-MVP** | Slice 8 Tier-M; **C-002 Locked** |
 | Groundwater / baseflow | H-001, H-004, **C-001** | **Done** (Locked) | Slice 8b — `baseflow-persist` |
-| Fire / succession / populations | ES-*, E-* | **No** | After limiting-factor spine (Slice 9+) |
-| Full beaver write-back | E-005, F-001 | **Architecture yes, breadth no** | Path must exist; one later engineer |
+| Fire / succession / populations | ES-*, E-* | **No** | Post-MVP: Slices 10 / 11 / 12 Done after the limiting-factor spine |
+| Full beaver write-back | E-005, F-001 | **Architecture yes, breadth no** | Path exists after Slice 13 (`physicalCover`); animal engineer still later |
 
 ---
 
@@ -118,7 +118,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **5b** | Player edits terrain (berm / dig) | **Site a cause** (A-005) | **Done — playtest Pass** |
 | 5 | Soil → vegetation (one-way) | Green follows wet ground | **Done — playtest Pass** |
 | 6 | Vegetation → roughness / infiltration → water | See hydrograph change from plant cover | **Done — playtest Pass (sim MVP)** |
-| **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; optional [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) |
+| **P** | — (observers / FX only) | **Volume without voxels** — cage, cursor, motion-in-time | **Done — Tier-P**; batched [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) ask subsumed into [batch-living-return.md](playtests/batch-living-return.md) (**Pass** 2026-07-30) |
 | **8** | Soil depth legacy + geomorphology | Thin soil holds less; channels erode without cover | **Done — Tier-M** (Tier-O deferred) |
 | **8b** | Soil ↔ GW ↔ baseflow (C-001) | Streams persist between storms | **Done** — C-001 Locked; BUILD_GUIDE §4.3 |
 | **8c** | — (observers, encoding, time) | **The return visit** — build it, run time, see what nature did | **Done** — Tier-O Pass (batch 2026-07-30) |
@@ -131,18 +131,20 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 | **16** | Sea level + island (**C-015 Locked**) | Shape an island; sea is the outlet / force dial | **Done** — Tier-O Pass; W-001 Superseded (ballot B 2026-07-30) |
 | **15** | Scenario brief chrome | Accept a brief; see window hold without inspector | **Done** — Tier-O Pass ([batch-island-brief.md](playtests/batch-island-brief.md)) |
 | **F** | Force panel + climate-mean rain + orographic wind (**C-020** lite) | Sculpt → set climate forces → watch the place | **Done** — BUILD_GUIDE §4.11b (agent; no Tier-O) |
-| **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | **Done** — agent; C-016 Open (owner metaphor batched) |
-| **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | **Done** — agent; C-017 Open (owner shore-legibility batched) |
-| **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | **Done** — agent; Tier-O shore-legibility batched |
+| **17** | Tidal envelope / intertidal (**C-016**) | MHW/MLW force dial; intertidal zone | **Done** — Tier-O Pass ([batch-maritime-shore.md](playtests/batch-maritime-shore.md)); **C-016 Locked** |
+| **18** | Wave exposure + coastal erosion (**C-017**) | Windward shore changes via geomorphology | **Done** — Tier-O Pass (same sitting); **C-017 Locked** |
+| **19** | Beaches / longshore deposition (**C-017**) | Windward scours; lee receives | **Done** — Tier-O Pass (same sitting); **C-017 Locked** |
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow earns differently | **Done** — Tier-O Pass (batch-salt-overseas) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | **Done** — Tier-O Pass (batch-salt-overseas) |
-| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | **Done** — owner legibility Pass; Lock still owner |
-| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | **Done** — D-007 clip Pass 2026-07-30 (full clouds later) |
+| **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | **Done** — owner legibility Pass; **C-009 Locked** 2026-07-30 |
+| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | **Done** — D-007 clip Pass 2026-07-30 (full clouds shipped after, BUILD_GUIDE §4.21) |
 | **A+** | Recovery audible (**AUD-003**) | Second ambient bed from `veg.cover` | **Done** — BUILD_GUIDE §4.19 (agent; C-014 still Open) |
 | — | Field Notebook UI (**U-006**) | Bounded causal explanation chrome | **Done** — BUILD_GUIDE §4.20; **Locked** v2.0.12 |
-| — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Done** — BUILD_GUIDE §4.21 (machine; Lock still owner) |
+| — | Full C-020 clouds / precip phase | Weather as clouds + phase | **Done** — BUILD_GUIDE §4.21; **C-020 Locked** v2.0.13 |
+| **G** | Season length + erosion intensity as force dials | Two more dials on the same post-sculpt panel | **Done** — BUILD_GUIDE §4.35 (machine half); **C-021** / **C-022** Open pending owner taste |
+| **L1** / **L6** | Infrastructure: deferred time debt; clock in real-world units | Rate ladder reads `1 s/s` … `1 week/s`, not unnamed multipliers | **Done** — BUILD_GUIDE §4.36 / §4.41 (agent; no baseline moved) |
 
-**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** **U-006 Locked**; **Full C-020 clouds** Done (machine); **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done; **Slice B** (**C-005 Locked tooling**); **Slice E** Exner-lite Done; **C-006** / **C-013** / **C-002 Locked**. Gap review: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **Next:** residual Lock **C-014**; **C-010** implement later; **C-021** / **C-022** filed Open.
+**MVP exit.** The player can: watch water and soil; commit a prediction and be wrong or right; site one cause and see the sim respond; see vegetation blunt runoff. Sandbox only. No win condition (G-001). **Sim MVP playtest Pass** at Slice 6. **Post-MVP ladder** (autonomous-first): … → Slice 14 / 16 / 15 Tier-O **Pass**; **Slice F** / **17**–**21** Done; C-018 / C-019 Tier-O **Pass**; **Slice S** / **Slice R** Done — D-007 rain-feel clip **Pass**; **Slice A+** Done; **Field Notebook** **U-006 Locked**; **Full C-020 clouds** Done — **C-020 Locked** v2.0.13; **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done; **Slice B** (**C-005 Locked tooling**); **Slice E** Exner-lite Done; **C-006** / **C-013** / **C-002 Locked**; **Slice G** Done (machine half — **C-021** / **C-022** still Open); **L1** / **L6** Done (time throughput + real-world rate units); BUILD_GUIDE §4.49–§4.52 correctness fixes Done. Gap review: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **Next:** Slice **L2** local seed rain (BUILD_GUIDE §4.37), then **L3** / **L7** / **L4**; BUILD_GUIDE §4.44–§4.48 (fire / vegetation correctness) run in parallel; residual Lock **C-014**; **C-021** / **C-022** owner taste sitting; **C-010** implement later.
 
 ---
 
@@ -162,7 +164,7 @@ Each row closes one **named** sim edge and one **named** game edge (or labels in
 
 The Slice 4 fun gate already **Passed** ([PLAYTEST_SLICE4.md](PLAYTEST_SLICE4.md)). Before opening a new **owner** playtest for post-MVP work, pass [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) ask gate. Agent-only slices (closeouts, 8b Tier-M, hygiene) do not spend a fun-gate session.
 
-The batch does not wait forever: it fires on the third accumulated Tier-O question, or when a slice cannot start without an answer (VERIFICATION_POLICY §4). The more the ladder is built autonomously, the more that firing rule — not the ask gate — is what keeps the world answerable to taste. **Fired 2026-07-28** into [playtests/8c-return-visit.md](playtests/8c-return-visit.md), which subsumes the batched presentation and erosion-legibility questions.
+The batch does not wait forever: it fires on the third accumulated Tier-O question, or when a slice cannot start without an answer (VERIFICATION_POLICY §4). The more the ladder is built autonomously, the more that firing rule — not the ask gate — is what keeps the world answerable to taste. **Fired 2026-07-28** into [playtests/8c-return-visit.md](playtests/8c-return-visit.md), which subsumes the batched presentation and erosion-legibility questions; that ask was itself replaced for the sitting by [playtests/batch-living-return.md](playtests/batch-living-return.md) (8c + Slice 13), owner **Pass** 2026-07-30.
 
 **The 20-second clip test** ([THESIS.md](THESIS.md) §8) is a self-check that costs no session: could you record twenty seconds — build, run time, watch nature take it — that reads to a stranger and makes them want to try it? When the answer is no, the next slice is whatever moves that clip closest to existing, and it is almost never a new system.
 

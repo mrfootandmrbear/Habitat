@@ -79,7 +79,7 @@ Summary only — do not reopen unless fixing regressions.
 | 5 | Soil → vegetation | Green follows wet | `vegetationProcess` | **Pass** |
 | 6 | Veg → roughness / infil → water | Cover blunts storm | paired-storm probe | **Pass** (sim MVP) |
 | §4.1 hygiene | Ledgers, D8, metric clock, bounds, symmetry | — | probes | Agent-only |
-| P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; optional Tier-O batched |
+| P (§4.2) | Observers / FX only | Volume without voxels | cage, cursor, flow cues | Tier-P; Tier-O subsumed into batch-living-return (**Pass** 2026-07-30) |
 | 8 | Soil depth legacy + geomorphology | Thin soil holds less | `save.ts`, `geomorphologyProcess` | Tier-M; Tier-O erosion deferred |
 | 8b | Soil ↔ GW ↔ baseflow (C-001 Locked) | Channels seep after storms | `groundwaterProcess`, `baseflow-persist` | Tier-M conservation |
 | 8c | Observers + rain regime + form memory | Return visit then→now | `rainRegime`, `regime-divergence` | **Done** — Tier-O Pass (batch 2026-07-30) |
@@ -100,32 +100,34 @@ Summary only — do not reopen unless fixing regressions.
 | **20** | Salinity (**C-018**) | Freshened vs salty hollow | `soil.salinity`, `salinity-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **21** | Island biogeography (**C-019**) | Overseas arrival; small vs large island | overseas kernel, `island-arrival` | **Done** — Tier-O Pass (batch-salt-overseas 2026-07-30) |
 | **S** | Substrate contrast (**C-009**) | Sand / clay / rock; geological deposit | `substrates.ts`, `substrate-contrast`, `substrate-deposit` | **Done** — owner Lock 2026-07-30 |
-| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 Open) |
+| **R** | Rain-feel mid-path (**C-020**) | Shower cadence + precip cue | `rainRegime` wetFraction, `RainCueMesh` | **Done** — D-007 clip Pass 2026-07-30 (full C-020 shipped later at §4.21) |
 | **A+** | Recovery audible (**AUD-003**) | `veg.cover` → `ambient.life` | `AudioBus` life bed, `audio.test.ts` | **Done** — agent (C-014 still Open) |
 | — | Full C-020 clouds / precip phase | Atmosphere Process + Heat dial | `climate.*`, `cloud-delivery`, `CloudMesh` | **Done** — **C-020 Locked** v2.0.13 |
 | **N** | Salt-memory encoding (**NS-006**) | Freshened green vs salty pale sparse | `saltMemoryEncodingDelta` | **Done** — clip Pass (C-018 Q-A) |
-| **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (C-004 / C-020 Open) |
+| **N2** | Heat→plant gate (**NS-002**) | Cold stalls wet hollow; warm establishes | `f_temp`, `heat-arrival` | **Done** — agent (shipped under then-Open C-004 / C-020; both now **Locked**) |
 | **N4** | Strand splash pioneer (**NS-004**) | Salty shore mats vs inland herb | `veg.*.strand`, `strand-arrival` | **Done** — agent (C-018 / C-019 **Locked**) |
 | **N3** | Onshore spray stress (**NS-003**) | Windward stalls herb; strand holds | `f_spray`, `spray-arrival` | **Done** — agent (C-017 **Locked**) |
 | **N5** | Sandy crest sand-binder (**NS-005**) | Dry sand crest binds; blunts storm | `veg.*.binder`, `binder-arrival` | **Done** — agent (C-009 / C-017 **Locked**) |
 | **N8** | Tidal inundation (**NS-008**) | Foreshore stalls herb; terrace earns | `f_inundation`, `inundation-arrival` | **Done** — agent (C-016 **Locked**) |
-| **N7** | Aspect light into Liebig (**NS-007**) | South earns; steep north light-limited | `f_light`, `light-arrival` | **Done** — agent (C-007 / C-011 **Locked**) |
+| **N7** | Aspect light into Liebig (**NS-007**) | South earns; steep north light-limited | `f_light`, `light-arrival` | **Done** — agent (**C-007 Locked**; C-011 Open) |
 | **N9** | Salt-marsh engineer (**NS-009**) | Mid-foreshore marsh; dry terrace herb | `veg.*.marsh`, `marsh-arrival` | **Done** — agent (C-016 **Locked**) |
 | **N10** | Climate-capped woody shrub (**NS-010**) | Warm herb hollow escalates; cold/bare stall | `veg.*.shrub`, `shrub-arrival` | **Done** — agent (C-007 / NS-002) |
 | **N11** | Cryptogam crust bootstrap (**NS-011**) | Damp bare crust; dry/shaded/salty stall | `veg.*.crust`, `crust-arrival` | **Done** — agent (C-007 stage-2) |
 | **B** | Branch-and-compare (**C-005**) | Same castle, different forces | `branch.ts`, `branch-compare` | **Done** — C-005 Locked as tooling (v2.0.12) |
 | **E** | Exner-lite inland deposit (**GEO-002**) | Channels cut; basins silt | `hillslopeDeposit`, `hillslope-deposit` | **Done** — agent |
 | **G** | Season + erosion-intensity dials (**C-021** / **C-022**) | Long season pushes growth; stormy wears the slope faster | `seasonRegime.ts`, `erosionRegime.ts`, `season-regime`, `erosion-intensity` | **Done** — agent machine half; both Open (owner Lock sitting outstanding) |
+| **L1** / **L6** | Deferred time debt; clock in real-world units | Rate ladder reads `1 s/s` … `1 week/s` instead of unnamed multipliers | `SimClock` debt counters, `src/ui/timeRates.ts` | **Done** — agent (no baseline moved) |
+| §4.49–§4.52 | Flat routing, flux stability, coastal base level, encoding delta | Correctness under the existing loops (no new verb) | `flowRouting.ts`, `fluxStep.ts`, `colorDistance.ts` | **Done** — agent (baselines refreshed with stated reasons) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** residual Lock **C-014** when hearable ([owner-lock-batch.md](candidates/owner-lock-batch.md)); **C-021** / **C-022** taste Lock sitting. **C-010** implement under Open later. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (no hear). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done (deferred time debt + real-world rate units; no baseline moved). Review-defect fixes **§4.49** / **§4.50** / **§4.51** / **§4.52** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **Slice L2** local seed rain (§4.37), then **L3** / **L7** / **L4**; §4.44–§4.48 (fire / vegetation defect fixes) run in parallel; owner Lock backlog runs beside both ([owner-lock-batch.md](candidates/owner-lock-batch.md)). **C-010** implement under Open later. Nutrients / animals stay off tip.
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette).
 
-**Next (executable tip):** residual Lock **C-014** when hearable; **C-021** / **C-022** taste sitting. **C-010** framing Done — implement later under Open. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **L2** local seed rain (§4.37) → **L3** mortality as a rate (§4.38) → **L7** activity-gated event band (§4.42) → **L4** biotic motion (§4.39); **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. Parallel: §4.44–§4.48. Residual owner asks: **C-014** when hearable; **C-021** / **C-022** taste sitting. **C-010** framing Done — implement later under Open. Keep nutrients / animals / SWE off the tip.
 
-**Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (filed — implement under Open); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
+**Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
-**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019). Filed dials still Open: **C-021** season; **C-022** erosion intensity.
+**The ladder, read as force dials.** [THESIS.md](THESIS.md) §4 reframes what the remaining slices are *for*: each one adds a force the player can turn, and the value is combinatorial rather than additive. 8b adds *does it stay wet between storms*; 8c / **F** add *mean rainfall climate* and make windward/leeward consequence visible in the landscape; 9 adds *what can live here* as the arrival gate; 10 adds *fire*; 11 adds *light and succession*; dry-down closes the balancing ET edge so greening is not a one-way ratchet; 12 adds *life moves in*; 13 closes *life changes how water moves*; 14 adds *finite objectives over the same loop* (G-002); **16** adds *sea level as global base level* (island form — C-015); **17** adds *tidal envelope / intertidal* (C-016); **18** adds *wave exposure → shore change* (C-017); **19** adds *longshore lee deposit / beaches* (C-017); **20** adds *salinity as legacy load* (C-018); **21** adds *overseas arrival* (C-019); **G** adds *season length* and *erosion intensity* (C-021 / C-022 — dials shipped machine-side, both still Open on owner taste).
 
 **Research ↔ decisions.** Steals from EXTERNAL_REFERENCES map to Locked/Current IDs or candidates C-001…C-022. Do not implement Open candidates as if Locked. Slice 21 acted on MacArthur–Wilson + new-island succession → overseas kernel + `island-arrival` (**C-019**); rejected species simulator, equilibrium paint, perimeter-as-island-default.
 
@@ -206,8 +208,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Checklist:**
 
 - [x] Extent cage, snapped cursor, flow cues, dual readouts, conservation HUD, property bundles, Tier-P proxies  
-- [ ] Presentation-only grains — deferred  
-- [ ] Batched Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) — only after ask gate  
+- [ ] Presentation-only grains — deferred; closed as won't-do in §4.1 (flow cues sufficient), so this box stays open by decision  
+- [x] Batched Tier-O: [PLAYTEST_PRESENTATION.md](PLAYTEST_PRESENTATION.md) — fired and subsumed into [playtests/batch-living-return.md](playtests/batch-living-return.md) (owner **Pass** 2026-07-30, via [8c-return-visit.md](playtests/8c-return-visit.md))  
 
 ---
 
@@ -230,7 +232,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.3b Slice 8c — The return visit *(game-side; the thesis slice)*
+### 4.3b Slice 8c — The return visit *(Done — Tier-O Pass; the game-side thesis slice)*
 
 **Why this exists.** [THESIS.md](THESIS.md): the loop is *build the form → choose the forces → run time → look*. Slice 8 shipped geomorphology as Tier-M and left its legibility deferred, which means the payoff the whole project is named after — nature having its way with what you built — currently exists and is **invisible**. This slice makes the return visit real. It adds no new sim system.
 
@@ -545,7 +547,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; MHW/MLW options; intertidal derived field or mask
 - [x] Tier-M: envelope widening → more intertidal cells; determinism
 - [x] Probe `tidal-envelope`; `docs/slices/17.json`
-- [x] Tier-O batched (metaphor conflict is owner) — dossier `docs/candidates/C-016-dossier.md`
+- [x] Tier-O batched (metaphor conflict is owner) — dossier `docs/candidates/C-016-dossier.md` → **Pass** ([batch-maritime-shore.md](playtests/batch-maritime-shore.md)); **C-016 Locked** 2026-07-30
 - [x] **Next-but-one:** Slice 18 wave exposure (§4.13)
 
 ---
@@ -565,12 +567,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; exposure from fetch × wind; geomorphology contribution path
 - [x] Tier-M: sheltered vs exposed paired divergence; soil mass closes
 - [x] Probe `shore-exposure`; `docs/slices/18.json`
-- [x] Tier-O batched (shore-legibility owner) — dossier `docs/candidates/C-017-dossier.md`
+- [x] Tier-O batched (shore-legibility owner) — dossier `docs/candidates/C-017-dossier.md` → **Pass** ([batch-maritime-shore.md](playtests/batch-maritime-shore.md)); **C-017 Locked** 2026-07-30
 - [x] **Next-but-one:** Slice 19 beaches / longshore (§4.14 stub) — salinity (20) remains available after
 
 ---
 
-### 4.14 Slice 19 — Beaches / longshore deposition *(after Slice 18)*
+### 4.14 Slice 19 — Beaches / longshore deposition *(Done — agent; **C-017 Locked** 2026-07-30)*
 
 **Why this exists.** Exposure alone retreats the windward shore; longshore transport is what builds the lee beach and closes the coastal sediment story under **C-017**.
 
@@ -589,7 +591,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.15 Slice 20 — Salinity *(Done — agent; C-018 owner half outstanding)*
+### 4.15 Slice 20 — Salinity *(Done — agent; **C-018 Locked** 2026-07-30)*
 
 **Why this exists.** Salt is the everyday **C-010** legacy load on an island — the first mobile soil-column substance that gates habitat near the shore and gives S-008 something to taste (**C-018**).
 
@@ -604,12 +606,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; salinity field + ocean source / freshwater dilution
 - [x] Tier-M: paired freshened-vs-salty hollow divergent arrival; save-legacy round-trip
 - [x] Probe `salinity-arrival`; `docs/slices/20.json`
-- [x] C-018 dossier (owner S-008 **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-A; Lock still owner)
+- [x] C-018 dossier (owner S-008 **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-A) → **C-018 Locked** 2026-07-30 ([owner-lock-batch.md](candidates/owner-lock-batch.md) row A)
 - [x] **Next-but-one:** Slice 21 island biogeography (§4.16)
 
 ---
 
-### 4.16 Slice 21 — Island biogeography *(Done — agent; C-019 owner half outstanding)*
+### 4.16 Slice 21 — Island biogeography *(Done — agent; **C-019 Locked** 2026-07-30)*
 
 **Why this exists.** Slice 12's mainland-perimeter seed rain is wrong on an island — seeds arrive over water, sparsely, and richness should track area and isolation (**C-019**). Closes the maritime arrival story after salt gates who can establish (**C-018**).
 
@@ -626,12 +628,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Composition note; over-water dispersal kernel + area/isolation eligibility
 - [x] Tier-M: paired small/large island under identical regimes; hash-stable (T-001); island worlds must not use perimeter mainland rain as sole source
 - [x] Probe `island-arrival`; `docs/slices/21.json`
-- [x] C-019 dossier (owner sparse-earned **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-B; Lock still owner)
+- [x] C-019 dossier (owner sparse-earned **Pass** — [batch-salt-overseas.md](playtests/batch-salt-overseas.md) Q-B) → **C-019 Locked** 2026-07-30 ([owner-lock-batch.md](candidates/owner-lock-batch.md) row A)
 - [x] **Next-but-one:** Slice **S** substrate contrast (§4.17) — D-007 redirects away from later stubs until the clip moves
 
 ---
 
-### 4.17 Slice S — Substrate contrast (**C-009**)
+### 4.17 Slice S — Substrate contrast (**C-009**) *(Done — agent; **C-009 Locked** 2026-07-30)*
 
 **Why this exists.** The thesis noun is still one undifferentiated soil. Under **D-007**, the next work must move the twenty-second clip — sand vs clay under the same storm is the highest clip yield per unit work, and it registers **no new Process** (property table + existing soilWater / geomorphology). Berm/dig ↔ `soil.depth` is closed (§4.1).
 
@@ -643,12 +645,12 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] `soil.material` (or equivalent class raster) + properties drive infil / porosity / erodibility — one law, data-driven (T-004)
 - [x] Default island seed paints a readable sand/clay mosaic; encoding Tier-P without inspector
 - [x] Probe `substrate-contrast`; geological **deposit** tool + probe `substrate-deposit`; `docs/slices/S.json`
-- [x] C-009 dossier (owner legibility half — Lock still owner; deposit framing vs N-001)
+- [x] C-009 dossier (owner legibility half; deposit framing vs N-001) → **C-009 Locked** 2026-07-30 ([owner-lock-batch.md](candidates/owner-lock-batch.md) row A)
 - [x] **Next-but-one:** C-020 rain-feel mid-path (§4.18) — still no cloud `Process`
 
 ---
 
-### 4.18 Slice R — Rain-feel mid-path (**C-020** / **C-004**, no new Process)
+### 4.18 Slice R — Rain-feel mid-path (**C-020** / **C-004**, no new Process) *(Done — agent; D-007 clip **Pass** 2026-07-30)*
 
 **Why this exists.** Owner: rain dial still reads as a spigot (island-brief, salt-overseas). Full atmospheric clouds/phase would register a new `Process` and is **gated by D-007** until a clip exists. This slice changes regime **temporal shape** + observer precip cues only.
 
@@ -664,7 +666,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.19 Slice A+ — Recovery audible (**AUD-003**)
+### 4.19 Slice A+ — Recovery audible (**AUD-003**) *(Done — agent; **C-014** still Open)*
 
 **Why this exists.** Slice A wired water ambience (AUD-001 / AUD-002). **AUD-003** (Locked) still has no second bed: recovery / life should enrich the soundscape from actual state, not a victory sting. Clip gate is clear (D-007 Pass 2026-07-30); this slice registers **no** new `Process`.
 
@@ -685,7 +687,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.20 Field Notebook UI (**U-006**)
+### 4.20 Field Notebook UI (**U-006**) *(Done — **U-006 Locked** v2.0.12)*
 
 **Why this exists.** U-006 (Current) requires a bounded causal explanation layer — event vocabulary, scale selection, uncertainty language, supported questions — without becoming an inspector dashboard or spoiling curiosity (U-004). Clip gate is clear; this slice registers **no** new `Process`.
 
@@ -705,7 +707,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.21 Full C-020 clouds / precip phase *(Done — agent; C-020 still Open)*
+### 4.21 Full C-020 clouds / precip phase *(Done — agent; **C-020 Locked** v2.0.13)*
 
 **Why this exists.** Slice R / mid-path rain-feel Pass left clouds as the remaining weather read. Full C-020 is a precip-phase / cloud `Process`.
 
@@ -729,7 +731,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.22 Slice N — Twin hollow salt memory encoding (**NS-006**)
+### 4.22 Slice N — Twin hollow salt memory encoding (**NS-006**) *(Done — agent)*
 
 **Why this exists.** C-018 machine + Tier-O Pass shipped salt and crust tint; Nature P0 still needed the engagement **outcome** proxy — freshened green vs salty pale sparse under one seed schedule — so the clip reads as salt memory, not weather (D-007 / THESIS §8).
 
@@ -744,7 +746,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.23 Slice N2 — Heat dial plant gate (**NS-002**)
+### 4.23 Slice N2 — Heat dial plant gate (**NS-002**) *(Done — agent)*
 
 **Why this exists.** Heat dial already drives precip phase (`climate.airTemperature`); plants ignored it. NS-002 adds `f_temp` under Open **C-004** / **C-020** — one field, inspectable limiting label (C-011).
 
@@ -761,7 +763,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.24 Slice N4 — Strand splash pioneer (**NS-004**)
+### 4.24 Slice N4 — Strand splash pioneer (**NS-004**) *(Done — agent)*
 
 **Why this exists.** One new guild after Heat gate; couples salt + shore + overseas so strand vs inland herb are two bets (Nature P0 #3).
 
@@ -780,14 +782,14 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.25 Slice N3 — Onshore spray stress gate (**NS-003**)
+### 4.25 Slice N3 — Onshore spray stress gate (**NS-003**) *(Done — agent)*
 
 **Why this exists.** Distinct spray stress from `soil.salinity` (island evidence §3); Wind × shoreExposure derived field for canopy / interior filter.
 
 **Gate.** After NS-004 machine green.
 
 **Nature cards:** NS-003  
-**Register:** C-017 Open; C-018 Open; C-007 Locked; C-011 Locked; N-004  
+**Register:** C-017 Open; C-018 Open; C-007 Locked; C-011 Open; N-004  
 **New Process?** no  
 **Study log:** island-colonization salt-spray gate → `f_spray` (**C-017**); rejected second salt ledger / `stress.spray` store
 
@@ -870,7 +872,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Loops.** Sim: envelope hydroperiod → herb Liebig `f_inundation`; foreshore stalls upland. Game: widen Tide or sit in the wet band — inland green stays out; terrace above can establish.
 
 **Nature cards:** NS-008  
-**Register:** C-016 Locked; C-018 Locked; C-007 Locked; C-011 Locked; N-004  
+**Register:** C-016 Locked; C-018 Locked; C-007 Locked; C-011 Open; N-004  
 **New Process?** no  
 **Study log:** island-colonization tidal inundation → `f_inundation` (**C-016**); rejected salinity collapse / tidal phase
 
@@ -887,7 +889,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Why this exists.** `light.insolation` already drives succession; arrival HSI ignores open-sky aspect. NS-007 promotes insolation → inspectable `f_light` without folding Beer–Lambert understory into the arrival gate.
 
 **Nature cards:** NS-007  
-**Register:** C-007 Locked; C-011 Locked; N-004  
+**Register:** C-007 Locked; C-011 Open; N-004  
 **New Process?** no  
 
 - [x] `f_light` from `light.insolation` in herb Liebig; understoryLight stays succession-only
@@ -901,7 +903,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Why this exists.** NS-008 zeros upland herbs in the intertidal; a marsh engineer guild should *prefer* a hydroperiod hump (mid-envelope) and feed back into shore physics via cover — the castle coming alive in the wet band.
 
 **Nature cards:** NS-009  
-**Register:** C-016 Locked; C-007 Locked; C-011 Locked; W-003; N-004  
+**Register:** C-016 Locked; C-007 Locked; C-011 Open; W-003; N-004  
 **New Process?** no — new guild HSI + establishment; physicalCover feedback only  
 
 - [x] Guild HSI hump on envelope hydroperiod (≠ upland `f_inundation` zero)
@@ -915,7 +917,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Why this exists.** Stage-3 structural escalation needs a climate-capped inland guild distinct from herb/marsh — warm herb-covered hollows escalate; frost and bare substrate lock woody out (NS-002 floor; island-colonization stage 3).
 
 **Nature cards:** NS-010  
-**Register:** C-007 Locked; C-011 Locked; C-004 Locked; W-003; E-004; N-004  
+**Register:** C-007 Locked; C-011 Open; C-004 Locked; W-003; E-004; N-004  
 **New Process?** no — new guild HSI + establishment; physicalCover feedback only
 
 - [x] Warmer f_temp floor + cover facilitation + upland inundation zero
@@ -929,7 +931,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Why this exists.** Stage-2 cover & soil bootstrap needs a damp-bare guild before woody — open canopy preferred (opposite of shrub facilitation); moisture holding via physicalCover → infil (island-colonization stage 2).
 
 **Nature cards:** NS-011  
-**Register:** C-007 Locked; C-011 Locked; W-003; E-004; N-004  
+**Register:** C-007 Locked; C-011 Open; W-003; E-004; N-004  
 **New Process?** no — new guild HSI + establishment; physicalCover feedback only
 
 - [x] Moisture × open canopy × salt × upland inundation HSI
@@ -942,7 +944,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Why this exists.** The two empty Force-panel stubs named in AGENTS.md, the [gap review](reviews/2026-07-30-sim-gap-review.md), and [ISLAND_FORCES.md](ISLAND_FORCES.md); both gated only on C-006 (Locked); DECISION_CONFORMANCE explicitly permits sharing one slice.
 
-**Register:** C-004 Locked; C-011 Locked; T-001; T-004; H-004; S-007; N-004; C-021 Open; C-022 Open
+**Register:** C-004 Locked; C-011 Open; T-001; T-004; H-004; S-007; N-004; C-021 Open; C-022 Open
 **New Process?** no — season scales the existing seasonal `vegetation` tick; erosion scales the existing `geomorphology` erosion terms (never production). D-007 clip gate does not apply.
 
 - [x] Season pressure multiplier (`short`/`typical`/`long`) on `runHerbEstablishmentStep`; `typical` = 1 neutral
@@ -981,7 +983,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **This implements Locked C-007, it does not depart from it.** C-007's implications already say *"dispersal pressure is a real path — occupancy is never copied from HSI alone."* Today dispersal is a static field, not a path.
 
-**Register:** C-007 Locked; C-019 Locked; C-011 Locked; C-003 Open (no stochastic arrivals); T-001; E-005; W-003; N-004
+**Register:** C-007 Locked; C-019 Locked; C-011 Open; C-003 Open (no stochastic arrivals); T-001; E-005; W-003; N-004
 **New Process?** no — changes what `dispersalProcess` sources pressure *from*; band, ownership, and field set are unchanged. D-007 clip gate does not apply.
 
 - [ ] Seed pressure = external term + local term: `overseas(d) + Σ_neighbours biomass · kernel`, as a deterministic separable convolution (no RNG — **C-003** is Open)
@@ -998,7 +1000,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Why this exists.** [Living-world review](reviews/2026-07-31-living-world-review.md) §2. `nextHerbBiomass` returns `min(capacity, biomass + growth)`, so an HSI collapse from 1.0 → 0.2 takes biomass **2.500 → 0.500 in a single band**. Loss is instantaneous; only recovery has a rate — backwards from real ecology, where loss is fast but finite and recovery is slow. Vegetation is therefore a *render of current HSI* rather than a state with history, and every scrap of ecological memory in the world lives in `soil.depth` / `soil.salinity` / `soil.porosity` with **none in the biota**. That is a bigger hole under **S-007** / **S-008** than the missing contaminant field **C-010** was filed for, and far cheaper to close.
 
-**Register:** S-007 Locked; S-008 Current; ES-006 Locked; ES-002; C-011 Locked; T-001; N-004
+**Register:** S-007 Locked; S-008 Current; ES-006 Locked; ES-002; C-011 Open; T-001; N-004
 **New Process?** no — changes the biomass update law inside the existing seasonal tick. D-007 clip gate does not apply.
 
 - [ ] Replace the clamp with a first-order decline toward capacity: when `biomass > capacity`, `biomass -= mortalityRate · (biomass − capacity) · dt`
@@ -1122,7 +1124,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.1. Six suitability factors are monotone ramps where the physically correct shape is a hump or threshold-slope — and that correct shape already exists elsewhere in the same file set: `factorInundationMarsh` (`inundationComposition.ts:42-45`) is a proper hump next to the upland arm's hard step at MHW; `factorSalinityTolerant` (`salinityComposition.ts:24-33`) is a proper threshold-slope next to the plain linear `factorSalinity`. Temperature has no upper limb (a 50°C world scores optimal for every guild), moisture has no wet limb for herb/shrub/crust (crust — a desiccation-adapted organism — is scored best at saturation), binder burial tolerance is inverted (sand binders require burial to stay vigorous; the current curve rewards sitting still), and strand/binder exposure factors have no destructive limb. The MHW step is the most consequential in combination with **L3**: a cell eroding across MHW by a millimetre loses its entire mature stand in one tick once mortality has no rate either.
 
-**Register:** C-007 Locked; C-011 Locked (real-world intuition is the instrument — binder burial response and crust moisture response are both currently backwards against their real referents); S-007 Locked; N-004
+**Register:** C-007 Locked; C-011 Open (real-world intuition is the instrument — binder burial response and crust moisture response are both currently backwards against their real referents); S-007 Locked; N-004
 **New Process?** no — corrects suitability-curve shapes inside existing `*Composition.ts` files; the Liebig min-scan machinery itself is unchanged (verified correct — [review §3](reviews/2026-07-31-vegetation-habitat-review.md)). D-007 clip gate does not apply.
 
 - [ ] Upland inundation gets the supratidal taper marsh already has (`inundationComposition.ts`)
@@ -1142,7 +1144,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 **Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.2–§2.3. `physicalCoverFrom` sums six guild fractions and clamps at 1 (`arrivalComposition.ts:196-205`); overlapping canopies physically combine as `1 − Π(1 − cᵢ)`, not a sum — three guilds at 40% independent cover give 0.78 by the correct formula but clamp to 1.0 here, which both overstates coupling into roughness/infiltration and flattens it past saturation. `canopyCoverFraction` has the identical defect for crust shading (`crustHsiComposition.ts:55-77`). Separately, nothing in this slice reads `light.understory` or `veg.leafAreaIndex` — `factorLight` uses open-sky insolation only (`lightComposition.ts:28`), so **there is no light competition between guilds today** — and a cell's own cover growth is scaled by its own *transmitted* light (`WorldState.ts:1412,1416`) when photosynthesis is driven by *absorbed* light, the inverse relationship, already double-counted by the same line's `(1 − cover)` logistic term. `LAI = cover · maxLAI` (`lightCompetition.ts:45`) is linear where the Beer–Lambert law it feeds implies `LAI = −ln(1−cover)/k` — full cover currently leaves a nonzero light floor instead of approaching darkness.
 
-**Register:** C-023 Open (guild competition — this slice does not decide C-023, but the understory mechanism C-023's leading direction already names as the natural displacement path is currently unused; fixing absorbed-vs-transmitted light here is a prerequisite, not an implementation of C-023 itself); ES-006 Locked; C-011 Locked
+**Register:** C-023 Open (guild competition — this slice does not decide C-023, but the understory mechanism C-023's leading direction already names as the natural displacement path is currently unused; fixing absorbed-vs-transmitted light here is a prerequisite, not an implementation of C-023 itself); ES-006 Locked; C-011 Open
 **New Process?** no — corrects the cover-combination formula and the light term the existing vegetation growth law reads. D-007 clip gate does not apply. **Does not implement C-023** — guild competition/displacement remains blocked on owner judgment; this slice only fixes the physics the eventual mechanism would ride on.
 
 - [ ] `physicalCoverFrom` and `canopyCoverFraction` switch from additive-clamped to product-complement (`1 − Π(1 − cᵢ)`)
@@ -1243,7 +1245,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 |---|---|---|---|
 | A+ / AUD-003 | Recovery audible — second ambient bed from `veg.cover` | AUD-003, C-014 | **Done** (§4.19) |
 | — | Field Notebook UI | U-006 | **Done** (§4.20) — Locked v2.0.12 |
-| — | Full C-020 clouds / precip phase | C-020 | **Done** (§4.21) — Lock still owner |
+| — | Full C-020 clouds / precip phase | C-020 | **Done** (§4.21) — **C-020 Locked** v2.0.13 |
 | N / NS-006 | Salt-memory encoding | C-018 | **Done** (§4.22) |
 | N2 / NS-002 | Heat→plant | C-004, C-020 | **Done** (§4.23) |
 | N4 / NS-004 | Strand splash pioneer | W-003, C-018, C-019 | **Done** (§4.24) |
@@ -1256,7 +1258,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | N11 / NS-011 | Cryptogam crust bootstrap | C-007, W-003 | **Done** (§4.34) |
 | B / C-005 | Branch-and-compare scaffold | C-005, T-001, P-005 | **Done** (§4.27) — Locked tooling v2.0.12 |
 | E / Exner-lite | Inland hillslope deposit | GEO-002, C-002 | **Done** (§4.29) — C-002 Locked v2.0.12 |
-| C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | §4.28 **Done** |
+| C-006 | Abundant sculpting CI promote | C-006, N-001, RC-004 | **Done** (§4.28) — **C-006 Locked** v2.0.11 |
 | G | Season + erosion-intensity dials | C-021, C-022, T-001, T-004, H-004, S-007, N-004 | **Done** (§4.35) — machine only, both Open |
 | — | C-020 glitches G1–G5 | C-020 presentation | **Fixed** — [C-020-dossier](candidates/C-020-dossier.md); `stormCue.test.ts` |
 | L1 | Time throughput defect (16× ran at 5×) | S-009, T-002, C-008 | §4.36 **Done** — shipped with L6; no baseline moved |
@@ -1277,22 +1279,22 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Surface-flux stability guard | T-001, H-004 | §4.50 **Done** |
 | — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Done** |
 | — | Encoding delta correctness | U-003, D-007 | §4.52 **Done** |
-| C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — not blocking §4.52 |
+| C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — did not block §4.52, which shipped without it |
 
-Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed. **§4.50 surface-flux stability guard** Done — per-face CFL cap + roughness floor inside `fluxStep`; no baseline moved (traced inert against every parameter the game currently exercises). **§4.51 coastal base-level & substrate coupling** Done — ocean-neighbor stage reads `seaLevel` not bed elevation, a non-outlet rim cell is excluded from hillslope erosion (structural/dynamic boundary disagreement), coastal erosion reads per-substrate `erosionK` as a ratio against loam (ratio 1 on loam, so the pre-fix calibration is unchanged there); nine `aNorm`-downstream baselines refreshed, same family §4.49 moved. **§4.52 encoding delta correctness** Done — occupant/light ramps no longer saturate before the top of their domain, delta floors switched to a luminance-weighted metric (grey deltas unchanged, blue discounted, green boosted vs. raw Euclidean), the binder/intertidal cross-file color collision fixed and checked, terrain overlay compositing made proportional instead of sequential (CPU + GLSL), `substrateEncodingDelta` now checks all substrate pairs at each one's own porosity, and the `timeRates.ts` "fastest sustains" label now derives from `sustainableRates()`; two Tier-P floors and one probe baseline (`tidal-envelope`) moved for documented reasons, not regressions.
+Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **L1** / **L6** Done (§4.36 / §4.41) — deferred time debt plus a rate ladder in real-world units (`1 s/s` … `1 week/s`); no baseline or `GOLDEN_*` hash moved. **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed. **§4.50 surface-flux stability guard** Done — per-face CFL cap + roughness floor inside `fluxStep`; no baseline moved (traced inert against every parameter the game currently exercises). **§4.51 coastal base-level & substrate coupling** Done — ocean-neighbor stage reads `seaLevel` not bed elevation, a non-outlet rim cell is excluded from hillslope erosion (structural/dynamic boundary disagreement), coastal erosion reads per-substrate `erosionK` as a ratio against loam (ratio 1 on loam, so the pre-fix calibration is unchanged there); nine `aNorm`-downstream baselines refreshed, same family §4.49 moved. **§4.52 encoding delta correctness** Done — occupant/light ramps no longer saturate before the top of their domain, delta floors switched to a luminance-weighted metric (grey deltas unchanged, blue discounted, green boosted vs. raw Euclidean), the binder/intertidal cross-file color collision fixed and checked, terrain overlay compositing made proportional instead of sequential (CPU + GLSL), `substrateEncodingDelta` now checks all substrate pairs at each one's own porosity, and the `timeRates.ts` "fastest sustains" label now derives from `sustainableRates()`; two Tier-P floors and one probe baseline (`tidal-envelope`) moved for documented reasons, not regressions.
 
-**Executable tip is now the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
+**Executable tip is the Living wave**, from two reviews — [living-world](reviews/2026-07-31-living-world-review.md) (life) and [time-architecture](reviews/2026-07-31-time-architecture-review.md) (the clock):
 
 ```
-L1 throughput defect  →  L6 real-world time units  →  L2 local seed rain
+L1 throughput defect [Done]  →  L6 real-world time units [Done]  →  L2 local seed rain [next]
    →  L3 mortality as a rate  →  L7 activity-gated event band  →  L4 biotic motion
 ```
 
-L1 and L6 lead because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
+L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
 
 **Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
 
-**A second, parallel review queue** — four scoped domain reviews using the same expert-review pattern as the renderer ([3c4b9f0](https://github.com/mrfootandmrbear/Habitat/commit/3c4b9f0)): [fire/fuel](reviews/2026-07-31-fire-fuel-review.md), [vegetation/habitat](reviews/2026-07-31-vegetation-habitat-review.md) (extends the living-world review's L2/L3/L5 territory), [hydrology/geomorphology](reviews/2026-07-31-hydrology-geomorphology-review.md), and [UI encoding](reviews/2026-07-31-ui-encoding-review.md) — queued as **§4.44–§4.52**. None registers a new `Process` and none needs a candidate except **C-026** (deliberate CVD-safe palette, Open, owner-judged, not blocking §4.52's bug fixes). Sequencing against the Living wave above is not yet owner-set; the one item worth calling out is **§4.49 drainage flat-routing correctness** — it corrupts `aNorm`, which both hillslope erosion and the groundwater channel boost already depend on, so it's upstream of more than its own review scope suggests. **§4.52 encoding delta correctness** is also worth flagging outside severity ranking: it fixes the Tier-P proxy mechanism ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)) that discharges Definition-of-done row 2 for every slice, past and future.
+**A second, parallel review queue** — four scoped domain reviews using the same expert-review pattern as the renderer ([3c4b9f0](https://github.com/mrfootandmrbear/Habitat/commit/3c4b9f0)): [fire/fuel](reviews/2026-07-31-fire-fuel-review.md), [vegetation/habitat](reviews/2026-07-31-vegetation-habitat-review.md) (extends the living-world review's L2/L3/L5 territory), [hydrology/geomorphology](reviews/2026-07-31-hydrology-geomorphology-review.md), and [UI encoding](reviews/2026-07-31-ui-encoding-review.md) — filed as **§4.44–§4.52**. None registers a new `Process` and none needs a candidate except **C-026** (deliberate CVD-safe palette, Open, owner-judged, which did not block §4.52's bug fixes). **§4.49–§4.52 have shipped**; **§4.44–§4.48** (fire spread rate, fuel/scar numerics, HSI curve shapes, guild cover & light, habitat/dispersal hygiene) remain queued and are the parallel track beside the Living wave. Two of the shipped four are worth recording outside severity ranking: **§4.49 drainage flat-routing correctness** was upstream of more than its own review scope suggested — it corrupted `aNorm`, which both hillslope erosion and the groundwater channel boost depend on, and its fix moved the baseline family §4.51 then moved again; and **§4.52 encoding delta correctness** repaired the Tier-P proxy mechanism ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)) that discharges Definition-of-done row 2 for every slice, past and future.
 
 ---
 
