@@ -1,0 +1,43 @@
+{
+  "id": "L2",
+  "title": "Local seed rain (C-007)",
+  "simLoop": "runDispersalStep sourced seed pressure from distance-to-shore alone, so veg.biomass.* was never a propagule source and every seed arrived from off-map forever — 15.6% of the default island could not vegetate at perfect habitat suitability. Seed pressure is now overseas(d) + Σ_neighbours (biomass / biomassMax) · kernel, evaluated as a deterministic separable convolution with no RNG (C-003 stays Open). The kernel is normalized to unit mass and the local term is normalized by each guild's own capacity, so it is bounded by localSeedStrength and cannot swamp the overseas term; per-guild dispersal distance is set only for strand (sea-dispersed) and crust (mats), with one shared default for the four guilds whose cards state no dispersal mode (N-004).",
+  "gameLoop": "A meadow you founded now spreads outward instead of sitting exactly where it started, its front stops at ground that is too salty rather than washing over it, and an interior cleared by disturbance grows back from whatever survived at its edge — where before the only seed source in the world was the coastline, so inland ground stayed bare forever while the suitability layer read 1.0 and offered no reason.",
+  "registerIds": [
+    "C-007",
+    "C-019",
+    "C-011",
+    "C-003",
+    "T-001",
+    "E-005",
+    "W-003",
+    "N-004"
+  ],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/seedRain.test.ts",
+    "src/sim/arrival.test.ts",
+    "src/sim/ownership.test.ts"
+  ],
+  "probes": [
+    "spread-front",
+    "arrival-earned",
+    "island-arrival",
+    "deep-time"
+  ],
+  "fields": [
+    "veg.seedBank.herb",
+    "veg.seedBank.strand",
+    "veg.seedBank.binder",
+    "veg.seedBank.marsh",
+    "veg.seedBank.shrub",
+    "veg.seedBank.crust",
+    "veg.establishment.herb",
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.crust",
+    "habitat.suitability"
+  ],
+  "notebookSeed": "The patch by the hollow has been widening a little each year, and it stopped where the ground turns salty. Nothing crossed that line.",
+  "tierO": "no owner-only question this slice — the machine half is fully CI-judged (spreading front measured against a no-patch control that stays at zero, front stalls at a salt ring at or below background, refugium recovery 628x the no-refugium control, C-019 isolation ratio 2.82 with S_elig shape unchanged); D-007 clip gate does not apply since dispersalProcess is an existing Process and no new one was registered. Deferred to L4 biotic motion (§4.39), which is the presentation slice where a spreading front becomes something to look at."
+}

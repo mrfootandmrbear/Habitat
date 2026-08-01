@@ -120,6 +120,112 @@ export function overseasSeedPressure(
 }
 
 /**
+ * Slice L2 — 1D normalized truncated exponential dispersal kernel (C-007).
+ * Weights w[k] ∝ exp(−|k| / λ), truncated at ⌈3λ⌉ (≥ 95% of the mass) and
+ * normalized to sum 1, so the separable 2D product is also a unit kernel and
+ * the local term is a weighted *mean* occupancy rather than an unbounded sum.
+ * Deterministic: fixed accumulation order, no RNG (C-003 Open — T-001).
+ */
+export function localDispersalKernel(lambdaCells: number): Float32Array {
+  const lambda = Math.max(lambdaCells, 1e-6);
+  const radius = Math.max(1, Math.ceil(3 * lambda));
+  const w = new Float32Array(2 * radius + 1);
+  let sum = 0;
+  for (let k = -radius; k <= radius; k++) {
+    const v = Math.exp(-Math.abs(k) / lambda);
+    w[k + radius] = v;
+    sum += v;
+  }
+  for (let i = 0; i < w.length; i++) w[i] = w[i]! / sum;
+  return w;
+}
+
+/**
+ * Separable convolution of a scalar field with a 1D kernel: horizontal pass
+ * into a scratch buffer, then vertical. Never reads a partially-updated cell,
+ * so the result is independent of scan order — the front spreads symmetrically
+ * rather than biased toward +x / +z (BUILD_GUIDE §2.1 Symmetry).
+ *
+ * Out-of-bounds neighbours contribute nothing while the kernel stays normalized
+ * over its full support, so pressure is diluted at the map edge and across open
+ * water: propagules that land off the field are lost, not reflected back.
+ */
+export function convolveSeparable(
+  src: Float32Array,
+  width: number,
+  height: number,
+  kernel: Float32Array,
+): Float32Array {
+  const radius = (kernel.length - 1) >> 1;
+  const tmp = new Float32Array(src.length);
+  for (let z = 0; z < height; z++) {
+    const row = z * width;
+    for (let x = 0; x < width; x++) {
+      let acc = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const sx = x + k;
+        if (sx < 0 || sx >= width) continue;
+        acc += src[row + sx]! * kernel[k + radius]!;
+      }
+      tmp[row + x] = acc;
+    }
+  }
+  const out = new Float32Array(src.length);
+  for (let z = 0; z < height; z++) {
+    for (let x = 0; x < width; x++) {
+      let acc = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const sz = z + k;
+        if (sz < 0 || sz >= height) continue;
+        acc += tmp[sz * width + x]! * kernel[k + radius]!;
+      }
+      out[z * width + x] = acc;
+    }
+  }
+  return out;
+}
+
+/**
+ * Slice L2 — local propagule pressure from standing biomass (C-007).
+ * `Σ_neighbours (biomass / biomassMax) · kernel · strength`, i.e. strength ×
+ * the kernel-weighted mean occupancy of the neighbourhood. Normalizing by the
+ * guild's own capacity keeps `strength` guild-independent (crust caps lower
+ * than herb) and bounds the term at `strength`, so local seed can never run
+ * away or swamp the overseas term (C-019 guard).
+ *
+ * Returns a field; callers add it to the external term. Biomass is zero
+ * everywhere at world start, so a fresh island still colonizes from overseas
+ * alone and the founding sequence is unchanged.
+ */
+export function localSeedPressureField(args: {
+  biomass: Float32Array;
+  width: number;
+  height: number;
+  biomassMax: number;
+  strength: number;
+  meanDistanceCells: number;
+}): Float32Array {
+  const n = args.width * args.height;
+  const out = new Float32Array(n);
+  const strength = Math.max(0, args.strength);
+  if (strength <= 0) return out;
+  const max = Math.max(args.biomassMax, 1e-6);
+  const occupancy = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    occupancy[i] = clamp01(Math.max(0, args.biomass[i]!) / max);
+  }
+  const kernel = localDispersalKernel(args.meanDistanceCells);
+  const blurred = convolveSeparable(
+    occupancy,
+    args.width,
+    args.height,
+    kernel,
+  );
+  for (let i = 0; i < n; i++) out[i] = strength * blurred[i]!;
+  return out;
+}
+
+/**
  * Establishment probability: p = 1 − exp(−seedBank · HSI · scale).
  * Zero HSI ⇒ zero probability.
  */

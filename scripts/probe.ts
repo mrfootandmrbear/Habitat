@@ -209,6 +209,33 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.bounded": { abs: 0 },
     "delta.earned": { abs: 0 },
   },
+  // Slice L2 — cell counts are integers and must not drift at all; biomass
+  // means carry float tolerance. controlYear4 / onRing are structural zeros:
+  // if either moves the scenario has stopped isolating the local term.
+  "spread-front": {
+    "expand.vegYear0": { abs: 0 },
+    "expand.vegYear2": { abs: 0 },
+    "expand.vegYear4": { abs: 0 },
+    "expand.controlYear4": { abs: 0 },
+    "stall.insideRing": { abs: 0 },
+    "stall.onRing": { abs: 0 },
+    "stall.beyondRing": { abs: 0 },
+    "stall.openControlBeyond": { abs: 0 },
+    "stall.backgroundBeyond": { abs: 0 },
+    "recover.burnedBiomass": { abs: 0 },
+    "recover.refugiumRecovered": { abs: 1e-5 },
+    "recover.noRefugiumRecovered": { abs: 1e-5 },
+    "isolation.smallFarBiomass": { abs: 1e-5 },
+    "isolation.largeNearBiomass": { abs: 1e-5 },
+    "isolation.isolationRatio": { abs: 1e-4 },
+    "isolation.sEligSmall": { abs: 1e-6 },
+    "isolation.sEligLarge": { abs: 1e-6 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.bounded": { abs: 0 },
+    "delta.spreads": { abs: 0 },
+    "delta.stalls": { abs: 0 },
+    "delta.recovers": { abs: 0 },
+  },
   "living-hollow": {
     "colonized.cover": { abs: 0 },
     "colonized.biomass": { abs: 1e-5 },

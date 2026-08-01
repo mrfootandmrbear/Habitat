@@ -2,7 +2,7 @@
   "scenario": "burn-recover",
   "metrics": {
     "fire.burnedCells": {
-      "value": 256,
+      "value": 133,
       "abs": 0
     },
     "fire.fuelBefore": {
@@ -10,15 +10,15 @@
       "abs": 0.0001
     },
     "fire.fuelAfter": {
-      "value": 130.84677124023438,
+      "value": 487.09753119945526,
       "abs": 0.0001
     },
     "fire.consumed": {
-      "value": 741.4650024414028,
+      "value": 385.21423954963615,
       "abs": 0.001
     },
     "fire.accountingError": {
-      "value": 0.000006103512191657501,
+      "value": 0.000003170966408561071,
       "abs": 0.001
     },
     "fire.determinismMatch": {
@@ -26,31 +26,31 @@
       "abs": 0
     },
     "fire.hashN": {
-      "value": 2096492907,
+      "value": 31881457,
       "abs": 0
     },
     "wetSector.coverAfterBurn": {
-      "value": 0.07000000029802322,
+      "value": 0.4096093687112443,
       "abs": 0.000001
     },
     "wetSector.coverRecovered": {
-      "value": 0.4536204934120178,
+      "value": 0.6084954580292106,
       "abs": 0.00001
     },
     "drySector.coverAfterBurn": {
-      "value": 0.07000000029802322,
+      "value": 0.3357812451431528,
       "abs": 0.000001
     },
     "drySector.coverRecovered": {
-      "value": 0.07000000029802322,
+      "value": 0.3357812451431528,
       "abs": 0.00001
     },
     "delta.recoveryGap": {
-      "value": 0.3836204931139946,
+      "value": 0.2727142128860578,
       "abs": 0.0001
     },
     "delta.wetVsDry": {
-      "value": 6.480292735439144,
+      "value": 1.8121782167130633,
       "abs": 0.1
     }
   }

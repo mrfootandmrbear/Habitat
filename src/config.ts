@@ -193,6 +193,26 @@ export const config = {
   fuelMoistureExtinction: 0.25,
   /** Slope factor exponent a in e^{a·tanφ} (fire runs uphill). */
   fireSlopeFactorA: 0.8,
+  /**
+   * Ceiling on the slope factor e^{a·tanφ} (§4.44, fire/fuel review §5).
+   * Unclamped the term is unbounded in player-sculpted relief, so a
+   * near-vertical face swamps the fuel and moisture terms and ignites
+   * regardless of wetness. At 5, a cell still needs a moisture factor above
+   * `fireSpreadStrengthMin / 5` to catch on the steepest possible face — i.e.
+   * soil moisture below ~0.97 × extinction — so moisture stays decisive.
+   * Real rate of spread saturates with slope; this is that saturation.
+   */
+  fireSlopeFactorMax: 5,
+  /**
+   * Surface rate of spread (m/min) with no wind — §4.44. Sets how far the
+   * front advances per step: rings = ROS · Δt / Δx, with Δt from
+   * `eventDtMinutes`. At the shipped event step this is a whole number of
+   * cells, so the front moves visibly without crossing the map in one tick.
+   * ~0.033 m/s, the moderate end of an unwinded surface fire in light fuels.
+   */
+  fireRateOfSpreadMetersPerMinute: 2,
+  /** Spread strength above which a probed cell catches (dimensionless). */
+  fireSpreadStrengthMin: 0.15,
   /** Fraction of fuel consumed per burn event [0,1]. */
   fireFuelConsumption: 0.85,
   /** Fraction of veg.cover killed by fire [0,1]. */
@@ -284,6 +304,41 @@ export const config = {
   overseasSeedBase: 40,
   /** Shore-biased exponential mean distance (cells) — shorter than mainland λ. */
   overseasMeanDistanceCells: 4,
+
+  /**
+   * Slice L2 — local seed rain (C-007 "dispersal pressure is a real path").
+   * Standing biomass becomes a propagule source, so pressure is
+   * `overseas(d) + Σ_neighbours biomass · kernel` rather than distance-to-shore
+   * alone. Deterministic separable convolution — no stochastic arrivals while
+   * C-003 stays Open.
+   *
+   * Strength is the pressure a *fully occupied* neighbourhood delivers, so the
+   * local term is bounded by this value. Held well under the shore's overseas
+   * pressure (overseasSeedBase × S_elig) so isolation still governs founding
+   * and the C-019 area/isolation signal survives — local seed only decides how
+   * a founded patch *spreads*, never whether an empty island is reached.
+   */
+  localSeedStrength: 10,
+  /**
+   * Default local kernel mean distance (cells) for guilds whose nature-study
+   * card states no dispersal mode. Deliberately one shared number rather than
+   * six invented ones (N-004 — no arbitrary hidden rules): herb, binder, marsh
+   * and shrub all use this.
+   */
+  localSeedMeanDistanceCells: 2,
+  /**
+   * Strand disperses by sea (Slice N4 card — "sea-dispersed seed";
+   * docs/evidence/island-colonization.md §3 hydrochory ≫ wind ≫ bird), so its
+   * propagules travel further along the shore than an inland guild's — the one
+   * guild with an explicit long-distance referent.
+   */
+  strandLocalMeanDistanceCells: 6,
+  /**
+   * Crust spreads as mats creeping into directly adjacent ground (Slice N11
+   * card — "living soil crusts and moss mats"), the short-range end of the
+   * contrast against sea-dispersed strand.
+   */
+  crustLocalMeanDistanceCells: 1,
   /** Default authored isolation when seaLevel is set (cells). */
   islandIsolationDefaultCells: 16,
   /** Area half-saturation for S_elig (cells). */

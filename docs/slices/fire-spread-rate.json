@@ -1,0 +1,21 @@
+{
+  "id": "fire-spread-rate",
+  "title": "Fire spread as a rate (T-001 / T-006 / ES-002)",
+  "simLoop": "runFireStep ignored dt and ran its BFS to full queue exhaustion in one call, so an entire connected fuel region burned instantly, every burn flag cleared before the function returned, and a 1-hour tick burned identically to a 30-day tick. The front is now capped at ROS * dt / cellSize whole cell-rings per step (2 m/min at the shipped event step = 3 rings) and fire.burning persists on cells that still carry fuel, so a burn has duration something outside the function can observe. Tracking the front explicitly also fixes two defects that shared its root cause: fire.intensity is cleared in the same pass that collects the active front, on the near side of the early return that previously skipped the only reset and left a dead fire reporting its last burn forever; and the visited mark is now set only when a cell actually ignites, so a cell that fails the spread gate from one neighbour stays probeable from another instead of burn shape being an artifact of scan order. The slope factor e^(a*tan phi), previously unbounded over a player-controlled elevation difference, saturates at 5 so a sculpted near-vertical face can no longer ignite regardless of moisture.",
+  "gameLoop": "A fire you light should spread outward at a pace you can watch and act against, and should stop reporting itself as burning once it has burned out — not consume every connected patch of fuel the instant it is lit.",
+  "registerIds": ["T-001", "T-006", "C-003", "ES-002"],
+  "invariantClass": "Refinement",
+  "tests": [
+    "src/sim/fire.test.ts"
+  ],
+  "probes": ["burn-recover"],
+  "fields": [
+    "fire.burning",
+    "fire.intensity",
+    "fire.fuelLoad",
+    "fire.scar",
+    "ledger.fuelConsumed"
+  ],
+  "notebookSeed": "The burn moved uphill through the dry fuel for days before it ran out of anything left to carry it.",
+  "tierO": "no owner-only question this slice — defect fix against Slice 10's own stated claims, machine half only (CI-judged: reach scales with dt at 25 / 85 / 313 cells for 3 / 6 / 12 rings; intensity clears within one tick of the last active cell going out; burn shape identical under all four rotations of the neighbour-check order, where the replaced rule differed on two of them); D-007 clip gate does not apply since no new Process was registered."
+}

@@ -2,8 +2,14 @@ import type { Process } from "./Process";
 
 /**
  * Slice 10 — fire spread (BFS from authored ignition, NATURAL_PROCESS_MATH §3.5).
- * Deterministic under T-001: sorted index-order BFS, no random iteration.
- * Gated on fuel load, fuel moisture (soil.moisture), and slope.
+ * Rate-limited since §4.44: the front advances `ROS · dt / Δx` cell-rings per
+ * step and `fire.burning` persists on cells that still carry fuel, so a burn
+ * has duration rather than consuming a whole fuel region in one call.
+ * Deterministic under T-001: the front is re-sorted ascending each ring and
+ * ignition is independent of neighbour-check order — both asserted in
+ * `fire.test.ts`, not merely asserted here.
+ * Gated on fuel load, fuel moisture (soil.moisture), and a slope factor that
+ * saturates rather than growing without bound on sculpted relief.
  * Authored ignition only while C-003 is Open.
  * Cover kill is a contribute into vegetation-owned `veg.cover` (SIM §11),
  * not a second owner of that field.

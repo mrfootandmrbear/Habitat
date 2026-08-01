@@ -681,8 +681,15 @@ export function probeLimitingShift(): ProbeResult {
 
 /**
  * Slice 10: post-fire recovery trajectory differs by pre-fire moisture.
- * Wet patch recovers veg.cover faster after identical burn (ES-002, NATURAL_PROCESS_MATH §3.5).
+ * Wet patch recovers veg.cover faster after a burn (ES-002, NATURAL_PROCESS_MATH §3.5).
  * Also asserts determinism (T-001) and fuel accounting conservation.
+ *
+ * Since §4.44 the single `runFireStep` call is one rate-limited step rather
+ * than a whole-region burn, so the two sectors are no longer burned to an
+ * identical depth — the centred ignition sits on the dry side of the split.
+ * The recovery claim is unaffected and is cleanest read as a change rather
+ * than a level: the dry sector gains nothing over the recovery window while
+ * the wet sector climbs well clear of where the burn left it.
  */
 export function probeBurnRecover(): ProbeResult {
   const w = 16;
@@ -4223,6 +4230,399 @@ export function probeErosionIntensity(): ProbeResult {
   };
 }
 
+/**
+ * Slice L2 — spread-front (C-007 Locked; C-019 Locked; C-011 Open; C-003 Open).
+ *
+ * Every case is a paired comparison against a control that differs only in the
+ * thing under test, because on a fully suitable island the overseas kernel will
+ * eventually reach the shallow interior on its own — the claim is about the
+ * *local* term, so the control has to isolate it.
+ *
+ * Geometry: the default island size, sampling the deep interior (within 12
+ * cells of centre). The living-world review measured that band as unreachable
+ * from overseas — the `control*` metrics below re-measure that every run, and
+ * they must stay 0 or the scenario is no longer testing what it claims.
+ *
+ *  1. expand — a founded patch grows outward year on year; no patch, no growth.
+ *  2. stall  — a seawater-salt band stops the front; the same world without the
+ *              band lets it through.
+ *  3. recover— a cleared interior refills from a surviving refugium; the same
+ *              clearing with no refugium left does not refill.
+ *  4. isolation — the C-019 guard: local seed must not erase area/isolation.
+ *
+ * Note on (3): fire currently clears `veg.cover` but not `veg.biomass.*`, so
+ * the disturbance is applied to biomass directly. Making fire clear biomass is
+ * a separate queued review-defect slice (BUILD_GUIDE §4.44–§4.48), not touched
+ * here.
+ */
+export function probeSpreadFront(): ProbeResult {
+  const size = config.gridSize;
+  const sea = 2;
+  const isolation = 16;
+  const centre = (size - 1) * 0.5;
+  const cx = size >> 1;
+  const cz = size >> 1;
+  const sampleRadius = 12;
+
+  const island = (): Grid2D => {
+    const t = new Grid2D(size, size, 0.5);
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        if (Math.hypot(x - centre, z - centre) <= size * 0.45) t.set(x, z, 3);
+      }
+    }
+    return t;
+  };
+
+  /** Perfect habitat on land, so dispersal is the only limiting input. */
+  const make = (): WorldState => {
+    const world = new WorldState(island(), {
+      seaLevel: sea,
+      islandIsolation: isolation,
+    });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    for (const i of world.oceanCells) {
+      world.soilMoisture.data[i] = 0;
+      world.groundwaterStorage.data[i] = 0;
+    }
+    world.runHabitatStep(1);
+    return world;
+  };
+
+  const foundPatch = (world: WorldState, r: number) => {
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (x < 0 || z < 0 || x >= size || z >= size) continue;
+        world.herbBiomass.set(x, z, config.herbBiomassMax);
+      }
+    }
+  };
+
+  const advance = (world: WorldState, years: number) => {
+    for (let y = 0; y < years; y++) {
+      world.runDispersalStep(1);
+      for (let s = 0; s < 4; s++) world.runHerbEstablishmentStep(1);
+    }
+  };
+
+  /** Vegetated land cells within `r` of centre — the deep-interior sample. */
+  const vegNearCentre = (world: WorldState, r: number): number => {
+    let n = 0;
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        if (Math.hypot(x - cx, z - cz) > r) continue;
+        const i = z * size + x;
+        if (world.oceanCells.has(i)) continue;
+        if (world.herbBiomass.data[i]! > 0.1) n++;
+      }
+    }
+    return n;
+  };
+
+  // --- 1. Expand: founded patch vs no patch, same world otherwise.
+  const grow = make();
+  foundPatch(grow, 1);
+  const expandYear0 = vegNearCentre(grow, sampleRadius);
+  advance(grow, 2);
+  const expandYear2 = vegNearCentre(grow, sampleRadius);
+  advance(grow, 2);
+  const expandYear4 = vegNearCentre(grow, sampleRadius);
+
+  const noPatch = make();
+  advance(noPatch, 4);
+  const controlYear4 = vegNearCentre(noPatch, sampleRadius);
+
+  if (controlYear4 !== 0) {
+    throw new Error(
+      `spread-front: overseas reached the deep interior (${controlYear4}) — sample band no longer isolates the local term`,
+    );
+  }
+  if (!(expandYear2 > expandYear0)) {
+    throw new Error(
+      `spread-front: patch did not expand by year 2 (${expandYear0} → ${expandYear2})`,
+    );
+  }
+  if (!(expandYear4 > expandYear2)) {
+    throw new Error(
+      `spread-front: expansion stalled on good ground (${expandYear2} → ${expandYear4})`,
+    );
+  }
+
+  // --- 2. Stall: a seawater-salt *ring* around the founded patch.
+  // factorSalinity(1) = 0 ⇒ herb HSI 0 on the ring (C-018). A ring rather than
+  // a band because the island's far side has its own coastline and colonizes
+  // from it — a straight band would be "crossed" by that far-side front rather
+  // than by the patch under test.
+  //
+  // The ring must be wider than the kernel's own reach (⌈3λ⌉ cells) or seed
+  // simply steps over it. A hostile strip narrower than the dispersal kernel is
+  // not a boundary — that is the honest result, not a defect. Sized off the
+  // config so a λ change re-tunes it.
+  const ringWidth = Math.ceil(3 * config.localSeedMeanDistanceCells) + 2;
+  const ringR0 = 4;
+  const ringR1 = ringR0 + ringWidth - 1;
+  const targetR0 = ringR1 + 1;
+  const targetR1 = ringR1 + 3;
+  const stallYears = 8;
+
+  const annulus = (world: WorldState, r0: number, r1: number): number => {
+    let n = 0;
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        const r = Math.hypot(x - cx, z - cz);
+        if (r < r0 || r > r1) continue;
+        const i = z * size + x;
+        if (world.oceanCells.has(i)) continue;
+        if (world.herbBiomass.data[i]! > 0.1) n++;
+      }
+    }
+    return n;
+  };
+
+  const paintRing = (world: WorldState) => {
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) {
+        const r = Math.hypot(x - cx, z - cz);
+        if (r >= ringR0 && r <= ringR1) world.soilSalinity.set(x, z, 1);
+      }
+    }
+    world.runHabitatStep(1);
+  };
+
+  const stall = make();
+  paintRing(stall);
+  foundPatch(stall, 1);
+  advance(stall, stallYears);
+
+  const openFront = make();
+  foundPatch(openFront, 1);
+  advance(openFront, stallYears);
+
+  // Background: no founded patch at all. At this horizon the island's far side
+  // has begun arriving from its own shore, so the target annulus is not
+  // guaranteed empty — the stall claim is measured against this, not against 0.
+  const background = make();
+  advance(background, stallYears);
+
+  const stallOnRing = annulus(stall, ringR0, ringR1);
+  const stallBeyond = annulus(stall, targetR0, targetR1);
+  const openBeyond = annulus(openFront, targetR0, targetR1);
+  const backgroundBeyond = annulus(background, targetR0, targetR1);
+  const stallInside = annulus(stall, 0, ringR0 - 1);
+
+  if (stallOnRing !== 0) {
+    throw new Error(
+      `spread-front: front established on the salt ring (${stallOnRing} cells)`,
+    );
+  }
+  if (!(stallInside > 0)) {
+    throw new Error("spread-front: patch failed to fill inside the ring");
+  }
+  if (!(stallBeyond <= backgroundBeyond)) {
+    throw new Error(
+      `spread-front: front crossed the salt ring (${stallBeyond} beyond vs ${backgroundBeyond} background)`,
+    );
+  }
+  if (!(openBeyond > backgroundBeyond)) {
+    throw new Error(
+      `spread-front: unringed control never reached the target annulus (${openBeyond} vs background ${backgroundBeyond}) — stall case proves nothing`,
+    );
+  }
+
+  // --- 3. Recover: cleared interior with a surviving refugium vs without one.
+  const disturbR = 6;
+  const clearDisc = (world: WorldState, r: number) => {
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (x < 0 || z < 0 || x >= size || z >= size) continue;
+        if (Math.hypot(x - cx, z - cz) <= r) world.herbBiomass.set(x, z, 0);
+      }
+    }
+  };
+
+  const discBiomass = (world: WorldState, r: number): number => {
+    let total = 0;
+    let n = 0;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (x < 0 || z < 0 || x >= size || z >= size) continue;
+        if (Math.hypot(x - cx, z - cz) > r) continue;
+        const i = z * size + x;
+        if (world.oceanCells.has(i)) continue;
+        total += world.herbBiomass.data[i]!;
+        n++;
+      }
+    }
+    return n === 0 ? 0 : total / n;
+  };
+
+  // A ring of sward survives around the cleared disc.
+  const refugium = make();
+  for (let z = 0; z < size; z++) {
+    for (let x = 0; x < size; x++) {
+      if (Math.hypot(x - cx, z - cz) <= disturbR + 8) {
+        refugium.herbBiomass.set(x, z, config.herbBiomassMax);
+      }
+    }
+  }
+  for (const i of refugium.oceanCells) refugium.herbBiomass.data[i] = 0;
+  clearDisc(refugium, disturbR);
+  const burnedBiomass = discBiomass(refugium, disturbR);
+  advance(refugium, 6);
+  const refugiumRecovered = discBiomass(refugium, disturbR);
+
+  // Control: nothing survives anywhere — the pre-L2 situation.
+  const noRefugium = make();
+  advance(noRefugium, 6);
+  const noRefugiumRecovered = discBiomass(noRefugium, disturbR);
+
+  if (burnedBiomass !== 0) {
+    throw new Error(
+      `spread-front: disturbance did not clear the disc (${burnedBiomass})`,
+    );
+  }
+  if (!(refugiumRecovered > 0.5)) {
+    throw new Error(
+      `spread-front: interior did not recover from refugium (${refugiumRecovered})`,
+    );
+  }
+  // The overseas kernel still delivers a trace this deep inland; it must stay
+  // far below the 0.1 threshold the rest of this probe counts as vegetated,
+  // i.e. the interior is bare to the eye without a surviving local source.
+  if (!(noRefugiumRecovered < 0.05)) {
+    throw new Error(
+      `spread-front: no-refugium control recovered (${noRefugiumRecovered}) — recovery is not local-sourced`,
+    );
+  }
+  if (!(refugiumRecovered > noRefugiumRecovered * 20)) {
+    throw new Error(
+      `spread-front: refugium recovery (${refugiumRecovered}) not clearly above the no-refugium control (${noRefugiumRecovered})`,
+    );
+  }
+
+  // --- 4. C-019 guard: local seed must not erase island isolation.
+  const colonize = (radius: number, isol: number, years: number) => {
+    const n = 32;
+    const c = (n - 1) * 0.5;
+    const t = new Grid2D(n, n, 0.5);
+    for (let z = 0; z < n; z++) {
+      for (let x = 0; x < n; x++) {
+        if (Math.hypot(x - c, z - c) <= radius) t.set(x, z, 3);
+      }
+    }
+    const world = new WorldState(t, { seaLevel: sea, islandIsolation: isol });
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    for (const i of world.oceanCells) {
+      world.soilMoisture.data[i] = 0;
+      world.groundwaterStorage.data[i] = 0;
+    }
+    world.runHabitatStep(1);
+    advance(world, years);
+    let total = 0;
+    let land = 0;
+    for (let i = 0; i < world.width * world.height; i++) {
+      if (world.oceanCells.has(i)) continue;
+      land++;
+      total += world.herbBiomass.data[i]!;
+    }
+    return {
+      sElig: world.eligibleRichness(),
+      meanBiomass: land === 0 ? 0 : total / land,
+    };
+  };
+
+  const smallFar = colonize(4, 40, 2);
+  const largeNear = colonize(10, 4, 2);
+  const isolationRatio =
+    largeNear.meanBiomass / Math.max(smallFar.meanBiomass, 1e-9);
+
+  if (!(largeNear.sElig > smallFar.sElig)) {
+    throw new Error(
+      `spread-front: S_elig shape lost (small ${smallFar.sElig}, large ${largeNear.sElig})`,
+    );
+  }
+  if (!(isolationRatio > 1.5)) {
+    throw new Error(
+      `spread-front: local seed swamped island isolation (ratio ${isolationRatio}) — C-019`,
+    );
+  }
+
+  // Determinism (T-001) + bounds.
+  const replay = make();
+  foundPatch(replay, 1);
+  advance(replay, 4);
+  const replayMatch = replay.stateHash() === grow.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("spread-front: replay hash mismatch");
+  }
+
+  let bounded = 1;
+  for (let i = 0; i < grow.herbBiomass.data.length; i++) {
+    const v = grow.herbBiomass.data[i]!;
+    if (!Number.isFinite(v) || v < 0 || v > config.herbBiomassMax + 1e-6) {
+      bounded = 0;
+      break;
+    }
+  }
+
+  return {
+    scenario: "spread-front",
+    records: [
+      {
+        label: "expand",
+        vegYear0: expandYear0,
+        vegYear2: expandYear2,
+        vegYear4: expandYear4,
+        controlYear4,
+      },
+      {
+        label: "stall",
+        insideRing: stallInside,
+        onRing: stallOnRing,
+        beyondRing: stallBeyond,
+        openControlBeyond: openBeyond,
+        backgroundBeyond,
+      },
+      {
+        label: "recover",
+        burnedBiomass,
+        refugiumRecovered,
+        noRefugiumRecovered,
+      },
+      {
+        label: "isolation",
+        smallFarBiomass: smallFar.meanBiomass,
+        largeNearBiomass: largeNear.meanBiomass,
+        isolationRatio,
+        sEligSmall: smallFar.sElig,
+        sEligLarge: largeNear.sElig,
+      },
+      {
+        label: "delta",
+        replayMatch,
+        bounded,
+        spreads: expandYear4 > expandYear0 ? 1 : 0,
+        stalls:
+          stallOnRing === 0 &&
+          stallBeyond <= backgroundBeyond &&
+          openBeyond > backgroundBeyond
+            ? 1
+            : 0,
+        recovers:
+          refugiumRecovered > 0.5 && noRefugiumRecovered < 0.05 ? 1 : 0,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -4237,6 +4637,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "drydown-feedback": probeDrydownFeedback,
   "disturbance-recovery": probeDisturbanceRecovery,
   "arrival-earned": probeArrivalEarned,
+  "spread-front": probeSpreadFront,
   "living-hollow": probeLivingHollow,
   "island-drainage": probeIslandDrainage,
   "tidal-envelope": probeTidalEnvelope,

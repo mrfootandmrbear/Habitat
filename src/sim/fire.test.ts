@@ -4,6 +4,12 @@ import { Grid2D } from "./Grid2D";
 import { WorldState } from "./WorldState";
 import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
+import {
+  FIRE_NEIGHBORS,
+  fireSpreadStrength,
+  spreadFireRings,
+  type FireNeighborOffsets,
+} from "./fire/spreadRings";
 
 describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
   describe("field registration", () => {
@@ -243,6 +249,303 @@ describe("fire / fuel (Slice 10, ES-002 / A-002 / T-001)", () => {
         if (world.fireBurning.data[i]! > 0.5) ignited++;
       }
       expect(ignited).toBe(0);
+    });
+  });
+
+  describe("fire spread as a rate (§4.44, fire/fuel review §1–§3)", () => {
+    /** Rings one call of `runFireStep(dt)` may advance — ROS · Δt / Δx. */
+    const ringsFor = (dt: number): number =>
+      Math.floor(
+        (config.fireRateOfSpreadMetersPerMinute * dt * config.eventDtMinutes) /
+          config.cellSizeMeters,
+      );
+
+    const litWorld = (w: number): WorldState => {
+      const world = new WorldState(new Grid2D(w, w, 2));
+      world.fuelLoad.fill(3.0);
+      world.soilMoisture.fill(0.05);
+      world.vegCover.fill(0.7);
+      return world;
+    };
+
+    const burnedCells = (world: WorldState): number => {
+      let n = 0;
+      for (let i = 0; i < world.fireIntensity.data.length; i++) {
+        if (world.fireIntensity.data[i]! > 0) n++;
+      }
+      return n;
+    };
+
+    const burningCells = (world: WorldState): number => {
+      let n = 0;
+      for (let i = 0; i < world.fireBurning.data.length; i++) {
+        if (world.fireBurning.data[i]! > 0.5) n++;
+      }
+      return n;
+    };
+
+    it("a longer tick burns further than a short one (dt is live)", () => {
+      const w = 40;
+      const shortTick = litWorld(w);
+      const longTick = litWorld(w);
+      shortTick.fireBurning.set(w / 2, w / 2, 1);
+      longTick.fireBurning.set(w / 2, w / 2, 1);
+
+      shortTick.runFireStep(1);
+      longTick.runFireStep(4);
+
+      const shortArea = burnedCells(shortTick);
+      const longArea = burnedCells(longTick);
+
+      // The defect this closes: both calls used to burn the whole connected
+      // fuel region, so these two numbers were identical.
+      expect(longArea).not.toBe(shortArea);
+      expect(longArea).toBeGreaterThan(shortArea);
+
+      // Front reach is linear in dt, so area over a flat uniform sheet grows
+      // roughly quadratically — 4x the tick is well past 3x the area.
+      expect(ringsFor(4)).toBe(4 * ringsFor(1));
+      expect(longArea).toBeGreaterThan(shortArea * 3);
+
+      // Neither tick reached the map edge, so the difference is the rate and
+      // not the fuel region running out.
+      expect(longArea).toBeLessThan(w * w);
+    });
+
+    it("a burn covers exactly the rings its rate allows", () => {
+      const w = 40;
+      const world = litWorld(w);
+      const cx = w / 2;
+      const cz = w / 2;
+      world.fireBurning.set(cx, cz, 1);
+
+      world.runFireStep(1);
+
+      // 4-neighbour spread from one cell fills a Manhattan diamond.
+      const rings = ringsFor(1);
+      expect(rings).toBeGreaterThan(0);
+      for (let z = 0; z < w; z++) {
+        for (let x = 0; x < w; x++) {
+          const within = Math.abs(x - cx) + Math.abs(z - cz) <= rings;
+          const lit = world.fireIntensity.get(x, z) > 0;
+          expect(lit).toBe(within);
+        }
+      }
+    });
+
+    it("burning persists between steps so a fire has visible duration", () => {
+      const world = litWorld(16);
+      world.fireBurning.set(8, 8, 1);
+
+      world.runFireStep(1);
+
+      // `fire.burning` is a declared written field; before §4.44 every flag was
+      // cleared before the call returned, so it was never observably 1 here.
+      expect(burningCells(world)).toBeGreaterThan(0);
+    });
+
+    it("intensity clears within one tick of the last active cell going out", () => {
+      const world = new WorldState(new Grid2D(8, 8, 2));
+      world.fuelLoad.fill(0);
+      world.soilMoisture.fill(0.05);
+      // One isolated fuel cell — nothing for the front to spread into.
+      world.fuelLoad.set(4, 4, 1.0);
+      world.fireBurning.set(4, 4, 1);
+
+      world.runFireStep(1);
+      expect(world.fireIntensity.get(4, 4)).toBeGreaterThan(0);
+      // Its fuel is now below the carry threshold, so it has gone out.
+      expect(burningCells(world)).toBe(0);
+
+      world.runFireStep(1);
+
+      // The old reset lived in a post-effects loop that the "no sources" early
+      // return skipped, so a dead fire reported its last intensity forever.
+      expect(world.fireIntensity.get(4, 4)).toBe(0);
+      expect(burnedCells(world)).toBe(0);
+    });
+
+    it("a stalled front stops consuming fuel once it has burned out", () => {
+      const world = new WorldState(new Grid2D(8, 8, 2));
+      world.fuelLoad.fill(0);
+      world.soilMoisture.fill(0.05);
+      world.fuelLoad.set(4, 4, 1.0);
+      world.fireBurning.set(4, 4, 1);
+
+      for (let i = 0; i < 5; i++) world.runFireStep(1);
+      const settled = world.fuelConsumedLedger;
+
+      for (let i = 0; i < 5; i++) world.runFireStep(1);
+
+      expect(world.fuelConsumedLedger).toBe(settled);
+      expect(burningCells(world)).toBe(0);
+    });
+  });
+
+  describe("burn shape is not an artifact of scan order (review §3)", () => {
+    /** Deterministic ridged terrain — the case the old bug was worst on. */
+    const ridged = (w: number): Float32Array => {
+      const elev = new Float32Array(w * w);
+      for (let z = 0; z < w; z++) {
+        for (let x = 0; x < w; x++) {
+          elev[z * w + x] = 4 * Math.sin(x * 0.7) + 3 * Math.cos(z * 0.5) + x * 0.2;
+        }
+      }
+      return elev;
+    };
+
+    const spreadArgs = (w: number, neighbors?: FireNeighborOffsets) => {
+      const fuel = new Float32Array(w * w);
+      const moisture = new Float32Array(w * w);
+      for (let i = 0; i < w * w; i++) {
+        // Marginal gates: strengths sit near the threshold, which is where
+        // probe order used to decide the outcome.
+        fuel[i] = 0.3 + ((i * 7) % 11) * 0.06;
+        moisture[i] = 0.10 + ((i * 13) % 9) * 0.015;
+      }
+      return {
+        width: w,
+        height: w,
+        active: [(w / 2) * w + w / 2],
+        burning: new Float32Array(w * w),
+        fuel,
+        moisture,
+        elev: ridged(w),
+        maxRings: 6,
+        claimed: new Int32Array(w * w),
+        stamp: 1,
+        cellSizeMeters: config.cellSizeMeters,
+        fuelSpreadThreshold: config.fuelSpreadThreshold,
+        moistureExtinction: config.fuelMoistureExtinction,
+        slopeA: config.fireSlopeFactorA,
+        slopeFactorMax: config.fireSlopeFactorMax,
+        spreadStrengthMin: config.fireSpreadStrengthMin,
+        neighbors,
+      };
+    };
+
+    it("burn shape is invariant to a rotation of the neighbour-check order", () => {
+      const w = 16;
+      const base = spreadFireRings(spreadArgs(w));
+      expect(base.length).toBeGreaterThan(4); // the case actually spreads
+
+      // Every rotation of N/S/W/E must produce the identical burn.
+      for (let shift = 1; shift < FIRE_NEIGHBORS.length; shift++) {
+        const rotated = [
+          ...FIRE_NEIGHBORS.slice(shift),
+          ...FIRE_NEIGHBORS.slice(0, shift),
+        ];
+        const got = spreadFireRings(spreadArgs(w, rotated));
+        expect([...got].sort((a, b) => a - b)).toEqual(
+          [...base].sort((a, b) => a - b),
+        );
+      }
+    });
+
+    it("a cell rejected from one neighbour stays probeable from another", () => {
+      // Hand-built minimal case for the old `visited`-before-test bug.
+      // A(idx 7) sits high above X, so fire probing downhill into X fails.
+      // B(idx 17) sits below X, so fire probing uphill into X passes.
+      // A is probed first (lower index) — under the old code it marked X
+      // visited on the way to failing, and X could never catch from B.
+      const w = 5;
+      const elev = new Float32Array(w * w);
+      const fuel = new Float32Array(w * w);
+      const moisture = new Float32Array(w * w);
+      const x = 2 * w + 2;
+      const a = 1 * w + 2;
+      const b = 3 * w + 2;
+
+      elev[x] = 10;
+      elev[a] = 30; // 20 m above X over one 10 m cell → steeply downhill probe
+      elev[b] = 0; //  10 m below X → uphill probe, fire runs uphill
+      fuel[x] = 0.9;
+      moisture[x] = 0.125; // moisture factor 0.5
+
+      const burning = new Float32Array(w * w);
+      burning[a] = 1;
+      burning[b] = 1;
+
+      const ignited = spreadFireRings({
+        width: w,
+        height: w,
+        active: [a, b],
+        burning,
+        fuel,
+        moisture,
+        elev,
+        maxRings: 1,
+        claimed: new Int32Array(w * w),
+        stamp: 1,
+        cellSizeMeters: config.cellSizeMeters,
+        fuelSpreadThreshold: config.fuelSpreadThreshold,
+        moistureExtinction: config.fuelMoistureExtinction,
+        slopeA: config.fireSlopeFactorA,
+        slopeFactorMax: config.fireSlopeFactorMax,
+        spreadStrengthMin: config.fireSpreadStrengthMin,
+      });
+
+      // Confirm the case is discriminating: the downhill probe really does fail.
+      const common = {
+        fuel: fuel[x]!,
+        moisture: moisture[x]!,
+        cellSizeMeters: config.cellSizeMeters,
+        fuelSpreadThreshold: config.fuelSpreadThreshold,
+        moistureExtinction: config.fuelMoistureExtinction,
+        slopeA: config.fireSlopeFactorA,
+        slopeFactorMax: config.fireSlopeFactorMax,
+      };
+      const fromA = fireSpreadStrength({
+        ...common,
+        riseMeters: elev[x]! - elev[a]!,
+      });
+      const fromB = fireSpreadStrength({
+        ...common,
+        riseMeters: elev[x]! - elev[b]!,
+      });
+      expect(fromA).toBeLessThanOrEqual(config.fireSpreadStrengthMin);
+      expect(fromB).toBeGreaterThan(config.fireSpreadStrengthMin);
+
+      expect(ignited).toContain(x);
+      expect(burning[x]).toBe(1);
+    });
+  });
+
+  describe("slope factor saturates (review §5)", () => {
+    const face = (moisture: number, riseMeters: number): number =>
+      fireSpreadStrength({
+        fuel: 1.0,
+        moisture,
+        riseMeters,
+        cellSizeMeters: config.cellSizeMeters,
+        fuelSpreadThreshold: config.fuelSpreadThreshold,
+        moistureExtinction: config.fuelMoistureExtinction,
+        slopeA: config.fireSlopeFactorA,
+        slopeFactorMax: config.fireSlopeFactorMax,
+      });
+
+    it("a near-vertical sculpted face cannot ignite a nearly-saturated cell", () => {
+      // 500 m of rise across one 10 m cell — unclamped this is e^40, which
+      // swamps fuel and moisture and makes any cliff an ignition source.
+      const nearlyWet = config.fuelMoistureExtinction * 0.996;
+      expect(face(nearlyWet, 500)).toBeLessThanOrEqual(
+        config.fireSpreadStrengthMin,
+      );
+    });
+
+    it("the slope term is bounded by the configured ceiling", () => {
+      // Dry cell, saturated fuel fraction: strength is exactly the ceiling.
+      expect(face(0, 500)).toBeCloseTo(config.fireSlopeFactorMax, 10);
+      expect(face(0, 1e6)).toBeCloseTo(config.fireSlopeFactorMax, 10);
+      // And the clamp does not disturb ordinary relief.
+      expect(face(0, 5)).toBeCloseTo(Math.exp(config.fireSlopeFactorA * 0.5), 10);
+    });
+
+    it("moisture still gates a steep dry-side face", () => {
+      // Steep and dry catches; steep and wet does not — slope no longer
+      // overrides moisture at any sculpted gradient.
+      expect(face(0.02, 500)).toBeGreaterThan(config.fireSpreadStrengthMin);
+      expect(face(config.fuelMoistureExtinction, 500)).toBe(0);
     });
   });
 

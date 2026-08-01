@@ -15,6 +15,7 @@ import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
 import { atmosphereProcess } from "./process/atmosphereProcess";
 import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
+import { spreadFireRings } from "./fire/spreadRings";
 import {
   stepAtmosphere,
   type PrecipPhase,
@@ -49,6 +50,7 @@ import {
 } from "./habitat/salinityComposition";
 import {
   eligibleRichness,
+  localSeedPressureField,
   establishmentProbability,
   nextHerbBiomass,
   overseasSeedPressure,
@@ -332,6 +334,15 @@ export class WorldState {
   private readonly gwFieldCapacityFraction: number;
   private readonly gwChannelBoost: number;
   private structureDirty = false;
+  /**
+   * Persistent fire-front scratch (§4.44). Stamped rather than re-zeroed, so a
+   * fire step allocates nothing per call — the old code built a fresh
+   * full-grid `Uint8Array` every time it ran. Integrator scratch, not state:
+   * it is derived fresh inside each call and is deliberately outside the
+   * registry, so it neither enters `stateHash` nor needs save/load (T-006).
+   */
+  private fireClaimed: Int32Array | null = null;
+  private fireClaimStamp = 0;
 
   constructor(
     terrain: Grid2D,
@@ -1505,6 +1516,7 @@ export class WorldState {
     const binderBio = this.binderBiomass.data;
     const marshBio = this.marshBiomass.data;
     const shrubBio = this.shrubBiomass.data;
+    const crustBio = this.crustBiomass.data;
     const exposure = this.shoreExposure.data;
     const salt = this.soilSalinity.data;
     const moisture = this.soilMoisture.data;
@@ -1527,21 +1539,71 @@ export class WorldState {
       ? meanHighWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
       : undefined;
 
-    const writeCell = (i: number, pressure: number) => {
+    // Slice L2 — local propagule pressure from standing biomass (C-007).
+    // Conspecific: each guild seeds its own kind. Computed once per dispersal
+    // step from the biomass committed by the previous seasonal band (the
+    // `lagged` read declared on dispersalProcess), then added to the external
+    // term below. All zero on a fresh world, so founding is unchanged.
+    const localFor = (
+      biomass: Float32Array,
+      biomassMax: number,
+      meanDistanceCells: number,
+    ): Float32Array =>
+      localSeedPressureField({
+        biomass,
+        width: this.width,
+        height: this.height,
+        biomassMax,
+        strength: config.localSeedStrength,
+        meanDistanceCells,
+      });
+
+    const localDefault = config.localSeedMeanDistanceCells;
+    const herbLocal = localFor(herbBio, config.herbBiomassMax, localDefault);
+    const strandLocal = localFor(
+      strandBio,
+      config.strandBiomassMax,
+      config.strandLocalMeanDistanceCells,
+    );
+    const binderLocal = localFor(
+      binderBio,
+      config.binderBiomassMax,
+      localDefault,
+    );
+    const marshLocal = localFor(
+      marshBio,
+      config.marshBiomassMax,
+      localDefault,
+    );
+    const shrubLocal = localFor(
+      shrubBio,
+      config.shrubBiomassMax,
+      localDefault,
+    );
+    const crustLocal = localFor(
+      crustBio,
+      config.crustBiomassMax,
+      config.crustLocalMeanDistanceCells,
+    );
+
+    const writeCell = (i: number, external: number) => {
+      const pressure = external + herbLocal[i]!;
       herbSeed[i] = pressure;
       herbEst[i] = establishmentProbability(pressure, herbHsi[i]!, herbScale);
-      strandSeed[i] = pressure;
+      const strandPressure = external + strandLocal[i]!;
+      strandSeed[i] = strandPressure;
       const strand = evaluateStrandHsi({
         shoreExposure: exposure[i]!,
         salinity: salt[i]!,
         airTempC,
       });
       strandEst[i] = establishmentProbability(
-        pressure,
+        strandPressure,
         strand.hsi,
         strandScale,
       );
-      binderSeed[i] = pressure;
+      const binderPressure = external + binderLocal[i]!;
+      binderSeed[i] = binderPressure;
       const porosity = substrateProps(mat[i]!).porosity;
       const binder = evaluateBinderHsi({
         moisture: moisture[i]!,
@@ -1551,11 +1613,12 @@ export class WorldState {
         longshoreTendency: longshore[i]!,
       });
       binderEst[i] = establishmentProbability(
-        pressure,
+        binderPressure,
         binder.hsi,
         binderScale,
       );
-      marshSeed[i] = pressure;
+      const marshPressure = external + marshLocal[i]!;
+      marshSeed[i] = marshPressure;
       const marsh = evaluateMarshHsi({
         elevMeters: hasTide ? elev[i]! : undefined,
         mlwMeters: mlw,
@@ -1563,8 +1626,13 @@ export class WorldState {
         salinity: salt[i]!,
         airTempC,
       });
-      marshEst[i] = establishmentProbability(pressure, marsh.hsi, marshScale);
-      shrubSeed[i] = pressure;
+      marshEst[i] = establishmentProbability(
+        marshPressure,
+        marsh.hsi,
+        marshScale,
+      );
+      const shrubPressure = external + shrubLocal[i]!;
+      shrubSeed[i] = shrubPressure;
       const shrub = evaluateShrubHsi({
         airTempC,
         herbBiomass: herbBio[i]!,
@@ -1575,8 +1643,13 @@ export class WorldState {
         mlwMeters: mlw,
         mhwMeters: mhw,
       });
-      shrubEst[i] = establishmentProbability(pressure, shrub.hsi, shrubScale);
-      crustSeed[i] = pressure;
+      shrubEst[i] = establishmentProbability(
+        shrubPressure,
+        shrub.hsi,
+        shrubScale,
+      );
+      const crustPressure = external + crustLocal[i]!;
+      crustSeed[i] = crustPressure;
       const crust = evaluateCrustHsi({
         moisture: moisture[i]!,
         porosity,
@@ -1590,7 +1663,11 @@ export class WorldState {
         mlwMeters: mlw,
         mhwMeters: mhw,
       });
-      crustEst[i] = establishmentProbability(pressure, crust.hsi, crustScale);
+      crustEst[i] = establishmentProbability(
+        crustPressure,
+        crust.hsi,
+        crustScale,
+      );
     };
 
     if (this.seaLevelMeters === undefined) {
@@ -1812,98 +1889,94 @@ export class WorldState {
   }
 
   /**
-   * BFS fire spread from burning cells (NATURAL_PROCESS_MATH §3.5).
-   * Deterministic: sorted queue by index for fixed iteration order (T-001).
-   * Gated on fuel load, fuel moisture (from soil.moisture), and slope factor.
+   * Fire spread as a rate (§4.44; NATURAL_PROCESS_MATH §3.5, fire/fuel review §1–§3).
+   *
+   * The front advances `ROS · dt / Δx` whole cell-rings per call instead of
+   * running the BFS to exhaustion, and `fire.burning` stays set on cells that
+   * still carry fuel, so a burn has duration something outside this function
+   * can observe and a player can intervene against (ES-002 — disturbance is a
+   * process, not a punishment; A-002 / A-006). Before this, one call burned an
+   * entire connected fuel region and cleared every flag before returning, so a
+   * 1-hour tick and a 30-day tick produced the same instantaneous result.
+   *
+   * Deterministic under T-001: the active front is walked in ascending index
+   * order, so `ledger.fuelConsumed` accumulates in a fixed order, and ignition
+   * is order-independent within a ring (see `spreadFireRings`).
+   *
+   * Authored ignition only while C-003 is Open — this changes how fire spreads
+   * once lit, never where it starts.
    */
-  runFireStep(_dt: number): void {
+  runFireStep(dt: number): void {
     const burning = this.fireBurning.data;
     const fuel = this.fuelLoad.data;
     const moisture = this.soilMoisture.data;
     const cover = this.vegCover.data;
     const intensity = this.fireIntensity.data;
-    const elev = this.terrain.data;
-    const w = this.width;
-    const h = this.height;
+    const scar = this.fireScar.data;
     const threshold = config.fuelSpreadThreshold;
-    const extinction = config.fuelMoistureExtinction;
-    const slopeA = config.fireSlopeFactorA;
     const consumption = config.fireFuelConsumption;
     const mortality = config.fireVegMortality;
-    const dx = config.cellSizeMeters;
 
-    // Collect currently-burning cells as ignition sources (sorted for determinism).
-    const sources: number[] = [];
+    // Single pass over the grid builds the active front *and* clears intensity
+    // on cells that stopped burning. The clear has to happen on this side of
+    // the "nothing is alight" return: the old code only reset intensity inside
+    // a post-effects loop that the early return skipped, so a fire that had
+    // gone out reported its last burn's intensity forever (review §2).
+    const active: number[] = [];
     for (let i = 0; i < burning.length; i++) {
-      if (burning[i]! > 0.5) sources.push(i);
+      if (burning[i]! > 0.5) active.push(i);
+      else if (intensity[i]! !== 0) intensity[i] = 0;
     }
-    if (sources.length === 0) return;
+    if (active.length === 0) return;
 
-    // BFS spread — each burning cell attempts to ignite 4-neighbors once.
-    const visited = new Uint8Array(w * h);
-    const queue: number[] = [];
-    for (const s of sources) {
-      visited[s] = 1;
-      queue.push(s);
+    // Rate → rings. `dt` is event-band units (1 = one event step).
+    const minutes = Math.max(0, dt) * config.eventDtMinutes;
+    const maxRings = Math.floor(
+      (config.fireRateOfSpreadMetersPerMinute * minutes) / config.cellSizeMeters,
+    );
+
+    if (!this.fireClaimed || this.fireClaimed.length !== burning.length) {
+      this.fireClaimed = new Int32Array(burning.length);
+      this.fireClaimStamp = 0;
     }
+    this.fireClaimStamp += 1;
 
-    let head = 0;
-    while (head < queue.length) {
-      const ci = queue[head++]!;
-      const cx = ci % w;
-      const cz = (ci - cx) / w;
-      const cElev = elev[ci]!;
+    const ignited = spreadFireRings({
+      width: this.width,
+      height: this.height,
+      active,
+      burning,
+      fuel,
+      moisture,
+      elev: this.terrain.data,
+      maxRings,
+      claimed: this.fireClaimed,
+      stamp: this.fireClaimStamp,
+      cellSizeMeters: config.cellSizeMeters,
+      fuelSpreadThreshold: threshold,
+      moistureExtinction: config.fuelMoistureExtinction,
+      slopeA: config.fireSlopeFactorA,
+      slopeFactorMax: config.fireSlopeFactorMax,
+      spreadStrengthMin: config.fireSpreadStrengthMin,
+    });
 
-      const neighbors = [
-        cz > 0 ? ci - w : -1,
-        cz + 1 < h ? ci + w : -1,
-        cx > 0 ? ci - 1 : -1,
-        cx + 1 < w ? ci + 1 : -1,
-      ];
+    // Effects walk the explicit front, not the whole grid — ascending index so
+    // the ledger sums in a fixed order (T-001).
+    const front = active.concat(ignited);
+    front.sort((a, b) => a - b);
 
-      for (const ni of neighbors) {
-        if (ni < 0 || visited[ni]!) continue;
-        visited[ni] = 1;
-
-        if (fuel[ni]! < threshold) continue;
-        if (moisture[ni]! >= extinction) continue;
-
-        // Slope factor: fire runs uphill.
-        const nElev = elev[ni]!;
-        const dz = nElev - cElev;
-        const tanPhi = dz / dx;
-        const slopeFactor = Math.exp(slopeA * tanPhi);
-
-        // Spread probability proportional to fuel availability and slope.
-        const fuelFraction = Math.min(1, fuel[ni]! / (threshold * 3));
-        const moistureFactor = 1 - moisture[ni]! / extinction;
-        const spreadStrength = fuelFraction * moistureFactor * slopeFactor;
-
-        if (spreadStrength > 0.15) {
-          burning[ni] = 1;
-          queue.push(ni);
-        }
-      }
-    }
-
-    // Post-fire effects: consume fuel, kill vegetation, record intensity.
-    for (let i = 0; i < burning.length; i++) {
-      if (burning[i]! < 0.5) {
-        intensity[i] = 0;
-        continue;
-      }
+    for (const i of front) {
       const consumed = fuel[i]! * consumption;
       intensity[i] = Math.min(10, consumed);
       fuel[i] = Math.max(0, fuel[i]! - consumed);
       cover[i] = Math.max(0, cover[i]! * (1 - mortality));
       // Persistent scar for presentation — decays on daily band.
-      this.fireScar.data[i] = Math.min(
-        1,
-        Math.max(this.fireScar.data[i]!, Math.min(1, consumed / 2)),
-      );
+      scar[i] = Math.min(1, Math.max(scar[i]!, Math.min(1, consumed / 2)));
       this.fuelConsumedLedger += consumed;
-      // Clear the burn flag after effects applied.
-      burning[i] = 0;
+      // A cell stays alight while it still carries enough fuel to sustain a
+      // burn; below the spread threshold it has burned out. This is what gives
+      // a fire duration, rather than clearing every flag on the way out.
+      burning[i] = fuel[i]! >= threshold ? 1 : 0;
     }
   }
 

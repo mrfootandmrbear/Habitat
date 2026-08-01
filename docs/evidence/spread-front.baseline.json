@@ -1,0 +1,93 @@
+{
+  "scenario": "spread-front",
+  "metrics": {
+    "expand.vegYear0": {
+      "value": 9,
+      "abs": 0
+    },
+    "expand.vegYear2": {
+      "value": 61,
+      "abs": 0
+    },
+    "expand.vegYear4": {
+      "value": 129,
+      "abs": 0
+    },
+    "expand.controlYear4": {
+      "value": 0,
+      "abs": 0
+    },
+    "stall.insideRing": {
+      "value": 29,
+      "abs": 0
+    },
+    "stall.onRing": {
+      "value": 0,
+      "abs": 0
+    },
+    "stall.beyondRing": {
+      "value": 2,
+      "abs": 0
+    },
+    "stall.openControlBeyond": {
+      "value": 40,
+      "abs": 0
+    },
+    "stall.backgroundBeyond": {
+      "value": 2,
+      "abs": 0
+    },
+    "recover.burnedBiomass": {
+      "value": 0,
+      "abs": 0
+    },
+    "recover.refugiumRecovered": {
+      "value": 2.364265130684439,
+      "abs": 0.00001
+    },
+    "recover.noRefugiumRecovered": {
+      "value": 0.0037671271670378943,
+      "abs": 0.00001
+    },
+    "isolation.smallFarBiomass": {
+      "value": 0.5981234919566375,
+      "abs": 0.00001
+    },
+    "isolation.largeNearBiomass": {
+      "value": 1.686341323430025,
+      "abs": 0.00001
+    },
+    "isolation.isolationRatio": {
+      "value": 2.819386541587771,
+      "abs": 0.0001
+    },
+    "isolation.sEligSmall": {
+      "value": 0.08702561420704585,
+      "abs": 0.000001
+    },
+    "isolation.sEligLarge": {
+      "value": 0.5424686314189192,
+      "abs": 0.000001
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.bounded": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.spreads": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.stalls": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.recovers": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}
