@@ -3892,6 +3892,103 @@ export function probeCloudDelivery(): ProbeResult {
 }
 
 /**
+ * L7 — activity-gated event band (SIM §6.2).
+ * Ship gate is hash-identity: gated vs ungated over wet→dry→wet spanning
+ * daily, seasonal, and annual boundaries must share stateHash(). Atmosphere
+ * stays outside the gate (cloud decay); the clock always advances.
+ */
+export function probeEventBandGate(): ProbeResult {
+  const seed = 42;
+  /** 40 days: annual commits every 36; light regime cycles wet/dry. */
+  const days = 40;
+
+  const run = (gating: boolean) => {
+    const world = new WorldState(generateMountain(24, 24, 6, seed), {
+      closedBoundary: true,
+      windUx: 1,
+      windUz: 0,
+    });
+    world.setEventBandGating(gating);
+    world.setRainRegime("light");
+    world.setAirTemperature(heatById("warm").airTempC);
+    for (let d = 0; d < days; d++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        world.stepEvent();
+      }
+    }
+    return {
+      hash: world.stateHash(),
+      hashN: Number.parseInt(world.stateHash().slice(0, 8), 16),
+      simMinutes: world.simMinutes,
+      skipped: world.eventBandSkippedSteps,
+      ran: world.eventBandRanSteps,
+      precip: world.precipitationLedger,
+      cloud: world.cloudWater,
+    };
+  };
+
+  const gated = run(true);
+  const ungated = run(false);
+  const total = days * config.dailyEventSteps;
+
+  if (gated.hash !== ungated.hash) {
+    throw new Error(
+      `event-band-gate: gated vs ungated hash diverge (L7 ship gate) ${gated.hash} vs ${ungated.hash}`,
+    );
+  }
+  if (gated.simMinutes !== ungated.simMinutes) {
+    throw new Error(
+      `event-band-gate: clock must advance equally (gated=${gated.simMinutes} ungated=${ungated.simMinutes})`,
+    );
+  }
+  if (gated.skipped <= 0) {
+    throw new Error(
+      `event-band-gate: expected dry skips under light regime (skipped=${gated.skipped})`,
+    );
+  }
+  if (gated.ran + gated.skipped !== total) {
+    throw new Error(
+      `event-band-gate: ran+skipped must cover span (${gated.ran}+${gated.skipped} ≠ ${total})`,
+    );
+  }
+  if (ungated.skipped !== 0 || ungated.ran !== total) {
+    throw new Error(
+      `event-band-gate: ungated arm must run every event step (ran=${ungated.ran} skipped=${ungated.skipped})`,
+    );
+  }
+  if (gated.precip !== ungated.precip || gated.cloud !== ungated.cloud) {
+    throw new Error(
+      `event-band-gate: precip/cloud must match (precip ${gated.precip} vs ${ungated.precip}, cloud ${gated.cloud} vs ${ungated.cloud})`,
+    );
+  }
+
+  return {
+    scenario: "event-band-gate",
+    records: [
+      {
+        label: "span",
+        days,
+        totalSteps: total,
+        ran: gated.ran,
+        skipped: gated.skipped,
+        skipFrac: gated.skipped / total,
+        simMinutes: gated.simMinutes,
+        precip: gated.precip,
+        cloud: gated.cloud,
+        hashN: gated.hashN,
+      },
+      {
+        label: "delta",
+        hashMatch: 1,
+        clockMatch: 1,
+        precipMatch: 1,
+        didSkip: gated.skipped > 0 ? 1 : 0,
+      },
+    ],
+  };
+}
+
+/**
  * GEO-002 Exner-lite — hillslope channel removals redeposit into a depression.
  * Capacity/depression weights inside geomorphology only (no second sediment
  * writer, no SWE / Hjulström gates).
@@ -4887,6 +4984,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "substrate-deposit": probeSubstrateDeposit,
   "hillslope-deposit": probeHillslopeDeposit,
   "cloud-delivery": probeCloudDelivery,
+  "event-band-gate": probeEventBandGate,
   "season-regime": probeSeasonRegime,
   "erosion-intensity": probeErosionIntensity,
 };

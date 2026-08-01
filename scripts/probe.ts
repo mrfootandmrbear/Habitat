@@ -260,6 +260,22 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.recoverySlower": { abs: 0 },
     "delta.hashMatch": { abs: 0 },
   },
+  "event-band-gate": {
+    // Identity ship gate — every metric exact (L7).
+    "span.days": { abs: 0 },
+    "span.totalSteps": { abs: 0 },
+    "span.ran": { abs: 0 },
+    "span.skipped": { abs: 0 },
+    "span.skipFrac": { abs: 0 },
+    "span.simMinutes": { abs: 0 },
+    "span.precip": { abs: 0 },
+    "span.cloud": { abs: 0 },
+    "span.hashN": { abs: 0 },
+    "delta.hashMatch": { abs: 0 },
+    "delta.clockMatch": { abs: 0 },
+    "delta.precipMatch": { abs: 0 },
+    "delta.didSkip": { abs: 0 },
+  },
   "living-hollow": {
     "colonized.cover": { abs: 0 },
     "colonized.biomass": { abs: 1e-5 },

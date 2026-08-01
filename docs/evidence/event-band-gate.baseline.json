@@ -1,0 +1,57 @@
+{
+  "scenario": "event-band-gate",
+  "metrics": {
+    "span.days": {
+      "value": 40,
+      "abs": 0
+    },
+    "span.totalSteps": {
+      "value": 3840,
+      "abs": 0
+    },
+    "span.ran": {
+      "value": 2688,
+      "abs": 0
+    },
+    "span.skipped": {
+      "value": 1152,
+      "abs": 0
+    },
+    "span.skipFrac": {
+      "value": 0.3,
+      "abs": 0
+    },
+    "span.simMinutes": {
+      "value": 57600,
+      "abs": 0
+    },
+    "span.precip": {
+      "value": 34.717808257329125,
+      "abs": 0
+    },
+    "span.cloud": {
+      "value": 0,
+      "abs": 0
+    },
+    "span.hashN": {
+      "value": 106564016,
+      "abs": 0
+    },
+    "delta.hashMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.clockMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.precipMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.didSkip": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

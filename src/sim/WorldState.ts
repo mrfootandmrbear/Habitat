@@ -23,8 +23,10 @@ import {
 } from "./climate/atmosphere";
 import {
   rainRegimeById,
+  regimeRainsThisEvent,
   type RainRegimeId,
 } from "./climate/rainRegime";
+import { eventBandActive } from "./eventBandGate";
 import { fillOrographicRainDepths } from "./climate/orographicPrecip";
 import {
   countIntertidal,
@@ -292,6 +294,15 @@ export class WorldState {
   private rainRegimeId: RainRegimeId = "dry";
   /** Atmosphere delivery armed only after setRainRegime (probes may still addRain). */
   private atmosphereArmed = false;
+  /**
+   * Activity gate for surface+fire (SIM §6.2 / L7). Default on.
+   * Force off only for the ungated arm of the hash-identity probe.
+   */
+  private eventBandGatingEnabled = true;
+  /** Event steps where surface+fire ran (gated or ungated). */
+  private eventBandRanCount = 0;
+  /** Event steps where surface+fire were skipped (gate inactive). */
+  private eventBandSkippedCount = 0;
   /** Air temperature (°C) from Heat dial — drives precip phase. */
   private readonly airTempBox: ScalarBox = { value: 16 };
   /** Global precipitable cloud water (m depth-equivalent). */
@@ -656,6 +667,53 @@ export class WorldState {
     return this.rainRegimeId;
   }
 
+  /**
+   * Toggle the §6.2 activity gate. Production stays on; the L7 probe's ungated
+   * arm forces off to prove hash-identity.
+   */
+  setEventBandGating(enabled: boolean): void {
+    this.eventBandGatingEnabled = enabled;
+  }
+
+  get eventBandGating(): boolean {
+    return this.eventBandGatingEnabled;
+  }
+
+  /** Surface+fire steps that actually ran (L7 / throughput). */
+  get eventBandRanSteps(): number {
+    return this.eventBandRanCount;
+  }
+
+  /** Surface+fire steps skipped by the gate (L7). */
+  get eventBandSkippedSteps(): number {
+    return this.eventBandSkippedCount;
+  }
+
+  /**
+   * Whether this event would discharge precip under the armed rain regime.
+   * Pure function of clock phase + regime — evaluated before atmosphere mutates.
+   */
+  private willAtmospherePrecipitate(): boolean {
+    if (!this.atmosphereArmed) return false;
+    const eventsDone = this.simMinutes / config.eventDtMinutes;
+    const dayIndex = Math.floor(eventsDone / config.dailyEventSteps);
+    return regimeRainsThisEvent(
+      rainRegimeById(this.rainRegimeId),
+      this.eventStepsSinceDaily,
+      config.dailyEventSteps,
+      dayIndex,
+    );
+  }
+
+  /** §6.2 gate predicate over current authoritative fields. */
+  isEventBandActive(): boolean {
+    return eventBandActive({
+      surfaceDepth: this.water.data,
+      burning: this.fireBurning.data,
+      willPrecipitate: this.willAtmospherePrecipitate(),
+    });
+  }
+
   /** Heat dial → air temperature (°C). Phase follows (C-020). */
   setAirTemperature(tempC: number): void {
     this.airTempBox.value = Number.isFinite(tempC) ? tempC : 16;
@@ -794,13 +852,29 @@ export class WorldState {
    * `dt` is the flux integrator step within the event (defaults to eventFluxDt).
    * Daily band receives dt in sim-days (1 = one full day); seasonal / annual /
    * decadal receive band units (1 = one full compressed commit) — rates scale by dt.
+   *
+   * Surface flow + fire are activity-gated (SIM §6.2 / L7). Atmosphere always
+   * runs so cloud decay / dawn charge continue between storms; the clock and
+   * slower bands always advance.
    */
   stepEvent(dt: number = config.eventFluxDt): void {
     if (this.structureDirty) {
       this.recomputeFlowStructure();
       this.structureDirty = false;
     }
-    this.scheduler.runBand("event", this, dt);
+
+    const active =
+      !this.eventBandGatingEnabled || this.isEventBandActive();
+    if (active) {
+      this.scheduler.runBand("event", this, dt);
+      this.eventBandRanCount += 1;
+    } else {
+      // Atmosphere excluded from the gate — dry-day cloud decay and wet-day
+      // dawn charge must not freeze while surface+fire sleep.
+      this.runAtmosphereStep();
+      this.eventBandSkippedCount += 1;
+    }
+
     this.simMinutes = this.simMinutes + config.eventDtMinutes;
     this.registry.assertBounds("event");
 

@@ -1,0 +1,30 @@
+{
+  "id": "L7",
+  "title": "Activity-gated event band (SIM §6.2)",
+  "simLoop": "WorldState.stepEvent ran surface flow and fire every sim-minute even when the preserve was dry. The event band is now activity-gated: surfaceWater + fire run only when any surfaceDepth > 0, the armed storm window will discharge precip, or any cell is burning. Atmosphere always runs (cloud decay / dawn charge). simMinutes and slower bands always advance.",
+  "gameLoop": "Storms still cost wall time; dry stretches between them no longer pay the full event-band bill. A century at ordinary storminess drops from tens of minutes of CPU toward single-digit minutes without changing any outcome the player can bet on — the gate is hash-identical to the ungated ladder.",
+  "registerIds": [
+    "S-009",
+    "T-001",
+    "T-002",
+    "H-001",
+    "S-005"
+  ],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/eventBandGate.test.ts",
+    "src/sim/eventBandGate.integration.test.ts",
+    "src/sim/probes/baseline.test.ts"
+  ],
+  "probes": [
+    "event-band-gate"
+  ],
+  "fields": [
+    "water.surfaceDepth",
+    "fire.burning",
+    "climate.cloudWater",
+    "climate.precipPhase"
+  ],
+  "notebookSeed": "Between storms the water sheet is gone and the ground is just waiting — time still moves, but the rush is over.",
+  "tierO": "no owner-only question — hash-identity is CI-judged; D-007 clip gate does not apply (no new Process). Next tip is L4 biotic motion (§4.39)."
+}
