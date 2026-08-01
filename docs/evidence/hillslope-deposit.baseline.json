@@ -2,15 +2,15 @@
   "scenario": "hillslope-deposit",
   "metrics": {
     "run.pitGain": {
-      "value": 0.0023529529571533203,
+      "value": 0.0016789436340332031,
       "abs": 0.00001
     },
     "run.channelLoss": {
-      "value": 0.0013966560363769531,
+      "value": 0.0019299983978271484,
       "abs": 0.00001
     },
     "run.sumDelta": {
-      "value": 0.06760787963867188,
+      "value": 0.07623791694641113,
       "abs": 0.00001
     },
     "run.bedrockOk": {
@@ -26,7 +26,7 @@
       "abs": 0
     },
     "run.hashN": {
-      "value": 4153795501,
+      "value": 3057450237,
       "abs": 0
     }
   }

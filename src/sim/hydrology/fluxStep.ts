@@ -3,7 +3,10 @@
  * Off-map neighbors mirror the cell surface (no-flow, SIMULATION_MODEL §10.1),
  * except at authored / derived outlet cells where off-map is absorbing (§10.2).
  * Ocean cells (C-015): land→ocean transfers and residual ocean depth go to
- * oceanExchange rather than accumulating on the ocean store.
+ * oceanExchange rather than accumulating on the ocean store. An ocean
+ * neighbor's stage is `seaLevel`, not its bed elevation (§4.51 / review §3) —
+ * a land cell's head difference against the ocean is freeboard above sea
+ * stage, not the ocean's full water column.
  *
  * Per-face flux is capped at `diff * 0.5` — transferring more than half a
  * head difference in one step would overshoot equalization and reverse the
@@ -49,6 +52,17 @@ export function fluxStep(
   baseRoughness = 0.03,
   /** Cells with elev < seaLevel — absorbing ocean (C-015). */
   oceanCells?: ReadonlySet<number>,
+  /**
+   * Global sea level (C-015 / SIMULATION_MODEL §10.2). An ocean neighbor's
+   * stage is held at `seaLevel`, not its bed elevation (hydrology/
+   * geomorphology review §3) — a land cell's head difference against the
+   * ocean is real freeboard above sea stage, not the ocean's full water
+   * column, which otherwise overstates outflow (coastal wetlands over-drain)
+   * and ties land-side drainage to the ocean's bathymetry instead of its
+   * surface. Falls back to bed elevation when omitted so existing callers
+   * that never pass `oceanCells` are unaffected.
+   */
+  seaLevel?: number,
 ): FluxStepResult {
   delta.fill(0);
   const n = width * height;
@@ -87,8 +101,10 @@ export function fluxStep(
       } else {
         const ni = nz * width + nx;
         if (oceanCells?.has(ni)) {
-          // Ocean neighbor acts as an open stage at bed elevation (absorbing).
-          neighborSurface = terrain[ni]!;
+          // Ocean neighbor acts as an open stage at sea level (absorbing) —
+          // not bed elevation (§4.51 / review §3): the ocean's water column
+          // isn't part of the land-side head difference.
+          neighborSurface = seaLevel ?? terrain[ni]!;
         } else {
           neighborSurface = terrain[ni]! + water[ni]!;
         }

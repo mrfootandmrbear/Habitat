@@ -2,7 +2,7 @@
   "scenario": "island-drainage",
   "metrics": {
     "mid.oceanExchange": {
-      "value": 2134.46698378454,
+      "value": 2132.218895207847,
       "abs": 0.01
     },
     "mid.precip": {
@@ -10,11 +10,11 @@
       "abs": 0.01
     },
     "mid.massResidual": {
-      "value": -0.0000460851351817837,
+      "value": -0.000037745052850368666,
       "abs": 0.001
     },
     "mid.relResidual": {
-      "value": 2.083565501201804e-8,
+      "value": 1.7065001469530914e-8,
       "abs": 0.000001
     },
     "mid.oceanCells": {
@@ -34,7 +34,7 @@
       "abs": 0.0001
     },
     "mid.stepMsMean": {
-      "value": 0.3298490677083334,
+      "value": 0.3085846354166667,
       "abs": 1000000000
     },
     "mid.replayMatch": {
@@ -42,7 +42,7 @@
       "abs": 0
     },
     "mid.hashN": {
-      "value": 2475195280,
+      "value": 163614177,
       "abs": 0
     },
     "high.oceanCells": {
@@ -54,7 +54,7 @@
       "abs": 0
     },
     "high.oceanExchange": {
-      "value": 2198.1845210351935,
+      "value": 2197.6185813422558,
       "abs": 0.01
     },
     "delta.oceanCellDelta": {
@@ -70,7 +70,7 @@
       "abs": 0
     },
     "delta.stepMs64": {
-      "value": 0.4713524583333329,
+      "value": 0.43260762500000044,
       "abs": 1000000000
     }
   }

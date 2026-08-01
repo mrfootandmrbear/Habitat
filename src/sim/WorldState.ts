@@ -930,6 +930,7 @@ export class WorldState {
       this.surfaceRoughness.data,
       config.baseRoughness,
       this.oceanCells.size > 0 ? this.oceanCells : undefined,
+      this.seaLevelMeters,
     );
     this.boundaryOutflowLedger += result.boundaryOutflow;
     this.oceanExchangeLedger += result.oceanExchange;
@@ -1179,7 +1180,15 @@ export class WorldState {
     // Erosion intensity (C-022) scales disturbance work only — never
     // production (weathering is not a storminess referent, N-004).
     const erosionScale = scale * this.erosionIntensityMultiplier;
-    const kCoast = config.shoreErosionK * erosionScale;
+    // §4.51 / review §4: coastal erosion used one global rate regardless of
+    // substrate, defeating the 47x sand/rock erodibility contrast
+    // substrates.ts establishes for hillslope erosion (kE below). Applying
+    // substrateProps(mat).erosionK as a ratio against loam — rather than
+    // substituting it outright — keeps config.shoreErosionK's calibration on
+    // loam shores exactly as it was (ratio 1) and only differentiates other
+    // materials, the same "loam matches the pre-S global knobs" convention
+    // substrates.ts documents for itself.
+    const loamErosionK = substrateProps(SUBSTRATE_LOAM).erosionK;
     const retain = Math.min(1, Math.max(0, config.longshoreRetainFraction));
     const retainHs = Math.min(
       1,
@@ -1225,7 +1234,22 @@ export class WorldState {
         const cFactor = 1 - physical * 0.85;
         // Ponded cells (Priority-Flood residual): no hillslope incision —
         // water-surface slope is flat; Exner sinks receive load instead.
-        if (a >= aMin && depression[i]! <= 1e-6) {
+        // §4.51 / review §3: Priority-Flood seeds the whole perimeter as
+        // open (depression == 0 there by construction, needed so nested
+        // interior depressions still resolve against a reference frame —
+        // that seeding cannot change without breaking basin fill elsewhere)
+        // but fluxStep only actually drains named outlets on that rim
+        // (SIMULATION_MODEL §10.1/§10.2: without sea level, edge cells that
+        // are not outlets route inward / are a closed basin). A non-outlet
+        // rim cell can therefore pond in the real dynamics while the
+        // structural depression signal alone says "free-draining" — exclude
+        // it here too, or hillslope incision fires on cells that are
+        // actually underwater.
+        const sealedRim =
+          this.seaLevelMeters === undefined &&
+          (x === 0 || z === 0 || x === this.width - 1 || z === this.height - 1) &&
+          !this.outletCells.has(i);
+        if (a >= aMin && depression[i]! <= 1e-6 && !sealedRim) {
           const slope = neighborSlope(filled, this.width, this.height, x, z, dx);
           const aNorm = Math.min(1, a / (this.width * this.height));
           const kE = substrateProps(mat[i]!).erosionK * erosionScale;
@@ -1235,6 +1259,10 @@ export class WorldState {
 
         // C-017: fetch×wind exposure contributes here — geomorphology integrates.
         // Living mats blunt coastal remobilization (C-009 / thesis payoff #2).
+        const kCoast =
+          config.shoreErosionK *
+          (substrateProps(mat[i]!).erosionK / loamErosionK) *
+          erosionScale;
         const coast = kCoast * exposure[i]! * cFactor;
         const erode = hillslopeErode + coast;
 

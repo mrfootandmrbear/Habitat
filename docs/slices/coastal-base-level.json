@@ -1,0 +1,29 @@
+{
+  "id": "coastal-base-level",
+  "title": "Coastal base-level & substrate coupling (C-015 / C-009)",
+  "simLoop": "fluxStep held an ocean neighbor's stage at bed elevation instead of seaLevel, overstating a coastal land cell's head difference against the ocean by the ocean's full water column. Priority-Flood's whole-perimeter-open fill convention (needed so nested interior depressions still resolve) disagreed with fluxStep's narrower 'only named outlets drain' dynamics at any non-outlet rim cell, so hillslope erosion's ponded-cell gate applied dry-land incision to cells that can actually pond. Coastal erosion used one global rate where hillslope erosion already reads per-substrate erosionK, erasing the sand/rock erodibility contrast. Fixed by holding ocean-neighbor stage at seaLevel, excluding non-outlet rim cells from hillslope erosion, and applying substrateProps(mat).erosionK as a ratio against loam in the coastal-erosion rate (preserving the pre-fix loam calibration exactly, ratio 1).",
+  "gameLoop": "A coastal wetland should drain toward true sea level, not toward the ocean's floor; a sand beach should visibly retreat faster under wave attack than a rocky headland right next to it.",
+  "registerIds": ["C-015", "C-009", "T-001"],
+  "invariantClass": "Equilibrium",
+  "tests": [
+    "src/sim/coastalBaseLevel.test.ts"
+  ],
+  "probes": [
+    "island-drainage",
+    "orographic-wind",
+    "deep-time",
+    "baseflow-persist",
+    "disturbance-recovery",
+    "hillslope-deposit",
+    "erosion-intensity",
+    "substrate-contrast",
+    "substrate-deposit"
+  ],
+  "fields": [
+    "water.surfaceDepth",
+    "terrain.elevation",
+    "soil.depth"
+  ],
+  "notebookSeed": "A coastal pond drains toward the true sea level, not the ocean's floor — and a sand shore wears away faster than the rock next to it.",
+  "tierO": "no owner-only question this closeout — machine half only (CI-judged: seaLevel-relative one-step outflow, ocean-depth-independence, sealed-rim erosion exclusion, sand-vs-rock differential retreat, loam-ratio-1 regression); D-007 clip gate does not apply since no new Process was registered."
+}
