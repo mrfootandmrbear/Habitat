@@ -2492,6 +2492,97 @@ export class WorldState {
     this.applyTerrainBrush(cx, cz, amount, materialId, radius);
   }
 
+  /**
+   * Flatten / trowel (§4.56 / C-028): move elev+depth toward the mean elevation
+   * inside the brush footprint. Player edit — not the C-022 erosion force dial.
+   * Depth rides with elev so bedrock = elev − depth holds (C-002).
+   */
+  flattenTerrain(
+    cx: number,
+    cz: number,
+    radius: number = config.sitingBrushRadius,
+  ): void {
+    const r = radius;
+    const cells: number[] = [];
+    let elevSum = 0;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!this.terrain.inBounds(x, z)) continue;
+        const dist = Math.hypot(x - cx, z - cz);
+        if (dist > r + 0.01) continue;
+        const i = z * this.width + x;
+        cells.push(i);
+        elevSum += this.terrain.data[i]!;
+      }
+    }
+    if (cells.length === 0) return;
+    const target = elevSum / cells.length;
+    this.applyElevationDeltasToward(cx, cz, r, target);
+  }
+
+  /**
+   * Shared elev+depth write for flatten: each footprint cell moves toward
+   * `targetElev` with the same radial falloff as berm/dig.
+   */
+  private applyElevationDeltasToward(
+    cx: number,
+    cz: number,
+    r: number,
+    targetElev: number,
+  ): void {
+    const zFloor = config.elevationFloor;
+    const minDepth = 1e-3;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!this.terrain.inBounds(x, z)) continue;
+        const dist = Math.hypot(x - cx, z - cz);
+        if (dist > r + 0.01) continue;
+        const falloff = 1 - dist / (r + 1);
+        const i = z * this.width + x;
+        const elev0 = this.terrain.data[i]!;
+        const depth0 = this.soilDepth.data[i]!;
+        let dh = (targetElev - elev0) * falloff;
+
+        let nextDepth = depth0 + dh;
+        let nextElev = elev0 + dh;
+        if (nextDepth < 0) {
+          dh = -depth0;
+          nextDepth = 0;
+          nextElev = elev0 + dh;
+        }
+        if (nextDepth > 5) {
+          dh = 5 - depth0;
+          nextDepth = 5;
+          nextElev = elev0 + dh;
+        }
+        if (nextElev < zFloor) {
+          dh = zFloor - elev0;
+          nextElev = zFloor;
+          nextDepth = depth0 + dh;
+          if (nextDepth < 0) {
+            nextDepth = 0;
+            dh = -depth0;
+            nextElev = elev0 + dh;
+          }
+          if (nextDepth > 5) {
+            nextDepth = 5;
+            dh = 5 - depth0;
+            nextElev = elev0 + dh;
+          }
+        }
+
+        if (dh === 0) continue;
+
+        const oldH = Math.max(depth0, minDepth);
+        const newH = Math.max(nextDepth, minDepth);
+        this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
+        this.soilDepth.data[i]! = nextDepth;
+        this.terrain.data[i]! = nextElev;
+      }
+    }
+    this.markStructureDirty();
+  }
+
   private applyTerrainBrush(
     cx: number,
     cz: number,

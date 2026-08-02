@@ -1,0 +1,13 @@
+{
+  "id": "flatten-trowel",
+  "title": "Flatten / trowel edit",
+  "simLoop": "Player flatten moves elev+depth toward mean elevation inside the brush footprint with radial falloff; bedrock = elev − depth holds (C-002); no vegetation write (C-006).",
+  "gameLoop": "Tool: flatten levels walls and terraces with the same bucket/shovel brush — a trowel edit, not the C-022 erosion force dial.",
+  "registerIds": ["C-006", "C-002", "C-013", "A-005", "C-028", "C-022"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/siting.test.ts", "src/sim/c006-abundant-sculpting.test.ts"],
+  "probes": [],
+  "fields": ["terrain.elevation", "soil.depth"],
+  "notebookSeed": "I trowelled the berm flat — the wall held a clean terrace for the next tide to meet.",
+  "tierO": "deferred — batch with C-028 mold/chrome taste after molds ship"
+}

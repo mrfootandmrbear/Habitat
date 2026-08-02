@@ -430,6 +430,7 @@ export type SitingTool =
   | "berm"
   | "dig"
   | "deposit"
+  | "flatten"
   | "predict"
   | "ignite";
 

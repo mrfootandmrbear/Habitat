@@ -74,6 +74,7 @@ const SITING: { id: SitingTool; label: string }[] = [
   { id: "berm", label: "Tool: raise berm" },
   { id: "dig", label: "Tool: dig channel" },
   { id: "deposit", label: "Tool: deposit" },
+  { id: "flatten", label: "Tool: flatten" },
   { id: "ignite", label: "Tool: ignite (authored)" },
 ];
 
