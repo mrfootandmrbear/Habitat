@@ -27,25 +27,34 @@ describe("probe baseline harness", () => {
     expect(flat["vegetated.infiltrated"]).toBe(4);
   });
 
-  it("every live scenario has a committed baseline and passes --check semantics", () => {
-    for (const name of listProbes()) {
-      const baselinePath = join(
-        process.cwd(),
-        "docs/evidence",
-        `${name}.baseline.json`,
-      );
-      const raw = JSON.parse(readFileSync(baselinePath, "utf8")) as BaselineFile;
-      expect(raw.scenario).toBe(name);
-      expect(Object.keys(raw.metrics).length).toBeGreaterThan(0);
+  // Runs every live probe end-to-end (~40 scenarios). CI runners sit near
+  // 20s wall time; 20_000 was flaky (timeout vs 19.6s pass on the same SHA).
+  it(
+    "every live scenario has a committed baseline and passes --check semantics",
+    () => {
+      for (const name of listProbes()) {
+        const baselinePath = join(
+          process.cwd(),
+          "docs/evidence",
+          `${name}.baseline.json`,
+        );
+        const raw = JSON.parse(
+          readFileSync(baselinePath, "utf8"),
+        ) as BaselineFile;
+        expect(raw.scenario).toBe(name);
+        expect(Object.keys(raw.metrics).length).toBeGreaterThan(0);
 
-      const result = runProbe(name);
-      const report = compareToBaseline(result);
-      expect(report.missingBaseline).toBe(false);
-      expect(report.ok, `${name} drifted: ${JSON.stringify(report.deltas)}`).toBe(
-        true,
-      );
-    }
-  }, 20_000);
+        const result = runProbe(name);
+        const report = compareToBaseline(result);
+        expect(report.missingBaseline).toBe(false);
+        expect(
+          report.ok,
+          `${name} drifted: ${JSON.stringify(report.deltas)}`,
+        ).toBe(true);
+      }
+    },
+    60_000,
+  );
 
   it("a deliberately perturbed baseline metric fails compare (Tier-M tripwire)", () => {
     const result = runProbe("basin-fill");

@@ -2460,12 +2460,22 @@ export class WorldState {
     return this.crustEstablishment.get(x, z);
   }
 
-  raiseBerm(cx: number, cz: number, amount: number = config.bermRaise): void {
-    this.applyTerrainBrush(cx, cz, amount);
+  raiseBerm(
+    cx: number,
+    cz: number,
+    amount: number = config.bermRaise,
+    radius: number = config.sitingBrushRadius,
+  ): void {
+    this.applyTerrainBrush(cx, cz, amount, undefined, radius);
   }
 
-  digChannel(cx: number, cz: number, amount: number = config.digLower): void {
-    this.applyTerrainBrush(cx, cz, -amount);
+  digChannel(
+    cx: number,
+    cz: number,
+    amount: number = config.digLower,
+    radius: number = config.sitingBrushRadius,
+  ): void {
+    this.applyTerrainBrush(cx, cz, -amount, undefined, radius);
   }
 
   /**
@@ -2477,8 +2487,9 @@ export class WorldState {
     cz: number,
     materialId: number,
     amount: number = config.bermRaise,
+    radius: number = config.sitingBrushRadius,
   ): void {
-    this.applyTerrainBrush(cx, cz, amount, materialId);
+    this.applyTerrainBrush(cx, cz, amount, materialId, radius);
   }
 
   private applyTerrainBrush(
@@ -2486,11 +2497,12 @@ export class WorldState {
     cz: number,
     delta: number,
     stampMaterial?: number,
+    radius: number = config.sitingBrushRadius,
   ): void {
     // Berm/dig move mobile soil with the surface so bedrock = elev − depth
     // stays put (THESIS §2.1, snowflow steal / C-002 · GEO-002). Tier-M:
     // per-cell Δelev === Δdepth when clamps do not bind.
-    const r = config.sitingBrushRadius;
+    const r = radius;
     const zFloor = config.elevationFloor;
     const minDepth = 1e-3;
     for (let z = cz - r; z <= cz + r; z++) {

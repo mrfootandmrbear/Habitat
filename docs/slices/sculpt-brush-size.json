@@ -1,0 +1,13 @@
+{
+  "id": "sculpt-brush-size",
+  "title": "Sculpt brush size — bucket / shovel",
+  "simLoop": "berm/dig/deposit accept an optional brush radius; bucket=4 shovel=8; default radius unchanged for ignite and legacy callers (C-006 / C-028).",
+  "gameLoop": "Player picks Brush: bucket or Brush: shovel, then raises/digs/deposits — fine towers or mass trenches without an edit budget.",
+  "registerIds": ["C-006", "C-002", "C-013", "A-005", "C-028"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/siting.test.ts"],
+  "probes": [],
+  "fields": ["terrain.elevation", "soil.depth"],
+  "notebookSeed": "I switched to the shovel and the trench opened in one stroke — same sand, bigger bite.",
+  "tierO": "deferred — batch with C-028 mold/chrome taste after flatten ships"
+}
