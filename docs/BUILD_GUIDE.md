@@ -131,7 +131,7 @@ Summary only — do not reopen unless fixing regressions.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip), **C-028** (sculpt toolbox — structural ships under C-006; taste later).
 
-**Next (executable tip):** **§4.57** geometric mold stamps → duplicator; parallel **§4.47** guild cover & light-competition correctness → §4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.58** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** Done. Keep nutrients / animals / SWE / wet-sand / freeze off the tip.
+**Next (executable tip):** **§4.57** geometric mold stamps → duplicator; parallel **§4.47** guild cover & light-competition correctness → §4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.58** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** Done. Keep nutrients / animals / SWE / wet-sand / freeze off the tip. Cloud succession: [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) (Track T = molds; Track R = §4.47).
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -145,7 +145,7 @@ Summary only — do not reopen unless fixing regressions.
 
 ### 4.0 Autonomous session protocol
 
-Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
+Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). **Gated multi-agent succession** (one slice per cloud run, merge into `main` starts the next): [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) — Track T terrain tools (§4.57→…) and Track R review correctness (§4.47→§4.48); copy-paste Automation prompts live there. Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
 
 Every agent session that advances the sim or build plan:
 
@@ -1433,6 +1433,7 @@ L1 and L6 led because they are small, move no baselines, and are how L2/L3 get o
 |---|---|
 | [MVP_SCOPE.md](MVP_SCOPE.md) | Which loops are in MVP; joint map; fun gate |
 | **This file** | How to execute each slice; autonomous protocol |
+| [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) | Merge-gated multi-agent succession; track prompts |
 | [SIMULATION_MODEL.md](SIMULATION_MODEL.md) | Fields, ownership, bands |
 | [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) | Promotion criteria + ledger |
 | [VERIFICATION_POLICY.md](VERIFICATION_POLICY.md) | Who verifies each claim; ask gate |

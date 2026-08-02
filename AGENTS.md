@@ -1,6 +1,6 @@
 # Habitat — Agent instructions
 
-Habitat is a living sand castle: sculpt substrates, set forces, run time, watch nature and life take what you built. Thesis: [docs/THESIS.md](docs/THESIS.md). Decisions: [docs/DECISION_REGISTER.md](docs/DECISION_REGISTER.md). Execution: [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md). Who verifies what: [docs/VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md).
+Habitat is a living sand castle: sculpt substrates, set forces, run time, watch nature and life take what you built. Thesis: [docs/THESIS.md](docs/THESIS.md). Decisions: [docs/DECISION_REGISTER.md](docs/DECISION_REGISTER.md). Execution: [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md). Who verifies what: [docs/VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md). Gated cloud succession (one slice per agent, merge starts the next): [docs/CLOUD_AGENT_PIPELINE.md](docs/CLOUD_AGENT_PIPELINE.md).
 
 ## Green bar (session gate)
 
@@ -71,3 +71,4 @@ Reviews: [sim-gap](docs/reviews/2026-07-30-sim-gap-review.md) (physics) · [livi
 - Named probes also work individually (`paired-storm`, `berm-reroute`, `basin-fill`); `--all --check` is the CI tripwire.
 - If `conformance:check` says the ledger is out of date, run `npm run conformance` and commit the ledger with the doc change that made it stale — do not leave the check red.
 - Hello-world smoke (optional after gate): `npm run dev` → Rain on → `1 day/s` / `1 week/s` → water pools downhill; inspect water-depth layer. Residual and hashes are Tier-M — report numbers, don’t ask the owner.
+- **Succession.** Merge-gated multi-agent pipeline: [docs/CLOUD_AGENT_PIPELINE.md](docs/CLOUD_AGENT_PIPELINE.md). One BUILD_GUIDE slice per cloud run; claim Track T (§4.57→duplicator) or Track R (§4.47→§4.48) only; rebase onto `main`; leave tip accurate for the next merge-triggered agent.
