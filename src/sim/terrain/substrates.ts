@@ -92,18 +92,117 @@ export function substrateProps(classId: number): SubstrateProps {
   return row ?? SUBSTRATES[SUBSTRATE_LOAM]!;
 }
 
+function hash2(ix: number, iz: number, seed: number): number {
+  let n = Math.imul(ix, 374761393) ^ Math.imul(iz, 668265263) ^ (seed | 0);
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  return (n >>> 0) / 4294967296;
+}
+
+function valueNoise2D(x: number, z: number, seed: number): number {
+  const x0 = Math.floor(x);
+  const z0 = Math.floor(z);
+  const fx = x - x0;
+  const fz = z - z0;
+  const sx = fx * fx * (3 - 2 * fx);
+  const sz = fz * fz * (3 - 2 * fz);
+  const a = hash2(x0, z0, seed);
+  const b = hash2(x0 + 1, z0, seed);
+  const c = hash2(x0, z0 + 1, seed);
+  const d = hash2(x0 + 1, z0 + 1, seed);
+  return a + (b - a) * sx + (c - a) * sz + (a - b - c + d) * sx * sz;
+}
+
 /**
- * Paint a readable sand | clay mosaic on land (ocean cells stay loam).
- * West of mid-x → sand; east → clay. Seed reserved for future noise variants.
+ * Chebyshev distance (cells) to nearest ocean cell. Land-only; ocean → 0.
+ */
+function shoreDistanceField(
+  width: number,
+  height: number,
+  oceanCells: ReadonlySet<number>,
+): Float32Array {
+  const n = width * height;
+  const dist = new Float32Array(n);
+  dist.fill(1e9);
+  const qx = new Int32Array(n);
+  const qz = new Int32Array(n);
+  let head = 0;
+  let tail = 0;
+  for (const i of oceanCells) {
+    dist[i] = 0;
+    qx[tail] = i % width;
+    qz[tail] = (i / width) | 0;
+    tail++;
+  }
+  const dirs = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ] as const;
+  while (head < tail) {
+    const x = qx[head]!;
+    const z = qz[head]!;
+    head++;
+    const i = z * width + x;
+    const d0 = dist[i]!;
+    for (const [dx, dz] of dirs) {
+      const nx = x + dx;
+      const nz = z + dz;
+      if (nx < 0 || nz < 0 || nx >= width || nz >= height) continue;
+      const ni = nz * width + nx;
+      const nd = d0 + 1;
+      if (nd < dist[ni]!) {
+        dist[ni] = nd;
+        qx[tail] = nx;
+        qz[tail] = nz;
+        tail++;
+      }
+    }
+  }
+  return dist;
+}
+
+/**
+ * Paint a readable sand / clay / rock mosaic on land (ocean cells stay loam).
+ *
+ * Seeded value-noise patches — not a hard mid-x bisect. Real-world bias:
+ * sand toward the shore, clay inland, sparse rock on the farthest interior
+ * rises so the starting castle reads as geology rather than a painted split.
  */
 export function paintSubstrateMosaic(
   material: Float32Array,
   width: number,
   height: number,
   oceanCells: ReadonlySet<number>,
-  _seed: number = 0,
+  seed: number = 0,
+  options?: { elev?: Float32Array },
 ): void {
-  const mid = width * 0.5;
+  const nCell = width * height;
+  if (material.length < nCell) {
+    throw new Error("paintSubstrateMosaic: material shorter than grid");
+  }
+  const elev = options?.elev;
+  if (elev !== undefined && elev.length < nCell) {
+    throw new Error("paintSubstrateMosaic: elev shorter than grid");
+  }
+
+  const shore = shoreDistanceField(width, height, oceanCells);
+  let maxShore = 0;
+  let maxElev = 0;
+  let minElev = Infinity;
+  for (let i = 0; i < nCell; i++) {
+    if (oceanCells.has(i)) continue;
+    if (shore[i]! > maxShore) maxShore = shore[i]!;
+    if (elev) {
+      const e = elev[i]!;
+      if (e > maxElev) maxElev = e;
+      if (e < minElev) minElev = e;
+    }
+  }
+  const elevSpan = Math.max(1e-6, maxElev - minElev);
+  const noiseSeed = (seed ^ 0x85ebca6b) >>> 0;
+  const hasShore = oceanCells.size > 0 && maxShore > 0;
+
   for (let z = 0; z < height; z++) {
     for (let x = 0; x < width; x++) {
       const i = z * width + x;
@@ -111,7 +210,30 @@ export function paintSubstrateMosaic(
         material[i] = SUBSTRATE_LOAM;
         continue;
       }
-      material[i] = x < mid ? SUBSTRATE_SAND : SUBSTRATE_CLAY;
+
+      const n1 = valueNoise2D(x / 9, z / 9, noiseSeed);
+      const n2 = valueNoise2D(x / 4.5 + 3, z / 4.5, noiseSeed + 11);
+      const patch = n1 * 0.65 + n2 * 0.35;
+
+      // Shore → sand; interior → clay. Without ocean, noise alone decides.
+      const inland = hasShore ? Math.min(1, shore[i]! / maxShore) : 0.45;
+      let score = inland * 0.42 + patch * 0.72 - 0.38;
+      if (elev) {
+        const elevNorm = (elev[i]! - minElev) / elevSpan;
+        score += elevNorm * 0.1;
+      }
+
+      if (
+        inland > 0.7 &&
+        patch > 0.82 &&
+        (elev ? (elev[i]! - minElev) / elevSpan > 0.55 : patch > 0.9)
+      ) {
+        material[i] = SUBSTRATE_ROCK;
+      } else if (score < 0.32) {
+        material[i] = SUBSTRATE_SAND;
+      } else {
+        material[i] = SUBSTRATE_CLAY;
+      }
     }
   }
 }

@@ -1742,7 +1742,8 @@ export function probeShoreExposure(): ProbeResult {
       if (elev0[i]! < sea) continue;
       const dElev = elev0[i]! - world.terrain.data[i]!;
       const dDepth = depth0[i]! - world.soilDepth.data[i]!;
-      if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = 0;
+      // f32 elev/depth over many bands drifts a few ULPs past 1e-6.
+      if (Math.abs(dElev - dDepth) > 1e-5) bedrockOk = 0;
     }
     return {
       hash: world.stateHash(),
@@ -1876,7 +1877,8 @@ export function probeLongshoreDrift(): ProbeResult {
       soil1 += world.soilDepth.data[i]!;
       const dElev = world.terrain.data[i]! - elev0[i]!;
       const dDepth = world.soilDepth.data[i]! - depth0[i]!;
-      if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = 0;
+      // f32 elev/depth over many bands drifts a few ULPs past 1e-6.
+      if (Math.abs(dElev - dDepth) > 1e-5) bedrockOk = 0;
     }
     return {
       hash: world.stateHash(),

@@ -2,7 +2,7 @@
   "id": "S",
   "title": "Substrate contrast — sand / clay / rock + deposit",
   "simLoop": "soil.material class drives per-cell porosity, infiltration, and hillslope erodibility from a data table (C-009 / T-004); depositSubstrate raises elev+depth and stamps material; one law, no new Process.",
-  "gameLoop": "West-sand / east-clay mosaic plus Tool: deposit (Material sand/clay/rock) — geological setup, not ecosystem paint.",
+  "gameLoop": "Seeded sand/clay/rock mosaic (shore→sand, inland→clay) plus Tool: deposit (Material sand/clay/rock) — geological setup, not ecosystem paint.",
   "registerIds": ["C-009", "C-011", "T-004", "T-003", "GEO-002", "D-007", "N-001", "N-004", "C-006"],
   "invariantClass": "Monotonicity",
   "tests": [

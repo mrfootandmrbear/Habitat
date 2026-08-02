@@ -101,7 +101,8 @@ describe("Slice 18 shore exposure (C-017)", () => {
         if (elev0[i]! < DEFAULT_SEA_LEVEL_METERS) continue;
         const dElev = elev0[i]! - world.terrain.data[i]!;
         const dDepth = depth0[i]! - world.soilDepth.data[i]!;
-        if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = false;
+        // f32 elev/depth over many bands: (bed+h)-h drifts a few ULPs past 1e-6.
+        if (Math.abs(dElev - dDepth) > 1e-5) bedrockOk = false;
       }
       return {
         hash: world.stateHash(),

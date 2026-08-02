@@ -12,6 +12,10 @@ import {
 } from "./terrain/substrates";
 import { substrateEncodingDelta } from "../ui/terrainEncoding";
 import { generateMountain } from "./terrain/generateMountain";
+import {
+  DEFAULT_SEA_LEVEL_METERS,
+  generateIsland,
+} from "./terrain/generateIsland";
 import { EditUndoStack } from "./sessionPersist";
 
 describe("substrate table (Slice S / C-009 / T-004)", () => {
@@ -59,32 +63,70 @@ describe("substrate table (Slice S / C-009 / T-004)", () => {
     ]);
   });
 
-  it("paints sand west / clay east on land", () => {
-    const terrain = new Grid2D(8, 8, 3);
-    const world = new WorldState(terrain, { seaLevel: 1 });
+  it("paints seeded sand/clay patches on land — not a mid-x bisect", () => {
+    const terrain = generateIsland(32, 32, 10, 42);
+    const world = new WorldState(terrain, { seaLevel: DEFAULT_SEA_LEVEL_METERS });
     paintSubstrateMosaic(
       world.soilMaterial.data,
       world.width,
       world.height,
       world.oceanCells,
+      42,
+      { elev: world.terrain.data },
     );
-    let sawSand = false;
-    let sawClay = false;
-    for (let z = 0; z < 8; z++) {
-      for (let x = 0; x < 8; x++) {
-        const i = z * 8 + x;
+    let sand = 0;
+    let clay = 0;
+    let midWestSand = 0;
+    let midEastSand = 0;
+    let midWestClay = 0;
+    let midEastClay = 0;
+    const mid = 16;
+    for (let z = 0; z < 32; z++) {
+      for (let x = 0; x < 32; x++) {
+        const i = z * 32 + x;
         if (world.oceanCells.has(i)) continue;
         const m = world.getSoilMaterial(x, z);
-        if (x < 4) {
-          expect(m).toBe(SUBSTRATE_SAND);
-          sawSand = true;
-        } else {
-          expect(m).toBe(SUBSTRATE_CLAY);
-          sawClay = true;
+        if (m === SUBSTRATE_SAND) sand++;
+        else if (m === SUBSTRATE_CLAY) clay++;
+        if (x === mid - 1) {
+          if (m === SUBSTRATE_SAND) midWestSand++;
+          if (m === SUBSTRATE_CLAY) midWestClay++;
+        }
+        if (x === mid) {
+          if (m === SUBSTRATE_SAND) midEastSand++;
+          if (m === SUBSTRATE_CLAY) midEastClay++;
         }
       }
     }
-    expect(sawSand && sawClay).toBe(true);
+    expect(sand).toBeGreaterThan(10);
+    expect(clay).toBeGreaterThan(10);
+    // Hard west-sand / east-clay bisect would put all mid-1 sand and all mid clay.
+    const hardBisect =
+      midWestSand > 0 &&
+      midWestClay === 0 &&
+      midEastClay > 0 &&
+      midEastSand === 0;
+    expect(hardBisect).toBe(false);
+  });
+
+  it("same seed paints an identical mosaic (T-001)", () => {
+    const paint = (seed: number) => {
+      const terrain = generateIsland(24, 24, 10, 5);
+      const world = new WorldState(terrain, {
+        seaLevel: DEFAULT_SEA_LEVEL_METERS,
+      });
+      paintSubstrateMosaic(
+        world.soilMaterial.data,
+        world.width,
+        world.height,
+        world.oceanCells,
+        seed,
+        { elev: world.terrain.data },
+      );
+      return Array.from(world.soilMaterial.data);
+    };
+    expect(paint(7)).toEqual(paint(7));
+    expect(paint(7)).not.toEqual(paint(8));
   });
 
   it("substrate encoding delta clears Tier-P floor", () => {

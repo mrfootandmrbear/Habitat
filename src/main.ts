@@ -4,6 +4,7 @@ import { SimClock } from "./sim/SimClock";
 import { WorldState } from "./sim/WorldState";
 import {
   generateIsland,
+  paintIslandSoilDepth,
 } from "./sim/terrain/generateIsland";
 import { paintSubstrateMosaic, SUBSTRATE_SAND, type DepositMaterialId } from "./sim/terrain/substrates";
 import {
@@ -97,12 +98,20 @@ let world = new WorldState(terrain, {
   windUx: windById("west").ux,
   windUz: windById("west").uz,
 });
+paintIslandSoilDepth(
+  world.soilDepth.data,
+  world.terrain.data,
+  world.width,
+  world.height,
+  world.oceanCells,
+);
 paintSubstrateMosaic(
   world.soilMaterial.data,
   world.width,
   world.height,
   world.oceanCells,
   islandSeed,
+  { elev: world.terrain.data },
 );
 let model = world.hydrologyModel;
 const prediction = new PredictionSession(n, n);
@@ -126,12 +135,20 @@ function regenerateIsland(seed: number): void {
     windUx: windById(windId).ux,
     windUz: windById(windId).uz,
   });
+  paintIslandSoilDepth(
+    next.soilDepth.data,
+    next.terrain.data,
+    next.width,
+    next.height,
+    next.oceanCells,
+  );
   paintSubstrateMosaic(
     next.soilMaterial.data,
     next.width,
     next.height,
     next.oceanCells,
     islandSeed,
+    { elev: next.terrain.data },
   );
   next.setRainRegime(rainRegime);
   next.setAirTemperature(heatById(heatId).airTempC);
