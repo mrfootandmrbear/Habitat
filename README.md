@@ -6,9 +6,10 @@ Where it came from and what it is trying to feel like is [THESIS.md](docs/THESIS
 
 Product decisions are governed by the [Decision Register](docs/DECISION_REGISTER.md). How those decisions shape play is explained in the [Design Wiki](docs/DESIGN_WIKI.md). Simulation architecture is specified in [SIMULATION_MODEL.md](docs/SIMULATION_MODEL.md). What the first playable proves — joint sim and game loops — is [MVP_SCOPE.md](docs/MVP_SCOPE.md). How to execute each slice is [BUILD_GUIDE.md](docs/BUILD_GUIDE.md). Who verifies what — agent measurement vs. owner playtest — is [VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md). Promotion criteria and the build-to-register ledger live in [DECISION_CONFORMANCE.md](docs/DECISION_CONFORMANCE.md). External tools to study (not ship) are listed in [EXTERNAL_REFERENCES.md](docs/EXTERNAL_REFERENCES.md). Island force inventory: [ISLAND_FORCES.md](docs/ISLAND_FORCES.md); force panel contract: [FORCE_PANEL.md](docs/FORCE_PANEL.md).
 
-## Run locally (no AI)
+## Play (no AI)
 
-If you just want to open Habitat in a browser yourself (no agents): [OWNER_RUN_LOCAL.md](docs/OWNER_RUN_LOCAL.md).
+- **iPad / any browser (hosted):** after Pages is enabled, open [https://mrfootandmrbear.github.io/Habitat/](https://mrfootandmrbear.github.io/Habitat/) — setup notes in [OWNER_RUN_LOCAL.md](docs/OWNER_RUN_LOCAL.md).
+- **Mac local:** [OWNER_RUN_LOCAL.md](docs/OWNER_RUN_LOCAL.md).
 
 ## Run the prototype
 
