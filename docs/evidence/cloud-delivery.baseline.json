@@ -14,7 +14,7 @@
       "abs": 0
     },
     "warm.relResidual": {
-      "value": 3.113005106036229e-8,
+      "value": 2.5265973876450713e-8,
       "abs": 0.000001
     },
     "warm.replayMatch": {
@@ -22,7 +22,7 @@
       "abs": 0
     },
     "warm.hashN": {
-      "value": 2433531317,
+      "value": 3167690762,
       "abs": 0
     },
     "cold.precip": {
@@ -38,7 +38,7 @@
       "abs": 0
     },
     "cold.hashN": {
-      "value": 348668959,
+      "value": 632441585,
       "abs": 0
     },
     "delta.phaseDiverged": {

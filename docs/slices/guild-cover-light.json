@@ -1,0 +1,32 @@
+{
+  "id": "guild-cover-light",
+  "title": "Guild cover & light-competition correctness (§4.47)",
+  "simLoop": "Overlapping guild cover fractions combine by product-complement 1 − Π(1 − cᵢ) instead of an additive clamp; leaf-area index is the Beer–Lambert-consistent inverse LAI = −ln(1 − cover)/k so transmitted light is exactly I₀(1 − cover) and approaches darkness at full cover; legacy cover growth reads the light absorbed across the open fraction, dropping the squared self-shading double-count.",
+  "gameLoop": "Three pioneer guilds at 40% each read as 0.78 combined cover, not a saturated 1.0, so extra biomass keeps a physical effect on roughness/infiltration and a full canopy no longer rests on a light floor; regrowth into gaps is no longer doubly suppressed.",
+  "registerIds": ["C-023", "ES-006", "C-011"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/guildCoverLight.test.ts",
+    "src/sim/living-hollow.test.ts",
+    "src/sim/vegetation.test.ts",
+    "src/sim/light-succession.test.ts"
+  ],
+  "probes": [
+    "deep-time",
+    "living-hollow",
+    "succession-diverge",
+    "burn-recover",
+    "light-arrival",
+    "crust-arrival"
+  ],
+  "fields": [
+    "veg.cover",
+    "veg.leafAreaIndex",
+    "light.understory",
+    "surface.roughness",
+    "veg.infiltrationContribution",
+    "habitat.suitability"
+  ],
+  "notebookSeed": "A second guild moving into a stand adds cover the way a second sheet of shade does — most of the ground is already taken — and a closed canopy really does go dark underneath.",
+  "tierO": "no owner-only question — product-complement combination and the Beer–Lambert-consistent LAI are CI-judged against named numeric edge cases (0.4×3 → 0.784; full cover → zero transmitted light). Does not implement C-023."
+}
