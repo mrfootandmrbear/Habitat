@@ -10,9 +10,12 @@ On an iPad: Safari → paste that URL → Go. No download, no Node, no Mac requi
 
 **One-time setup (Mac/GitHub, not on the iPad):**
 
-1. Merge the Pages deploy workflow to `main` (`.github/workflows/deploy-pages.yml`).
-2. In the GitHub repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. Wait for the **Deploy GitHub Pages** workflow to finish (Actions tab). Re-runs on every push to `main`, or trigger **Run workflow** manually.
+1. In the GitHub repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**  
+   (not “Deploy from a branch”). Save if the UI asks.
+2. Open **Actions** → left sidebar → **Deploy GitHub Pages** (not **CI**) → **Run workflow** → branch `main`.
+3. Wait until that run is green. A failed deploy means the link still 404s.
+
+If the site URL still 404s: confirm step 1, then re-run **Deploy GitHub Pages**. Do not use the **CI** workflow for publishing.
 
 Downloading the repo ZIP onto an iPad will not run the game — iPad Safari needs a hosted build (this) or a Mac serving the app on the same Wi‑Fi.
 

@@ -1,5 +1,8 @@
 name: Deploy GitHub Pages
 
+# Use THIS workflow (not "CI") to publish the playable site.
+# Repo Settings → Pages → Build and deployment → Source must be "GitHub Actions".
+
 on:
   push:
     branches: [main]
@@ -19,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        id: pages
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -27,7 +32,8 @@ jobs:
       - name: Build static site
         run: npm run build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}/
+          # configure-pages base_path is like "/Habitat" (no trailing slash).
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
