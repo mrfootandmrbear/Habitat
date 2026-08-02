@@ -1,4 +1,9 @@
-import type { InspectorLayer, SitingBrushSize, SitingTool } from "../config";
+import type {
+  InspectorLayer,
+  MoldShape,
+  SitingBrushSize,
+  SitingTool,
+} from "../config";
 import {
   HEAT_REGIMES,
   type HeatId,
@@ -94,6 +99,7 @@ const SITING: { id: SitingTool; label: string }[] = [
   { id: "dig", label: "Tool: dig channel" },
   { id: "deposit", label: "Tool: deposit" },
   { id: "flatten", label: "Tool: flatten" },
+  { id: "mold", label: "Tool: mold" },
   { id: "ignite", label: "Tool: ignite (authored)" },
 ];
 
@@ -101,6 +107,13 @@ const SITING: { id: SitingTool; label: string }[] = [
 const BRUSH_SIZES: { id: SitingBrushSize; label: string }[] = [
   { id: "bucket", label: "Brush: bucket" },
   { id: "shovel", label: "Brush: shovel" },
+];
+
+/** Geometric mold footprints (C-028 / §4.57) — one-shot form causes (A-005). */
+const MOLD_SHAPES: { id: MoldShape; label: string }[] = [
+  { id: "cylinder", label: "Mold: cylinder mound" },
+  { id: "pyramid", label: "Mold: pyramid" },
+  { id: "terrace", label: "Mold: square terrace" },
 ];
 
 const MATERIAL_LABEL: Record<DepositMaterialId, string> = {
@@ -123,6 +136,7 @@ export function mountControls(
     inspector: InspectorLayer;
     sitingTool: SitingTool;
     sitingBrushSize: SitingBrushSize;
+    moldShape: MoldShape;
     depositMaterial: DepositMaterialId;
     /** Island terrain seed (T-001 — regenerates the exact landscape). */
     terrainSeed: number;
@@ -141,6 +155,7 @@ export function mountControls(
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
     onSitingBrushSize: (size: SitingBrushSize) => void;
+    onMoldShape: (shape: MoldShape) => void;
     onDepositMaterial: (id: DepositMaterialId) => void;
     onCommitPrediction: () => void;
     onComparePrediction: () => void;
@@ -169,6 +184,7 @@ export function mountControls(
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
   setSitingBrushSize: (size: SitingBrushSize) => void;
+  setMoldShape: (shape: MoldShape) => void;
   setDepositMaterial: (id: DepositMaterialId) => void;
   setTerrainSeed: (seed: number) => void;
   setStatus: (text: string) => void;
@@ -582,10 +598,30 @@ export function mountControls(
     );
   });
 
+  const moldSelect = document.createElement("select");
+  moldSelect.id = "mold-shape";
+  moldSelect.setAttribute(
+    "aria-label",
+    "Mold shape (C-028 / §4.57 — geometric form stamp)",
+  );
+  for (const shape of MOLD_SHAPES) {
+    const opt = document.createElement("option");
+    opt.value = shape.id;
+    opt.textContent = shape.label;
+    moldSelect.appendChild(opt);
+  }
+  moldSelect.value = initial.moldShape;
+  moldSelect.addEventListener("change", () => {
+    handlers.onMoldShape(moldSelect.value as MoldShape);
+  });
+
   const syncMaterialVisibility = (tool: SitingTool): void => {
     const showMaterial = tool === "deposit";
     materialSelect.hidden = !showMaterial;
     materialSelect.disabled = !showMaterial;
+    const showMold = tool === "mold";
+    moldSelect.hidden = !showMold;
+    moldSelect.disabled = !showMold;
   };
 
   const sitingSelect = document.createElement("select");
@@ -686,6 +722,7 @@ export function mountControls(
     sitingSelect,
     brushSelect,
     materialSelect,
+    moldSelect,
     undoBtn,
   );
 
@@ -747,6 +784,9 @@ export function mountControls(
     },
     setSitingBrushSize: (size) => {
       brushSelect.value = size;
+    },
+    setMoldShape: (shape) => {
+      moldSelect.value = shape;
     },
     setDepositMaterial: (id) => {
       materialSelect.value = String(id);

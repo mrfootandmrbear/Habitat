@@ -58,8 +58,8 @@ Two automations share the merge trigger but claim **disjoint** tip items. Rebase
 
 | Order | Slice | Notes |
 |---|---|---|
-| T1 | **§4.57** geometric mold stamps | Tip today |
-| T2 | Duplicator stamp | Named as §4.57 next-but-one |
+| T1 | **§4.57** geometric mold stamps | **Done** |
+| T2 | **§4.59** duplicator stamp | Tip today (Track T) |
 | Tn | Whatever BUILD_GUIDE tip names next on this wave | Never L5 / L8 / nutrients / animals / SWE / wet-sand / freeze |
 
 ### Track R — Review correctness (vegetation/habitat)
@@ -100,7 +100,7 @@ You are a Habitat cloud succession agent on Track T (terrain tools).
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md.
 2. Read "Next (executable tip)" and the Track T table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track T slice (today: §4.57 molds, then duplicator). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track T slice (today: §4.59 duplicator). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.

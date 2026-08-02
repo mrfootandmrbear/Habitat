@@ -3,6 +3,7 @@ import {
   config,
   sitingBrushRadiusFor,
   type InspectorLayer,
+  type MoldShape,
   type SitingBrushSize,
   type SitingTool,
 } from "./config";
@@ -294,6 +295,7 @@ let timeRate: TimeRate = "pause";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "dig";
 let sitingBrushSize: SitingBrushSize = "bucket";
+let moldShape: MoldShape = "cylinder";
 let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
@@ -405,6 +407,7 @@ const ui = mountControls(
     inspector,
     sitingTool,
     sitingBrushSize,
+    moldShape,
     depositMaterial,
     terrainSeed: islandSeed,
   },
@@ -536,6 +539,12 @@ const ui = mountControls(
       ui.setSitingTool(tool);
       controls.enabled = true;
       tryUnlockAudio();
+      // Molds use a fixed footprint; every other tool tracks the brush tier.
+      sitingCursor.setBrushRadius(
+        tool === "mold"
+          ? config.moldRadius
+          : sitingBrushRadiusFor(sitingBrushSize),
+      );
       if (tool === "none") {
         sitingCursor.setVisible(false);
         ui.setHint(
@@ -556,6 +565,11 @@ const ui = mountControls(
         ui.setHint(
           "Flatten = trowel — levels toward mean height in the brush (not the erosion dial)",
         );
+      } else if (tool === "mold") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Mold = one-shot form stamp — click to raise a cylinder / pyramid / terrace",
+        );
       } else {
         sitingCursor.setVisible(true);
         ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
@@ -563,13 +577,26 @@ const ui = mountControls(
     },
     onSitingBrushSize: (size) => {
       sitingBrushSize = size;
-      const r = sitingBrushRadiusFor(size);
-      sitingCursor.setBrushRadius(r);
+      // Molds keep their fixed footprint — only track the brush for other tools.
+      if (sitingTool !== "mold") {
+        sitingCursor.setBrushRadius(sitingBrushRadiusFor(size));
+      }
       ui.setSitingBrushSize(size);
       ui.setHint(
         size === "bucket"
           ? "Brush: bucket — fine towers and channels"
           : "Brush: shovel — mass berms and trenches",
+      );
+    },
+    onMoldShape: (shape) => {
+      moldShape = shape;
+      ui.setMoldShape(shape);
+      ui.setHint(
+        shape === "cylinder"
+          ? "Mold: cylinder mound — round flat-top disc"
+          : shape === "pyramid"
+            ? "Mold: pyramid — square base, peaked top"
+            : "Mold: square terrace — square flat-top mesa",
       );
     },
     onDepositMaterial: (id) => {
@@ -765,6 +792,10 @@ canvas.addEventListener("pointerup", (e) => {
       cell.z,
       sitingBrushRadiusFor(sitingBrushSize),
     );
+    ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "mold") {
+    editUndo.pushCheckpoint(world);
+    world.stampMold(cell.x, cell.z, moldShape);
     ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "ignite") {
     // Authored ignition only (C-003 Open) — pulse cause, not stochastic (A-002 / A-005).
@@ -999,9 +1030,11 @@ function frame(now: number): void {
             ? "deposit"
             : sitingTool === "flatten"
               ? "flatten"
-              : sitingTool === "ignite"
-                ? "ignite"
-                : "predict";
+              : sitingTool === "mold"
+                ? `mold: ${moldShape}`
+                : sitingTool === "ignite"
+                  ? "ignite"
+                  : "predict";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +

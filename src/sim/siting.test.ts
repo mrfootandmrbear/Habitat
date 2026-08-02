@@ -196,6 +196,117 @@ describe("terrain siting (Slice 5b, A-005)", () => {
   });
 });
 
+describe("geometric mold stamps (§4.57, C-028 / A-005)", () => {
+  const r = config.moldRadius;
+  const h = config.moldHeight;
+
+  it("cylinder mold raises a known disc by the mold height (flat top)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    const cx = 20;
+    const cz = 20;
+    const before = world.terrain.data.slice();
+    world.stampMold(cx, cz, "cylinder", h, r);
+    // Every cell inside the Euclidean footprint rises by exactly the height.
+    let touched = 0;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        const i = z * 40 + x;
+        if (Math.hypot(x - cx, z - cz) <= r + 0.01) {
+          expect(world.terrain.data[i]! - before[i]!).toBeCloseTo(h, 5);
+          touched++;
+        }
+      }
+    }
+    expect(touched).toBeGreaterThan(0);
+    // A cell just outside the footprint is untouched.
+    const outside = cz * 40 + (cx + r + 2);
+    expect(world.terrain.data[outside]!).toBe(before[outside]!);
+  });
+
+  it("mold with negative height lowers the footprint (raise/lower)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    const cx = 20;
+    const cz = 20;
+    const before = world.terrain.get(cx, cz);
+    world.stampMold(cx, cz, "cylinder", -0.5, r);
+    expect(world.terrain.get(cx, cz)).toBeLessThan(before);
+  });
+
+  it("pyramid peaks at the center; terrace is a flat-top square", () => {
+    const cx = 20;
+    const cz = 20;
+
+    const pyr = new WorldState(generateMountain(40, 40, 8, 3));
+    const pyrBefore = pyr.terrain.data.slice();
+    pyr.stampMold(cx, cz, "pyramid", h, r);
+    const pyrCenter =
+      pyr.terrain.data[cz * 40 + cx]! - pyrBefore[cz * 40 + cx]!;
+    const pyrEdge =
+      pyr.terrain.data[cz * 40 + (cx + r)]! - pyrBefore[cz * 40 + (cx + r)]!;
+    expect(pyrCenter).toBeGreaterThan(pyrEdge);
+    expect(pyrEdge).toBeGreaterThan(0);
+
+    const ter = new WorldState(generateMountain(40, 40, 8, 3));
+    const terBefore = ter.terrain.data.slice();
+    ter.stampMold(cx, cz, "terrace", h, r);
+    const terCenter =
+      ter.terrain.data[cz * 40 + cx]! - terBefore[cz * 40 + cx]!;
+    // Square footprint: even the far corner (Chebyshev r) rises by the full
+    // height, which the round cylinder never reaches.
+    const terCorner =
+      ter.terrain.data[(cz + r) * 40 + (cx + r)]! -
+      terBefore[(cz + r) * 40 + (cx + r)]!;
+    expect(terCenter).toBeCloseTo(h, 5);
+    expect(terCorner).toBeCloseTo(h, 5);
+  });
+
+  it("mold conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.stampMold(20, 20, "pyramid", h, r);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    // Per cell Δelev === Δdepth by construction; the summed residual is pure
+    // Float32Array rounding across the ~81-cell footprint (≈6e-6 << 1e-4).
+    expect(Math.abs(dElev - dDepth)).toBeLessThan(1e-4);
+    expect(dElev).toBeGreaterThan(0);
+  });
+
+  it("mold undo restores state hash (C-013)", () => {
+    const world = new WorldState(generateMountain(32, 32, 8, 3));
+    const undo = new EditUndoStack();
+    const before = world.stateHash();
+    undo.pushCheckpoint(world);
+    world.stampMold(16, 16, "cylinder");
+    expect(world.stateHash()).not.toBe(before);
+    expect(undo.undo(world)).toBe(true);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("20 mold stamps write no vegetation (C-006)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    const cover0 = world.vegCover.data.slice();
+    const herb0 = world.herbBiomass.data.slice();
+    const shapes = ["cylinder", "pyramid", "terrace"] as const;
+    for (let i = 0; i < 20; i++) {
+      world.stampMold(
+        12 + (i % 6),
+        12 + (i % 5),
+        shapes[i % shapes.length]!,
+      );
+    }
+    expect([...world.vegCover.data]).toEqual([...cover0]);
+    expect([...world.herbBiomass.data]).toEqual([...herb0]);
+    // The stamps did move terrain — this is not a no-op.
+    expect(world.terrain.get(14, 14)).not.toBe(0);
+  });
+});
+
 describe("worldToGrid (siting pick)", () => {
   it("maps center of world to mid grid", () => {
     const cell = worldToGrid(0, 0, 96, 96, 48);

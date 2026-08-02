@@ -1,4 +1,4 @@
-import { config } from "../config";
+import { config, moldProfileWeight, type MoldShape } from "../config";
 import { Grid2D } from "./Grid2D";
 import { FieldRegistry } from "./registry/FieldRegistry";
 import type { ScalarBox } from "./registry/types";
@@ -2555,6 +2555,74 @@ export class WorldState {
         const elev0 = this.terrain.data[i]!;
         const depth0 = this.soilDepth.data[i]!;
         let dh = (targetElev - elev0) * falloff;
+
+        let nextDepth = depth0 + dh;
+        let nextElev = elev0 + dh;
+        if (nextDepth < 0) {
+          dh = -depth0;
+          nextDepth = 0;
+          nextElev = elev0 + dh;
+        }
+        if (nextDepth > 5) {
+          dh = 5 - depth0;
+          nextDepth = 5;
+          nextElev = elev0 + dh;
+        }
+        if (nextElev < zFloor) {
+          dh = zFloor - elev0;
+          nextElev = zFloor;
+          nextDepth = depth0 + dh;
+          if (nextDepth < 0) {
+            nextDepth = 0;
+            dh = -depth0;
+            nextElev = elev0 + dh;
+          }
+          if (nextDepth > 5) {
+            nextDepth = 5;
+            dh = 5 - depth0;
+            nextElev = elev0 + dh;
+          }
+        }
+
+        if (dh === 0) continue;
+
+        const oldH = Math.max(depth0, minDepth);
+        const newH = Math.max(nextDepth, minDepth);
+        this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
+        this.soilDepth.data[i]! = nextDepth;
+        this.terrain.data[i]! = nextElev;
+      }
+    }
+    this.markStructureDirty();
+  }
+
+  /**
+   * Geometric mold stamp (§4.57 / C-028): one-shot form cause (A-005) that
+   * applies a fixed elev(+depth) delta field over a fixed footprint. `height`
+   * is signed — positive builds a mound / terrace, negative carves the same
+   * form downward. Depth rides with elev so bedrock = elev − depth holds
+   * (C-002); no material (deposit stays on its own path, C-009) and no
+   * vegetation write (C-006).
+   */
+  stampMold(
+    cx: number,
+    cz: number,
+    shape: MoldShape,
+    height: number = config.moldHeight,
+    radius: number = config.moldRadius,
+  ): void {
+    const r = radius;
+    const zFloor = config.elevationFloor;
+    const minDepth = 1e-3;
+    for (let z = cz - r; z <= cz + r; z++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!this.terrain.inBounds(x, z)) continue;
+        const weight = moldProfileWeight(shape, x - cx, z - cz, r);
+        if (weight <= 0) continue;
+        const i = z * this.width + x;
+        const elev0 = this.terrain.data[i]!;
+        const depth0 = this.soilDepth.data[i]!;
+        let dh = height * weight;
 
         let nextDepth = depth0 + dh;
         let nextElev = elev0 + dh;

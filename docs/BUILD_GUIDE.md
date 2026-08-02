@@ -125,13 +125,14 @@ Summary only — do not reopen unless fixing regressions.
 | **L4** | Biotic motion (wind sway) | Shoots lean with wind; calm is still; standing dead barely leans | `occupantSway`, OccupantMesh | **Done** — presentation ([L4-composition](slices/L4-composition.md); D-007 clip Pass) |
 | §4.46 | HSI curve-shape corrections | Liebig curves honest at extremes; arrival probes refreshed | `hsiComposition`, `hsiCurveShape.test.ts` | **Done** — agent ([hsi-curve-shape-composition](slices/hsi-curve-shape-composition.md)) |
 | §4.56 | Flatten / trowel (player smooth) | Levels toward mean elev in brush; depth with elev | `flattenTerrain`, Tool: flatten | **Done** — agent ([flatten-trowel-composition](slices/flatten-trowel-composition.md)) |
+| §4.57 | Geometric mold stamps | Cylinder / pyramid / terrace form stamps; depth with elev | `stampMold`, `moldProfileWeight`, Tool: mold | **Done** — agent ([geometric-mold-stamps-composition](slices/geometric-mold-stamps-composition.md)) |
 | §4.58 | Simple / Full control density | Simple keeps sculpt · primary forces · time; Full on demand | `chromeDensity.ts`, `#chrome-density` | **Done** — agent ([chrome-density-composition](slices/chrome-density-composition.md)) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done; **C-028** framing Done (sculpt toolbox). **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.46** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done; **§4.55 brush size** Done; **§4.56 flatten/trowel** Done; **§4.58 Simple/Full chrome** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.57** geometric mold stamps (terrain tools); parallel **§4.47** guild cover & light-competition correctness → §4.48; Living remainder blocked (L5 / L8). Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done; **C-028** framing Done (sculpt toolbox). **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.46** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done; **§4.55 brush size** Done; **§4.56 flatten/trowel** Done; **§4.57 mold stamps** Done; **§4.58 Simple/Full chrome** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.59** duplicator stamp (terrain tools, specified §4.59); parallel **§4.47** guild cover & light-competition correctness → §4.48; Living remainder blocked (L5 / L8). Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip), **C-028** (sculpt toolbox — structural ships under C-006; taste later).
 
-**Next (executable tip):** **§4.57** geometric mold stamps → duplicator; parallel **§4.47** guild cover & light-competition correctness → §4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.58** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** Done. Keep nutrients / animals / SWE / wet-sand / freeze off the tip. Cloud succession: [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) (Track T = molds; Track R = §4.47).
+**Next (executable tip):** **§4.59** duplicator stamp (specified §4.59); parallel **§4.47** guild cover & light-competition correctness → §4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.58** / **§4.57** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** Done. Keep nutrients / animals / SWE / wet-sand / freeze off the tip. Cloud succession: [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) (Track T = duplicator; Track R = §4.47).
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -145,7 +146,7 @@ Summary only — do not reopen unless fixing regressions.
 
 ### 4.0 Autonomous session protocol
 
-Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). **Gated multi-agent succession** (one slice per cloud run, merge into `main` starts the next): [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) — Track T terrain tools (§4.57→…) and Track R review correctness (§4.47→§4.48); copy-paste Automation prompts live there. Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
+Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). **Gated multi-agent succession** (one slice per cloud run, merge into `main` starts the next): [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) — Track T terrain tools (§4.59 duplicator→…) and Track R review correctness (§4.47→§4.48); copy-paste Automation prompts live there. Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
 
 Every agent session that advances the sim or build plan:
 
@@ -1311,7 +1312,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.57 Slice — Geometric mold stamps *(queued)*
+### 4.57 Slice — Geometric mold stamps *(Done — agent)*
 
 **Why this exists.** C-028 kit keep list: Geometric molds (pyramid, star fort, cylinder) — one-shot **form stamps** that raise/lower elev+depth in a fixed footprint. Still a terrain cause (A-005), not Townscaper building paint. Ships under Locked **C-006** after flatten; wet-sand / freeze / figurines stay banned.
 
@@ -1322,10 +1323,31 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 **Bans.** Townscaper / finished-building paint · copying vegetation or water · edit budget on stamps · freeze · wet-sand carve physics · carving needles at facade scale (C-012).
 **New Process?** no.
 
-- [ ] At least two mold footprints (e.g. cylinder mound + square terrace / pyramid) as elev+depth stamps; share brush-size tier or fixed mold radius
-- [ ] Undo before time (C-013); no veg write (C-006); optional material stamp only via existing deposit path, not as default mold behavior
-- [ ] Test: stamp raises/lowers a known cell set; ΣΔelev = ΣΔdepth; undo hash identity; 20 stamps write no veg
-- [ ] Composition + manifest; **Next-but-one:** duplicator stamp (C-028 — copy elev(+depth)[+material] only; never veg/water/suitability)
+- [x] Three mold footprints — `cylinder` (round flat-top disc), `pyramid` (square base → peak), `terrace` (square flat-top mesa) — as elev+depth stamps at a fixed `config.moldRadius` (`moldProfileWeight` in `config.ts`; `WorldState.stampMold`)
+- [x] Undo before time (C-013); no veg write (C-006); material stays on the separate C-009 deposit path — molds never stamp material by default
+- [x] Test: stamp raises/lowers a known cell set; ΣΔelev = ΣΔdepth (1e-4, f32); undo hash identity; 20 stamps write no veg (`siting.test.ts`, `c006-abundant-sculpting.test.ts`)
+- [x] Composition + manifest: [geometric-mold-stamps-composition.md](slices/geometric-mold-stamps-composition.md), [geometric-mold-stamps.json](slices/geometric-mold-stamps.json)
+- [x] **Next-but-one:** §4.59 duplicator stamp (specified below); parallel tip §4.47 guild cover & light-competition correctness
+
+---
+
+### 4.59 Slice — Duplicator stamp *(queued)*
+
+**Why this exists.** C-028 kit "Sandbox magic" keep list: **Duplicator Stamp** — copy `elev(+depth)[+material]` from a source footprint and re-stamp the same form elsewhere. Multiplies a *form-copy verb* under Locked C-006, never a habitat. After molds give fixed geometric forms, the duplicator lets the player lift a form they already sculpted (a ridge, a basin lip) and repeat it — still a terrain cause (A-005), not painted architecture or copied ecology.
+
+**Loops.** Sim: `copyForm(srcCx, srcCz, radius)` captures a relative elev(+depth)[+material] delta field from a source footprint against its footprint-mean; `pasteForm(dstCx, dstCz)` re-applies that delta field at the destination with the same clamp family (C-002 depth rides elev). Game: pick source → pick destination → the sculpted form reappears; undo before time (C-013).
+
+**Register / candidates.** C-006 Locked; C-002 Locked; C-013 Locked; A-005 Locked; C-028 Open (framing — "Sandbox magic" / Duplicator); C-009 Locked (material copies only through the deposit-stamp path, never veg/water).
+**Study.** C-028 framing kit map §4 (Duplicator Stamp = "Keep (later slice) — must not copy vegetation or water as a finished habitat"); §4.57 mold stamp composition (shares the fixed-footprint clamp family).
+**Bans.** Copying **vegetation, water, or suitability** as a finished habitat (N-001 / C-007) · Townscaper finished-building paste · edit budget / cooldown on the stamp (C-006) · freeze · wet-sand · facade-scale needles (C-012) · pasting a whole living scene.
+
+**New Process?** no.
+
+- [ ] `WorldState.copyForm(srcCx, srcCz, radius?)` captures a relative elev(+depth) delta field (and optional material) against the source footprint mean; a pure observer — no sim write
+- [ ] `WorldState.pasteForm(dstCx, dstCz)` re-applies the captured delta field; depth rides with elev (C-002); undo before time (C-013)
+- [ ] Copy/paste **never** reads or writes vegetation, water, or suitability (assert the copied buffer excludes those fields, and 20 pastes write no veg — C-006 / N-001)
+- [ ] Test: paste reproduces the source relief within f32 (ΣΔelev = ΣΔdepth); undo hash identity; copy leaves the world hash unchanged (observer, P-006/T-006)
+- [ ] Composition + manifest; **Next-but-one:** re-evaluate C-028 owner taste half (do molds/duplicator feel like shaping sand?) vs §4.47 guild-cover correctness — whichever the queue tip names
 
 ---
 
@@ -1393,7 +1415,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Starting surface (island form + mosaic) | C-006, C-015, C-009, T-001 | §4.54 **Done** |
 | — | Sculpt brush size (bucket / shovel) | C-006, C-002, C-028 | §4.55 **Done** |
 | — | Flatten / trowel edit | C-006, C-002, C-028, C-022 | §4.56 **Done** |
-| — | Geometric mold stamps | C-006, C-002, C-028, A-005 | §4.57 **Queued** |
+| — | Geometric mold stamps | C-006, C-002, C-028, A-005 | §4.57 **Done** |
+| — | Duplicator stamp | C-006, C-002, C-028, A-005, C-009 | §4.59 **Queued** |
 | — | Simple / Full control density | U-001, U-003, C-004, T-005 | §4.58 **Done** |
 | C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — did not block §4.52, which shipped without it |
 
@@ -1411,7 +1434,7 @@ L1 and L6 led because they are small, move no baselines, and are how L2/L3 get o
 
 **Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
 
-**A second, parallel review queue** — four scoped domain reviews using the same expert-review pattern as the renderer ([3c4b9f0](https://github.com/mrfootandmrbear/Habitat/commit/3c4b9f0)): [fire/fuel](reviews/2026-07-31-fire-fuel-review.md), [vegetation/habitat](reviews/2026-07-31-vegetation-habitat-review.md) (extends the living-world review's L2/L3/L5 territory), [hydrology/geomorphology](reviews/2026-07-31-hydrology-geomorphology-review.md), and [UI encoding](reviews/2026-07-31-ui-encoding-review.md) — filed as **§4.44–§4.52**. None registers a new `Process` and none needs a candidate except **C-026** (deliberate CVD-safe palette, Open, owner-judged, which did not block §4.52's bug fixes). **§4.44–§4.46 and §4.49–§4.52 have shipped**; **§4.47–§4.48** (guild cover & light, habitat/dispersal hygiene) remain queued on the parallel review track; terrain-tools tip is **§4.57** molds after **§4.54–§4.56** Done. Three of the shipped five are worth recording outside severity ranking: **§4.44 fire spread as a rate** turned out to be one root cause wearing three faces — nothing tracked which cells were alight between calls, and that single absence produced the missing rate, the intensity that outlived the fire, and the scan-order-dependent burn shape, so tracking the front explicitly closed all three at once; **§4.49 drainage flat-routing correctness** was upstream of more than its own review scope suggested — it corrupted `aNorm`, which both hillslope erosion and the groundwater channel boost depend on, and its fix moved the baseline family §4.51 then moved again; and **§4.52 encoding delta correctness** repaired the Tier-P proxy mechanism ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)) that discharges Definition-of-done row 2 for every slice, past and future.
+**A second, parallel review queue** — four scoped domain reviews using the same expert-review pattern as the renderer ([3c4b9f0](https://github.com/mrfootandmrbear/Habitat/commit/3c4b9f0)): [fire/fuel](reviews/2026-07-31-fire-fuel-review.md), [vegetation/habitat](reviews/2026-07-31-vegetation-habitat-review.md) (extends the living-world review's L2/L3/L5 territory), [hydrology/geomorphology](reviews/2026-07-31-hydrology-geomorphology-review.md), and [UI encoding](reviews/2026-07-31-ui-encoding-review.md) — filed as **§4.44–§4.52**. None registers a new `Process` and none needs a candidate except **C-026** (deliberate CVD-safe palette, Open, owner-judged, which did not block §4.52's bug fixes). **§4.44–§4.46 and §4.49–§4.52 have shipped**; **§4.47–§4.48** (guild cover & light, habitat/dispersal hygiene) remain queued on the parallel review track; terrain-tools tip is **§4.59** duplicator after **§4.54–§4.57** Done. Three of the shipped five are worth recording outside severity ranking: **§4.44 fire spread as a rate** turned out to be one root cause wearing three faces — nothing tracked which cells were alight between calls, and that single absence produced the missing rate, the intensity that outlived the fire, and the scan-order-dependent burn shape, so tracking the front explicitly closed all three at once; **§4.49 drainage flat-routing correctness** was upstream of more than its own review scope suggested — it corrupted `aNorm`, which both hillslope erosion and the groundwater channel boost depend on, and its fix moved the baseline family §4.51 then moved again; and **§4.52 encoding delta correctness** repaired the Tier-P proxy mechanism ([VERIFICATION_POLICY.md](VERIFICATION_POLICY.md)) that discharges Definition-of-done row 2 for every slice, past and future.
 
 ---
 
