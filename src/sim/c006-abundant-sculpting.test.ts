@@ -51,7 +51,7 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     }
   });
 
-  it("100 berm/dig/deposit edits succeed with no rejection and no veg write", () => {
+  it("100 berm/dig/deposit/flatten edits succeed with no rejection and no veg write", () => {
     const world = new WorldState(generateMountain(24, 24, 6, 2));
     const herb0 = sumGrid(world.herbBiomass.data);
     const strand0 = sumGrid(world.strandBiomass.data);
@@ -62,14 +62,17 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     const cover0 = sumGrid(world.vegCover.data);
     const elev0 = world.terrain.get(12, 12);
 
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 30; i++) {
       world.raiseBerm(10 + (i % 5), 10 + (i % 4), 0.15);
     }
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 25; i++) {
       world.digChannel(8 + (i % 4), 8 + (i % 5), 0.1);
     }
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 25; i++) {
       world.depositSubstrate(14 + (i % 3), 14 + (i % 3), SUBSTRATE_SAND, 0.12);
+    }
+    for (let i = 0; i < 20; i++) {
+      world.flattenTerrain(12 + (i % 3), 12 + (i % 3));
     }
 
     expect(sumGrid(world.herbBiomass.data)).toBe(herb0);

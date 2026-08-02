@@ -4,7 +4,7 @@ import { worldToGrid } from "../ui/siting";
 
 /**
  * Cell-snapped siting gizmo (BUILD_GUIDE §4.2). Presentation only — does not
- * write simulation state.
+ * write simulation state. Footprint tracks the active brush size (C-028 §4.55).
  */
 export class SitingCursor {
   readonly group: THREE.Group;
@@ -13,20 +13,23 @@ export class SitingCursor {
   private readonly height: number;
   private readonly worldSize: number;
   private cell: { x: number; z: number } | null = null;
+  private brushRadius: number;
 
   constructor(
     width: number = config.gridSize,
     height: number = config.gridSize,
     worldSize: number = config.worldSize,
+    brushRadius: number = config.sitingBrushRadius,
   ) {
     this.width = width;
     this.height = height;
     this.worldSize = worldSize;
+    this.brushRadius = brushRadius;
     this.group = new THREE.Group();
     this.group.name = "sitingCursor";
 
     const cellW = worldSize / (width - 1);
-    const footprint = Math.max(1, 2 * config.sitingBrushRadius + 1);
+    const footprint = Math.max(1, 2 * brushRadius + 1);
     const geo = new THREE.BoxGeometry(
       cellW * footprint * 0.92,
       0.35,
@@ -50,6 +53,20 @@ export class SitingCursor {
 
   getCell(): { x: number; z: number } | null {
     return this.cell;
+  }
+
+  /** Update the preview footprint when the player switches bucket ↔ shovel. */
+  setBrushRadius(radius: number): void {
+    if (radius === this.brushRadius) return;
+    this.brushRadius = radius;
+    const cellW = this.worldSize / (this.width - 1);
+    const footprint = Math.max(1, 2 * radius + 1);
+    this.box.geometry.dispose();
+    this.box.geometry = new THREE.BoxGeometry(
+      cellW * footprint * 0.92,
+      0.35,
+      cellW * footprint * 0.92,
+    );
   }
 
   /** Snap world hit to grid; returns cell or null if outside. */

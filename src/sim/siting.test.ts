@@ -1,8 +1,31 @@
 import { describe, expect, it } from "vitest";
+import { config } from "../config";
 import { totalWaterVolume } from "./hydrology/fluxStep";
+import { EditUndoStack } from "./sessionPersist";
 import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
 import { worldToGrid } from "../ui/siting";
+
+function footprintVariance(
+  world: WorldState,
+  cx: number,
+  cz: number,
+  radius: number,
+): number {
+  const elevs: number[] = [];
+  for (let z = cz - radius; z <= cz + radius; z++) {
+    for (let x = cx - radius; x <= cx + radius; x++) {
+      if (!world.terrain.inBounds(x, z)) continue;
+      if (Math.hypot(x - cx, z - cz) > radius + 0.01) continue;
+      elevs.push(world.terrain.get(x, z));
+    }
+  }
+  if (elevs.length === 0) return 0;
+  const mean = elevs.reduce((a, b) => a + b, 0) / elevs.length;
+  let sumSq = 0;
+  for (const e of elevs) sumSq += (e - mean) * (e - mean);
+  return sumSq / elevs.length;
+}
 
 describe("terrain siting (Slice 5b, A-005)", () => {
   it("raiseBerm increases terrain elevation owned by WorldState", () => {
@@ -85,6 +108,91 @@ describe("terrain siting (Slice 5b, A-005)", () => {
     }
     expect(dElev).toBeCloseTo(dDepth, 5);
     expect(dElev).toBeGreaterThan(0);
+  });
+
+  it("shovel footprint moves more cells than bucket (C-028 / §4.55)", () => {
+    const bucketR = config.sitingBrushRadii.bucket;
+    const shovelR = config.sitingBrushRadii.shovel;
+    expect(shovelR).toBeGreaterThan(bucketR);
+    expect(bucketR).toBe(config.sitingBrushRadius);
+
+    const countTouched = (radius: number): number => {
+      const world = new WorldState(generateMountain(32, 32, 8, 3));
+      const before = world.terrain.data.slice();
+      world.raiseBerm(16, 16, 0.5, radius);
+      let n = 0;
+      for (let i = 0; i < before.length; i++) {
+        if (world.terrain.data[i]! !== before[i]!) n++;
+      }
+      return n;
+    };
+    expect(countTouched(shovelR)).toBeGreaterThan(countTouched(bucketR));
+  });
+
+  it("shovel still conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const world = new WorldState(generateMountain(32, 32, 8, 3));
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.raiseBerm(16, 16, 0.8, config.sitingBrushRadii.shovel);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(dElev).toBeCloseTo(dDepth, 5);
+    expect(dElev).toBeGreaterThan(0);
+  });
+
+  it("flatten lowers local elev variance (C-028 / §4.56 trowel)", () => {
+    const world = new WorldState(generateMountain(32, 32, 8, 3));
+    const cx = 16;
+    const cz = 16;
+    const r = config.sitingBrushRadii.bucket;
+    // Seed a peaked berm so the footprint has measurable relief.
+    world.raiseBerm(cx, cz, 2.0, r);
+    const before = footprintVariance(world, cx, cz, r);
+    expect(before).toBeGreaterThan(0.01);
+    world.flattenTerrain(cx, cz, r);
+    const after = footprintVariance(world, cx, cz, r);
+    expect(after).toBeLessThan(before * 0.5);
+  });
+
+  it("flatten conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const world = new WorldState(generateMountain(32, 32, 8, 3));
+    world.raiseBerm(16, 16, 1.5, config.sitingBrushRadii.bucket);
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.flattenTerrain(16, 16, config.sitingBrushRadii.bucket);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(dElev).toBeCloseTo(dDepth, 5);
+  });
+
+  it("flatten undo restores state hash (C-013)", () => {
+    const world = new WorldState(generateMountain(24, 24, 6, 2));
+    world.raiseBerm(12, 12, 1.2);
+    const undo = new EditUndoStack();
+    const before = world.stateHash();
+    undo.pushCheckpoint(world);
+    world.flattenTerrain(12, 12);
+    expect(world.stateHash()).not.toBe(before);
+    expect(undo.undo(world)).toBe(true);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("flatten does not write vegetation (C-006)", () => {
+    const world = new WorldState(generateMountain(24, 24, 6, 2));
+    world.raiseBerm(12, 12, 1.5);
+    const cover0 = world.vegCover.data.slice();
+    const herb0 = world.herbBiomass.data.slice();
+    world.flattenTerrain(12, 12);
+    expect([...world.vegCover.data]).toEqual([...cover0]);
+    expect([...world.herbBiomass.data]).toEqual([...herb0]);
   });
 });
 

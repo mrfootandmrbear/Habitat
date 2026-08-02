@@ -1,5 +1,11 @@
 import "./style.css";
-import { config, type InspectorLayer, type SitingTool } from "./config";
+import {
+  config,
+  sitingBrushRadiusFor,
+  type InspectorLayer,
+  type SitingBrushSize,
+  type SitingTool,
+} from "./config";
 import { SimClock } from "./sim/SimClock";
 import { WorldState } from "./sim/WorldState";
 import {
@@ -287,6 +293,7 @@ let erosionId: ErosionId = "moderate";
 let timeRate: TimeRate = "pause";
 let inspector: InspectorLayer = "none";
 let sitingTool: SitingTool = "dig";
+let sitingBrushSize: SitingBrushSize = "bucket";
 let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
@@ -397,6 +404,7 @@ const ui = mountControls(
     timeRate,
     inspector,
     sitingTool,
+    sitingBrushSize,
     depositMaterial,
     terrainSeed: islandSeed,
   },
@@ -543,10 +551,26 @@ const ui = mountControls(
         ui.setHint(
           "Deposit = geological dump — raises ground and sets sand/clay/rock",
         );
+      } else if (tool === "flatten") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Flatten = trowel — levels toward mean height in the brush (not the erosion dial)",
+        );
       } else {
         sitingCursor.setVisible(true);
         ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
       }
+    },
+    onSitingBrushSize: (size) => {
+      sitingBrushSize = size;
+      const r = sitingBrushRadiusFor(size);
+      sitingCursor.setBrushRadius(r);
+      ui.setSitingBrushSize(size);
+      ui.setHint(
+        size === "bucket"
+          ? "Brush: bucket — fine towers and channels"
+          : "Brush: shovel — mass berms and trenches",
+      );
     },
     onDepositMaterial: (id) => {
       depositMaterial = id;
@@ -708,15 +732,39 @@ canvas.addEventListener("pointerup", (e) => {
 
   if (sitingTool === "berm") {
     editUndo.pushCheckpoint(world);
-    world.raiseBerm(cell.x, cell.z);
+    world.raiseBerm(
+      cell.x,
+      cell.z,
+      config.bermRaise,
+      sitingBrushRadiusFor(sitingBrushSize),
+    );
     ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "dig") {
     editUndo.pushCheckpoint(world);
-    world.digChannel(cell.x, cell.z);
+    world.digChannel(
+      cell.x,
+      cell.z,
+      config.digLower,
+      sitingBrushRadiusFor(sitingBrushSize),
+    );
     ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "deposit") {
     editUndo.pushCheckpoint(world);
-    world.depositSubstrate(cell.x, cell.z, depositMaterial);
+    world.depositSubstrate(
+      cell.x,
+      cell.z,
+      depositMaterial,
+      config.bermRaise,
+      sitingBrushRadiusFor(sitingBrushSize),
+    );
+    ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "flatten") {
+    editUndo.pushCheckpoint(world);
+    world.flattenTerrain(
+      cell.x,
+      cell.z,
+      sitingBrushRadiusFor(sitingBrushSize),
+    );
     ui.setUndoEnabled(editUndo.canUndo);
   } else if (sitingTool === "ignite") {
     // Authored ignition only (C-003 Open) — pulse cause, not stochastic (A-002 / A-005).
@@ -949,9 +997,11 @@ function frame(now: number): void {
           ? "dig channel"
           : sitingTool === "deposit"
             ? "deposit"
-            : sitingTool === "ignite"
-              ? "ignite"
-              : "predict";
+            : sitingTool === "flatten"
+              ? "flatten"
+              : sitingTool === "ignite"
+                ? "ignite"
+                : "predict";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +
