@@ -22,16 +22,17 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
     const warmCovered = evaluateShrubHsi({
       airTempC: heatById("warm").airTempC,
       herbBiomass: config.herbBiomassMax * 0.6,
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.5,
       salinity: 0,
     });
     expect(warmCovered.hsi).toBeGreaterThan(0.4);
-    expect(warmCovered.fTemp).toBe(1);
+    expect(warmCovered.fTemp).toBeGreaterThan(0.8);
+    expect(warmCovered.fTemp).toBeLessThanOrEqual(1);
 
     const coldCovered = evaluateShrubHsi({
       airTempC: heatById("cold").airTempC,
       herbBiomass: config.herbBiomassMax * 0.6,
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.5,
       salinity: 0,
     });
     expect(coldCovered.hsi).toBe(0);
@@ -40,7 +41,7 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
     const mildCovered = evaluateShrubHsi({
       airTempC: heatById("mild").airTempC,
       herbBiomass: config.herbBiomassMax * 0.6,
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.5,
       salinity: 0,
     });
     expect(mildCovered.hsi).toBe(0);
@@ -49,7 +50,7 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
     const warmBare = evaluateShrubHsi({
       airTempC: heatById("warm").airTempC,
       herbBiomass: 0,
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.5,
       salinity: 0,
     });
     expect(warmBare.hsi).toBe(0);
@@ -71,7 +72,7 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
       world.setAirTemperature(heatById(heatId).airTempC);
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);

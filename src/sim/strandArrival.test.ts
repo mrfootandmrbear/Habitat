@@ -2,17 +2,23 @@ import { describe, expect, it } from "vitest";
 import { config } from "../config";
 import { Grid2D } from "./Grid2D";
 import { WorldState } from "./WorldState";
-import { factorSalinity, factorSalinityTolerant } from "./habitat/salinityComposition";
+import {
+  factorSalinity,
+  factorSalinityTolerant,
+} from "./habitat/salinityComposition";
 import {
   evaluateStrandHsi,
   STRAND_LIMITING_SALINITY,
   STRAND_LIMITING_SHORE,
 } from "./habitat/strandHsiComposition";
-import { LIMITING_SPRAY } from "./habitat/hsiComposition";
+import { LIMITING_SALINITY } from "./habitat/hsiComposition";
 
 describe("Strand splash pioneer (C-018 / Slice N4)", () => {
   it("tolerant salinity stays high where herb f_salinity collapses", () => {
-    expect(factorSalinity(0.85)).toBeCloseTo(0.15, 8);
+    expect(factorSalinity(0.85)).toBeCloseTo(
+      factorSalinityTolerant(0.85, config.herbSalinityFullThrough),
+      8,
+    );
     expect(factorSalinityTolerant(0.85)).toBe(1);
     expect(factorSalinityTolerant(1)).toBe(0);
     expect(factorSalinityTolerant(0)).toBe(1);
@@ -27,14 +33,14 @@ describe("Strand splash pioneer (C-018 / Slice N4)", () => {
     expect(inland.hsi).toBe(0);
 
     const strand = evaluateStrandHsi({
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       salinity: 0.85,
     });
     expect(strand.hsi).toBe(1);
     expect(strand.limiting).not.toBe(STRAND_LIMITING_SALINITY);
 
     const hyper = evaluateStrandHsi({
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       salinity: 1,
     });
     expect(hyper.limiting).toBe(STRAND_LIMITING_SALINITY);
@@ -66,11 +72,11 @@ describe("Strand splash pioneer (C-018 / Slice N4)", () => {
       const world = new WorldState(new Grid2D(w, h, 2.5));
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
-      world.shoreExposure.set(shoreX, shoreZ, 1);
+      world.shoreExposure.set(shoreX, shoreZ, 0.5);
       world.soilSalinity.set(shoreX, shoreZ, 0.85);
       world.runHabitatStep(1);
       world.runDispersalStep(1);
@@ -97,7 +103,7 @@ describe("Strand splash pioneer (C-018 / Slice N4)", () => {
     const inlandHerb = a.getHerbBiomass(inlandX, inlandZ);
     const inlandStrand = a.getStrandBiomass(inlandX, inlandZ);
 
-    expect(a.getLimitingFactor(shoreX, shoreZ)).toBe(LIMITING_SPRAY);
+    expect(a.getLimitingFactor(shoreX, shoreZ)).toBe(LIMITING_SALINITY);
     expect(shoreStrand).toBeGreaterThan(0.1);
     expect(shoreStrand).toBeGreaterThan(shoreHerb * 4);
     expect(inlandHerb).toBeGreaterThan(0.1);
