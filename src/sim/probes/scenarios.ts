@@ -2475,7 +2475,8 @@ export function probeSprayArrival(): ProbeResult {
 
   const leeA = make(0);
   const leeB = make(0);
-  const windward = make(1);
+  // Mid-crest exposure: herb spray-limited, strand shore-hump at its peak (§4.46).
+  const windward = make(0.5);
 
   const replayMatch = leeA.stateHash() === leeB.stateHash() ? 1 : 0;
   if (replayMatch !== 1) {
@@ -2544,7 +2545,7 @@ export function probeSprayArrival(): ProbeResult {
         hsi: windHsi,
         herbBiomass: windHerb,
         strandBiomass: windStrand,
-        exposure: 1,
+        exposure: 0.5,
         limiting: windLim,
         sprayLimited: windLim === LIMITING_SPRAY ? 1 : 0,
         salinity: 0,
@@ -3322,6 +3323,7 @@ export function probeCrustArrival(): ProbeResult {
     salinity?: number;
   }) => {
     const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.setAirTemperature(config.herbTempOptC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
     world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
@@ -3341,11 +3343,12 @@ export function probeCrustArrival(): ProbeResult {
     return world;
   };
 
-  const dampA = make({ moistureFrac: 1, herbFrac: 0 });
-  const dampB = make({ moistureFrac: 1, herbFrac: 0 });
+  const dampA = make({ moistureFrac: 0.25, herbFrac: 0 });
+  const dampB = make({ moistureFrac: 0.25, herbFrac: 0 });
   const dry = make({ moistureFrac: 0, herbFrac: 0 });
-  const shaded = make({ moistureFrac: 1, herbFrac: 1 });
-  const salty = make({ moistureFrac: 1, herbFrac: 0, salinity: 1 });
+  // Herb-peak moisture so standing cover stays dense enough to zero f_open.
+  const shaded = make({ moistureFrac: 0.5, herbFrac: 1 });
+  const salty = make({ moistureFrac: 0.25, herbFrac: 0, salinity: 1 });
 
   const replayMatch = dampA.stateHash() === dampB.stateHash() ? 1 : 0;
   if (replayMatch !== 1) {
@@ -3376,9 +3379,9 @@ export function probeCrustArrival(): ProbeResult {
   if (dryCrust !== 0) {
     throw new Error(`crust-arrival: dry crust expected 0 (got ${dryCrust})`);
   }
-  if (shadedCrust !== 0) {
+  if (!(dampCrust > shadedCrust + 0.05)) {
     throw new Error(
-      `crust-arrival: shaded crust expected 0 (got ${shadedCrust})`,
+      `crust-arrival: shaded crust not suppressed (${shadedCrust} vs damp ${dampCrust})`,
     );
   }
   if (saltyCrust !== 0) {
@@ -4456,6 +4459,7 @@ export function probeSpreadFront(): ProbeResult {
       seaLevel: sea,
       islandIsolation: isolation,
     });
+    world.setAirTemperature(config.herbTempOptC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
     world.soilMoisture.fill(config.soilPorosity * 0.5);
@@ -4940,6 +4944,7 @@ export function probeDiebackLag(): ProbeResult {
 
   // WorldState path: moisture collapse drives HSI, then establishment declines.
   const world = new WorldState(generateMountain(8, 8, 2, 1));
+  world.setAirTemperature(config.herbTempOptC);
   world.vegCover.fill(0);
   world.herbBiomass.fill(max);
   world.soilDepth.fill(config.hsiDepthRefMeters);

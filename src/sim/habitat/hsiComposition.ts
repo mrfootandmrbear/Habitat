@@ -90,11 +90,16 @@ export function factorMoisture(moisture: number, porosity: number): number {
 
 /**
  * Crust moisture: peaks at low–moderate fill — desiccation-adapted, not
- * saturation-loving (C-011). Same triangular form, left-shifted peak.
+ * saturation-loving (C-011). Asymmetric: 0 at bone-dry, 1 at 25% fill, 0
+ * again by mid-wet (symmetric triangularHump would leave dry at 0.5).
  */
 export function factorMoistureCrust(moisture: number, porosity: number): number {
   const fill = clamp01(moisture / Math.max(porosity, 1e-6));
-  return triangularHump(fill, 0.25);
+  const peak = 0.25;
+  const wetZero = 0.55;
+  if (fill <= peak) return clamp01(fill / Math.max(peak, 1e-6));
+  if (fill >= wetZero) return 0;
+  return clamp01(1 - (fill - peak) / (wetZero - peak));
 }
 
 export function factorDepth(depthMeters: number, depthRef: number): number {

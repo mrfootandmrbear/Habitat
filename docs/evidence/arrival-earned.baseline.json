@@ -2,7 +2,7 @@
   "scenario": "arrival-earned",
   "metrics": {
     "suitable.hsi": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "suitable.seedBank": {
@@ -10,11 +10,11 @@
       "abs": 0.00001
     },
     "suitable.establishment": {
-      "value": 0.9406313896179199,
+      "value": 0.9049474000930786,
       "abs": 0.000001
     },
     "suitable.biomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.00001
     },
     "unsuitable.hsi": {
@@ -34,7 +34,7 @@
       "abs": 0
     },
     "delta.biomassDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.00001
     },
     "delta.hashMatch": {

@@ -2,11 +2,11 @@
   "scenario": "light-arrival",
   "metrics": {
     "south.hsi": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "south.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "south.insolation": {
@@ -14,11 +14,11 @@
       "abs": 0.000001
     },
     "south.limiting": {
-      "value": 0,
+      "value": 4,
       "abs": 0
     },
     "south.moisture": {
-      "value": 0.44999998807907104,
+      "value": 0.22499999403953552,
       "abs": 0.000001
     },
     "north.hsi": {
@@ -42,15 +42,15 @@
       "abs": 0
     },
     "north.moisture": {
-      "value": 0.44999998807907104,
+      "value": 0.22499999403953552,
       "abs": 0.000001
     },
     "delta.herbDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "delta.hsiDelta": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "delta.insolationGap": {
@@ -66,7 +66,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 2452418659,
+      "value": 1603708567,
       "abs": 0
     }
   }

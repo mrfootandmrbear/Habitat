@@ -50,15 +50,15 @@
       "abs": 0.00001
     },
     "isolation.smallFarBiomass": {
-      "value": 0.5981234919566375,
+      "value": 0.5141229835840372,
       "abs": 0.00001
     },
     "isolation.largeNearBiomass": {
-      "value": 1.686341323430025,
+      "value": 1.5057820383506486,
       "abs": 0.00001
     },
     "isolation.isolationRatio": {
-      "value": 2.819386541587771,
+      "value": 2.9288362637546186,
       "abs": 0.0001
     },
     "isolation.sEligSmall": {

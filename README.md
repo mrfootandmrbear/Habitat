@@ -38,11 +38,11 @@ npm run conformance
 
 ## Current slice
 
-**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10); **C-006 Locked** (v2.0.11); **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12); **C-020 Locked** (v2.0.13). **Slice G** shipped (machine) — **C-021** / **C-022** season / erosion-intensity dials wired, both Open pending owner Lock. **Slice B** / **Slice E** Done. **NS-007** / **NS-008** / **NS-009** / **NS-010** / **NS-011** Done. Living-wave **L1** / **L6** / **L2** / **L3** / **L7** / **L4** Done; **Wave 0** Done (live audio, fire→biomass, pause+dig, seed regenerate). **§4.44** / **§4.49–§4.52** correctness fixes shipped. Open taste: **C-014** (now hearable), **C-021**, **C-022**. Island is the default playable world.
+**Post-MVP / D-007:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done; rain-feel / clouds machine Done. **Lock A+B+C-004** (v2.0.9–v2.0.10); **C-006 Locked** (v2.0.11); **C-005 tooling / C-013 / C-002 / U-006 Locked** (v2.0.12); **C-020 Locked** (v2.0.13). **Slice G** shipped (machine) — **C-021** / **C-022** season / erosion-intensity dials wired, both Open pending owner Lock. **Slice B** / **Slice E** Done. **NS-007** / **NS-008** / **NS-009** / **NS-010** / **NS-011** Done. Living-wave **L1** / **L6** / **L2** / **L3** / **L7** / **L4** Done; **Wave 0** Done (live audio, fire→biomass, pause+dig, seed regenerate). **§4.44** / **§4.45** / **§4.46** / **§4.49–§4.52** correctness fixes shipped. Open taste: **C-014** (now hearable), **C-021**, **C-022**. Island is the default playable world.
 
-**Next.** Executable tip: **§4.46** HSI curve-shape corrections ([BUILD_GUIDE §4.46](docs/BUILD_GUIDE.md)). Living wave blocked (**L5** / **L8**). Owner Lock backlog (**C-014** hearable, **C-021**/**C-022** taste, **C-010** later) runs in parallel.
+**Next.** Executable tip: **§4.47** Guild cover & light-competition correctness ([BUILD_GUIDE §4.47](docs/BUILD_GUIDE.md)). Living wave blocked (**L5** / **L8**). Owner Lock backlog (**C-014** hearable, **C-021**/**C-022** taste, **C-010** later) runs in parallel.
 
-**A second, parallel queue.** **§4.44** / **§4.49–§4.53** shipped; **§4.45–§4.48** remain queued.
+**A second, parallel queue.** **§4.44** / **§4.45** / **§4.46** / **§4.49–§4.53** shipped; **§4.47–§4.48** remain queued.
 
 - Sim MVP (Slice 6) and Slice 8 geomorphology are Tier-M done
 - Batched Tier-O ([PLAYTEST_PRESENTATION.md](docs/PLAYTEST_PRESENTATION.md) + erosion legibility) already fired and **Passed** — subsumed into `docs/playtests/batch-living-return.md` 2026-07-30; later batches fire on the third question or when a slice is blocked ([VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md) §4)

@@ -2,27 +2,27 @@
   "scenario": "drydown-feedback",
   "metrics": {
     "southBare.moistureAfterDry": {
-      "value": 0.10192926486342913,
+      "value": 0.10192626007483341,
       "abs": 0.00001
     },
     "southBare.meanPet": {
-      "value": 0.011029749613953754,
+      "value": 0.011029744255210971,
       "abs": 0.000001
     },
     "southBare.etTotal": {
-      "value": 10.275849124427328,
+      "value": 10.275793440387414,
       "abs": 0.0001
     },
     "southBare.transpiration": {
-      "value": 0.7035568793154656,
+      "value": 0.7035511792066906,
       "abs": 0.0001
     },
     "southBare.soilEvaporation": {
-      "value": 8.689913016294561,
+      "value": 8.689863032363426,
       "abs": 0.0001
     },
     "southBare.massResidual": {
-      "value": 0.000018939466855272258,
+      "value": 0.000019088371004727378,
       "abs": 0.001
     },
     "southBare.replayMatch": {
@@ -30,39 +30,39 @@
       "abs": 0
     },
     "southVeg.moistureAfterDry": {
-      "value": 0.10385374710313044,
+      "value": 0.10385739716002718,
       "abs": 0.00001
     },
     "southVeg.transpiration": {
-      "value": 7.3839786384533665,
+      "value": 7.38392086623714,
       "abs": 0.0001
     },
     "southVeg.soilEvaporation": {
-      "value": 2.180208045833141,
+      "value": 2.1801914920793966,
       "abs": 0.0001
     },
     "northBare.moistureAfterDry": {
-      "value": 0.12360213187639602,
+      "value": 0.1235970692068804,
       "abs": 0.00001
     },
     "northBare.meanPet": {
-      "value": 0.0047270096256397665,
+      "value": 0.004727022447696072,
       "abs": 0.000001
     },
     "delta.petGap": {
-      "value": 0.006302739988313988,
+      "value": 0.006302721807514899,
       "abs": 0.000001
     },
     "delta.moistureGap": {
-      "value": 0.02167286701296689,
+      "value": 0.021670809132046998,
       "abs": 0.00001
     },
     "delta.transpirationGap": {
-      "value": 6.680421759137901,
+      "value": 6.680369687030449,
       "abs": 0.0001
     },
     "delta.relResidual": {
-      "value": 1.0275318389362189e-7,
+      "value": 1.0356104060724559e-7,
       "abs": 0.00001
     }
   }

@@ -2,11 +2,11 @@
   "scenario": "inundation-arrival",
   "metrics": {
     "dry.hsi": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "dry.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "dry.amplitude": {
@@ -18,7 +18,7 @@
       "abs": 0
     },
     "dry.limiting": {
-      "value": 0,
+      "value": 4,
       "abs": 0
     },
     "dry.salinity": {
@@ -30,11 +30,11 @@
       "abs": 0
     },
     "wet.hsi": {
-      "value": 0,
+      "value": 0.28571435809135437,
       "abs": 0.000001
     },
     "wet.herbBiomass": {
-      "value": 0,
+      "value": 0.7142859101295471,
       "abs": 0.000001
     },
     "wet.amplitude": {
@@ -62,11 +62,11 @@
       "abs": 0
     },
     "delta.herbDelta": {
-      "value": 2.5,
+      "value": 1.3690473437309265,
       "abs": 0.000001
     },
     "delta.hsiDelta": {
-      "value": 1,
+      "value": 0.547618955373764,
       "abs": 0.000001
     },
     "delta.saltMatch": {
@@ -82,7 +82,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 3625913666,
+      "value": 863281066,
       "abs": 0
     }
   }

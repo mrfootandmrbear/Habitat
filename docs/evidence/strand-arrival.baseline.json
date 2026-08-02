@@ -2,11 +2,11 @@
   "scenario": "strand-arrival",
   "metrics": {
     "shore.strandBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "shore.herbBiomass": {
-      "value": 0,
+      "value": 0.4687499403953552,
       "abs": 0.000001
     },
     "shore.salinity": {
@@ -14,11 +14,11 @@
       "abs": 0
     },
     "shore.exposure": {
-      "value": 1,
+      "value": 0.5,
       "abs": 0
     },
     "shore.herbLimiting": {
-      "value": 5,
+      "value": 3,
       "abs": 0
     },
     "inland.strandBiomass": {
@@ -26,7 +26,7 @@
       "abs": 0.000001
     },
     "inland.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "inland.salinity": {
@@ -38,15 +38,15 @@
       "abs": 0
     },
     "inland.herbLimiting": {
-      "value": 0,
+      "value": 4,
       "abs": 0
     },
     "delta.shoreGuildDelta": {
-      "value": 2.5,
+      "value": 1.6145833134651184,
       "abs": 0.000001
     },
     "delta.inlandGuildDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "delta.seedMatch": {
@@ -62,7 +62,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 3842511401,
+      "value": 2520786063,
       "abs": 0
     }
   }

@@ -106,6 +106,7 @@ describe("§4.46 HSI curve shapes", () => {
     expect(factorMoisture(0, por)).toBe(0);
     expect(factorMoisture(por, por)).toBe(0); // saturation no longer optimal
     expect(factorMoistureCrust(por * 0.25, por)).toBe(1);
+    expect(factorMoistureCrust(0, por)).toBe(0); // bone-dry kills crust
     // Crust at saturation is worse than at its arid peak.
     expect(factorMoistureCrust(por, por)).toBeLessThan(
       factorMoistureCrust(por * 0.25, por),
