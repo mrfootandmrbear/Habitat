@@ -40,7 +40,7 @@ import {
   fillLongshoreTendency,
   leeDepositWeight,
 } from "./climate/longshoreTendency";
-import { evaluateHsi, LIMITING_SPRAY } from "./habitat/hsiComposition";
+import { evaluateHsi, LIMITING_LIGHT } from "./habitat/hsiComposition";
 import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
 import {
   evaluateBinderHsi,
@@ -2840,8 +2840,12 @@ export class WorldState {
         band: "daily" as const,
         legacy: false,
         data: this.habitatLimitingFactor.data,
-        // Liebig arm ids through LIMITING_SPRAY (5) — C-004 temp + C-017 spray.
-        range: [0, LIMITING_SPRAY] as const,
+        // Liebig arm ids through LIMITING_LIGHT (7) — C-016 inundation and
+        // C-007/C-011 light both post-date this bound; a cell whose limiting
+        // arm is inundation or light threw a false Bounds/NaN daily-band
+        // assertion and froze the sim (only reachable once tide creates a
+        // nonzero hydroperiod, or insolation actually gates a cell).
+        range: [0, LIMITING_LIGHT] as const,
       },
       {
         id: "habitat.limitingGap",

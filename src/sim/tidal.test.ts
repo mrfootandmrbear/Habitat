@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { WorldState } from "./WorldState";
-import { generateIsland, DEFAULT_SEA_LEVEL_METERS } from "./terrain/generateIsland";
+import {
+  generateIsland,
+  paintIslandSoilDepth,
+  DEFAULT_SEA_LEVEL_METERS,
+} from "./terrain/generateIsland";
+import { paintSubstrateMosaic } from "./terrain/substrates";
 import {
   countIntertidal,
   fillIntertidalMask,
@@ -9,6 +14,7 @@ import {
   meanLowWater,
   tideById,
 } from "./climate/tidalEnvelope";
+import { LIMITING_INUNDATION } from "./habitat/hsiComposition";
 import { intertidalEncodingDelta } from "../ui/terrainEncoding";
 import { config } from "../config";
 
@@ -98,5 +104,54 @@ describe("Slice 17 tidal envelope (C-016)", () => {
 
   it("intertidal tint clears Tier-P encoding floor", () => {
     expect(intertidalEncodingDelta(config.soilPorosity)).toBeGreaterThan(0.08);
+  });
+
+  it("does not throw once a cell's Liebig limiting arm is actually inundation (freeze regression)", () => {
+    // habitat.limitingFactor's registered range once stopped at LIMITING_SPRAY
+    // (5), predating the inundation (C-016) and light (C-007/C-011) arms.
+    // Off tide, hydroperiod is always 0 and f_inundation is always 1, so
+    // LIMITING_INUNDATION (6) can never win the argmin — the stale bound went
+    // unnoticed. On tide, a submerged/foreshore cell can drive f_inundation
+    // below every other factor, and stepEvent's daily assertBounds threw
+    // "Bounds/NaN (daily): habitat.limitingFactor[i]=6 not in [0, 5]",
+    // pausing the sim (felt like a freeze — reachable only with tide on).
+    const terrain = generateIsland(24, 24, 8, 3);
+    const world = new WorldState(terrain, {
+      seaLevel: DEFAULT_SEA_LEVEL_METERS,
+      tidalAmplitude: tideById("spring").amplitudeMeters,
+      windUx: 1,
+      windUz: 0,
+    });
+    paintIslandSoilDepth(
+      world.soilDepth.data,
+      world.terrain.data,
+      world.width,
+      world.height,
+      world.oceanCells,
+    );
+    paintSubstrateMosaic(
+      world.soilMaterial.data,
+      world.width,
+      world.height,
+      world.oceanCells,
+      3,
+      { elev: world.terrain.data },
+    );
+    world.setRainRegime("heavy");
+
+    let sawInundationLimit = false;
+    for (let day = 0; day < 60 && !sawInundationLimit; day++) {
+      for (let i = 0; i < config.dailyEventSteps; i++) {
+        expect(() => world.stepEvent()).not.toThrow();
+      }
+      const lim = world.habitatLimitingFactor.data;
+      for (let i = 0; i < lim.length; i++) {
+        if (lim[i] === LIMITING_INUNDATION) {
+          sawInundationLimit = true;
+          break;
+        }
+      }
+    }
+    expect(sawInundationLimit).toBe(true);
   });
 });
