@@ -2,15 +2,15 @@
   "scenario": "longshore-drift",
   "metrics": {
     "west.westDelta": {
-      "value": -0.12514181435108185,
+      "value": -0.21128236364435266,
       "abs": 0.0001
     },
     "west.eastDelta": {
-      "value": 0.3382176421582699,
+      "value": 0.2807376302521804,
       "abs": 0.0001
     },
     "west.shoreErosion": {
-      "value": 4.702473977208136,
+      "value": 3.847628108784561,
       "abs": 0.001
     },
     "west.bedrockOk": {
@@ -18,7 +18,7 @@
       "abs": 0
     },
     "west.soilDelta": {
-      "value": -2.65527206659317,
+      "value": -2.3972537517547607,
       "abs": 0.001
     },
     "west.replayMatch": {
@@ -26,31 +26,31 @@
       "abs": 0
     },
     "west.hashN": {
-      "value": 2408658953,
+      "value": 1631263583,
       "abs": 0
     },
     "east.westDelta": {
-      "value": 0.33660585433244705,
+      "value": 0.32507857569941767,
       "abs": 0.0001
     },
     "east.eastDelta": {
-      "value": -0.14057139679789543,
+      "value": -0.29648801787146206,
       "abs": 0.0001
     },
     "east.shoreErosion": {
-      "value": 4.679858464747672,
+      "value": 3.7124239973723903,
       "abs": 0.001
     },
     "east.hashN": {
-      "value": 83927035,
+      "value": 2496226365,
       "abs": 0
     },
     "calm.westDelta": {
-      "value": 0.005370251834392548,
+      "value": 0.005362440038610388,
       "abs": 0.0001
     },
     "calm.eastDelta": {
-      "value": 0.005370713770389557,
+      "value": 0.005371899440370757,
       "abs": 0.0001
     },
     "calm.shoreErosion": {
@@ -62,15 +62,15 @@
       "abs": 0
     },
     "delta.westLeeGain": {
-      "value": 0.3328469283878803,
+      "value": 0.27536573081180965,
       "abs": 0.0001
     },
     "delta.eastLeeGain": {
-      "value": 0.3312356024980545,
+      "value": 0.3197161356608073,
       "abs": 0.0001
     },
     "delta.westWindwardLoss": {
-      "value": 0.1305120661854744,
+      "value": 0.21664480368296304,
       "abs": 0.0001
     },
     "delta.bedrockClosed": {

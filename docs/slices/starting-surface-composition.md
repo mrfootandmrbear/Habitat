@@ -25,7 +25,7 @@ The default island read as a raised bedrock biscuit bisected by a hard mid-x san
 
 ## Probe baselines
 
-Island-shape probes that hash or measure geometry from `generateIsland` may move (`island-drainage`, maritime shore family). Refresh only with stated reason — form change is intentional; conservation / determinism must still pass.
+Island-shape probes refreshed after the intentional form change (`island-drainage`, `tidal-envelope`, `shore-exposure`, `longshore-drift`). Conservation / determinism still pass; geometry scalars (ocean cells, shoreline, hashes) moved with the new coast. Multi-band bedrock checks use `1e-5` (f32 `(bed+h)−h` ULP drift over ~12 bands — measured max ~2.5e-6 on the new peaks).
 
 ## Next-but-one
 
