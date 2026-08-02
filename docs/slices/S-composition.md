@@ -42,7 +42,7 @@ Probes: `substrate-contrast` (sand vs clay fill); `substrate-deposit` (deposit A
 
 ## Encoding
 
-Default view dry BASE from `dryRgb` on the table. West sand / east clay mosaic on the island (`paintSubstrateMosaic`). Tier-P: `substrateEncodingDelta` > 0.12 (min of sand↔clay and sand↔rock).
+Default view dry BASE from `dryRgb` on the table. Seeded shore→sand / inland→clay mosaic on the island (`paintSubstrateMosaic` — not a mid-x bisect). Tier-P: `substrateEncodingDelta` > 0.12 (min of sand↔clay and sand↔rock).
 
 ## Bans
 

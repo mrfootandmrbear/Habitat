@@ -2,7 +2,7 @@
   "scenario": "island-drainage",
   "metrics": {
     "mid.oceanExchange": {
-      "value": 2132.218895207847,
+      "value": 2156.1671202422276,
       "abs": 0.01
     },
     "mid.precip": {
@@ -10,19 +10,19 @@
       "abs": 0.01
     },
     "mid.massResidual": {
-      "value": -0.000037745052850368666,
+      "value": 0.000007309141892619664,
       "abs": 0.001
     },
     "mid.relResidual": {
-      "value": 1.7065001469530914e-8,
+      "value": 3.304552721995891e-9,
       "abs": 0.000001
     },
     "mid.oceanCells": {
-      "value": 1659,
+      "value": 1795,
       "abs": 0
     },
     "mid.shorelineCells": {
-      "value": 81,
+      "value": 69,
       "abs": 0
     },
     "mid.habitatZones": {
@@ -30,11 +30,11 @@
       "abs": 0
     },
     "mid.shoreFrac": {
-      "value": 0.12558139534883722,
+      "value": 0.13555992141453832,
       "abs": 0.0001
     },
     "mid.stepMsMean": {
-      "value": 0.3085846354166667,
+      "value": 0.5673593776041667,
       "abs": 1000000000
     },
     "mid.replayMatch": {
@@ -42,23 +42,23 @@
       "abs": 0
     },
     "mid.hashN": {
-      "value": 163614177,
+      "value": 2947291,
       "abs": 0
     },
     "high.oceanCells": {
-      "value": 2101,
+      "value": 1996,
       "abs": 0
     },
     "high.shorelineCells": {
-      "value": 45,
+      "value": 53,
       "abs": 0
     },
     "high.oceanExchange": {
-      "value": 2197.6185813422558,
+      "value": 2185.09190146304,
       "abs": 0.01
     },
     "delta.oceanCellDelta": {
-      "value": 442,
+      "value": 201,
       "abs": 0
     },
     "delta.conserved": {
@@ -70,7 +70,7 @@
       "abs": 0
     },
     "delta.stepMs64": {
-      "value": 0.43260762500000044,
+      "value": 0.7661837083333344,
       "abs": 1000000000
     }
   }

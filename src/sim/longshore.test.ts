@@ -132,7 +132,8 @@ describe("Slice 19 longshore / beaches (C-017)", () => {
         if (elev0[i]! < sea) continue;
         const dElev = world.terrain.data[i]! - elev0[i]!;
         const dDepth = world.soilDepth.data[i]! - depth0[i]!;
-        if (Math.abs(dElev - dDepth) > 1e-6) bedrockOk = false;
+        // f32 elev/depth over many bands: (bed+h)-h drifts a few ULPs past 1e-6.
+        if (Math.abs(dElev - dDepth) > 1e-5) bedrockOk = false;
       }
       return {
         hash: world.stateHash(),

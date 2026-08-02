@@ -1,0 +1,17 @@
+{
+  "id": "starting-surface",
+  "title": "Starting surface — natural island form + substrate mosaic",
+  "simLoop": "generateIsland builds an asymmetric low multi-hill canvas; paintIslandSoilDepth puts relief in the regolith column; paintSubstrateMosaic seeds shore→sand / inland→clay patches (C-006 / C-015 / C-009).",
+  "gameLoop": "New island / default load is a soft sculpting castle — not a raised bedrock biscuit or a hard sand|clay bisect.",
+  "registerIds": ["C-006", "C-015", "C-009", "T-001", "C-011"],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/islandSurface.test.ts",
+    "src/sim/substrate.test.ts",
+    "src/sim/island.test.ts"
+  ],
+  "probes": ["island-drainage"],
+  "fields": ["soil.depth", "soil.material", "terrain.elevation"],
+  "notebookSeed": "The shore was sand, the hollow clay — I started shaping before the rain.",
+  "tierO": "deferred — sculpt-canvas hygiene; owner taste lands with the terrain-tools play pass"
+}
