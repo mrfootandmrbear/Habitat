@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { config } from "../config";
 import { totalWaterVolume } from "./hydrology/fluxStep";
 import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
@@ -77,6 +78,40 @@ describe("terrain siting (Slice 5b, A-005)", () => {
     const elevBefore = world.terrain.data.slice();
     const depthBefore = world.soilDepth.data.slice();
     world.raiseBerm(10, 10, 0.8);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(dElev).toBeCloseTo(dDepth, 5);
+    expect(dElev).toBeGreaterThan(0);
+  });
+
+  it("shovel footprint moves more cells than bucket (C-028 / §4.55)", () => {
+    const bucketR = config.sitingBrushRadii.bucket;
+    const shovelR = config.sitingBrushRadii.shovel;
+    expect(shovelR).toBeGreaterThan(bucketR);
+    expect(bucketR).toBe(config.sitingBrushRadius);
+
+    const countTouched = (radius: number): number => {
+      const world = new WorldState(generateMountain(32, 32, 8, 3));
+      const before = world.terrain.data.slice();
+      world.raiseBerm(16, 16, 0.5, radius);
+      let n = 0;
+      for (let i = 0; i < before.length; i++) {
+        if (world.terrain.data[i]! !== before[i]!) n++;
+      }
+      return n;
+    };
+    expect(countTouched(shovelR)).toBeGreaterThan(countTouched(bucketR));
+  });
+
+  it("shovel still conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const world = new WorldState(generateMountain(32, 32, 8, 3));
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.raiseBerm(16, 16, 0.8, config.sitingBrushRadii.shovel);
     let dElev = 0;
     let dDepth = 0;
     for (let i = 0; i < elevBefore.length; i++) {

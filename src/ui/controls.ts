@@ -1,4 +1,4 @@
-import type { InspectorLayer, SitingTool } from "../config";
+import type { InspectorLayer, SitingBrushSize, SitingTool } from "../config";
 import {
   HEAT_REGIMES,
   type HeatId,
@@ -77,6 +77,12 @@ const SITING: { id: SitingTool; label: string }[] = [
   { id: "ignite", label: "Tool: ignite (authored)" },
 ];
 
+/** Brush size tiers (C-028 / §4.55) — craft names, still causes. */
+const BRUSH_SIZES: { id: SitingBrushSize; label: string }[] = [
+  { id: "bucket", label: "Brush: bucket" },
+  { id: "shovel", label: "Brush: shovel" },
+];
+
 const MATERIAL_LABEL: Record<DepositMaterialId, string> = {
   [SUBSTRATE_SAND]: "Material: sand",
   [SUBSTRATE_CLAY]: "Material: clay",
@@ -96,6 +102,7 @@ export function mountControls(
     timeRate: TimeRate;
     inspector: InspectorLayer;
     sitingTool: SitingTool;
+    sitingBrushSize: SitingBrushSize;
     depositMaterial: DepositMaterialId;
     /** Island terrain seed (T-001 — regenerates the exact landscape). */
     terrainSeed: number;
@@ -113,6 +120,7 @@ export function mountControls(
     onTimeRate: (rate: TimeRate) => void;
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
+    onSitingBrushSize: (size: SitingBrushSize) => void;
     onDepositMaterial: (id: DepositMaterialId) => void;
     onCommitPrediction: () => void;
     onComparePrediction: () => void;
@@ -140,6 +148,7 @@ export function mountControls(
   setTimeRate: (rate: TimeRate) => void;
   setInspector: (layer: InspectorLayer) => void;
   setSitingTool: (tool: SitingTool) => void;
+  setSitingBrushSize: (size: SitingBrushSize) => void;
   setDepositMaterial: (id: DepositMaterialId) => void;
   setTerrainSeed: (seed: number) => void;
   setStatus: (text: string) => void;
@@ -475,6 +484,23 @@ export function mountControls(
     handlers.onSitingTool(sitingSelect.value as SitingTool);
   });
 
+  const brushSelect = document.createElement("select");
+  brushSelect.id = "siting-brush-size";
+  brushSelect.setAttribute(
+    "aria-label",
+    "Brush size (C-028 — bucket or shovel)",
+  );
+  for (const size of BRUSH_SIZES) {
+    const opt = document.createElement("option");
+    opt.value = size.id;
+    opt.textContent = size.label;
+    brushSelect.appendChild(opt);
+  }
+  brushSelect.value = initial.sitingBrushSize;
+  brushSelect.addEventListener("change", () => {
+    handlers.onSitingBrushSize(brushSelect.value as SitingBrushSize);
+  });
+
   const materialSelect = document.createElement("select");
   materialSelect.id = "deposit-material";
   materialSelect.setAttribute(
@@ -556,6 +582,7 @@ export function mountControls(
     undoBtn,
     timeGroup,
     sitingSelect,
+    brushSelect,
     materialSelect,
     predictGroup,
     inspectorSelect,
@@ -593,6 +620,9 @@ export function mountControls(
     },
     setSitingTool: (tool) => {
       sitingSelect.value = tool;
+    },
+    setSitingBrushSize: (size) => {
+      brushSelect.value = size;
     },
     setDepositMaterial: (id) => {
       materialSelect.value = String(id);

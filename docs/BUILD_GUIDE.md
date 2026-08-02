@@ -124,11 +124,11 @@ Summary only — do not reopen unless fixing regressions.
 | **L7** | Activity-gated event band (SIM §6.2) | Dry spans skip surface+fire; storms unchanged; hash-identical | `eventBandActive`, `event-band-gate` | **Done** — agent ([L7-composition](slices/L7-composition.md); skipFrac 0.3, all baselines unmoved) |
 | **L4** | Biotic motion (wind sway) | Shoots lean with wind; calm is still; standing dead barely leans | `occupantSway`, OccupantMesh | **Done** — presentation ([L4-composition](slices/L4-composition.md); D-007 clip Pass) |
 
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done. **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.46** HSI curve-shape corrections; §4.47–§4.48 follow; Living remainder blocked (L5 / L8); terrain-tools feel continues after §4.54. Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
+**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done; **C-028** framing Done (sculpt toolbox). **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done; **§4.55 brush size** Done. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** **§4.56** flatten/trowel (terrain tools); parallel **§4.46** HSI curve-shape corrections; Living remainder blocked (L5 / L8). Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette).
+**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip), **C-028** (sculpt toolbox — structural ships under C-006; taste later).
 
-**Next (executable tip):** **§4.46** HSI curve-shape corrections → §4.47–§4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **W0** / **L3** / **L7** / **L4** / **§4.45** Done. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **§4.56** flatten / trowel edit → molds / duplicator; parallel **§4.46** HSI curve-shape corrections → §4.47–§4.48; **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.55** / **W0** / **L3** / **L7** / **L4** / **§4.45** Done. Keep nutrients / animals / SWE / wet-sand / freeze off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -1273,7 +1273,37 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] `paintSubstrateMosaic` — seeded shore→sand / inland→clay patches (+ sparse rock); not a mid-x bisect; seed identity (T-001)
 - [x] Playable load + regenerate paint soil depth and mosaic (`main.ts`)
 - [x] Composition + manifest: [starting-surface-composition.md](slices/starting-surface-composition.md), [starting-surface.json](slices/starting-surface.json)
-- [x] **Next-but-one:** continue terrain-tools feel; parallel tip **§4.46** HSI curve-shape corrections
+- [x] **Next-but-one:** §4.55 sculpt brush size (bucket / shovel) — C-028 framing; parallel tip **§4.46** HSI curve-shape corrections
+
+---
+
+### 4.55 Slice — Sculpt brush size (bucket / shovel) *(Done — agent)*
+
+**Why this exists.** Owner sand-castle toolbox kit ([C-028-framing.md](candidates/C-028-framing.md)): Trusty Bucket vs Heavy Shovel are the first structural tools after §4.54's canvas. One fixed brush radius could not express fine towers vs mass trenches. Ships under Locked **C-006** / **A-005**; wet-sand / freeze / figurines stay banned per the framing.
+
+**Register:** C-006 Locked; C-002 Locked; C-013 Locked; A-005 Locked; C-028 Open (framing only — this cut does not wait on Lock)
+**New Process?** no — brush radius parameter on existing berm/dig/deposit. D-007 clip gate does not apply.
+
+- [x] `config.sitingBrushRadii` — `bucket: 4`, `shovel: 8`; `sitingBrushRadius` remains the bucket default
+- [x] `raiseBerm` / `digChannel` / `depositSubstrate` take optional `radius`; UI passes the active tier
+- [x] Controls: **Brush: bucket** / **Brush: shovel**; cursor footprint tracks size
+- [x] Tests: shovel touches more cells than bucket; shovel conserves ΣΔelev = ΣΔdepth (`siting.test.ts`)
+- [x] Composition + manifest: [sculpt-brush-size-composition.md](slices/sculpt-brush-size-composition.md), [sculpt-brush-size.json](slices/sculpt-brush-size.json)
+- [x] **Next-but-one:** §4.56 flatten / trowel edit (player smooth — distinct from C-022 force dial)
+
+---
+
+### 4.56 Slice — Flatten / trowel edit *(queued stub)*
+
+**Why this exists.** C-028 kit: Fine Trowels & Palettes — flatten walls, crisp edges, ramparts. Player **edit** that moves elev+depth toward a local target plane inside the brush (C-002), not the C-022 erosion *force* dial and not a nature-applied smooth.
+
+**Register:** C-006 Locked; C-002 Locked; C-013 Locked; A-005 Locked; C-028 Open; C-022 Open (must stay distinct)
+**New Process?** no.
+
+- [ ] Flatten tool: toward mean (or min/max) elev in brush footprint; depth moves with elev
+- [ ] Undo before time (C-013); no veg write (C-006)
+- [ ] Test: after flatten, local elev variance drops; ΣΔelev = ΣΔdepth; hash undo identity
+- [ ] Composition + manifest; **Next-but-one:** geometric mold stamps (C-028 keep list)
 
 ---
 
@@ -1319,6 +1349,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Encoding delta correctness | U-003, D-007 | §4.52 **Done** |
 | **W0** | Locked presentation debt (audio, fire→biomass, pause+dig, seed) | AUD-001–003, C-014, C-008, C-013, T-001, ES-004 | §4.53 **Done** |
 | — | Starting surface (island form + mosaic) | C-006, C-015, C-009, T-001 | §4.54 **Done** |
+| — | Sculpt brush size (bucket / shovel) | C-006, C-002, C-028 | §4.55 **Done** |
+| — | Flatten / trowel edit | C-006, C-002, C-028, C-022 | §4.56 **Queued** |
 | C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — did not block §4.52, which shipped without it |
 
 Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **L1** / **L6** Done (§4.36 / §4.41) — deferred time debt plus a rate ladder in real-world units (`1 s/s` … `1 week/s`); no baseline or `GOLDEN_*` hash moved. **L2** / **L3** / **L7** Done — local seed rain, mortality-as-rate, activity-gated event band (hash-identity, skipFrac 0.3, baselines unmoved). **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed. **§4.50 surface-flux stability guard** Done — per-face CFL cap + roughness floor inside `fluxStep`; no baseline moved (traced inert against every parameter the game currently exercises). **§4.51 coastal base-level & substrate coupling** Done — ocean-neighbor stage reads `seaLevel` not bed elevation, a non-outlet rim cell is excluded from hillslope erosion (structural/dynamic boundary disagreement), coastal erosion reads per-substrate `erosionK` as a ratio against loam (ratio 1 on loam, so the pre-fix calibration is unchanged there); nine `aNorm`-downstream baselines refreshed, same family §4.49 moved. **§4.52 encoding delta correctness** Done — occupant/light ramps no longer saturate before the top of their domain, delta floors switched to a luminance-weighted metric (grey deltas unchanged, blue discounted, green boosted vs. raw Euclidean), the binder/intertidal cross-file color collision fixed and checked, terrain overlay compositing made proportional instead of sequential (CPU + GLSL), `substrateEncodingDelta` now checks all substrate pairs at each one's own porosity, and the `timeRates.ts` "fastest sustains" label now derives from `sustainableRates()`; two Tier-P floors and one probe baseline (`tidal-envelope`) moved for documented reasons, not regressions.

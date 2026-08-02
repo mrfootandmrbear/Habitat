@@ -144,6 +144,15 @@ export const config = {
   baseRoughness: 0.03,
   vegRoughnessBonus: 0.12,
   vegInfiltrationBonus: 0.1,
+  /**
+   * Sculpt brush size tiers (C-028 / §4.55) — Trusty Bucket vs Heavy Shovel.
+   * `sitingBrushRadius` stays the bucket default so ignite and older call sites
+   * keep a single number; berm/dig/deposit read the active tier from UI.
+   */
+  sitingBrushRadii: {
+    bucket: 4,
+    shovel: 8,
+  },
   /** Cell-radius of berm/dig footprint (Euclidean). Was 1 — too small for C-006. */
   sitingBrushRadius: 4,
   /** Peak raise (m) at brush center per stroke. */
@@ -423,3 +432,12 @@ export type SitingTool =
   | "deposit"
   | "predict"
   | "ignite";
+
+/** Sculpt footprint tier (C-028 / C-006) — bucket = fine, shovel = mass. */
+export type SitingBrushSize = "bucket" | "shovel";
+
+export function sitingBrushRadiusFor(
+  size: SitingBrushSize,
+): number {
+  return config.sitingBrushRadii[size];
+}
