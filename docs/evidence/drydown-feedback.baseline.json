@@ -2,27 +2,27 @@
   "scenario": "drydown-feedback",
   "metrics": {
     "southBare.moistureAfterDry": {
-      "value": 0.10192626007483341,
+      "value": 0.10193120382609777,
       "abs": 0.00001
     },
     "southBare.meanPet": {
-      "value": 0.011029744255210971,
+      "value": 0.011029744477127679,
       "abs": 0.000001
     },
     "southBare.etTotal": {
-      "value": 10.275793440387414,
+      "value": 10.27631333750528,
       "abs": 0.0001
     },
     "southBare.transpiration": {
-      "value": 0.7035511792066906,
+      "value": 0.797312879452804,
       "abs": 0.0001
     },
     "southBare.soilEvaporation": {
-      "value": 8.689863032363426,
+      "value": 8.59662122923515,
       "abs": 0.0001
     },
     "southBare.massResidual": {
-      "value": 0.000019088371004727378,
+      "value": 0.000018504210999026327,
       "abs": 0.001
     },
     "southBare.replayMatch": {
@@ -30,39 +30,39 @@
       "abs": 0
     },
     "southVeg.moistureAfterDry": {
-      "value": 0.10385739716002718,
+      "value": 0.10388296376913786,
       "abs": 0.00001
     },
     "southVeg.transpiration": {
-      "value": 7.38392086623714,
+      "value": 7.569342359993165,
       "abs": 0.0001
     },
     "southVeg.soilEvaporation": {
-      "value": 2.1801914920793966,
+      "value": 1.9957967384579691,
       "abs": 0.0001
     },
     "northBare.moistureAfterDry": {
-      "value": 0.1235970692068804,
+      "value": 0.12359897868009284,
       "abs": 0.00001
     },
     "northBare.meanPet": {
-      "value": 0.004727022447696072,
+      "value": 0.004727021287180833,
       "abs": 0.000001
     },
     "delta.petGap": {
-      "value": 0.006302721807514899,
+      "value": 0.006302723189946846,
       "abs": 0.000001
     },
     "delta.moistureGap": {
-      "value": 0.021670809132046998,
+      "value": 0.02166777485399507,
       "abs": 0.00001
     },
     "delta.transpirationGap": {
-      "value": 6.680369687030449,
+      "value": 6.772029480540361,
       "abs": 0.0001
     },
     "delta.relResidual": {
-      "value": 1.0356104060724559e-7,
+      "value": 1.0039176974298206e-7,
       "abs": 0.00001
     }
   }

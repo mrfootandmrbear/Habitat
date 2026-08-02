@@ -296,9 +296,27 @@ export function herbCoverFraction(
 }
 
 /**
+ * Product-complement combination of independent cover fractions:
+ * `1 − Π(1 − cᵢ)` (§4.47). Overlapping canopies occlude the ground
+ * multiplicatively, not additively — three guilds at 40% independent cover
+ * combine to 0.784, not the clamped 1.0 an additive sum reports. Each input is
+ * clamped to [0,1]; the result is bounded in [0,1] by construction (no final
+ * clamp needed) and stays monotone in every component, so extra biomass keeps
+ * a physical effect instead of flattening past saturation.
+ */
+export function combineCoverFractions(fractions: readonly number[]): number {
+  let openProduct = 1;
+  for (const f of fractions) {
+    openProduct *= 1 - clamp01(f);
+  }
+  return clamp01(1 - openProduct);
+}
+
+/**
  * Local physical cover for roughness / infiltration / erosion blunting —
  * not a registered field. Herb + strand + binder + marsh + shrub + crust stack
- * (C-018 / C-009 / C-016 / Slice N10 / N11); capped at 1 — never dual-writes veg.cover.
+ * (C-018 / C-009 / C-016 / Slice N10 / N11); combined by product-complement
+ * (§4.47) — never dual-writes veg.cover.
  */
 export function physicalCoverFrom(
   vegCover: number,
@@ -315,14 +333,13 @@ export function physicalCoverFrom(
   crustBiomass = 0,
   crustBiomassMax = 1,
 ): number {
-  return Math.min(
-    1,
-    clamp01(vegCover) +
-      herbCoverFraction(herbBiomass, herbBiomassMax) +
-      herbCoverFraction(strandBiomass, strandBiomassMax) +
-      herbCoverFraction(binderBiomass, binderBiomassMax) +
-      herbCoverFraction(marshBiomass, marshBiomassMax) +
-      herbCoverFraction(shrubBiomass, shrubBiomassMax) +
-      herbCoverFraction(crustBiomass, crustBiomassMax),
-  );
+  return combineCoverFractions([
+    clamp01(vegCover),
+    herbCoverFraction(herbBiomass, herbBiomassMax),
+    herbCoverFraction(strandBiomass, strandBiomassMax),
+    herbCoverFraction(binderBiomass, binderBiomassMax),
+    herbCoverFraction(marshBiomass, marshBiomassMax),
+    herbCoverFraction(shrubBiomass, shrubBiomassMax),
+    herbCoverFraction(crustBiomass, crustBiomassMax),
+  ]);
 }

@@ -27,8 +27,12 @@ describe("herb → physics (Slice 13, E-005)", () => {
     expect(physicalCoverFrom(0.4, config.herbBiomassMax, config.herbBiomassMax)).toBe(
       1,
     );
+    // §4.47: cover fractions combine by product-complement 1 − Π(1 − cᵢ), not
+    // an additive clamp. 0.2 with a 0.5 herb fraction → 1 − 0.8·0.5 = 0.6
+    // (was 0.7 under the additive sum), and two 0.5 fractions → 1 − 0.5·0.5 =
+    // 0.75 (was clamped to 1.0).
     expect(physicalCoverFrom(0.2, config.herbBiomassMax * 0.5, config.herbBiomassMax)).toBeCloseTo(
-      0.7,
+      0.6,
       6,
     );
     expect(
@@ -39,7 +43,7 @@ describe("herb → physics (Slice 13, E-005)", () => {
         config.strandBiomassMax * 0.5,
         config.strandBiomassMax,
       ),
-    ).toBe(1);
+    ).toBeCloseTo(0.75, 6);
   });
 
   it("does not dual-write veg.cover from herb biomass", () => {
