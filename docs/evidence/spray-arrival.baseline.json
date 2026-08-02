@@ -2,11 +2,11 @@
   "scenario": "spray-arrival",
   "metrics": {
     "lee.hsi": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "lee.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "lee.strandBiomass": {
@@ -18,7 +18,7 @@
       "abs": 0
     },
     "lee.limiting": {
-      "value": 0,
+      "value": 4,
       "abs": 0
     },
     "lee.salinity": {
@@ -26,19 +26,19 @@
       "abs": 0
     },
     "windward.hsi": {
-      "value": 0,
+      "value": 0.5,
       "abs": 0.000001
     },
     "windward.herbBiomass": {
-      "value": 0,
+      "value": 1.25,
       "abs": 0.000001
     },
     "windward.strandBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "windward.exposure": {
-      "value": 1,
+      "value": 0.5,
       "abs": 0
     },
     "windward.limiting": {
@@ -54,11 +54,11 @@
       "abs": 0
     },
     "delta.herbDelta": {
-      "value": 2.5,
+      "value": 0.8333332538604736,
       "abs": 0.000001
     },
     "delta.hsiDelta": {
-      "value": 1,
+      "value": 0.3333333134651184,
       "abs": 0.000001
     },
     "delta.saltMatch": {
@@ -70,7 +70,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 1024055037,
+      "value": 1985961038,
       "abs": 0
     }
   }

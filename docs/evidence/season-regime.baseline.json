@@ -2,7 +2,7 @@
   "scenario": "season-regime",
   "metrics": {
     "short.herbBiomass": {
-      "value": 0.20143993198871613,
+      "value": 0.19540847837924957,
       "abs": 0.000001
     },
     "short.pressure": {
@@ -10,7 +10,7 @@
       "abs": 0
     },
     "typical.herbBiomass": {
-      "value": 0.33573323488235474,
+      "value": 0.32568079233169556,
       "abs": 0.000001
     },
     "typical.pressure": {
@@ -18,7 +18,7 @@
       "abs": 0
     },
     "long.herbBiomass": {
-      "value": 0.47002652287483215,
+      "value": 0.45595312118530273,
       "abs": 0.000001
     },
     "long.pressure": {
@@ -26,7 +26,7 @@
       "abs": 0
     },
     "delta.seasonDelta": {
-      "value": 0.26858659088611603,
+      "value": 0.26054464280605316,
       "abs": 0.000001
     },
     "delta.neutralMatch": {
@@ -38,7 +38,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 1007655993,
+      "value": 3574534104,
       "abs": 0
     }
   }

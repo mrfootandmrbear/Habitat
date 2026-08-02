@@ -181,11 +181,13 @@ export const config = {
   /** Slice 9 HSI — GW storage depth at which f_groundwater saturates (m). */
   hsiGwRefMeters: 0.25,
   /**
-   * Heat plant gate — herb guild cold tolerance (°C). f_temp = 0 at/below kill,
-   * 1 at/above opt; Heat dial warm sits above opt so default HSI is unchanged.
+   * Heat plant gate — herb guild cold tolerance (°C). Unimodal TPC: 0 at/below
+   * kill, 1 at opt, right-skewed decline above opt (§4.46).
    */
   herbTempKillC: -4,
   herbTempOptC: 12,
+  /** Pore salt at/below which herb/shrub/crust f_salinity stays 1 (§4.46). */
+  herbSalinityFullThrough: 0.2,
 
   /**
    * Slice 10 — Fire / Fuel (NATURAL_PROCESS_MATH §3.5, ES-002).
@@ -284,8 +286,12 @@ export const config = {
   binderBiomassMax: 2.5,
   /** Loam still admits sparse binder; clay/rock stay at 0. */
   binderLoamSandFactor: 0.25,
-  /** How much remobilization (|longshore|) binders tolerate before HSI falls. */
-  binderBurialTolerance: 0.9,
+  /**
+   * Normalized accretion (−divergence of longshore transport, clamped to
+   * [0,1]) at which binder burial suitability peaks. Zero and extreme
+   * accretion both limit — Ammophila-type binders need moderate burial.
+   */
+  binderBurialOptimum: 0.35,
   /**
    * Salt-marsh engineer (C-016 / Slice N9) — mid-envelope hydroperiod hump.
    * Same seed schedule as herb/strand/binder; HSI uses inundation × salt × temp.

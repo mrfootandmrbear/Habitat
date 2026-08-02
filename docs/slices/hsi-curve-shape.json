@@ -1,0 +1,39 @@
+{
+  "id": "hsi-curve-shape",
+  "title": "HSI curve-shape corrections (§4.46)",
+  "simLoop": "Six suitability arms that were monotone or hard-step now use hump / threshold-slope forms already present in the composition set. Binder burial reads longshore transport divergence; crust moisture peaks low–moderate.",
+  "gameLoop": "A millimetre across MHW no longer zeros an upland stand; wet sand is no longer the crust optimum; dune binders want moderate burial, not stillness; splash pioneers peak mid-exposure.",
+  "registerIds": ["C-007", "C-011", "S-007", "N-004"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/habitat/hsiCurveShape.test.ts",
+    "src/sim/habitat/hsi.test.ts",
+    "src/sim/inundationArrival.test.ts",
+    "src/sim/heatArrival.test.ts",
+    "src/sim/binderArrival.test.ts",
+    "src/sim/strandArrival.test.ts",
+    "src/sim/crustArrival.test.ts"
+  ],
+  "probes": [
+    "arrival-earned",
+    "strand-arrival",
+    "binder-arrival",
+    "crust-arrival",
+    "spray-arrival",
+    "limiting-shift",
+    "heat-arrival",
+    "inundation-arrival",
+    "deep-time"
+  ],
+  "fields": [
+    "habitat.suitability",
+    "habitat.limitingFactor",
+    "veg.establishment.herb",
+    "veg.biomass.herb",
+    "veg.biomass.binder",
+    "veg.biomass.strand",
+    "veg.biomass.crust"
+  ],
+  "notebookSeed": "The wet band is no longer the best place for every living thing — and crossing the tide line does not kill a meadow in one tick.",
+  "tierO": "no owner-only question — curve shapes are CI-judged against named edge cases; C-011 taste residual unchanged."
+}

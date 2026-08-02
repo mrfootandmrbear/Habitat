@@ -2,15 +2,15 @@
   "scenario": "heat-arrival",
   "metrics": {
     "warm.hsi": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "warm.biomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "warm.limiting": {
-      "value": 0,
+      "value": 4,
       "abs": 0
     },
     "warm.airTempC": {
@@ -54,11 +54,11 @@
       "abs": 0
     },
     "delta.biomassDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "delta.hsiDelta": {
-      "value": 1,
+      "value": 0.8333333134651184,
       "abs": 0.000001
     },
     "delta.mildBetween": {
@@ -70,7 +70,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 1024055037,
+      "value": 1985961038,
       "abs": 0
     }
   }

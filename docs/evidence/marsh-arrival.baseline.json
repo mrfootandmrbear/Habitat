@@ -2,7 +2,7 @@
   "scenario": "marsh-arrival",
   "metrics": {
     "foreshore.marshBiomass": {
-      "value": 2.5,
+      "value": 2.2916667461395264,
       "abs": 0.000001
     },
     "foreshore.herbBiomass": {
@@ -22,7 +22,7 @@
       "abs": 0.000001
     },
     "terrace.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "terrace.intertidal": {
@@ -34,11 +34,11 @@
       "abs": 0.000001
     },
     "delta.foreshoreGuildDelta": {
-      "value": 2.5,
+      "value": 2.2916667461395264,
       "abs": 0.000001
     },
     "delta.terraceGuildDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "delta.seedMatch": {
@@ -62,7 +62,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 1568265356,
+      "value": 2750718625,
       "abs": 0
     }
   }

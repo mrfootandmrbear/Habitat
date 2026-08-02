@@ -11,19 +11,23 @@ import { evaluateHsi, LIMITING_SALINITY } from "./habitat/hsiComposition";
 import { soilWaterProcess } from "./process/soilWaterProcess";
 import { habitatProcess } from "./process/habitatProcess";
 import { WorldState } from "./WorldState";
-import { generateIsland, DEFAULT_SEA_LEVEL_METERS } from "./terrain/generateIsland";
 import {
-  applySave,
-  omitField,
-  serializeRegistry,
-  SaveError,
-} from "./save";
+  generateIsland,
+  DEFAULT_SEA_LEVEL_METERS,
+} from "./terrain/generateIsland";
+import { applySave, omitField, serializeRegistry, SaveError } from "./save";
 
 describe("salinity composition (Slice 20 / C-018)", () => {
   it("factorSalinity is 1 fresh and 0 at seawater", () => {
     expect(factorSalinity(0)).toBe(1);
+    expect(factorSalinity(config.herbSalinityFullThrough)).toBe(1);
     expect(factorSalinity(1)).toBe(0);
-    expect(factorSalinity(0.5)).toBeCloseTo(0.5, 8);
+    expect(factorSalinity(0.5)).toBeCloseTo(
+      1 -
+        (0.5 - config.herbSalinityFullThrough) /
+          (1 - config.herbSalinityFullThrough),
+      8,
+    );
   });
 
   it("freshwater infiltrate dilutes; ET concentrates", () => {
@@ -132,7 +136,7 @@ describe("soil.salinity field (Slice 20 / C-018)", () => {
       const world = new WorldState(new Grid2D(w, h, 2.5));
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(salinity);
       const x = 1;
@@ -155,7 +159,7 @@ describe("soil.salinity field (Slice 20 / C-018)", () => {
     expect(fresh.biomass - salty.biomass).toBeGreaterThan(0.05);
 
     const sample = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.5,
       soilDepth: config.hsiDepthRefMeters,
       groundwater: config.hsiGwRefMeters,
       porosity: config.soilPorosity,

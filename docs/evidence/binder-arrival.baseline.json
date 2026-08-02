@@ -26,11 +26,11 @@
       "abs": 0.000001
     },
     "hollow.herbBiomass": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "hollow.moisture": {
-      "value": 0.44999998807907104,
+      "value": 0.22499999403953552,
       "abs": 0.000001
     },
     "hollow.exposure": {
@@ -46,7 +46,7 @@
       "abs": 0.000001
     },
     "delta.hollowGuildDelta": {
-      "value": 2.5,
+      "value": 2.0833332538604736,
       "abs": 0.000001
     },
     "delta.seedMatch": {
@@ -62,7 +62,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 1786465175,
+      "value": 3212852450,
       "abs": 0
     }
   }

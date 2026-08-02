@@ -33,7 +33,7 @@ const flatIsland = (size: number): Grid2D => {
 const perfectHabitat = (world: WorldState): void => {
   world.vegCover.fill(0);
   world.soilDepth.fill(config.hsiDepthRefMeters);
-  world.soilMoisture.fill(config.soilPorosity);
+  world.soilMoisture.fill(config.soilPorosity * 0.5);
   world.groundwaterStorage.fill(config.hsiGwRefMeters);
   world.soilSalinity.fill(0);
   for (const i of world.oceanCells) {

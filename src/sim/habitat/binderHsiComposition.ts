@@ -2,7 +2,8 @@
  * Sandy crest sand-binder HSI (C-009 / Slice N5).
  * Rule: docs/slices/N5-composition.md — drainage × exposure × sand × burial.
  * Distinct from wet-site herb and strand splash pioneer.
- * Burial uses |shore.longshore| as remobilization proxy (no stress.burial store).
+ * Burial uses longshore transport divergence (∂Q/∂x), not |longshore|
+ * magnitude — uniform drift nets zero burial pressure (§4.46).
  */
 
 import { config } from "../../config";
@@ -12,7 +13,7 @@ import {
   SUBSTRATE_ROCK,
   SUBSTRATE_SAND,
 } from "../terrain/substrates";
-import { clamp01 } from "./hsiComposition";
+import { clamp01, triangularHump } from "./hsiComposition";
 
 export const BINDER_LIMITING_DRAINAGE = 0;
 export const BINDER_LIMITING_EXPOSURE = 1;
@@ -48,34 +49,58 @@ export function factorDrainage(moisture: number, porosity: number): number {
   return clamp01(1 - Math.max(0, moisture) / cap);
 }
 
-/** Windward / crest affinity from fetch×wind exposure (C-017). */
+/**
+ * Crest exposure hump — same triangular form as marsh inundation.
+ * Inland (0) and extreme fetch (1) both limit; mid-crest peaks.
+ */
 export function factorCrestExposure(shoreExposure: number): number {
-  return clamp01(shoreExposure);
+  return triangularHump(shoreExposure, 0.5);
 }
 
 /**
  * Sand substrate affinity (C-009 table). Look up by class id — never hardcode
- * process forks per material (T-004).
+ * process forks per material (T-004). Always clamp01 (review §2.5).
  */
 export function factorSandSubstrate(materialClassId: number): number {
   const id = Math.round(materialClassId);
   if (id === SUBSTRATE_SAND) return 1;
-  if (id === SUBSTRATE_LOAM) return config.binderLoamSandFactor;
+  if (id === SUBSTRATE_LOAM) return clamp01(config.binderLoamSandFactor);
   if (id === SUBSTRATE_CLAY || id === SUBSTRATE_ROCK) return 0;
   return 0;
 }
 
 /**
- * Burial tolerance under coastal remobilization pressure (|longshore|).
- * Binders hold under moderate remobilization; extreme flux still limits.
+ * Discrete divergence of the signed longshore tendency field.
+ * Mirror edges so a uniform field yields exactly 0 (no spurious burial).
+ */
+export function longshoreTransportDivergence(
+  longshore: Float32Array,
+  i: number,
+  width: number,
+  height: number,
+): number {
+  const x = i % width;
+  const z = (i / width) | 0;
+  const q = longshore[i]!;
+  const qW = x > 0 ? longshore[i - 1]! : q;
+  const qE = x < width - 1 ? longshore[i + 1]! : q;
+  const qN = z > 0 ? longshore[i - width]! : q;
+  const qS = z < height - 1 ? longshore[i + width]! : q;
+  return 0.5 * (qE - qW) + 0.5 * (qS - qN);
+}
+
+/**
+ * Burial suitability under accretion (transport convergence = −divergence).
+ * Hump peaks at moderate accretion — sand binders need burial to stay
+ * vigorous; zero and extreme both limit (C-011).
  */
 export function factorBurialTolerance(
-  longshoreTendency: number,
-  tolerance?: number,
+  transportDivergence: number,
+  optimum?: number,
 ): number {
-  const pressure = clamp01(Math.abs(longshoreTendency));
-  const tol = clamp01(tolerance ?? config.binderBurialTolerance);
-  return clamp01(1 - pressure * (1 - tol));
+  const accretion = clamp01(Math.max(0, -transportDivergence));
+  const peak = clamp01(optimum ?? config.binderBurialOptimum);
+  return triangularHump(accretion, peak);
 }
 
 /** Pure binder Liebig — no WorldState (T-006). */
@@ -84,15 +109,16 @@ export function evaluateBinderHsi(args: {
   porosity: number;
   shoreExposure: number;
   materialClassId: number;
-  longshoreTendency?: number;
-  burialTolerance?: number;
+  /** ∂Q divergence; omit → 0 (uniform / unknown). */
+  transportDivergence?: number;
+  burialOptimum?: number;
 }): BinderHsiSample {
   const fDrainage = factorDrainage(args.moisture, args.porosity);
   const fExposure = factorCrestExposure(args.shoreExposure);
   const fSand = factorSandSubstrate(args.materialClassId);
   const fBurial = factorBurialTolerance(
-    args.longshoreTendency ?? 0,
-    args.burialTolerance,
+    args.transportDivergence ?? 0,
+    args.burialOptimum,
   );
   const factors: [BinderLimitingId, number][] = [
     [BINDER_LIMITING_DRAINAGE, fDrainage],

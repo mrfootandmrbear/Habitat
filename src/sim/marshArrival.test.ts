@@ -84,7 +84,7 @@ describe("Salt-marsh engineer (C-016 / Slice N9)", () => {
       });
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);

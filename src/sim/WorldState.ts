@@ -42,7 +42,10 @@ import {
 } from "./climate/longshoreTendency";
 import { evaluateHsi, LIMITING_SPRAY } from "./habitat/hsiComposition";
 import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
-import { evaluateBinderHsi } from "./habitat/binderHsiComposition";
+import {
+  evaluateBinderHsi,
+  longshoreTransportDivergence,
+} from "./habitat/binderHsiComposition";
 import { evaluateMarshHsi } from "./habitat/marshHsiComposition";
 import { evaluateShrubHsi } from "./habitat/shrubHsiComposition";
 import { evaluateCrustHsi } from "./habitat/crustHsiComposition";
@@ -1685,7 +1688,12 @@ export class WorldState {
         porosity,
         shoreExposure: exposure[i]!,
         materialClassId: mat[i]!,
-        longshoreTendency: longshore[i]!,
+        transportDivergence: longshoreTransportDivergence(
+          longshore,
+          i,
+          this.width,
+          this.height,
+        ),
       });
       binderEst[i] = establishmentProbability(
         binderPressure,
@@ -1880,7 +1888,12 @@ export class WorldState {
         porosity: substrateProps(mat[i]!).porosity,
         shoreExposure: exposure[i]!,
         materialClassId: mat[i]!,
-        longshoreTendency: longshore[i]!,
+        transportDivergence: longshoreTransportDivergence(
+          longshore,
+          i,
+          this.width,
+          this.height,
+        ),
       }).hsi;
       binderBiomass[i] = nextHerbBiomass({
         biomass: binderBiomass[i]!,

@@ -24,7 +24,7 @@ describe("Onshore spray stress gate (C-017)", () => {
       const world = new WorldState(new Grid2D(w, h, 2.5));
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
@@ -56,7 +56,7 @@ describe("Onshore spray stress gate (C-017)", () => {
     world.runHabitatStep(1);
     const hsiDry = world.getHabitatSuitability(2, 2);
     expect(world.getLimitingFactor(2, 2)).toBe(LIMITING_SPRAY);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.runHabitatStep(1);
     expect(world.getHabitatSuitability(2, 2)).toBeCloseTo(hsiDry, 8);
   });
@@ -69,16 +69,18 @@ describe("Onshore spray stress gate (C-017)", () => {
     const world = new WorldState(new Grid2D(w, h, 2.5));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
-    world.shoreExposure.set(sx, sz, 1);
+    world.shoreExposure.set(sx, sz, 0.5);
     world.runHabitatStep(1);
     world.runDispersalStep(1);
     for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
     expect(world.getLimitingFactor(sx, sz)).toBe(LIMITING_SPRAY);
-    expect(world.getHerbBiomass(sx, sz)).toBeLessThan(0.05);
+    expect(world.getHerbBiomass(sx, sz)).toBeLessThan(
+      world.getStrandBiomass(sx, sz),
+    );
     expect(world.getStrandBiomass(sx, sz)).toBeGreaterThan(0.1);
   });
 });

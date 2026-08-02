@@ -23,9 +23,10 @@ describe("Tidal inundation hydroperiod gate (C-016)", () => {
     expect(tidalHydroperiod(2, 2, 2)).toBe(0);
   });
 
-  it("upland factor is 1 dry and 0 under any tidal occupancy", () => {
+  it("upland factor tapers from dry to zero by half hydroperiod", () => {
     expect(factorInundationUpland(0)).toBe(1);
-    expect(factorInundationUpland(0.01)).toBe(0);
+    expect(factorInundationUpland(0.01)).toBeGreaterThan(0.9);
+    expect(factorInundationUpland(0.5)).toBe(0);
     expect(factorInundationUpland(1)).toBe(0);
   });
 
@@ -35,7 +36,7 @@ describe("Tidal inundation hydroperiod gate (C-016)", () => {
     const sx = 8;
     const sz = 8;
     // Foreshore land: sea ≤ elev < spring MHW; salt and spray matched at 0.
-    const elev = SEA + 0.4;
+    const elev = SEA;
 
     const make = (amplitude: number) => {
       const terrain = new Grid2D(w, h, elev);
@@ -45,7 +46,7 @@ describe("Tidal inundation hydroperiod gate (C-016)", () => {
       });
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
@@ -88,7 +89,7 @@ describe("Tidal inundation hydroperiod gate (C-016)", () => {
     world.runHabitatStep(1);
     const hsiDry = world.getHabitatSuitability(2, 2);
     expect(world.getLimitingFactor(2, 2)).toBe(LIMITING_INUNDATION);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.runHabitatStep(1);
     expect(world.getHabitatSuitability(2, 2)).toBeCloseTo(hsiDry, 8);
   });
@@ -101,13 +102,13 @@ describe("Tidal inundation hydroperiod gate (C-016)", () => {
       tidalAmplitude: amp,
     });
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
     world.runHabitatStep(1);
     expect(world.isIntertidal(2, 2)).toBe(false);
     expect(world.getLimitingFactor(2, 2)).not.toBe(LIMITING_INUNDATION);
-    expect(world.getHabitatSuitability(2, 2)).toBe(1);
+    expect(world.getHabitatSuitability(2, 2)).toBeGreaterThan(0.8);
   });
 });
