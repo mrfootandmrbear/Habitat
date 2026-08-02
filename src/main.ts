@@ -551,6 +551,11 @@ const ui = mountControls(
         ui.setHint(
           "Deposit = geological dump — raises ground and sets sand/clay/rock",
         );
+      } else if (tool === "flatten") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Flatten = trowel — levels toward mean height in the brush (not the erosion dial)",
+        );
       } else {
         sitingCursor.setVisible(true);
         ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
@@ -750,6 +755,14 @@ canvas.addEventListener("pointerup", (e) => {
       cell.z,
       depositMaterial,
       config.bermRaise,
+      sitingBrushRadiusFor(sitingBrushSize),
+    );
+    ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "flatten") {
+    editUndo.pushCheckpoint(world);
+    world.flattenTerrain(
+      cell.x,
+      cell.z,
       sitingBrushRadiusFor(sitingBrushSize),
     );
     ui.setUndoEnabled(editUndo.canUndo);
@@ -984,9 +997,11 @@ function frame(now: number): void {
           ? "dig channel"
           : sitingTool === "deposit"
             ? "deposit"
-            : sitingTool === "ignite"
-              ? "ignite"
-              : "predict";
+            : sitingTool === "flatten"
+              ? "flatten"
+              : sitingTool === "ignite"
+                ? "ignite"
+                : "predict";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +

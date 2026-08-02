@@ -94,7 +94,7 @@ No new `Process`. No Open gate to start.
 3. Tier-M: footprint cell count scales with size; ΣΔelev = ΣΔdepth still holds (C-002); 100 edits still write no veg (C-006).
 4. Labels stay cause-shaped: "Brush: bucket" / "Brush: shovel" — craft names, not spell names.
 
-**Next-but-one after §4.55:** flatten/trowel edit (§4.56 stub), then mold stamps + duplicator — still form-only, still no veg copy.
+**After §4.55:** §4.56 flatten/trowel **shipped**. **Next:** mold stamps (§4.57) + duplicator — still form-only, still no veg copy.
 
 ---
 
