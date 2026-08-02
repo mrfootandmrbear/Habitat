@@ -27,17 +27,21 @@ export function tidalHydroperiod(
 }
 
 /**
- * Upland / inland herb inundation suitability: 1 above the envelope,
- * 0 anywhere the tide regularly floods (hydroperiod > 0).
+ * Upland / inland herb inundation suitability: full above the envelope,
+ * then a linear supratidal taper through the upper intertidal — the dry-side
+ * mirror of marsh's triangular hump. A millimetre across MHW no longer
+ * zeros the arm (BUILD_GUIDE §4.46 / vegetation-habitat review §2.1).
  */
 export function factorInundationUpland(hydroperiod: number): number {
-  return clamp01(hydroperiod) > 0 ? 0 : 1;
+  return clamp01(1 - 2 * clamp01(hydroperiod));
 }
 
 /**
  * Salt-marsh engineer inundation suitability (Slice N9): triangular hump on the
  * same envelope hydroperiod. Peaks at mid-band (0.5); dry terrace (0) and
  * deep subtidal (1) → 0. Never fold into herb Liebig (inundation-arrival).
+ * Shape matches `triangularHump(h, 0.5)` in hsiComposition (kept local to
+ * avoid a circular import with that module).
  */
 export function factorInundationMarsh(hydroperiod: number): number {
   const h = clamp01(hydroperiod);

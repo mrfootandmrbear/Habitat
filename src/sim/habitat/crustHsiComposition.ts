@@ -5,7 +5,7 @@
  */
 
 import { config } from "../../config";
-import { clamp01, factorMoisture } from "./hsiComposition";
+import { clamp01, factorMoistureCrust } from "./hsiComposition";
 import {
   factorInundationUpland,
   tidalHydroperiod,
@@ -106,13 +106,18 @@ export function evaluateCrustHsi(args: {
   mlwMeters?: number;
   mhwMeters?: number;
 }): CrustHsiSample {
-  const fMoisture = factorMoisture(
-    args.moisture ?? config.soilPorosity,
-    args.porosity ?? config.soilPorosity,
+  const porosity = args.porosity ?? config.soilPorosity;
+  // Default moisture at crust peak (low–moderate), not saturation.
+  const fMoisture = factorMoistureCrust(
+    args.moisture ?? porosity * 0.25,
+    porosity,
   );
   const canopy = canopyCoverFraction(args);
   const fOpen = factorOpenCanopy(canopy);
-  const fSalinity = factorSalinity(args.salinity ?? 0);
+  const fSalinity = factorSalinity(
+    args.salinity ?? 0,
+    config.herbSalinityFullThrough,
+  );
   const hasTide =
     args.elevMeters !== undefined &&
     args.mlwMeters !== undefined &&
