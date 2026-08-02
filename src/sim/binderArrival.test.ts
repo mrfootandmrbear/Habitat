@@ -8,6 +8,7 @@ import {
   BINDER_LIMITING_EXPOSURE,
   BINDER_LIMITING_SAND,
   evaluateBinderHsi,
+  factorBurialTolerance,
   factorDrainage,
   factorSandSubstrate,
 } from "./habitat/binderHsiComposition";
@@ -22,7 +23,9 @@ import {
 describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
   it("sand affinity is high on sand and zero on clay/rock", () => {
     expect(factorSandSubstrate(SUBSTRATE_SAND)).toBe(1);
-    expect(factorSandSubstrate(SUBSTRATE_LOAM)).toBe(config.binderLoamSandFactor);
+    expect(factorSandSubstrate(SUBSTRATE_LOAM)).toBe(
+      config.binderLoamSandFactor,
+    );
     expect(factorSandSubstrate(SUBSTRATE_CLAY)).toBe(0);
     expect(factorSandSubstrate(SUBSTRATE_ROCK)).toBe(0);
   });
@@ -36,9 +39,9 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
     const crest = evaluateBinderHsi({
       moisture: 0,
       porosity: config.soilPorosity,
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       materialClassId: SUBSTRATE_SAND,
-      longshoreTendency: 0,
+      transportDivergence: -config.binderBurialOptimum,
     });
     expect(crest.hsi).toBe(1);
 
@@ -47,7 +50,6 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
       porosity: config.soilPorosity,
       shoreExposure: 0,
       materialClassId: SUBSTRATE_LOAM,
-      longshoreTendency: 0,
     });
     expect(wetHollow.hsi).toBe(0);
     expect(
@@ -59,9 +61,9 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
     const clayCrest = evaluateBinderHsi({
       moisture: 0,
       porosity: config.soilPorosity,
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       materialClassId: SUBSTRATE_CLAY,
-      longshoreTendency: 0,
+      transportDivergence: -config.binderBurialOptimum,
     });
     expect(clayCrest.limiting).toBe(BINDER_LIMITING_SAND);
     expect(clayCrest.hsi).toBe(0);
@@ -73,35 +75,46 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
       porosity: config.soilPorosity,
       shoreExposure: 0.2,
       materialClassId: SUBSTRATE_SAND,
+      transportDivergence: -config.binderBurialOptimum,
     });
     const wetter = evaluateBinderHsi({
       moisture: config.soilPorosity * 0.3,
       porosity: config.soilPorosity,
       shoreExposure: 0.2,
       materialClassId: SUBSTRATE_SAND,
+      transportDivergence: -config.binderBurialOptimum,
     });
     expect(dry.limiting).toBe(BINDER_LIMITING_EXPOSURE);
     expect(wetter.hsi).toBeLessThanOrEqual(dry.hsi + 1e-9);
   });
 
-  it("extreme longshore remobilization burial-limits binders", () => {
+  it("moderate accretion opens binders while calm and extreme burial limit", () => {
     const calm = evaluateBinderHsi({
       moisture: 0,
       porosity: config.soilPorosity,
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       materialClassId: SUBSTRATE_SAND,
-      longshoreTendency: 0,
+      transportDivergence: 0,
     });
-    const remobilized = evaluateBinderHsi({
+    const moderate = evaluateBinderHsi({
       moisture: 0,
       porosity: config.soilPorosity,
-      shoreExposure: 1,
+      shoreExposure: 0.5,
       materialClassId: SUBSTRATE_SAND,
-      longshoreTendency: 1,
+      transportDivergence: -config.binderBurialOptimum,
     });
-    expect(calm.hsi).toBe(1);
-    expect(remobilized.limiting).toBe(BINDER_LIMITING_BURIAL);
-    expect(remobilized.hsi).toBeCloseTo(config.binderBurialTolerance, 8);
+    const extreme = evaluateBinderHsi({
+      moisture: 0,
+      porosity: config.soilPorosity,
+      shoreExposure: 0.5,
+      materialClassId: SUBSTRATE_SAND,
+      transportDivergence: -1,
+    });
+    expect(calm.limiting).toBe(BINDER_LIMITING_BURIAL);
+    expect(calm.hsi).toBeCloseTo(factorBurialTolerance(0), 8);
+    expect(moderate.hsi).toBe(1);
+    expect(extreme.limiting).toBe(BINDER_LIMITING_BURIAL);
+    expect(extreme.hsi).toBeLessThan(calm.hsi);
   });
 
   it("dry sandy crest earns binder; wet loam hollow earns herb under one seed schedule", () => {
@@ -116,7 +129,7 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
       const world = new WorldState(new Grid2D(w, h, 2.5));
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
@@ -125,7 +138,9 @@ describe("Sandy crest sand-binder (C-009 / Slice N5)", () => {
       // Crest: dry sand + wind.
       world.soilMaterial.set(crestX, crestZ, SUBSTRATE_SAND);
       world.soilMoisture.set(crestX, crestZ, 0);
-      world.shoreExposure.set(crestX, crestZ, 1);
+      world.shoreExposure.set(crestX, crestZ, 0.5);
+      world.shoreLongshore.set(crestX - 1, crestZ, config.binderBurialOptimum);
+      world.shoreLongshore.set(crestX + 1, crestZ, -config.binderBurialOptimum);
       world.runHabitatStep(1);
       world.runDispersalStep(1);
       for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);

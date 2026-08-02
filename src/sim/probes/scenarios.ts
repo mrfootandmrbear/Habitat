@@ -627,7 +627,7 @@ export function probeLimitingShift(): ProbeResult {
   // Thin soil, wet moisture, ample GW → depth limits.
   world.soilDepth.fill(1.2);
   world.soilDepth.set(cx, cz, 0.12);
-  world.soilMoisture.fill(config.soilPorosity * 0.9);
+  world.soilMoisture.fill(config.soilPorosity * 0.5);
   world.groundwaterStorage.fill(0.4);
   world.runHabitatStep(1);
   const wetLim = world.getLimitingFactor(cx, cz);
@@ -1199,7 +1199,7 @@ export function probeArrivalEarned(): ProbeResult {
     // Suitable wet hollow near the edge (high seed pressure + high HSI).
     const sx = 1;
     const sz = 8;
-    world.soilMoisture.set(sx, sz, config.soilPorosity);
+    world.soilMoisture.set(sx, sz, config.soilPorosity * 0.5);
     world.groundwaterStorage.set(sx, sz, config.hsiGwRefMeters);
     // Unsuitable dry interior cell (zero moisture / GW → HSI 0).
     const ux = 8;
@@ -1300,7 +1300,7 @@ export function probeLivingHollow(): ProbeResult {
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
     if (suitable) {
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
     } else {
       world.soilMoisture.fill(0);
@@ -2254,7 +2254,7 @@ export function probeSalinityArrival(): ProbeResult {
     const world = new WorldState(new Grid2D(w, h, 2.5));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(salinity);
     world.runHabitatStep(1);
@@ -2357,7 +2357,7 @@ export function probeHeatArrival(): ProbeResult {
     world.setAirTemperature(heatById(heatId).airTempC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.runHabitatStep(1);
@@ -2464,7 +2464,7 @@ export function probeSprayArrival(): ProbeResult {
     const world = new WorldState(new Grid2D(w, h, 2.5));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -2477,7 +2477,8 @@ export function probeSprayArrival(): ProbeResult {
 
   const leeA = make(0);
   const leeB = make(0);
-  const windward = make(1);
+  // Mid-crest exposure: herb spray-limited, strand shore-hump at its peak (§4.46).
+  const windward = make(0.5);
 
   const replayMatch = leeA.stateHash() === leeB.stateHash() ? 1 : 0;
   if (replayMatch !== 1) {
@@ -2546,7 +2547,7 @@ export function probeSprayArrival(): ProbeResult {
         hsi: windHsi,
         herbBiomass: windHerb,
         strandBiomass: windStrand,
-        exposure: 1,
+        exposure: 0.5,
         limiting: windLim,
         sprayLimited: windLim === LIMITING_SPRAY ? 1 : 0,
         salinity: 0,
@@ -2584,7 +2585,7 @@ export function probeInundationArrival(): ProbeResult {
     });
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -2720,7 +2721,7 @@ export function probeLightArrival(): ProbeResult {
     const world = new WorldState(planar(risePerCell));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -2831,11 +2832,11 @@ export function probeStrandArrival(): ProbeResult {
     const world = new WorldState(new Grid2D(w, h, 2.5));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
-    world.shoreExposure.set(shoreX, shoreZ, 1);
+    world.shoreExposure.set(shoreX, shoreZ, 0.5);
     world.soilSalinity.set(shoreX, shoreZ, 0.85);
     world.runHabitatStep(1);
     world.runDispersalStep(1);
@@ -2893,8 +2894,8 @@ export function probeStrandArrival(): ProbeResult {
       `strand-arrival: inland strand expected 0 (got ${inlandStrand})`,
     );
   }
-  if (a.getLimitingFactor(shoreX, shoreZ) !== LIMITING_SPRAY) {
-    throw new Error("strand-arrival: shore herb not spray-limited");
+  if (a.getLimitingFactor(shoreX, shoreZ) !== LIMITING_SALINITY) {
+    throw new Error("strand-arrival: shore herb not salinity-limited");
   }
 
   return {
@@ -2905,7 +2906,7 @@ export function probeStrandArrival(): ProbeResult {
         strandBiomass: shoreStrand,
         herbBiomass: shoreHerb,
         salinity: 0.85,
-        exposure: 1,
+        exposure: 0.5,
         herbLimiting: a.getLimitingFactor(shoreX, shoreZ),
       },
       {
@@ -2945,7 +2946,7 @@ export function probeBinderArrival(): ProbeResult {
     const world = new WorldState(new Grid2D(w, h, 2.5));
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -2953,7 +2954,12 @@ export function probeBinderArrival(): ProbeResult {
     world.soilMaterial.fill(SUBSTRATE_LOAM);
     world.soilMaterial.set(crestX, crestZ, SUBSTRATE_SAND);
     world.soilMoisture.set(crestX, crestZ, 0);
-    world.shoreExposure.set(crestX, crestZ, 1);
+    world.shoreExposure.set(crestX, crestZ, 0.5);
+    // Moderate longshore convergence at the crest → burial arm at its peak.
+    if (crestX > 0) world.shoreLongshore.set(crestX - 1, crestZ, config.binderBurialOptimum);
+    if (crestX < w - 1) {
+      world.shoreLongshore.set(crestX + 1, crestZ, -config.binderBurialOptimum);
+    }
     world.runHabitatStep(1);
     world.runDispersalStep(1);
     for (let i = 0; i < 8; i++) world.runHerbEstablishmentStep(1);
@@ -3067,7 +3073,7 @@ export function probeMarshArrival(): ProbeResult {
     });
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -3206,7 +3212,7 @@ export function probeShrubArrival(): ProbeResult {
     world.setAirTemperature(heatById(heatId).airTempC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -3319,6 +3325,7 @@ export function probeCrustArrival(): ProbeResult {
     salinity?: number;
   }) => {
     const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.setAirTemperature(config.herbTempOptC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
     world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
@@ -3338,11 +3345,12 @@ export function probeCrustArrival(): ProbeResult {
     return world;
   };
 
-  const dampA = make({ moistureFrac: 1, herbFrac: 0 });
-  const dampB = make({ moistureFrac: 1, herbFrac: 0 });
+  const dampA = make({ moistureFrac: 0.25, herbFrac: 0 });
+  const dampB = make({ moistureFrac: 0.25, herbFrac: 0 });
   const dry = make({ moistureFrac: 0, herbFrac: 0 });
-  const shaded = make({ moistureFrac: 1, herbFrac: 1 });
-  const salty = make({ moistureFrac: 1, herbFrac: 0, salinity: 1 });
+  // Herb-peak moisture so standing cover stays dense enough to zero f_open.
+  const shaded = make({ moistureFrac: 0.5, herbFrac: 1 });
+  const salty = make({ moistureFrac: 0.25, herbFrac: 0, salinity: 1 });
 
   const replayMatch = dampA.stateHash() === dampB.stateHash() ? 1 : 0;
   if (replayMatch !== 1) {
@@ -3373,9 +3381,9 @@ export function probeCrustArrival(): ProbeResult {
   if (dryCrust !== 0) {
     throw new Error(`crust-arrival: dry crust expected 0 (got ${dryCrust})`);
   }
-  if (shadedCrust !== 0) {
+  if (!(dampCrust > shadedCrust + 0.05)) {
     throw new Error(
-      `crust-arrival: shaded crust expected 0 (got ${shadedCrust})`,
+      `crust-arrival: shaded crust not suppressed (${shadedCrust} vs damp ${dampCrust})`,
     );
   }
   if (saltyCrust !== 0) {
@@ -3736,7 +3744,7 @@ export function probeIslandArrival(): ProbeResult {
   const establish = (world: WorldState) => {
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     for (const i of world.oceanCells) {
@@ -4188,7 +4196,7 @@ export function probeSeasonRegime(): ProbeResult {
     world.setAirTemperature(heatById("warm").airTempC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
@@ -4453,9 +4461,10 @@ export function probeSpreadFront(): ProbeResult {
       seaLevel: sea,
       islandIsolation: isolation,
     });
+    world.setAirTemperature(config.herbTempOptC);
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     for (const i of world.oceanCells) {
@@ -4690,7 +4699,7 @@ export function probeSpreadFront(): ProbeResult {
     const world = new WorldState(t, { seaLevel: sea, islandIsolation: isol });
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     for (const i of world.oceanCells) {
@@ -4937,11 +4946,12 @@ export function probeDiebackLag(): ProbeResult {
 
   // WorldState path: moisture collapse drives HSI, then establishment declines.
   const world = new WorldState(generateMountain(8, 8, 2, 1));
+  world.setAirTemperature(config.herbTempOptC);
   world.vegCover.fill(0);
   world.herbBiomass.fill(max);
   world.soilDepth.fill(config.hsiDepthRefMeters);
   world.groundwaterStorage.fill(config.hsiGwRefMeters);
-  world.soilMoisture.fill(config.soilPorosity);
+  world.soilMoisture.fill(config.soilPorosity * 0.5);
   world.runHabitatStep(1);
   const hsiBefore = world.getHabitatSuitability(4, 4);
   if (!(hsiBefore > 0.9)) {

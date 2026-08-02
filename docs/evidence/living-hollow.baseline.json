@@ -6,7 +6,7 @@
       "abs": 0
     },
     "colonized.biomass": {
-      "value": 2.496595025062561,
+      "value": 2.0833332538604736,
       "abs": 0.00001
     },
     "colonized.downslope": {
@@ -42,7 +42,7 @@
       "abs": 0.0001
     },
     "delta.biomassDelta": {
-      "value": 2.496595025062561,
+      "value": 2.0833332538604736,
       "abs": 0.00001
     },
     "delta.downslopeDelta": {

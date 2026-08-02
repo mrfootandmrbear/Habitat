@@ -7,7 +7,7 @@
  */
 
 import { config } from "../../config";
-import { clamp01 } from "./hsiComposition";
+import { triangularHump } from "./hsiComposition";
 import { factorSalinityTolerant } from "./salinityComposition";
 import { factorTemperature } from "./temperatureComposition";
 
@@ -35,9 +35,12 @@ export type StrandHsiSample = {
   fTemp: number;
 };
 
-/** Shore affinity from fetch×wind exposure (C-017) — inland → 0. */
+/**
+ * Shore affinity hump (C-017) — inland and extreme fetch both limit;
+ * splash-zone mid-exposure peaks (marsh triangular form).
+ */
 export function factorShore(shoreExposure: number): number {
-  return clamp01(shoreExposure);
+  return triangularHump(shoreExposure, 0.5);
 }
 
 /** Pure strand Liebig — no WorldState (T-006). */

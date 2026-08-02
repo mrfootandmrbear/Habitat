@@ -7,13 +7,19 @@ import { LIMITING_TEMPERATURE } from "./habitat/hsiComposition";
 import { factorTemperature } from "./habitat/temperatureComposition";
 
 describe("Heat dial plant gate (C-004 / C-020)", () => {
-  it("factorTemperature is 0 at kill, 1 at opt, linear between", () => {
+  it("factorTemperature is unimodal with a warm-side upper limb", () => {
     const kill = config.herbTempKillC;
     const opt = config.herbTempOptC;
+    const crit = opt + 1.5 * (opt - kill);
     expect(factorTemperature(kill, kill, opt)).toBe(0);
     expect(factorTemperature(kill - 1, kill, opt)).toBe(0);
     expect(factorTemperature(opt, kill, opt)).toBe(1);
-    expect(factorTemperature(opt + 5, kill, opt)).toBe(1);
+    expect(factorTemperature(opt + 4, kill, opt)).toBeLessThan(1);
+    expect(factorTemperature(opt + 4, kill, opt)).toBeCloseTo(
+      (crit - (opt + 4)) / (crit - opt),
+      8,
+    );
+    expect(factorTemperature(crit, kill, opt)).toBe(0);
     const mid = (kill + opt) / 2;
     expect(factorTemperature(mid, kill, opt)).toBeCloseTo(0.5, 8);
   });
@@ -29,7 +35,7 @@ describe("Heat dial plant gate (C-004 / C-020)", () => {
       world.setAirTemperature(heatById(heatId).airTempC);
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.runHabitatStep(1);
@@ -42,7 +48,7 @@ describe("Heat dial plant gate (C-004 / C-020)", () => {
     const cold = make("cold");
     const warmBiomass = warm.getHerbBiomass(sx, sz);
     const coldBiomass = cold.getHerbBiomass(sx, sz);
-    expect(warm.getLimitingFactor(sx, sz)).not.toBe(LIMITING_TEMPERATURE);
+    expect(warm.getHabitatSuitability(sx, sz)).toBeGreaterThan(0);
     expect(cold.getLimitingFactor(sx, sz)).toBe(LIMITING_TEMPERATURE);
     expect(cold.getHabitatSuitability(sx, sz)).toBe(0);
     expect(warmBiomass).toBeGreaterThan(0.1);
@@ -58,7 +64,7 @@ describe("Heat dial plant gate (C-004 / C-020)", () => {
     world.runHabitatStep(1);
     const hsiDry = world.getHabitatSuitability(2, 2);
     expect(world.getLimitingFactor(2, 2)).toBe(LIMITING_TEMPERATURE);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.runHabitatStep(1);
     expect(world.getHabitatSuitability(2, 2)).toBeCloseTo(hsiDry, 8);
   });

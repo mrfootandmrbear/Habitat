@@ -86,11 +86,15 @@ export function evaluateShrubHsi(args: {
     herbFrac,
     args.coverHalfSat ?? config.shrubCoverHalfSat,
   );
+  const porosity = args.porosity ?? config.soilPorosity;
   const fMoisture = factorMoisture(
-    args.moisture ?? config.soilPorosity,
-    args.porosity ?? config.soilPorosity,
+    args.moisture ?? porosity * 0.5,
+    porosity,
   );
-  const fSalinity = factorSalinity(args.salinity ?? 0);
+  const fSalinity = factorSalinity(
+    args.salinity ?? 0,
+    config.herbSalinityFullThrough,
+  );
   const hasTide =
     args.elevMeters !== undefined &&
     args.mlwMeters !== undefined &&

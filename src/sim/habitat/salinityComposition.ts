@@ -11,9 +11,17 @@ function clamp01(x: number): number {
   return Math.min(1, Math.max(0, x));
 }
 
-/** Non-halophyte suitability: fresh → 1, seawater → 0. */
-export function factorSalinity(salinity: number): number {
-  return clamp01(1 - Math.max(0, salinity));
+/**
+ * Non-halophyte suitability: threshold-slope with a low plateau — same shape
+ * as `factorSalinityTolerant`, lower `fullThrough` so light salt is still
+ * fine and the crash is reserved for higher pore salt (not a linear ramp
+ * from the first grain).
+ */
+export function factorSalinity(
+  salinity: number,
+  fullThrough = 0.2,
+): number {
+  return factorSalinityTolerant(salinity, fullThrough);
 }
 
 /**

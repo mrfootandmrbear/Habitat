@@ -9,12 +9,7 @@ import {
 import { evaluateHsi } from "./habitat/hsiComposition";
 import { generateMountain } from "./terrain/generateMountain";
 import { WorldState } from "./WorldState";
-import {
-  applySave,
-  omitField,
-  serializeRegistry,
-  SaveError,
-} from "./save";
+import { applySave, omitField, serializeRegistry, SaveError } from "./save";
 
 describe("arrival composition (Slice 12 / C-007)", () => {
   it("zero suitability yields zero establishment probability", () => {
@@ -241,7 +236,9 @@ describe("arrival WorldState (Slice 12)", () => {
     const world = new WorldState(generateMountain(8, 8, 2, 1));
     expect(world.registry.get("veg.seedBank.herb").owner).toBe("dispersal");
     expect(world.registry.get("veg.seedBank.herb").legacy).toBe(true);
-    expect(world.registry.get("veg.establishment.herb").owner).toBe("dispersal");
+    expect(world.registry.get("veg.establishment.herb").owner).toBe(
+      "dispersal",
+    );
     expect(world.registry.get("veg.biomass.herb").owner).toBe("vegetation");
     expect(world.registry.get("veg.biomass.herb").band).toBe("seasonal");
   });
@@ -274,7 +271,7 @@ describe("arrival WorldState (Slice 12)", () => {
     const world = new WorldState(generateMountain(12, 12, 3, 3));
     world.vegCover.fill(0);
     // Wet suitable cell near edge (high seed + high HSI).
-    world.soilMoisture.set(1, 6, config.soilPorosity);
+    world.soilMoisture.set(1, 6, config.soilPorosity * 0.5);
     world.groundwaterStorage.set(1, 6, config.hsiGwRefMeters);
     world.soilDepth.set(1, 6, config.hsiDepthRefMeters);
     // Dry unsuitable interior cell.

@@ -18,9 +18,9 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
     expect(factorOpenCanopy(0.5)).toBeCloseTo(0.5, 8);
   });
 
-  it("damp bare opens crust; dry, shaded, and salty stay limited", () => {
+  it("damp bare opens crust; drier, saturated, shaded, and salty stay limited", () => {
     const dampBare = evaluateCrustHsi({
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.25,
       herbBiomass: 0,
       salinity: 0,
     });
@@ -32,11 +32,19 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
       herbBiomass: 0,
       salinity: 0,
     });
-    expect(dryBare.hsi).toBe(0);
+    expect(dryBare.hsi).toBeLessThan(dampBare.hsi);
     expect(dryBare.limiting).toBe(CRUST_LIMITING_MOISTURE);
 
-    const dampShaded = evaluateCrustHsi({
+    const saturatedBare = evaluateCrustHsi({
       moisture: config.soilPorosity,
+      herbBiomass: 0,
+      salinity: 0,
+    });
+    expect(saturatedBare.hsi).toBe(0);
+    expect(saturatedBare.limiting).toBe(CRUST_LIMITING_MOISTURE);
+
+    const dampShaded = evaluateCrustHsi({
+      moisture: config.soilPorosity * 0.25,
       herbBiomass: config.herbBiomassMax,
       salinity: 0,
     });
@@ -44,7 +52,7 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
     expect(dampShaded.limiting).toBe(CRUST_LIMITING_OPEN);
 
     const dampSalty = evaluateCrustHsi({
-      moisture: config.soilPorosity,
+      moisture: config.soilPorosity * 0.25,
       herbBiomass: 0,
       salinity: 1,
     });
@@ -52,7 +60,7 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
     expect(dampSalty.limiting).toBe(CRUST_LIMITING_SALINITY);
   });
 
-  it("damp bare inland earns crust; dry and shaded stay empty under one seed", () => {
+  it("damp bare inland earns crust; drier and shaded twins lag under one seed", () => {
     const w = 16;
     const h = 16;
     const sx = 8;
@@ -86,14 +94,14 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
       return world;
     };
 
-    const dampA = make({ moistureFrac: 1, herbFrac: 0, herbSeed: false });
-    const dampB = make({ moistureFrac: 1, herbFrac: 0, herbSeed: false });
+    const dampA = make({ moistureFrac: 0.25, herbFrac: 0, herbSeed: false });
+    const dampB = make({ moistureFrac: 0.25, herbFrac: 0, herbSeed: false });
     expect(dampA.stateHash()).toBe(dampB.stateHash());
 
     const dry = make({ moistureFrac: 0, herbFrac: 0, herbSeed: false });
-    const shaded = make({ moistureFrac: 1, herbFrac: 1, herbSeed: false });
+    const shaded = make({ moistureFrac: 0.25, herbFrac: 1, herbSeed: false });
     const salty = make({
-      moistureFrac: 1,
+      moistureFrac: 0.25,
       herbFrac: 0,
       herbSeed: false,
       salinity: 1,
@@ -110,8 +118,7 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
     );
     expect(dampCrust).toBeGreaterThan(0.1);
     expect(dampCrust).toBeGreaterThan(dryCrust + 0.05);
-    expect(dryCrust).toBe(0);
-    expect(shadedCrust).toBe(0);
+    expect(dampCrust).toBeGreaterThan(shadedCrust + 0.05);
     expect(saltyCrust).toBe(0);
   });
 

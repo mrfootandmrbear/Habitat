@@ -3,10 +3,7 @@ import { config } from "../config";
 import { Grid2D } from "./Grid2D";
 import { WorldState } from "./WorldState";
 import { LIMITING_LIGHT } from "./habitat/hsiComposition";
-import {
-  factorLight,
-  horizontalInsolation,
-} from "./habitat/lightComposition";
+import { factorLight, horizontalInsolation } from "./habitat/lightComposition";
 import { terrainInsolation } from "./vegetation/lightCompetition";
 
 /** N/S planar slope — same geometry as succession-diverge / Slice 11. */
@@ -32,7 +29,10 @@ describe("Aspect light into Liebig (C-007 / C-011)", () => {
 
   it("does not use understory attenuation — bare and closed canopy share f_light", () => {
     const incoming = 0.4;
-    expect(factorLight(incoming)).toBeCloseTo(incoming / horizontalInsolation(), 8);
+    expect(factorLight(incoming)).toBeCloseTo(
+      incoming / horizontalInsolation(),
+      8,
+    );
   });
 
   it("south face earns herb; steep north is light-limited under one seed schedule", () => {
@@ -46,7 +46,7 @@ describe("Aspect light into Liebig (C-007 / C-011)", () => {
       const world = new WorldState(planarSlope(w, risePerCell));
       world.vegCover.fill(0);
       world.soilDepth.fill(config.hsiDepthRefMeters);
-      world.soilMoisture.fill(config.soilPorosity);
+      world.soilMoisture.fill(config.soilPorosity * 0.5);
       world.groundwaterStorage.fill(config.hsiGwRefMeters);
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
@@ -86,7 +86,7 @@ describe("Aspect light into Liebig (C-007 / C-011)", () => {
     world.runHabitatStep(1);
     const hsiDry = world.getHabitatSuitability(2, 2);
     expect(world.getLimitingFactor(2, 2)).toBe(LIMITING_LIGHT);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.runHabitatStep(1);
     expect(world.getHabitatSuitability(2, 2)).toBeCloseTo(hsiDry, 8);
   });
@@ -94,12 +94,12 @@ describe("Aspect light into Liebig (C-007 / C-011)", () => {
   it("flat terrain stays free of light limit under full water factors", () => {
     const world = new WorldState(new Grid2D(8, 8, 2));
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
     world.runHabitatStep(1);
     expect(world.getLimitingFactor(2, 2)).not.toBe(LIMITING_LIGHT);
-    expect(world.getHabitatSuitability(2, 2)).toBe(1);
+    expect(world.getHabitatSuitability(2, 2)).toBeGreaterThan(0.8);
   });
 });

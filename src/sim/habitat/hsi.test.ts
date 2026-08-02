@@ -4,6 +4,7 @@ import { Grid2D } from "../Grid2D";
 import { WorldState } from "../WorldState";
 import {
   evaluateHsi,
+  factorMoisture,
   LIMITING_DEPTH,
   LIMITING_GROUNDWATER,
   LIMITING_INUNDATION,
@@ -14,11 +15,16 @@ import {
   LIMITING_TEMPERATURE,
 } from "./hsiComposition";
 import { heatById } from "../climate/atmosphere";
+import { factorSalinity } from "./salinityComposition";
+import { factorTemperature } from "./temperatureComposition";
+
+/** Non-limiting moisture under the §4.46 hump (peaks at half fill). */
+const peakMoist = config.soilPorosity * 0.5;
 
 describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
   it("uses min composition — improving a non-limiting factor does not raise HSI", () => {
     const base = evaluateHsi({
-      moisture: 0.1, // limiting
+      moisture: 0.1, // limiting (below peak)
       soilDepth: 1,
       groundwater: 0.5,
       porosity: config.soilPorosity,
@@ -60,9 +66,9 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
     expect(Number.isFinite(z.limitingGap)).toBe(true);
   });
 
-  it("names depth as limiting when soil is thin and water is abundant", () => {
+  it("names depth as limiting when soil is thin and water is at peak fill", () => {
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 0.1,
       groundwater: 1,
       porosity: config.soilPorosity,
@@ -70,11 +76,12 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       gwRef: config.hsiGwRefMeters,
     });
     expect(s.limiting).toBe(LIMITING_DEPTH);
+    expect(factorMoisture(peakMoist, config.soilPorosity)).toBe(1);
   });
 
   it("names groundwater when GW is the minimum", () => {
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 0.01,
       porosity: config.soilPorosity,
@@ -85,22 +92,26 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
   });
 
   it("names salinity when salt is the minimum (C-018)", () => {
+    const salt = 0.9;
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 1,
       porosity: config.soilPorosity,
       depthRef: config.hsiDepthRefMeters,
       gwRef: config.hsiGwRefMeters,
-      salinity: 0.9,
+      salinity: salt,
     });
     expect(s.limiting).toBe(LIMITING_SALINITY);
-    expect(s.hsi).toBeCloseTo(0.1, 8);
+    expect(s.hsi).toBeCloseTo(
+      factorSalinity(salt, config.herbSalinityFullThrough),
+      8,
+    );
   });
 
   it("names temperature when Heat is cold (C-004)", () => {
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 1,
       porosity: config.soilPorosity,
@@ -115,7 +126,7 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
     expect(s.fTemp).toBe(0);
   });
 
-  it("warm Heat leaves f_temp at 1 so moisture can still limit", () => {
+  it("warm Heat keeps f_temp high so moisture can still limit", () => {
     const s = evaluateHsi({
       moisture: 0.1,
       soilDepth: 2,
@@ -127,13 +138,22 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
       tempKillC: config.herbTempKillC,
       tempOptC: config.herbTempOptC,
     });
-    expect(s.fTemp).toBe(1);
+    // Unimodal TPC: warm sits above opt on the upper limb, not stuck at 1.
+    expect(s.fTemp).toBeCloseTo(
+      factorTemperature(
+        heatById("warm").airTempC,
+        config.herbTempKillC,
+        config.herbTempOptC,
+      ),
+      8,
+    );
+    expect(s.fTemp).toBeGreaterThan(0.8);
     expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 
   it("names spray when shore exposure is full (C-017)", () => {
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 1,
       porosity: config.soilPorosity,
@@ -160,15 +180,16 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
     expect(s.limiting).toBe(LIMITING_MOISTURE);
   });
 
-  it("names inundation when elev sits in the tidal envelope (C-016)", () => {
+  it("names inundation when elev sits deep in the tidal envelope (C-016)", () => {
+    // hydroperiod ≥ 0.5 → upland taper has already hit 0
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 1,
       porosity: config.soilPorosity,
       depthRef: config.hsiDepthRefMeters,
       gwRef: config.hsiGwRefMeters,
-      elevMeters: 2.2,
+      elevMeters: 1.5,
       mlwMeters: 1,
       mhwMeters: 3,
     });
@@ -195,7 +216,7 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
 
   it("names light when open-sky insolation is zero (C-007 / C-011)", () => {
     const s = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 2,
       groundwater: 1,
       porosity: config.soilPorosity,
@@ -234,7 +255,7 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
     });
     expect(base.limiting).toBe(LIMITING_SALINITY);
     const wetter = evaluateHsi({
-      moisture: config.soilPorosity,
+      moisture: peakMoist,
       soilDepth: 1,
       groundwater: 0.5,
       porosity: config.soilPorosity,
@@ -255,7 +276,7 @@ describe("Liebig HSI (Slice 9 / NATURAL_PROCESS_MATH §3.3)", () => {
 
   it("updates suitability on a daily band", () => {
     const world = new WorldState(new Grid2D(6, 6, 1));
-    world.soilMoisture.fill(0.3);
+    world.soilMoisture.fill(peakMoist);
     world.soilDepth.fill(0.8);
     world.groundwaterStorage.fill(0.1);
     for (let i = 0; i < config.dailyEventSteps; i++) {

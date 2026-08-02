@@ -71,8 +71,35 @@ export function clamp01(x: number): number {
   return Math.min(1, Math.max(0, x));
 }
 
+/**
+ * Triangular hump on [0,1]: peaks at `peak`, zero at `peak±0.5` (clamped).
+ * Shared shape for marsh inundation, upland taper mirror, exposure, burial, moisture.
+ */
+export function triangularHump(x: number, peak = 0.5): number {
+  return clamp01(1 - 2 * Math.abs(clamp01(x) - peak));
+}
+
+/**
+ * Herb/shrub moisture: hump peaking at half field capacity.
+ * Saturation and bone-dry both limit (wet-side penalty).
+ */
 export function factorMoisture(moisture: number, porosity: number): number {
-  return clamp01(moisture / Math.max(porosity, 1e-6));
+  const fill = clamp01(moisture / Math.max(porosity, 1e-6));
+  return triangularHump(fill, 0.5);
+}
+
+/**
+ * Crust moisture: peaks at low–moderate fill — desiccation-adapted, not
+ * saturation-loving (C-011). Asymmetric: 0 at bone-dry, 1 at 25% fill, 0
+ * again by mid-wet (symmetric triangularHump would leave dry at 0.5).
+ */
+export function factorMoistureCrust(moisture: number, porosity: number): number {
+  const fill = clamp01(moisture / Math.max(porosity, 1e-6));
+  const peak = 0.25;
+  const wetZero = 0.55;
+  if (fill <= peak) return clamp01(fill / Math.max(peak, 1e-6));
+  if (fill >= wetZero) return 0;
+  return clamp01(1 - (fill - peak) / (wetZero - peak));
 }
 
 export function factorDepth(depthMeters: number, depthRef: number): number {
@@ -117,7 +144,10 @@ export function evaluateHsi(args: {
   const fMoisture = factorMoisture(args.moisture, args.porosity);
   const fDepth = factorDepth(args.soilDepth, args.depthRef);
   const fGroundwater = factorGroundwater(args.groundwater, args.gwRef);
-  const fSalinity = factorSalinity(args.salinity ?? 0);
+  const fSalinity = factorSalinity(
+    args.salinity ?? 0,
+    config.herbSalinityFullThrough,
+  );
   const kill = args.tempKillC ?? config.herbTempKillC;
   const opt = args.tempOptC ?? config.herbTempOptC;
   // Missing airTemp → treat as at/above opt so legacy call sites stay full.

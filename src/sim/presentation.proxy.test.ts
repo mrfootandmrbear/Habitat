@@ -12,14 +12,8 @@ import { generateIsland } from "./terrain/generateIsland";
 import { shorelineEncodingDelta } from "./climate/seaLevel";
 import { fillOrographicRainDepths } from "./climate/orographicPrecip";
 import { windById } from "./climate/windRegime";
-import {
-  elevChangeEncodingStrength,
-  FormMemory,
-} from "./formMemory";
-import {
-  BranchSession,
-  branchMoistureEncodingDelta,
-} from "./branch";
+import { elevChangeEncodingStrength, FormMemory } from "./formMemory";
+import { BranchSession, branchMoistureEncodingDelta } from "./branch";
 import { applyForces, type ForceSettings } from "./forceSettings";
 import { lightEncodingDelta } from "../ui/lightEncoding";
 import {
@@ -41,11 +35,7 @@ import {
   crustOccupantEncodingDelta,
   binderBiomassRgb,
 } from "../ui/occupantEncoding";
-import {
-  guildFlex,
-  livingVitality,
-  swayAmplitude,
-} from "../ui/occupantSway";
+import { guildFlex, livingVitality, swayAmplitude } from "../ui/occupantSway";
 import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -209,7 +199,11 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     }
     bareSoil /= bare.soilMoisture.data.length;
     colonizedSoil /= colonized.soilMoisture.data.length;
-    const delta = soilEncodingDelta(bareSoil, colonizedSoil, config.soilPorosity);
+    const delta = soilEncodingDelta(
+      bareSoil,
+      colonizedSoil,
+      config.soilPorosity,
+    );
     expect(delta).toBeGreaterThan(0.15);
   });
 
@@ -232,9 +226,9 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     );
     expect(delta).toBeGreaterThan(0.15);
     // Higher sea → more shoreline cells on this radial island.
-    expect(
-      shorelineEncodingDelta(48, 48, terrain.data, 3.5),
-    ).toBeGreaterThan(shoreFrac);
+    expect(shorelineEncodingDelta(48, 48, terrain.data, 3.5)).toBeGreaterThan(
+      shoreFrac,
+    );
   });
 
   it("intertidal foreshore tint clears the perceptual floor (Slice 17 / C-016)", () => {
@@ -322,7 +316,10 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     // two different quantities that co-occur on the shore, and every prior
     // delta check compared a palette only against its own file's colors —
     // this one is the cross-file mechanism the review's §3 finding named.
-    const binder = binderBiomassRgb(config.binderBiomassMax, config.binderBiomassMax);
+    const binder = binderBiomassRgb(
+      config.binderBiomassMax,
+      config.binderBiomassMax,
+    );
     expect(rgbDistance(binder, INTERTIDAL)).toBeGreaterThan(0.08);
   });
 
@@ -335,7 +332,7 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     });
     world.vegCover.fill(0);
     world.soilDepth.fill(config.hsiDepthRefMeters);
-    world.soilMoisture.fill(config.soilPorosity);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
     world.groundwaterStorage.fill(config.hsiGwRefMeters);
     world.soilSalinity.fill(0);
     for (const i of world.oceanCells) {
@@ -384,9 +381,7 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         x > 0 ? i - 1 : -1,
         x < size - 1 ? i + 1 : -1,
       ];
-      const shore = nbs.some(
-        (ni) => ni >= 0 && elev0[ni]! < 2,
-      );
+      const shore = nbs.some((ni) => ni >= 0 && elev0[ni]! < 2);
       if (!shore) continue;
       const loss = elev0[i]! - world.terrain.data[i]!;
       if (x < mid) {
