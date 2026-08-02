@@ -51,7 +51,7 @@ describe("C-006 abundant sculpting (CI promote)", () => {
     }
   });
 
-  it("120 berm/dig/deposit/flatten/mold edits succeed with no rejection and no veg write", () => {
+  it("140 berm/dig/deposit/flatten/mold/duplicate edits succeed with no rejection and no veg write", () => {
     const world = new WorldState(generateMountain(24, 24, 6, 2));
     const herb0 = sumGrid(world.herbBiomass.data);
     const strand0 = sumGrid(world.strandBiomass.data);
@@ -82,6 +82,10 @@ describe("C-006 abundant sculpting (CI promote)", () => {
         moldShapes[i % moldShapes.length]!,
         0.2,
       );
+    }
+    world.copyForm(12, 12);
+    for (let i = 0; i < 20; i++) {
+      world.pasteForm(16 + (i % 4), 16 + (i % 3));
     }
 
     expect(sumGrid(world.herbBiomass.data)).toBe(herb0);

@@ -297,6 +297,9 @@ let sitingTool: SitingTool = "dig";
 let sitingBrushSize: SitingBrushSize = "bucket";
 let moldShape: MoldShape = "cylinder";
 let depositMaterial: DepositMaterialId = SUBSTRATE_SAND;
+// Duplicator (§4.59 / C-028): a source/destination click cycle. False = the
+// next click copies a source; true = the next click pastes it, then resets.
+let duplicateArmed = false;
 let steps = 0;
 let pointerDown: { x: number; y: number } | null = null;
 let cutawayCell: { x: number; z: number } | null = null;
@@ -536,12 +539,14 @@ const ui = mountControls(
     },
     onSitingTool: (tool) => {
       sitingTool = tool;
+      duplicateArmed = false;
       ui.setSitingTool(tool);
       controls.enabled = true;
       tryUnlockAudio();
-      // Molds use a fixed footprint; every other tool tracks the brush tier.
+      // Molds and the duplicator use a fixed footprint; every other tool
+      // tracks the brush tier.
       sitingCursor.setBrushRadius(
-        tool === "mold"
+        tool === "mold" || tool === "duplicate"
           ? config.moldRadius
           : sitingBrushRadiusFor(sitingBrushSize),
       );
@@ -570,6 +575,11 @@ const ui = mountControls(
         ui.setHint(
           "Mold = one-shot form stamp — click to raise a cylinder / pyramid / terrace",
         );
+      } else if (tool === "duplicate") {
+        sitingCursor.setVisible(true);
+        ui.setHint(
+          "Duplicator — click a source form, then click again to re-stamp it",
+        );
       } else {
         sitingCursor.setVisible(true);
         ui.setHint("Yellow cell = site · click to place cause (orbit on look)");
@@ -577,8 +587,9 @@ const ui = mountControls(
     },
     onSitingBrushSize: (size) => {
       sitingBrushSize = size;
-      // Molds keep their fixed footprint — only track the brush for other tools.
-      if (sitingTool !== "mold") {
+      // Molds and the duplicator keep a fixed footprint — only track the
+      // brush for other tools.
+      if (sitingTool !== "mold" && sitingTool !== "duplicate") {
         sitingCursor.setBrushRadius(sitingBrushRadiusFor(size));
       }
       ui.setSitingBrushSize(size);
@@ -797,6 +808,21 @@ canvas.addEventListener("pointerup", (e) => {
     editUndo.pushCheckpoint(world);
     world.stampMold(cell.x, cell.z, moldShape);
     ui.setUndoEnabled(editUndo.canUndo);
+  } else if (sitingTool === "duplicate") {
+    if (!duplicateArmed) {
+      // Copy is a pure observer (P-006 / T-006) — no undo checkpoint needed.
+      world.copyForm(cell.x, cell.z);
+      duplicateArmed = true;
+      ui.setHint("Source copied — click a destination to re-stamp it");
+    } else {
+      editUndo.pushCheckpoint(world);
+      world.pasteForm(cell.x, cell.z);
+      ui.setUndoEnabled(editUndo.canUndo);
+      duplicateArmed = false;
+      ui.setHint(
+        "Duplicator — click a source form, then click again to re-stamp it",
+      );
+    }
   } else if (sitingTool === "ignite") {
     // Authored ignition only (C-003 Open) — pulse cause, not stochastic (A-002 / A-005).
     world.igniteCell(cell.x, cell.z);
@@ -1032,9 +1058,13 @@ function frame(now: number): void {
               ? "flatten"
               : sitingTool === "mold"
                 ? `mold: ${moldShape}`
-                : sitingTool === "ignite"
-                  ? "ignite"
-                  : "predict";
+                : sitingTool === "duplicate"
+                  ? duplicateArmed
+                    ? "duplicate: pick destination"
+                    : "duplicate: pick source"
+                  : sitingTool === "ignite"
+                    ? "ignite"
+                    : "predict";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +

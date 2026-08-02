@@ -446,6 +446,7 @@ export type SitingTool =
   | "deposit"
   | "flatten"
   | "mold"
+  | "duplicate"
   | "predict"
   | "ignite";
 

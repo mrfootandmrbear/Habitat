@@ -54,20 +54,20 @@ Valid non-idle exits that still allow the chain to continue after merge:
 
 Two automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
 
-### Track T — Terrain tools (C-028 structural)
+### Track T — Terrain tools (C-028 structural) — **parked**
 
 | Order | Slice | Notes |
 |---|---|---|
 | T1 | **§4.57** geometric mold stamps | **Done** |
-| T2 | **§4.59** duplicator stamp | Tip today (Track T) |
-| Tn | Whatever BUILD_GUIDE tip names next on this wave | Never L5 / L8 / nutrients / animals / SWE / wet-sand / freeze |
+| T2 | **§4.59** duplicator stamp | **Done** — C-028 structural "keep" kit is now fully shipped |
+| Tn | None — no further machine slice | Remaining C-028 work is owner taste (do molds/duplicator feel like shaping sand?; flags/banners chrome slot) — owner Lock backlog, not agent-executable. Do **not** invent a new Track T slice; if re-enabled later it will be named in BUILD_GUIDE's tip paragraph. |
 
 ### Track R — Review correctness (vegetation/habitat)
 
 | Order | Slice | Notes |
 |---|---|---|
-| R1 | **§4.47** guild cover & light-competition | Tip today (parallel) |
-| R2 | **§4.48** habitat/dispersal determinism hygiene | After R1 |
+| R1 | **§4.47** guild cover & light-competition | **Done** |
+| R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today — sole executable queue (Track T parked) |
 | Rn | Next unblocked review-queue item | Skip owner-blocked Living remainder |
 
 **Never in either track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
@@ -90,9 +90,11 @@ Create **two** Automations in the Cursor dashboard (Cloud Agents → Automations
 
 CI already runs `npm run gate`. Automations do **not** replace CI.
 
-### Prompt — Track T (terrain tools)
+### Prompt — Track T (terrain tools) — currently parked
 
-Copy into the automation prompt body:
+Track T has **no open machine slice** as of §4.59 (duplicator stamp, Done) — the C-028 structural "keep" kit is fully shipped. Leave this Automation **disabled** until BUILD_GUIDE's tip paragraph names a new Track T item (e.g. an owner Lock unblocks C-028 taste into a new structural verb). If enabled and fired with nothing to claim, the agent must write a one-line "Track T has no open slice" status and stop — never invent work by reaching into Track R or the blocked Living remainder.
+
+Copy into the automation prompt body (once re-enabled with a real tip item):
 
 ```
 You are a Habitat cloud succession agent on Track T (terrain tools).
@@ -100,7 +102,7 @@ You are a Habitat cloud succession agent on Track T (terrain tools).
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md.
 2. Read "Next (executable tip)" and the Track T table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track T slice (today: §4.59 duplicator). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track T slice. If the Track T table shows no open slice (parked, owner taste, or otherwise), or the named tip item is already Done or blocked, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.
@@ -123,7 +125,7 @@ You are a Habitat cloud succession agent on Track R (review correctness — vege
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md.
 2. Read "Next (executable tip)" and the Track R table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice (today: §4.47, then §4.48). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice (today: §4.48; §4.47 Done). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.
