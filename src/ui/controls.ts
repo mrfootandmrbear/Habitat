@@ -100,6 +100,7 @@ const SITING: { id: SitingTool; label: string }[] = [
   { id: "deposit", label: "Tool: deposit" },
   { id: "flatten", label: "Tool: flatten" },
   { id: "mold", label: "Tool: mold" },
+  { id: "duplicate", label: "Tool: duplicate" },
   { id: "ignite", label: "Tool: ignite (authored)" },
 ];
 

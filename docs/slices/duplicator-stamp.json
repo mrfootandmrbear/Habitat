@@ -1,0 +1,13 @@
+{
+  "id": "duplicator-stamp",
+  "title": "Duplicator stamp",
+  "simLoop": "copyForm captures a relative elev(+depth)[+material] delta field against the source footprint's own mean (pure observer, no sim write); pasteForm re-applies that delta field at a new footprint through the same clamp family as berm/mold, depth riding with elev (C-002); material re-stamps only through the existing direct-write path deposit already uses (C-009).",
+  "gameLoop": "Tool: duplicate — click a source form, then click a destination to re-stamp the same relief elsewhere, multiplying a form the player already sculpted (a ridge, a basin lip) as a terrain cause (A-005), not painted architecture or copied ecology.",
+  "registerIds": ["C-006", "C-002", "C-013", "A-005", "C-028", "C-009"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/siting.test.ts", "src/sim/c006-abundant-sculpting.test.ts"],
+  "probes": [],
+  "fields": ["terrain.elevation", "soil.depth", "soil.material"],
+  "notebookSeed": "I copied the ridge I shaped by the cove and set it down again at the inlet — the same form, twice, not a new one nature grew.",
+  "tierO": "deferred — batch with C-028 mold/duplicator taste (do molds and the duplicator feel like shaping sand or placing architecture); no owner-only question blocks this slice"
+}

@@ -315,6 +315,18 @@ export class WorldState {
   private readonly precipPhaseBox: ScalarBox = { value: PRECIP_PHASE_RAIN };
   /** Scratch for orographic discharge (atmosphere Process). */
   private readonly atmosphereRainScratch: Float32Array;
+  /**
+   * Duplicator clipboard (§4.59 / C-028): the last `copyForm` capture, or
+   * `null` before any copy. Relative to the source footprint's own mean so
+   * `pasteForm` re-stamps the same *relief*, not absolute elevations.
+   */
+  private copiedForm: {
+    readonly radius: number;
+    /** `(2r+1)²`, row-major (dz+r)·side+(dx+r); `NaN` = uncaptured cell. */
+    readonly dElev: Float32Array;
+    /** Same indexing; `-1` = uncaptured cell (no material re-stamp). */
+    readonly material: Int32Array;
+  } | null = null;
 
   /** Single-source ledgers (registry ScalarBox). */
   private readonly precipBox: ScalarBox = { value: 0 };
@@ -2669,6 +2681,132 @@ export class WorldState {
         this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
         this.soilDepth.data[i]! = nextDepth;
         this.terrain.data[i]! = nextElev;
+      }
+    }
+    this.markStructureDirty();
+  }
+
+  /**
+   * Duplicator copy (§4.59 / C-028 "Sandbox magic"): captures the source
+   * footprint's elev delta against its own mean, plus material, into
+   * `copiedForm` for a later `pasteForm`. Pure observer — no sim write, no
+   * hash change (P-006 / T-006); never reads vegetation, water, or
+   * suitability (C-006 / N-001).
+   */
+  copyForm(
+    srcCx: number,
+    srcCz: number,
+    radius: number = config.moldRadius,
+  ): void {
+    const r = radius;
+    const side = 2 * r + 1;
+    let sum = 0;
+    let count = 0;
+    for (let dz = -r; dz <= r; dz++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.hypot(dx, dz) > r + 0.01) continue;
+        const x = srcCx + dx;
+        const z = srcCz + dz;
+        if (!this.terrain.inBounds(x, z)) continue;
+        sum += this.terrain.data[z * this.width + x]!;
+        count++;
+      }
+    }
+    if (count === 0) {
+      this.copiedForm = null;
+      return;
+    }
+    const mean = sum / count;
+    const dElev = new Float32Array(side * side).fill(NaN);
+    const material = new Int32Array(side * side).fill(-1);
+    for (let dz = -r; dz <= r; dz++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.hypot(dx, dz) > r + 0.01) continue;
+        const x = srcCx + dx;
+        const z = srcCz + dz;
+        if (!this.terrain.inBounds(x, z)) continue;
+        const i = z * this.width + x;
+        const idx = (dz + r) * side + (dx + r);
+        dElev[idx] = this.terrain.data[i]! - mean;
+        material[idx] = this.soilMaterial.data[i]!;
+      }
+    }
+    this.copiedForm = { radius: r, dElev, material };
+  }
+
+  /** True once `copyForm` has captured a source footprint. */
+  hasCopiedForm(): boolean {
+    return this.copiedForm !== null;
+  }
+
+  /**
+   * Duplicator paste (§4.59 / C-028): re-applies the last `copyForm` capture
+   * as a signed elev delta at a new footprint, same clamp family as
+   * berm/mold; depth rides with elev (C-002). Material re-stamps through
+   * the same direct-write path as `depositSubstrate` (C-009 — never a new
+   * mechanism). No-op if nothing has been copied. No vegetation write
+   * (C-006).
+   */
+  pasteForm(dstCx: number, dstCz: number): void {
+    const form = this.copiedForm;
+    if (!form) return;
+    const r = form.radius;
+    const side = 2 * r + 1;
+    const zFloor = config.elevationFloor;
+    const minDepth = 1e-3;
+    for (let dz = -r; dz <= r; dz++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const idx = (dz + r) * side + (dx + r);
+        const rel = form.dElev[idx]!;
+        if (Number.isNaN(rel)) continue;
+        const x = dstCx + dx;
+        const z = dstCz + dz;
+        if (!this.terrain.inBounds(x, z)) continue;
+        const i = z * this.width + x;
+        const elev0 = this.terrain.data[i]!;
+        const depth0 = this.soilDepth.data[i]!;
+        let dh = rel;
+
+        let nextDepth = depth0 + dh;
+        let nextElev = elev0 + dh;
+        if (nextDepth < 0) {
+          dh = -depth0;
+          nextDepth = 0;
+          nextElev = elev0 + dh;
+        }
+        if (nextDepth > 5) {
+          dh = 5 - depth0;
+          nextDepth = 5;
+          nextElev = elev0 + dh;
+        }
+        if (nextElev < zFloor) {
+          dh = zFloor - elev0;
+          nextElev = zFloor;
+          nextDepth = depth0 + dh;
+          if (nextDepth < 0) {
+            nextDepth = 0;
+            dh = -depth0;
+            nextElev = elev0 + dh;
+          }
+          if (nextDepth > 5) {
+            nextDepth = 5;
+            dh = 5 - depth0;
+            nextElev = elev0 + dh;
+          }
+        }
+
+        const material = form.material[idx]!;
+        if (dh === 0) {
+          if (material >= 0) this.soilMaterial.data[i]! = material;
+          continue;
+        }
+
+        const oldH = Math.max(depth0, minDepth);
+        const newH = Math.max(nextDepth, minDepth);
+        this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
+        this.soilDepth.data[i]! = nextDepth;
+        this.terrain.data[i]! = nextElev;
+        if (material >= 0) this.soilMaterial.data[i]! = material;
       }
     }
     this.markStructureDirty();

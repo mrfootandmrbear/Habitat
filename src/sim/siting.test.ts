@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { config } from "../config";
+import { config, moldProfileWeight } from "../config";
 import { totalWaterVolume } from "./hydrology/fluxStep";
 import { EditUndoStack } from "./sessionPersist";
+import { Grid2D } from "./Grid2D";
 import { generateMountain } from "./terrain/generateMountain";
+import { SUBSTRATE_ROCK } from "./terrain/substrates";
 import { WorldState } from "./WorldState";
 import { worldToGrid } from "../ui/siting";
 
@@ -304,6 +306,140 @@ describe("geometric mold stamps (§4.57, C-028 / A-005)", () => {
     expect([...world.herbBiomass.data]).toEqual([...herb0]);
     // The stamps did move terrain — this is not a no-op.
     expect(world.terrain.get(14, 14)).not.toBe(0);
+  });
+});
+
+describe("duplicator stamp (§4.59, C-028 / A-005 / C-009)", () => {
+  const r = config.moldRadius;
+
+  it("hasCopiedForm is false until copyForm captures a source", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    expect(world.hasCopiedForm()).toBe(false);
+    world.copyForm(20, 20, r);
+    expect(world.hasCopiedForm()).toBe(true);
+  });
+
+  it("pasteForm with no prior copy is a no-op", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    const before = world.stateHash();
+    world.pasteForm(20, 20);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("copyForm is a pure observer — world hash unchanged (P-006 / T-006)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    world.stampMold(20, 20, "cylinder", config.moldHeight, r);
+    const before = world.stateHash();
+    world.copyForm(20, 20, r);
+    expect(world.hasCopiedForm()).toBe(true);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("paste reproduces the source relief within f32 (mean-subtracted pyramid)", () => {
+    const flatElev = 2;
+    const size = 64;
+    const world = new WorldState(new Grid2D(size, size, flatElev));
+    const scx = 16;
+    const scz = 16;
+    world.stampMold(scx, scz, "pyramid", config.moldHeight, r);
+    world.copyForm(scx, scz, r);
+
+    // Expected relative relief, computed independently of WorldState's
+    // internal clipboard: mean-subtracted pyramid weight profile — the same
+    // math stampMold used to build the source, before copyForm's mean-shift.
+    const offsets: { dx: number; dz: number }[] = [];
+    let sum = 0;
+    for (let dz = -r; dz <= r; dz++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.hypot(dx, dz) > r + 0.01) continue;
+        offsets.push({ dx, dz });
+        sum += config.moldHeight * moldProfileWeight("pyramid", dx, dz, r);
+      }
+    }
+    const mean = sum / offsets.length;
+
+    // Paste far enough from the source that footprints never overlap, onto
+    // ground that is still flat there. Give the destination footprint
+    // mid-range soil depth first — the pyramid's mean-subtracted relief
+    // swings both signs by more than the 0.8 m default depth, which would
+    // otherwise clip the dip against the depth ≥ 0 clamp (a real, intended
+    // clamp — not what this test is measuring).
+    const dcx = 48;
+    const dcz = 48;
+    for (const { dx, dz } of offsets) {
+      world.soilDepth.data[(dcz + dz) * size + (dcx + dx)] = 2.5;
+    }
+    const before = world.terrain.data.slice();
+    world.pasteForm(dcx, dcz);
+    for (const { dx, dz } of offsets) {
+      const i = (dcz + dz) * size + (dcx + dx);
+      const expected =
+        config.moldHeight * moldProfileWeight("pyramid", dx, dz, r) - mean;
+      expect(world.terrain.data[i]! - before[i]!).toBeCloseTo(expected, 4);
+    }
+  });
+
+  it("paste conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const world = new WorldState(generateMountain(48, 48, 8, 3));
+    world.stampMold(16, 16, "pyramid", config.moldHeight, r);
+    world.copyForm(16, 16, r);
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.pasteForm(32, 32);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(Math.abs(dElev - dDepth)).toBeLessThan(1e-4);
+  });
+
+  it("paste undo restores state hash (C-013)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    world.stampMold(20, 20, "pyramid", config.moldHeight, r);
+    world.copyForm(20, 20, r);
+    const undo = new EditUndoStack();
+    const before = world.stateHash();
+    undo.pushCheckpoint(world);
+    world.pasteForm(30, 10);
+    expect(world.stateHash()).not.toBe(before);
+    expect(undo.undo(world)).toBe(true);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("paste re-stamps captured material through the deposit-stamp path (C-009)", () => {
+    const world = new WorldState(generateMountain(40, 40, 8, 3));
+    world.depositSubstrate(20, 20, SUBSTRATE_ROCK, 0.1, r);
+    world.copyForm(20, 20, r);
+    world.pasteForm(10, 10);
+    expect(world.getSoilMaterial(10, 10)).toBe(SUBSTRATE_ROCK);
+  });
+
+  it("20 pastes write no vegetation, water, or suitability (C-006 / N-001)", () => {
+    const world = new WorldState(generateMountain(48, 48, 8, 3));
+    world.stampMold(24, 24, "pyramid", config.moldHeight, r);
+    world.copyForm(24, 24, r);
+    const cover0 = world.vegCover.data.slice();
+    const herb0 = world.herbBiomass.data.slice();
+    const water0 = world.water.data.slice();
+    const hsi0 = world.habitatSuitability.data.slice();
+    const terrainBefore = world.terrain.data.slice();
+    for (let i = 0; i < 20; i++) {
+      world.pasteForm(10 + (i % 6), 10 + (i % 5));
+    }
+    expect([...world.vegCover.data]).toEqual([...cover0]);
+    expect([...world.herbBiomass.data]).toEqual([...herb0]);
+    expect([...world.water.data]).toEqual([...water0]);
+    expect([...world.habitatSuitability.data]).toEqual([...hsi0]);
+    let changed = false;
+    for (let i = 0; i < terrainBefore.length; i++) {
+      if (world.terrain.data[i] !== terrainBefore[i]) {
+        changed = true;
+        break;
+      }
+    }
+    expect(changed).toBe(true);
   });
 });
 
