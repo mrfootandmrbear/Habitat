@@ -6,7 +6,7 @@
       "abs": 0
     },
     "same.hashN": {
-      "value": 34607855,
+      "value": 2165290772,
       "abs": 0
     },
     "same.precip": {
@@ -14,7 +14,7 @@
       "abs": 0.00001
     },
     "heavy.hashN": {
-      "value": 117022398,
+      "value": 1704761659,
       "abs": 0
     },
     "heavy.precip": {
@@ -22,11 +22,11 @@
       "abs": 0.00001
     },
     "heavy.meanSoil": {
-      "value": 0.03219771043852359,
+      "value": 0.0322069048017961,
       "abs": 0.00001
     },
     "dry.hashN": {
-      "value": 2133292292,
+      "value": 1467281819,
       "abs": 0
     },
     "dry.precip": {
@@ -46,11 +46,11 @@
       "abs": 0.00001
     },
     "delta.soilDelta": {
-      "value": 0.028676259396892754,
+      "value": 0.028685453760165267,
       "abs": 0.00001
     },
     "delta.encoding": {
-      "value": 0.1911750626459517,
+      "value": 0.19123635840110179,
       "abs": 0.0001
     },
     "delta.encodingCleared": {

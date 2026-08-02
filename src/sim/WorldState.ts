@@ -1536,7 +1536,17 @@ export class WorldState {
         const moisture = m[i]!;
         let cover = c[i]!;
         if (moisture > thresh) {
-          cover += growth * moisture * light.understoryLight * (1 - cover);
+          // §4.47: canopy expansion is driven by the light actually *absorbed*
+          // by plants colonizing the open fraction — I₀ intercepted across the
+          // gap area (1 − cover). The prior term used the *transmitted*
+          // understory light and multiplied it by an explicit (1 − cover);
+          // since transmitted light is itself I₀(1 − cover) under the corrected
+          // LAI, that squared the open-space factor (I₀(1 − cover)²), a
+          // double-count of self-shading that read growth off the inverse of
+          // the light the canopy captures. Absorbed light, limited once by open
+          // space:
+          const absorbedLight = light.insolation * (1 - cover);
+          cover += growth * moisture * absorbedLight;
         } else {
           cover -= decay * (1 - moisture / Math.max(thresh, 1e-6));
         }

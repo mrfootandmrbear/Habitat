@@ -33,7 +33,19 @@ export function terrainInsolation(
   return clamp01(nx * sunX + ny * sunY + nz * sunZ);
 }
 
-/** Beer–Lambert canopy attenuation (NATURAL_PROCESS_MATH §3.2). */
+/**
+ * Beer–Lambert canopy attenuation (NATURAL_PROCESS_MATH §3.2).
+ *
+ * §4.47: leaf-area index is the Beer–Lambert-*consistent* inverse of cover,
+ * `LAI = −ln(1 − cover)/k`, not the linear `cover · maxLAI`. Under that form
+ * the transmitted fraction is exactly `exp(−k·LAI) = 1 − cover`, so understory
+ * light is `I₀(1 − cover)` and approaches darkness as cover → 1 instead of
+ * resting on the old `exp(−k·maxLAI)` floor. The reported `leafAreaIndex`
+ * diverges at full cover, so it is clamped to `maxLeafAreaIndex` to stay inside
+ * its registered bound; the transmitted light is computed from the exact
+ * `(1 − cover)` identity rather than the clamped LAI so no floor is
+ * reintroduced.
+ */
 export function evaluateLight(
   insolation: number,
   cover: number,
@@ -42,10 +54,12 @@ export function evaluateLight(
 ): LightSample {
   const incoming = clamp01(insolation);
   const boundedCover = clamp01(cover);
-  const leafAreaIndex = boundedCover * maxLeafAreaIndex;
-  const understoryLight = clamp01(
-    incoming * Math.exp(-extinctionCoefficient * leafAreaIndex),
-  );
+  const k = Math.max(extinctionCoefficient, 1e-6);
+  const openFraction = 1 - boundedCover;
+  const understoryLight = clamp01(incoming * openFraction);
+  const rawLeafAreaIndex =
+    openFraction > 0 ? -Math.log(openFraction) / k : Number.POSITIVE_INFINITY;
+  const leafAreaIndex = Math.min(maxLeafAreaIndex, rawLeafAreaIndex);
   return { insolation: incoming, leafAreaIndex, understoryLight };
 }
 

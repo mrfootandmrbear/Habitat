@@ -6,11 +6,11 @@
       "abs": 0.000001
     },
     "south.meanUnderstoryLight": {
-      "value": 0.20132742822170258,
+      "value": 0.15452928841114044,
       "abs": 0.000001
     },
     "south.meanCover": {
-      "value": 0.5061704516410828,
+      "value": 0.8318771719932556,
       "abs": 0.000001
     },
     "south.replayMatch": {
@@ -22,11 +22,11 @@
       "abs": 0.000001
     },
     "north.meanUnderstoryLight": {
-      "value": 0.13348884880542755,
+      "value": 0.17373093962669373,
       "abs": 0.000001
     },
     "north.meanCover": {
-      "value": 0.36070936918258667,
+      "value": 0.558968186378479,
       "abs": 0.000001
     },
     "delta.insolationGap": {
@@ -34,7 +34,7 @@
       "abs": 0.000001
     },
     "delta.coverGap": {
-      "value": 0.1454610824584961,
+      "value": 0.2729089856147766,
       "abs": 0.000001
     }
   }

@@ -11,7 +11,7 @@ import {
   tidalHydroperiod,
 } from "./inundationComposition";
 import { factorSalinity } from "./salinityComposition";
-import { herbCoverFraction } from "./arrivalComposition";
+import { combineCoverFractions, herbCoverFraction } from "./arrivalComposition";
 
 export const CRUST_LIMITING_MOISTURE = 0;
 export const CRUST_LIMITING_OPEN = 1;
@@ -39,7 +39,12 @@ export function factorOpenCanopy(canopyFraction: number): number {
   return clamp01(1 - clamp01(canopyFraction));
 }
 
-/** Stacked non-crust cover fraction for the open-canopy arm (capped at 1). */
+/**
+ * Non-crust cover fraction for the open-canopy arm, combined by
+ * product-complement `1 − Π(1 − cᵢ)` (§4.47) rather than an additive clamp, so
+ * crust is not scored as shaded out the moment two pioneer guilds each reach a
+ * moderate cover.
+ */
 export function canopyCoverFraction(args: {
   herbBiomass?: number;
   herbBiomassMax?: number;
@@ -52,29 +57,28 @@ export function canopyCoverFraction(args: {
   shrubBiomass?: number;
   shrubBiomassMax?: number;
 }): number {
-  return Math.min(
-    1,
+  return combineCoverFractions([
     herbCoverFraction(
       args.herbBiomass ?? 0,
       args.herbBiomassMax ?? config.herbBiomassMax,
-    ) +
-      herbCoverFraction(
-        args.strandBiomass ?? 0,
-        args.strandBiomassMax ?? config.strandBiomassMax,
-      ) +
-      herbCoverFraction(
-        args.binderBiomass ?? 0,
-        args.binderBiomassMax ?? config.binderBiomassMax,
-      ) +
-      herbCoverFraction(
-        args.marshBiomass ?? 0,
-        args.marshBiomassMax ?? config.marshBiomassMax,
-      ) +
-      herbCoverFraction(
-        args.shrubBiomass ?? 0,
-        args.shrubBiomassMax ?? config.shrubBiomassMax,
-      ),
-  );
+    ),
+    herbCoverFraction(
+      args.strandBiomass ?? 0,
+      args.strandBiomassMax ?? config.strandBiomassMax,
+    ),
+    herbCoverFraction(
+      args.binderBiomass ?? 0,
+      args.binderBiomassMax ?? config.binderBiomassMax,
+    ),
+    herbCoverFraction(
+      args.marshBiomass ?? 0,
+      args.marshBiomassMax ?? config.marshBiomassMax,
+    ),
+    herbCoverFraction(
+      args.shrubBiomass ?? 0,
+      args.shrubBiomassMax ?? config.shrubBiomassMax,
+    ),
+  ]);
 }
 
 export type CrustHsiSample = {
