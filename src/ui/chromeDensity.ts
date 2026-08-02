@@ -21,6 +21,7 @@ export const SIMPLE_CONTROL_IDS = [
   "siting-tool",
   "siting-brush-size",
   "deposit-material",
+  "mold-shape",
   "undo-edit",
   "siting-hint",
   "status",

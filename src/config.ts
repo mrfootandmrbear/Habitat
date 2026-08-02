@@ -159,6 +159,14 @@ export const config = {
   bermRaise: 2.25,
   /** Peak lower (m) at brush center per stroke (clamped by soil.depth). */
   digLower: 1.5,
+  /**
+   * Geometric mold stamps (C-028 / §4.57) — one-shot form causes (A-005).
+   * Fixed footprint radius so a mold reads as a recognizable rampart / mound /
+   * cylinder, not a variable brush. Depth rides with elev (C-002).
+   */
+  moldRadius: 5,
+  /** Peak elev(+depth) delta (m) a mold stamp applies at full profile weight. */
+  moldHeight: 3.0,
   predictionWetThreshold: 0.01,
   /** Horizon in event steps (~45 sim-hours at 15 min/event). */
   predictionHorizonSteps: 180,
@@ -437,6 +445,7 @@ export type SitingTool =
   | "dig"
   | "deposit"
   | "flatten"
+  | "mold"
   | "predict"
   | "ignite";
 
@@ -447,4 +456,40 @@ export function sitingBrushRadiusFor(
   size: SitingBrushSize,
 ): number {
   return config.sitingBrushRadii[size];
+}
+
+/**
+ * Geometric mold footprints (C-028 / §4.57) — fixed-form terrain stamps.
+ * `cylinder` = round flat-top disc; `pyramid` = square base tapering to a peak;
+ * `terrace` = square flat-top mesa. Shape-only (elev+depth); no material, no
+ * vegetation (C-006). Material stays on the separate deposit path (C-009).
+ */
+export type MoldShape = "cylinder" | "pyramid" | "terrace";
+
+/**
+ * Relative profile weight in [0, 1] of a mold at footprint offset (dx, dz)
+ * with fixed radius `r`. Multiplied by a signed height to raise or lower.
+ */
+export function moldProfileWeight(
+  shape: MoldShape,
+  dx: number,
+  dz: number,
+  r: number,
+): number {
+  switch (shape) {
+    case "cylinder": {
+      // Round flat-top disc — every cell inside the Euclidean radius full weight.
+      return Math.hypot(dx, dz) <= r + 0.01 ? 1 : 0;
+    }
+    case "terrace": {
+      // Square flat-top mesa — Chebyshev footprint, uniform weight.
+      return Math.max(Math.abs(dx), Math.abs(dz)) <= r + 0.01 ? 1 : 0;
+    }
+    case "pyramid": {
+      // Square base tapering linearly to a central peak.
+      const cheb = Math.max(Math.abs(dx), Math.abs(dz));
+      if (cheb > r + 0.01) return 0;
+      return 1 - cheb / (r + 1);
+    }
+  }
 }

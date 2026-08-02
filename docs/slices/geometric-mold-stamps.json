@@ -1,0 +1,13 @@
+{
+  "id": "geometric-mold-stamps",
+  "title": "Geometric mold stamps",
+  "simLoop": "stampMold applies a fixed elev(+depth) delta field over a fixed footprint (cylinder disc / pyramid / square terrace); depth rides with elev so bedrock = elev − depth holds (C-002); no material (deposit stays separate, C-009) and no vegetation write (C-006).",
+  "gameLoop": "Tool: mold — pick a geometric form (cylinder mound / pyramid / square terrace) and click once to raise a recognizable rampart, mound, or terrace as a terrain cause (A-005), not painted architecture.",
+  "registerIds": ["C-006", "C-002", "C-013", "A-005", "C-028", "C-009"],
+  "invariantClass": "Conservation",
+  "tests": ["src/sim/siting.test.ts", "src/sim/c006-abundant-sculpting.test.ts"],
+  "probes": [],
+  "fields": ["terrain.elevation", "soil.depth"],
+  "notebookSeed": "I pressed a cylinder mound into the flat and the next storm had a hill to run off — a form I set, not a wetland I painted.",
+  "tierO": "deferred — batch with C-028 mold/chrome taste (do molds feel like shaping sand or placing architecture); no owner-only question blocks this slice"
+}
