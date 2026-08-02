@@ -33,7 +33,26 @@ import {
   SUBSTRATE_SAND,
   type DepositMaterialId,
 } from "../sim/terrain/substrates";
+import {
+  CHROME_DENSITY_STORAGE_KEY,
+  type ChromeDensity,
+  resolveChromeDensity,
+} from "./chromeDensity";
 import { sustainableRates, rateDescription, type TimeRateId } from "./timeRates";
+
+function markFullOnly(el: HTMLElement): void {
+  el.classList.add("chrome-full");
+  el.dataset.chromeTier = "full";
+}
+
+function makeRow(id: string, ariaLabel: string): HTMLDivElement {
+  const row = document.createElement("div");
+  row.className = "chrome-row";
+  row.id = id;
+  row.setAttribute("role", "group");
+  row.setAttribute("aria-label", ariaLabel);
+  return row;
+}
 
 /** Rate ids and their sim-time-per-wall-second meaning live in `timeRates.ts`. */
 export type TimeRate = TimeRateId;
@@ -157,9 +176,65 @@ export function mountControls(
   setCutaway: (text: string) => void;
   setUndoEnabled: (enabled: boolean) => void;
   setBranchMode: (active: boolean) => void;
+  setChromeDensity: (density: ChromeDensity) => void;
+  getChromeDensity: () => ChromeDensity;
 } {
   const bar = document.createElement("div");
   bar.id = "controls";
+  bar.setAttribute("aria-label", "Habitat controls");
+
+  let chromeDensity: ChromeDensity = "simple";
+  try {
+    chromeDensity = resolveChromeDensity(
+      globalThis.localStorage?.getItem(CHROME_DENSITY_STORAGE_KEY),
+    );
+  } catch {
+    chromeDensity = "simple";
+  }
+
+  const densityGroup = document.createElement("div");
+  densityGroup.id = "chrome-density";
+  densityGroup.setAttribute("role", "group");
+  densityGroup.setAttribute(
+    "aria-label",
+    "Control density (U-001 — Simple or Full)",
+  );
+
+  const simpleBtn = document.createElement("button");
+  simpleBtn.type = "button";
+  simpleBtn.id = "chrome-simple";
+  simpleBtn.textContent = "Simple";
+  simpleBtn.setAttribute(
+    "aria-label",
+    "Simple controls — sculpt, primary forces, time",
+  );
+
+  const fullBtn = document.createElement("button");
+  fullBtn.type = "button";
+  fullBtn.id = "chrome-full";
+  fullBtn.textContent = "Full";
+  fullBtn.setAttribute(
+    "aria-label",
+    "Full controls — all force dials, inspect, branch, session",
+  );
+
+  const applyChromeDensity = (density: ChromeDensity): void => {
+    chromeDensity = density;
+    bar.dataset.chrome = density;
+    simpleBtn.classList.toggle("active", density === "simple");
+    fullBtn.classList.toggle("active", density === "full");
+    simpleBtn.setAttribute("aria-pressed", String(density === "simple"));
+    fullBtn.setAttribute("aria-pressed", String(density === "full"));
+    try {
+      globalThis.localStorage?.setItem(CHROME_DENSITY_STORAGE_KEY, density);
+    } catch {
+      /* private mode / no storage — density still applies for the session */
+    }
+  };
+
+  simpleBtn.addEventListener("click", () => applyChromeDensity("simple"));
+  fullBtn.addEventListener("click", () => applyChromeDensity("full"));
+  densityGroup.append(simpleBtn, fullBtn);
 
   const forcePanel = document.createElement("fieldset");
   forcePanel.id = "force-panel";
@@ -201,6 +276,7 @@ export function mountControls(
   heatSelect.addEventListener("change", () => {
     handlers.onHeat(heatSelect.value as HeatId);
   });
+  markFullOnly(heatSelect);
 
   const seaSelect = document.createElement("select");
   seaSelect.id = "sea-level";
@@ -235,6 +311,7 @@ export function mountControls(
   tideSelect.addEventListener("change", () => {
     handlers.onTide(tideSelect.value as TideId);
   });
+  markFullOnly(tideSelect);
 
   const windSelect = document.createElement("select");
   windSelect.id = "wind-regime";
@@ -269,6 +346,7 @@ export function mountControls(
   seasonSelect.addEventListener("change", () => {
     handlers.onSeason(seasonSelect.value as SeasonId);
   });
+  markFullOnly(seasonSelect);
 
   const erosionSelect = document.createElement("select");
   erosionSelect.id = "erosion-intensity";
@@ -286,21 +364,24 @@ export function mountControls(
   erosionSelect.addEventListener("change", () => {
     handlers.onErosion(erosionSelect.value as ErosionId);
   });
+  markFullOnly(erosionSelect);
 
   forcePanel.append(
     rainSelect,
-    heatSelect,
     seaSelect,
-    tideSelect,
     windSelect,
+    heatSelect,
+    tideSelect,
     seasonSelect,
     erosionSelect,
   );
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
+  resetBtn.id = "reset-water";
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
+  markFullOnly(resetBtn);
 
   const seedGroup = document.createElement("div");
   seedGroup.id = "seed-actions";
@@ -334,6 +415,7 @@ export function mountControls(
   });
 
   seedGroup.append(seedInput, newIslandBtn);
+  markFullOnly(seedGroup);
 
   const briefBtn = document.createElement("button");
   briefBtn.type = "button";
@@ -344,6 +426,7 @@ export function mountControls(
     "Accept or dismiss scenario brief (G-002 / Slice 15)",
   );
   briefBtn.addEventListener("click", handlers.onToggleBrief);
+  markFullOnly(briefBtn);
 
   const notebookBtn = document.createElement("button");
   notebookBtn.type = "button";
@@ -354,15 +437,18 @@ export function mountControls(
     "Open or close Field Notebook (U-006)",
   );
   notebookBtn.addEventListener("click", handlers.onToggleNotebook);
+  markFullOnly(notebookBtn);
 
   const rememberBtn = document.createElement("button");
   rememberBtn.type = "button";
+  rememberBtn.id = "remember-form";
   rememberBtn.textContent = "Remember form";
   rememberBtn.setAttribute(
     "aria-label",
     "Remember current landform as then (return visit)",
   );
   rememberBtn.addEventListener("click", handlers.onRememberForm);
+  markFullOnly(rememberBtn);
 
   const branchGroup = document.createElement("div");
   branchGroup.id = "branch-actions";
@@ -421,21 +507,27 @@ export function mountControls(
     compareBranchBtn,
     endBranchBtn,
   );
+  markFullOnly(branchGroup);
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
+  saveBtn.id = "save-world";
   saveBtn.textContent = "Save";
   saveBtn.setAttribute("aria-label", "Save world (T-003)");
   saveBtn.addEventListener("click", handlers.onSave);
+  markFullOnly(saveBtn);
 
   const loadBtn = document.createElement("button");
   loadBtn.type = "button";
+  loadBtn.id = "load-world";
   loadBtn.textContent = "Load";
   loadBtn.setAttribute("aria-label", "Load world");
   loadBtn.addEventListener("click", handlers.onLoad);
+  markFullOnly(loadBtn);
 
   const undoBtn = document.createElement("button");
   undoBtn.type = "button";
+  undoBtn.id = "undo-edit";
   undoBtn.textContent = "Undo edit";
   undoBtn.setAttribute("aria-label", "Undo last terrain edit (C-013)");
   undoBtn.disabled = true;
@@ -471,37 +563,6 @@ export function mountControls(
   };
   syncTimeRate(initial.timeRate);
 
-  const sitingSelect = document.createElement("select");
-  sitingSelect.id = "siting-tool";
-  sitingSelect.setAttribute("aria-label", "Tool");
-  for (const tool of SITING) {
-    const opt = document.createElement("option");
-    opt.value = tool.id;
-    opt.textContent = tool.label;
-    sitingSelect.appendChild(opt);
-  }
-  sitingSelect.value = initial.sitingTool;
-  sitingSelect.addEventListener("change", () => {
-    handlers.onSitingTool(sitingSelect.value as SitingTool);
-  });
-
-  const brushSelect = document.createElement("select");
-  brushSelect.id = "siting-brush-size";
-  brushSelect.setAttribute(
-    "aria-label",
-    "Brush size (C-028 — bucket or shovel)",
-  );
-  for (const size of BRUSH_SIZES) {
-    const opt = document.createElement("option");
-    opt.value = size.id;
-    opt.textContent = size.label;
-    brushSelect.appendChild(opt);
-  }
-  brushSelect.value = initial.sitingBrushSize;
-  brushSelect.addEventListener("change", () => {
-    handlers.onSitingBrushSize(brushSelect.value as SitingBrushSize);
-  });
-
   const materialSelect = document.createElement("select");
   materialSelect.id = "deposit-material";
   materialSelect.setAttribute(
@@ -519,6 +580,45 @@ export function mountControls(
     handlers.onDepositMaterial(
       Number(materialSelect.value) as DepositMaterialId,
     );
+  });
+
+  const syncMaterialVisibility = (tool: SitingTool): void => {
+    const showMaterial = tool === "deposit";
+    materialSelect.hidden = !showMaterial;
+    materialSelect.disabled = !showMaterial;
+  };
+
+  const sitingSelect = document.createElement("select");
+  sitingSelect.id = "siting-tool";
+  sitingSelect.setAttribute("aria-label", "Tool");
+  for (const tool of SITING) {
+    const opt = document.createElement("option");
+    opt.value = tool.id;
+    opt.textContent = tool.label;
+    sitingSelect.appendChild(opt);
+  }
+  sitingSelect.value = initial.sitingTool;
+  sitingSelect.addEventListener("change", () => {
+    const tool = sitingSelect.value as SitingTool;
+    syncMaterialVisibility(tool);
+    handlers.onSitingTool(tool);
+  });
+
+  const brushSelect = document.createElement("select");
+  brushSelect.id = "siting-brush-size";
+  brushSelect.setAttribute(
+    "aria-label",
+    "Brush size (C-028 — bucket or shovel)",
+  );
+  for (const size of BRUSH_SIZES) {
+    const opt = document.createElement("option");
+    opt.value = size.id;
+    opt.textContent = size.label;
+    brushSelect.appendChild(opt);
+  }
+  brushSelect.value = initial.sitingBrushSize;
+  brushSelect.addEventListener("change", () => {
+    handlers.onSitingBrushSize(brushSelect.value as SitingBrushSize);
   });
 
   const predictGroup = document.createElement("div");
@@ -542,6 +642,7 @@ export function mountControls(
   clearPredBtn.addEventListener("click", handlers.onClearPrediction);
 
   predictGroup.append(commitBtn, compareBtn, clearPredBtn);
+  markFullOnly(predictGroup);
 
   const inspectorSelect = document.createElement("select");
   inspectorSelect.id = "inspector";
@@ -556,6 +657,7 @@ export function mountControls(
   inspectorSelect.addEventListener("change", () => {
     handlers.onInspector(inspectorSelect.value as InspectorLayer);
   });
+  markFullOnly(inspectorSelect);
 
   const hint = document.createElement("div");
   hint.id = "siting-hint";
@@ -565,13 +667,35 @@ export function mountControls(
   const cutaway = document.createElement("div");
   cutaway.id = "cutaway";
   cutaway.textContent = "Cutaway: hover a cell with a tool";
+  markFullOnly(cutaway);
 
   const status = document.createElement("div");
   status.id = "status";
   status.textContent = "Habitat";
 
-  bar.append(
+  syncMaterialVisibility(initial.sitingTool);
+
+  const loopRow = makeRow(
+    "chrome-row-loop",
+    "Core loop — density, forces, time, tools",
+  );
+  loopRow.append(
+    densityGroup,
     forcePanel,
+    timeGroup,
+    sitingSelect,
+    brushSelect,
+    materialSelect,
+    undoBtn,
+  );
+
+  const sessionRow = makeRow(
+    "chrome-row-session",
+    "Session — brief, notebook, seed, branch, save",
+  );
+  sessionRow.classList.add("chrome-full");
+  sessionRow.dataset.chromeTier = "full";
+  sessionRow.append(
     briefBtn,
     notebookBtn,
     resetBtn,
@@ -580,17 +704,15 @@ export function mountControls(
     branchGroup,
     saveBtn,
     loadBtn,
-    undoBtn,
-    timeGroup,
-    sitingSelect,
-    brushSelect,
-    materialSelect,
     predictGroup,
     inspectorSelect,
-    hint,
-    cutaway,
-    status,
   );
+
+  const readRow = makeRow("chrome-row-read", "Status and cutaway");
+  readRow.append(hint, cutaway, status);
+
+  bar.append(loopRow, sessionRow, readRow);
+  applyChromeDensity(chromeDensity);
   parent.appendChild(bar);
 
   return {
@@ -621,6 +743,7 @@ export function mountControls(
     },
     setSitingTool: (tool) => {
       sitingSelect.value = tool;
+      syncMaterialVisibility(tool);
     },
     setSitingBrushSize: (size) => {
       brushSelect.value = size;
@@ -650,5 +773,7 @@ export function mountControls(
       endBranchBtn.disabled = !active;
       branchBtn.disabled = active;
     },
+    setChromeDensity: applyChromeDensity,
+    getChromeDensity: () => chromeDensity,
   };
 }

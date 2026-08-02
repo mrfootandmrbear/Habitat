@@ -20,29 +20,56 @@ body,
   left: 1rem;
   bottom: 1rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 0.5rem 0.65rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: stretch;
+  padding: 0.45rem 0.6rem;
   border-radius: 6px;
   background: rgba(8, 14, 11, 0.78);
-  max-width: calc(100vw - 2rem);
+  max-width: min(46rem, calc(100vw - 2rem));
+  z-index: 2;
+}
+
+#controls[data-chrome="simple"] {
+  max-width: min(38rem, calc(100vw - 2rem));
+}
+
+#controls .chrome-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* U-001 — Full-only chrome is hidden in Simple */
+#controls[data-chrome="simple"] .chrome-full {
+  display: none !important;
+}
+
+#chrome-density {
+  display: flex;
+  gap: 0.2rem;
+}
+
+#chrome-density button.active {
+  background: #3a6b52;
+  border-color: #6fa888;
 }
 
 #controls fieldset#force-panel {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
   align-items: center;
   margin: 0;
-  padding: 0.35rem 0.5rem;
+  padding: 0.3rem 0.45rem;
   border: 1px solid rgba(215, 230, 220, 0.25);
   border-radius: 4px;
 }
 
 #controls fieldset#force-panel legend {
   padding: 0 0.35rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(215, 230, 220, 0.7);
@@ -53,18 +80,25 @@ body,
   background: #1c3328;
   color: #d7e6dc;
   border-radius: 4px;
-  padding: 0.35rem 0.65rem;
+  padding: 0.3rem 0.55rem;
   cursor: pointer;
   font: inherit;
+  font-size: 0.85rem;
 }
 
 #controls button:hover {
   background: #254536;
 }
 
+#controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 #time-rates {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
+  flex-wrap: wrap;
 }
 
 #time-rates button.active {
@@ -72,52 +106,79 @@ body,
   border-color: #6fa888;
 }
 
-#inspector {
+#controls select,
+#inspector,
+#siting-tool,
+#siting-brush-size,
+#deposit-material,
+#rain-regime,
+#sea-level,
+#wind-regime,
+#heat-regime,
+#tide-envelope,
+#season-regime,
+#erosion-intensity {
   border: 1px solid #3d5c4c;
   background: #1c3328;
   color: #d7e6dc;
   border-radius: 4px;
-  padding: 0.35rem 0.5rem;
+  padding: 0.3rem 0.45rem;
   font: inherit;
-  max-width: 12rem;
-}
-
-#siting-tool {
-  border: 1px solid #3d5c4c;
-  background: #1c3328;
-  color: #d7e6dc;
-  border-radius: 4px;
-  padding: 0.35rem 0.5rem;
-  font: inherit;
+  font-size: 0.85rem;
   max-width: 11rem;
 }
 
+#inspector {
+  max-width: 12rem;
+}
+
 #siting-hint {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   opacity: 0.75;
-  max-width: 18rem;
+  max-width: 16rem;
+}
+
+#controls[data-chrome="simple"] #siting-hint {
+  max-width: 14rem;
 }
 
 #cutaway {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   opacity: 0.85;
-  max-width: 28rem;
+  max-width: 22rem;
   color: #b8d4c4;
 }
 
-#predict-actions {
+#predict-actions,
+#branch-actions,
+#seed-actions {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+#terrain-seed {
+  width: 5.5rem;
+  border: 1px solid #3d5c4c;
+  background: #1c3328;
+  color: #d7e6dc;
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  font: inherit;
+  font-size: 0.85rem;
 }
 
 #status {
-  margin-left: 0.35rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.02em;
   opacity: 0.9;
-  max-width: 42rem;
+  max-width: 36rem;
   line-height: 1.35;
+}
+
+#controls[data-chrome="simple"] #status {
+  max-width: 28rem;
 }
 
 #scenario-brief {

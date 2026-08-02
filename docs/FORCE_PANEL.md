@@ -31,6 +31,8 @@ Geography decides *where* a regime bites. The player sets the mean; the island d
 
 Chrome: one **Forces** group containing these selects (exact labels in `src/ui/controls.ts`). No cell arguments on any handler.
 
+**Density (U-001).** The control strip defaults to **Simple**: Rain / Sea / Wind stay visible with time and sculpt tools. Heat / Tide / Season / Erosion (and inspect / branch / session chrome) live under **Full**. Toggle is `#chrome-density` in `src/ui/controls.ts`; contract in [chrome-density-composition.md](slices/chrome-density-composition.md).
+
 ## Geography as modulator
 
 Under a fixed rainfall mean and wind:
