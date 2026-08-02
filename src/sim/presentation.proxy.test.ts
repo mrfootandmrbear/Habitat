@@ -49,6 +49,11 @@ import {
 import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
+import {
+  chromeControlCount,
+  chromeDensityDelta,
+  fullOnlyVisible,
+} from "../ui/chromeDensity";
 import { LIVING_HOLLOW_BRIEF } from "./scenario/ScenarioSession";
 
 describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
@@ -601,5 +606,14 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(swayAmplitude(1, guildFlex("herb"), dead)).toBeLessThan(
       swayAmplitude(1, guildFlex("herb"), 1),
     );
+  });
+
+  it("Simple chrome is leaner than Full so the world keeps real estate (U-001)", () => {
+    expect(fullOnlyVisible("simple")).toBe(false);
+    expect(fullOnlyVisible("full")).toBe(true);
+    expect(chromeControlCount("simple")).toBeLessThan(
+      chromeControlCount("full"),
+    );
+    expect(chromeDensityDelta()).toBeGreaterThanOrEqual(8);
   });
 });

@@ -1,0 +1,16 @@
+{
+  "id": "chrome-density",
+  "title": "Simple / Full control density",
+  "simLoop": "infrastructure — no authoritative field or Process change; chrome is observer-only (T-006).",
+  "gameLoop": "Simple keeps sculpt · Rain/Sea/Wind · time · undo on screen; Full reveals secondary force dials, inspect, branch/predict, and session chrome on demand (U-001).",
+  "registerIds": ["U-001", "U-003", "C-004", "T-005", "T-006"],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/ui/chromeDensity.test.ts",
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": [],
+  "fields": [],
+  "notebookSeed": "I put the strip on Simple so I could watch the island instead of the dials — Full was still there when I needed the tide.",
+  "tierO": "no owner-only question; deferred — density is machine-measured (Simple leaner than Full); taste of which forces stay in Simple can batch later if needed"
+}
