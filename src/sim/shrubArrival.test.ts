@@ -78,6 +78,10 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
       world.shoreExposure.fill(0);
       world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
       world.runHabitatStep(1);
+      // §4.48: shrub HSI is now an annual snapshot (veg.hsi.shrub) dispersal
+      // writes — refresh it against this scenario's heat/moisture/herb-cover
+      // before overriding the seed banks below.
+      world.runDispersalStep(1);
       // Bare case: no herb seed so cover cannot bootstrap mid-run.
       const herbSeed = opts?.bareSeed ? 0 : config.seedSourceStrength;
       world.herbSeedBank.fill(herbSeed);

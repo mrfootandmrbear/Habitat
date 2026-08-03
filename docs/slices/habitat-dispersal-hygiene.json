@@ -1,0 +1,34 @@
+{
+  "id": "habitat-dispersal-hygiene",
+  "title": "Habitat/dispersal determinism hygiene (§4.48)",
+  "simLoop": "habitatProcess now declares terrain.elevation and soil.material, both silently consumed inside runHabitatStep. Five new registered fields (veg.hsi.{strand,binder,marsh,shrub,crust}) are the single place runDispersalStep computes each guild's raw HSI; runHerbEstablishmentStep reads that annual snapshot instead of recomputing it every seasonal tick. runHerbEstablishmentStep is restructured guild-major (outer loop over an explicit, parametrizable guild order, inner loop over cells) so every guild's update reads only its own seed/biomass/HSI arrays — the same-tick cross-guild read that made the update order-dependent no longer exists.",
+  "gameLoop": "A shrub thicket or crust patch reads how suitable last year's conditions actually were, not a number quietly recomputed mid-season off whatever the meadow happened to be doing that week — the displayed establishment odds and what actually grew the guild can no longer silently disagree.",
+  "registerIds": ["T-001", "T-005"],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/guildEstablishmentOrder.test.ts",
+    "src/sim/shrubArrival.test.ts",
+    "src/sim/crustArrival.test.ts",
+    "src/sim/marshArrival.test.ts",
+    "src/sim/time-invariance.test.ts"
+  ],
+  "probes": [
+    "shrub-arrival",
+    "crust-arrival",
+    "marsh-arrival",
+    "living-hollow",
+    "deep-time",
+    "disturbance-recovery"
+  ],
+  "fields": [
+    "veg.hsi.strand",
+    "veg.hsi.binder",
+    "veg.hsi.marsh",
+    "veg.hsi.shrub",
+    "veg.hsi.crust",
+    "terrain.elevation",
+    "soil.material"
+  ],
+  "notebookSeed": "A shrub thicket reads how thick last year's meadow already was, not how thick it happens to be right now, mid-season, while it's still filling in.",
+  "tierO": "no owner-only question — order-independence and the declared-reads fix are CI-judged (guildEstablishmentOrder.test.ts); D-007 clip gate does not apply (no new Process). Track R has no further executable item after this ships — remaining vegetation/habitat work (C-023 guild competition) stays owner-gated behind L2/L3, off tip."
+}

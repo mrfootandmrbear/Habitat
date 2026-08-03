@@ -62,13 +62,13 @@ Two automations share the merge trigger but claim **disjoint** tip items. Rebase
 | T2 | **§4.59** duplicator stamp | **Done** — C-028 structural "keep" kit is now fully shipped |
 | Tn | None — no further machine slice | Remaining C-028 work is owner taste (do molds/duplicator feel like shaping sand?; flags/banners chrome slot) — owner Lock backlog, not agent-executable. Do **not** invent a new Track T slice; if re-enabled later it will be named in BUILD_GUIDE's tip paragraph. |
 
-### Track R — Review correctness (vegetation/habitat)
+### Track R — Review correctness (vegetation/habitat) — **parked**
 
 | Order | Slice | Notes |
 |---|---|---|
 | R1 | **§4.47** guild cover & light-competition | **Done** |
-| R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today — sole executable queue (Track T parked) |
-| Rn | Next unblocked review-queue item | Skip owner-blocked Living remainder |
+| R2 | **§4.48** habitat/dispersal determinism hygiene | **Done** — this closed §4.44–§4.52, the entire second review-driven queue |
+| Rn | None — no further machine slice | The one item left in vegetation/habitat, **C-023** guild competition, is owner-judged (gated on L2/L3, both already Done, so it is unblocked for an owner Lock sitting — not agent-executable). Do **not** invent a new Track R slice; if a future review files a fresh defect it will be named in BUILD_GUIDE's tip paragraph. |
 
 **Never in either track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
 
@@ -117,7 +117,11 @@ Rules:
 Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track T’s following item.
 ```
 
-### Prompt — Track R (review correctness)
+### Prompt — Track R (review correctness) — currently parked
+
+Track R has **no open machine slice** as of §4.48 (habitat/dispersal determinism hygiene, Done) — this closed §4.44–§4.52, the entire second review-driven queue. Leave this Automation **disabled** until BUILD_GUIDE's tip paragraph names a new Track R item (e.g. a future review files a fresh defect, or an owner Lock sitting on **C-023** turns guild competition into an agent-executable slice). If enabled and fired with nothing to claim, the agent must write a one-line "Track R has no open slice" status and stop — never invent work by reaching into Track T or the blocked Living remainder.
+
+Copy into the automation prompt body (once re-enabled with a real tip item):
 
 ```
 You are a Habitat cloud succession agent on Track R (review correctness — vegetation/habitat).
@@ -125,19 +129,18 @@ You are a Habitat cloud succession agent on Track R (review correctness — vege
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md.
 2. Read "Next (executable tip)" and the Track R table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice (today: §4.48; §4.47 Done). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice. If the Track R table shows no open slice (parked, owner-judged, or otherwise), or the named tip item is already Done or blocked, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.
-- §4.47 does NOT implement C-023 — only cover combination + absorbed-light / LAI correctness per the checklist.
 - Follow BUILD_GUIDE checklist. Green bar: npm run gate.
 - Baseline moves require a stated reason in the commit body.
 - Update BUILD_GUIDE / MVP_SCOPE / README / slice manifest + composition (build-plan-on-commit). When editing the shared tip paragraph, change only the Track R clause.
 - On block: /blocked-note, name next queue item, stop.
-- Never implement L5/L8/nutrients/animals/SWE. Never invent Locked policy from Open candidates.
+- Never implement L5/L8/nutrients/animals/SWE/C-023. Never invent Locked policy from Open candidates.
 - Open a draft PR. Summarize gate results. Do not ask the owner to confirm numbers.
 
-Handoff: leave "Next (executable tip)" accurate for the next Track R agent.
+Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track R's following item.
 ```
 
 ---

@@ -83,6 +83,10 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
       world.runHabitatStep(1);
       // Restore moisture after habitat (HSI may leave it unchanged; keep twin honest).
       world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+      // §4.48: crust HSI is now an annual snapshot (veg.hsi.crust) dispersal
+      // writes — refresh it against this scenario's configured fields before
+      // overriding the seed banks below for the uniform-seed comparison.
+      world.runDispersalStep(1);
       const herbSeed = opts.herbSeed === false ? 0 : config.seedSourceStrength;
       world.herbSeedBank.fill(herbSeed);
       world.strandSeedBank.fill(0);

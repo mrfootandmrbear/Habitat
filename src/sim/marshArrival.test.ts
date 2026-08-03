@@ -89,6 +89,10 @@ describe("Salt-marsh engineer (C-016 / Slice N9)", () => {
       world.soilSalinity.fill(0);
       world.shoreExposure.fill(0);
       world.runHabitatStep(1);
+      // §4.48: marsh HSI is now an annual snapshot (veg.hsi.marsh) dispersal
+      // writes — refresh it against this scenario's fields before overriding
+      // the seed banks below for the uniform-seed comparison.
+      world.runDispersalStep(1);
       // Uniform seed — isolate guild HSI from overseas shore bias.
       world.herbSeedBank.fill(config.seedSourceStrength);
       world.strandSeedBank.fill(config.seedSourceStrength);
