@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { snowCoverTarget } from "../ui/stormCue";
+import type { CloudFootprint } from "./CloudMesh";
+import { buildSnowAffinityTexture } from "./snowAffinity";
 
 /**
  * Observer-only storm event cue (Slice R / C-020 / T-006).
@@ -18,6 +20,13 @@ export class RainCueMesh {
   private targetGround = 0;
   private groundOpacity = 0;
   private readonly worldSize: number;
+  /** 0 rain · 1 sleet · 2 snow — drives per-phase fall motion (G7). */
+  private phase = 0;
+  /** Wall-seconds accumulator driving snow sway (G7). */
+  private time = 0;
+  /** Cloud footprints to spawn precip under (G6) — empty falls back to a uniform veil. */
+  private footprints: CloudFootprint[] = [];
+  private groundAffinityTex: THREE.DataTexture | null = null;
 
   constructor(worldSize: number, count = 1400) {
     this.worldSize = worldSize;
@@ -86,6 +95,7 @@ export class RainCueMesh {
     const s = Math.min(1, Math.max(0, strength));
     this.targetOpacity = active ? s : 0;
     this.targetGround = snowCoverTarget(phase, active, s);
+    this.phase = phase;
     const streakMat = this.points.material as THREE.PointsMaterial;
     const veilMat = this.veil.material as THREE.MeshBasicMaterial;
     if (phase >= 2) {
@@ -107,6 +117,60 @@ export class RainCueMesh {
   /** Current ground-cover opacity — Tier-P proxy for snow hold (G3). */
   getGroundCoverOpacity(): number {
     return this.groundOpacity;
+  }
+
+  /** Current overcast-veil opacity — Tier-P proxy; also feeds weather fog (G9). */
+  getVeilOpacity(): number {
+    return this.veilOpacity;
+  }
+
+  /** Mean particle height — Tier-P proxy for fall-speed divergence (G7). */
+  meanHeight(): number {
+    const pos = this.points.geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+    let sum = 0;
+    for (let i = 0; i < pos.count; i++) sum += pos.getY(i);
+    return sum / pos.count;
+  }
+
+  /** Fraction of particles within `radius` of (x, z) — Tier-P proxy for cloud-sourced spawn (G6). */
+  fractionNear(x: number, z: number, radius: number): number {
+    const pos = this.points.geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+    let within = 0;
+    for (let i = 0; i < pos.count; i++) {
+      const dx = pos.getX(i) - x;
+      const dz = pos.getZ(i) - z;
+      if (Math.sqrt(dx * dx + dz * dz) < radius) within++;
+    }
+    return pos.count > 0 ? within / pos.count : 0;
+  }
+
+  /**
+   * Cloud footprints to spawn/respawn precip under (G6). Empty falls back
+   * to the old uniform world-wide scatter so precip never just vanishes
+   * while `CloudMesh` hasn't reported any releasing bodies yet.
+   */
+  setCloudFootprints(footprints: CloudFootprint[]): void {
+    this.footprints = footprints;
+  }
+
+  /**
+   * Bakes a terrain-weighted patchy mask for the snow ground-cover hold
+   * (G8) from the elevation grid that already exists — flatter, lower
+   * ground collects more, exposed slopes shed. Still the same
+   * `groundOpacity` scalar driving build/melt; this only reshapes its
+   * texture, so it stays a presentation hold, not a snowpack store.
+   */
+  setTerrainAffinity(elevation: Float32Array, width: number, height: number): void {
+    const tex = buildSnowAffinityTexture(elevation, width, height);
+    this.groundAffinityTex?.dispose();
+    this.groundAffinityTex = tex;
+    const mat = this.groundCover.material as THREE.MeshBasicMaterial;
+    mat.alphaMap = tex;
+    mat.needsUpdate = true;
   }
 
   /**
@@ -141,21 +205,44 @@ export class RainCueMesh {
       return;
     }
 
+    this.time += dt;
     const pos = this.points.geometry.getAttribute(
       "position",
     ) as THREE.BufferAttribute;
     const half = this.worldSize * 0.5;
-    const driftX = windUx * 5 * dt;
-    const driftZ = windUz * 5 * dt;
-    const speed = 0.55 + this.targetOpacity * 0.9;
+
+    // Rain vs snow read as different weather, not the same dot recolored
+    // (G7): snow falls slower, drifts more with wind, and sways as it falls;
+    // rain falls fast and mostly just follows the wind shear.
+    const fallSpeedMul = this.phase >= 2 ? 0.35 : this.phase >= 1 ? 0.7 : 1;
+    const windResponseMul = this.phase >= 2 ? 1.6 : this.phase >= 1 ? 1.2 : 1;
+    const swayAmp = this.phase >= 2 ? 0.55 : this.phase >= 1 ? 0.15 : 0;
+
+    const driftX = windUx * 5 * dt * windResponseMul;
+    const driftZ = windUz * 5 * dt * windResponseMul;
+    const speed = (0.55 + this.targetOpacity * 0.9) * fallSpeedMul;
+    const footprints = this.footprints;
     for (let i = 0; i < pos.count; i++) {
-      let x = pos.getX(i) + driftX;
+      const swayX =
+        swayAmp > 0 ? Math.sin(this.time * 1.3 + i * 0.7) * swayAmp : 0;
+      const swayZ =
+        swayAmp > 0 ? Math.cos(this.time * 1.04 + i * 0.9) * swayAmp : 0;
+      let x = pos.getX(i) + driftX + swayX * dt;
       let y = pos.getY(i) - this.velocities[i]! * dt * speed;
-      let z = pos.getZ(i) + driftZ;
+      let z = pos.getZ(i) + driftZ + swayZ * dt;
       if (y < 0) {
-        y = 16 + Math.random() * 8;
-        x = (Math.random() * 2 - 1) * half;
-        z = (Math.random() * 2 - 1) * half;
+        if (footprints.length > 0) {
+          // Spawn under a cloud footprint (G6) — precip reads as coming
+          // out of the sky, not from a uniform veil with no source.
+          const fp = footprints[i % footprints.length]!;
+          x = fp.x + (Math.random() * 2 - 1) * fp.radius;
+          z = fp.z + (Math.random() * 2 - 1) * fp.radius;
+          y = fp.y - 0.5 + Math.random() * 1.2;
+        } else {
+          y = 16 + Math.random() * 8;
+          x = (Math.random() * 2 - 1) * half;
+          z = (Math.random() * 2 - 1) * half;
+        }
       }
       if (x < -half) x += this.worldSize;
       if (x > half) x -= this.worldSize;
@@ -173,5 +260,6 @@ export class RainCueMesh {
     (this.veil.material as THREE.Material).dispose();
     this.groundCover.geometry.dispose();
     (this.groundCover.material as THREE.Material).dispose();
+    this.groundAffinityTex?.dispose();
   }
 }

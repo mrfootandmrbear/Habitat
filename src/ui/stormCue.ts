@@ -68,3 +68,43 @@ export function snowCoverTarget(
   if (!spellActive || phase < 2) return 0;
   return Math.min(1, Math.max(0, strength)) * 0.55;
 }
+
+/**
+ * How many of the existing cloud bodies release at once (G6). Regime
+ * intensity maps onto a discrete count of the same fixed cloud pool instead
+ * of a wider faucet plane, so "how much rain" reads as "how many clouds are
+ * working the sky" — the framing this dial was missing. Deterministic
+ * function of the regime dial only; no new RNG (C-003 stays Open).
+ */
+export function releasingCloudCount(
+  regime: RainRegimeId,
+  totalClouds: number,
+): number {
+  if (totalClouds <= 0) return 0;
+  const strength = stormCueStrength(regime);
+  return Math.max(
+    1,
+    Math.min(totalClouds, Math.round(strength * totalClouds)),
+  );
+}
+
+export type FogRange = { near: number; far: number };
+
+/**
+ * Weather-responsive haze (G9). `Scene.ts`'s fixed 70–140 band sits beyond
+ * where the camera normally works at `worldSize=48` and never reacted to
+ * weather — inert render cost, not a signal. Pulling both bounds in with
+ * cloud cover and storm veil strength gives the haze something to say
+ * (visibility drops in the weather) and relaxes it back to `base` on a dry
+ * day instead of holding one constant backdrop.
+ */
+export function weatherFogRange(
+  base: FogRange,
+  veilStrength: number,
+  cloudCover: number,
+): FogRange {
+  const v = Math.min(1, Math.max(0, veilStrength));
+  const c = Math.min(1, Math.max(0, cloudCover));
+  const pull = 1 - 0.55 * (v * 0.7 + c * 0.3);
+  return { near: base.near * pull, far: base.far * pull };
+}

@@ -1,4 +1,5 @@
 import "./style.css";
+import type { Fog } from "three";
 import {
   config,
   sitingBrushRadiusFor,
@@ -53,8 +54,10 @@ import {
   type HeatId,
 } from "./sim/climate/atmosphere";
 import {
+  releasingCloudCount,
   stormCueStrength,
   stormSpellArmed,
+  weatherFogRange,
 } from "./ui/stormCue";
 import {
   seaLevelById,
@@ -178,6 +181,7 @@ function regenerateIsland(seed: number): void {
   ui.setTerrainSeed(islandSeed);
   oceanMesh.setSeaLevel(world.seaLevel);
   windArrow.setWind(windId);
+  rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
   rebuildExtentCage();
   syncMeshes();
   syncWaterDisplay(0, true);
@@ -281,6 +285,7 @@ scene.add(occupantMesh.object);
 terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.snapFrom(world);
 occupantMesh.updateFrom(model, world);
+rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
 
 let rainRegime: RainRegimeId = "dry";
 let heatId: HeatId = "warm";
@@ -918,6 +923,14 @@ let stormDisplayActive = false;
 let stormReleaseHold = 0;
 const STORM_RELEASE_HOLD_S = 1.6;
 
+/** Scene fog range as authored in Scene.ts — weatherFogRange scales from this (G9). */
+const baseFogRange = scene.fog
+  ? { near: (scene.fog as Fog).near, far: (scene.fog as Fog).far }
+  : { near: 70, far: 140 };
+/** Wall-seconds until the next patchy-snow terrain-affinity refresh (G8). */
+let snowAffinityRefreshTimer = 0;
+const SNOW_AFFINITY_REFRESH_S = 3;
+
 function climateDayIndex(): number {
   return Math.floor(
     world.simMinutes / config.eventDtMinutes / config.dailyEventSteps,
@@ -998,7 +1011,6 @@ function frame(now: number): void {
   }
   // Storm + cloud cues — hold across wet block / cloud charge (G1; T-006).
   cloudMesh.setAtmosphere(world.cloudWater, world.precipPhase);
-  cloudMesh.update(wallDt, wind.ux, wind.uz);
   if (stepsRun > 0) {
     const wetDay = regimeIsWetDay(
       rainRegimeById(rainRegime),
@@ -1025,7 +1037,38 @@ function frame(now: number): void {
     stormReleaseHold = 0;
     rainCue.setStorm(false);
   }
+  // How many clouds read as releasing at once (G6) — regime intensity maps
+  // onto the same fixed cloud pool instead of a wider faucet plane.
+  cloudMesh.setReleasingCount(
+    stormDisplayActive ? releasingCloudCount(rainRegime, cloudMesh.count) : 0,
+  );
+  cloudMesh.update(wallDt, wind.ux, wind.uz);
+  rainCue.setCloudFootprints(cloudMesh.getReleasingFootprints());
   rainCue.update(wallDt, wind.ux, wind.uz);
+
+  // Weather-responsive haze (G9) — thickens with the storm veil / cloud
+  // cover instead of sitting at a fixed distance no matter the weather.
+  if (scene.fog) {
+    const fogRange = weatherFogRange(
+      baseFogRange,
+      rainCue.getVeilOpacity(),
+      cloudMesh.meanOpacity(),
+    );
+    const fog = scene.fog as Fog;
+    fog.near = fogRange.near;
+    fog.far = fogRange.far;
+  }
+
+  // Patchy snow ground-cover mask (G8) — refresh occasionally while snow is
+  // relevant so it stays honest against mid-play sculpting, without paying
+  // the terrain-scan cost every frame.
+  if (phaseThisTick >= 2 || rainCue.getGroundCoverOpacity() > 0.02) {
+    snowAffinityRefreshTimer -= wallDt;
+    if (snowAffinityRefreshTimer <= 0) {
+      rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
+      snowAffinityRefreshTimer = SNOW_AFFINITY_REFRESH_S;
+    }
+  }
 
   if (prediction.shouldAutoCompare(steps)) {
     runCompare();

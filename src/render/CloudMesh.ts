@@ -6,6 +6,17 @@ type CloudBody = {
   homeX: number;
   homeZ: number;
   homeY: number;
+  /** Approximate horizontal footprint radius — base sphere radius × mean XZ scale. */
+  radius: number;
+  /** This frame's pick for "actively releasing" (G6) — top-N by opacity. */
+  releasing: boolean;
+};
+
+export type CloudFootprint = {
+  x: number;
+  z: number;
+  y: number;
+  radius: number;
 };
 
 /**
@@ -21,6 +32,8 @@ export class CloudMesh {
   private readonly worldSize: number;
   private readonly wrapHalf: number;
   private readonly wrapPad: number;
+  /** How many clouds should read as actively releasing this frame (G6). */
+  private releasingCount = 0;
 
   constructor(worldSize: number, count = 7) {
     this.worldSize = worldSize;
@@ -31,7 +44,10 @@ export class CloudMesh {
 
     const half = worldSize * 0.42;
     for (let i = 0; i < count; i++) {
-      const geo = new THREE.SphereGeometry(2.8 + (i % 3) * 0.9, 12, 10);
+      const baseRadius = 2.8 + (i % 3) * 0.9;
+      const scaleX = 1.6 + (i % 2) * 0.5;
+      const scaleZ = 1.1 + (i % 3) * 0.25;
+      const geo = new THREE.SphereGeometry(baseRadius, 12, 10);
       const mat = new THREE.MeshBasicMaterial({
         color: 0xd8dee6,
         transparent: true,
@@ -45,11 +61,47 @@ export class CloudMesh {
       const homeZ = Math.sin(ang) * r * 0.85;
       const homeY = 11 + (i % 3) * 1.4;
       mesh.position.set(homeX, homeY, homeZ);
-      mesh.scale.set(1.6 + (i % 2) * 0.5, 0.45, 1.1 + (i % 3) * 0.25);
+      mesh.scale.set(scaleX, 0.45, scaleZ);
       this.group.add(mesh);
-      this.clouds.push({ mesh, homeX, homeZ, homeY });
+      this.clouds.push({
+        mesh,
+        homeX,
+        homeZ,
+        homeY,
+        radius: baseRadius * ((scaleX + scaleZ) / 2),
+        releasing: false,
+      });
     }
     this.group.visible = false;
+  }
+
+  /**
+   * Arm the number of clouds that should read as releasing this frame (G6).
+   * Selection happens in `update()` against whichever bodies are currently
+   * densest (windward bias already ranks them) — no cell targeting, no new
+   * RNG, just picking among the same drifting pool.
+   */
+  setReleasingCount(count: number): void {
+    this.releasingCount = Math.max(0, count | 0);
+  }
+
+  /**
+   * World-space footprints of the clouds currently marked releasing (G6) —
+   * `RainCueMesh` spawns/respawns precip under these instead of a uniform
+   * world-wide veil. Empty when nothing is releasing this frame.
+   */
+  getReleasingFootprints(): CloudFootprint[] {
+    const out: CloudFootprint[] = [];
+    for (const body of this.clouds) {
+      if (!body.releasing) continue;
+      out.push({
+        x: body.mesh.position.x,
+        z: body.mesh.position.z,
+        y: body.mesh.position.y,
+        radius: body.radius,
+      });
+    }
+    return out;
   }
 
   /**
@@ -122,6 +174,35 @@ export class CloudMesh {
     if (this.opacity < 0.015 && this.targetOpacity <= 0) {
       this.group.visible = false;
     }
+    this.updateReleasingFlags();
+  }
+
+  /**
+   * Picks the `releasingCount` densest bodies as this frame's releasing set
+   * (G6) — reuses the windward-biased opacity ranking above rather than a
+   * second targeting mechanism, and never marks a body that's too faint to
+   * read as a cloud at all.
+   */
+  private updateReleasingFlags(): void {
+    const ranked = this.clouds
+      .map((body, idx) => ({
+        idx,
+        opacity: (body.mesh.material as THREE.MeshBasicMaterial).opacity,
+      }))
+      .sort((a, b) => b.opacity - a.opacity);
+    const releasingIdx = new Set<number>();
+    const n = Math.min(this.releasingCount, ranked.length);
+    for (let k = 0; k < n; k++) {
+      if (ranked[k]!.opacity > 0.05) releasingIdx.add(ranked[k]!.idx);
+    }
+    for (let i = 0; i < this.clouds.length; i++) {
+      this.clouds[i]!.releasing = releasingIdx.has(i);
+    }
+  }
+
+  /** Total cloud bodies in the pool — sizes `releasingCloudCount` (G6). */
+  get count(): number {
+    return this.clouds.length;
   }
 
   /** Mean opacity of cloud materials — Tier-P / debug. */
