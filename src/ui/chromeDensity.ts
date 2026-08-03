@@ -2,7 +2,7 @@
  * Control-bar chrome density (U-001 / U-003).
  *
  * Simple keeps the sand-castle loop readable: sculpt · primary forces · run time.
- * Full exposes secondary force dials, inspect layers, branch/predict, and session chrome.
+ * Full exposes secondary force dials, inspect layers, branch, and session chrome.
  * No sim authority — presentation only (T-006).
  */
 
@@ -41,7 +41,6 @@ export const FULL_ONLY_CONTROL_IDS = [
   "branch-actions",
   "save-world",
   "load-world",
-  "predict-actions",
   "inspector",
   "cutaway",
 ] as const;

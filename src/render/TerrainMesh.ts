@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { config, type InspectorLayer } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
-import { compareClassName } from "../sim/prediction/PredictionSession";
 import { understoryLightRgb } from "../ui/lightEncoding";
 import {
   defaultTerrainRgb,
@@ -26,10 +25,6 @@ const WET_OVERLAY = new THREE.Color(0x4a5c3a);
 const VEG_OVERLAY = new THREE.Color(0x3a7a3a);
 const ERODE = new THREE.Color(0xc45c3a);
 const DEPOSIT = new THREE.Color(0xe8d5a8);
-const PREDICT_PENDING = new THREE.Color(0x2ec4b6);
-const PREDICT_HIT = new THREE.Color(0x3dcc6f);
-const PREDICT_MISS = new THREE.Color(0xe85d4c);
-const PREDICT_UNEXPECTED = new THREE.Color(0xe8b84c);
 
 /** Uniform array size for the GPU path's material table — headroom past the
  * current 4 substrates so a future preserve can add rows without a shader
@@ -195,7 +190,7 @@ function injectAfterInclude(source: string, marker: string, injected: string): s
  * - gpuMesh: default view — GPU-displaced/colored, smooth, upsampled past
  *   the sim grid. Fast path: field textures updated via native memcpy, no
  *   per-cell CPU loop.
- * - cpuMesh: inspector overlays / prediction marks / "remembered form" tint
+ * - cpuMesh: inspector overlays / "remembered form" tint
  *   — unchanged CPU per-cell rebuild (Tier-P color logic, ~20 overlay modes)
  *   at native sim-grid resolution.
  * Exactly one is a child of `mesh` at a time, so raycasting (siting/cutaway)
@@ -207,7 +202,7 @@ export class TerrainMesh {
   private readonly height: number;
   private readonly worldSize: number;
 
-  // CPU fallback path (overlay / prediction / elevDelta) — unchanged from
+  // CPU fallback path (overlay / elevDelta) — unchanged from
   // the pre-GPU implementation.
   private readonly cpuMesh: THREE.Mesh;
   private readonly cpuGeometry: THREE.PlaneGeometry;
@@ -384,16 +379,14 @@ export class TerrainMesh {
     model: WaterStateView,
     world?: WorldState,
     overlay: InspectorLayer = "none",
-    predictionClassify: Uint8Array | null = null,
     /** Per-cell elev delta (now − then) for return-visit encoding; null = off. */
     elevDelta: Float32Array | null = null,
   ): void {
-    const useCpuFallback =
-      overlay !== "none" || predictionClassify !== null || elevDelta !== null;
+    const useCpuFallback = overlay !== "none" || elevDelta !== null;
 
     if (useCpuFallback) {
       this.setActiveChild("cpu");
-      this.updateCpuFallback(model, world, overlay, predictionClassify, elevDelta);
+      this.updateCpuFallback(model, world, overlay, elevDelta);
       return;
     }
 
@@ -436,7 +429,6 @@ export class TerrainMesh {
     model: WaterStateView,
     world: WorldState | undefined,
     overlay: InspectorLayer,
-    predictionClassify: Uint8Array | null,
     elevDelta: Float32Array | null,
   ): void {
     const pos = this.cpuGeometry.attributes.position as THREE.BufferAttribute;
@@ -495,10 +487,6 @@ export class TerrainMesh {
           col.copy(BASE);
         }
 
-        if (predictionClassify) {
-          this.applyPrediction(col, predictionClassify[i] ?? 0);
-        }
-
         this.colors.setXYZ(i, col.r, col.g, col.b);
         i++;
       }
@@ -514,20 +502,6 @@ export class TerrainMesh {
       this.cpuGeometry.computeVertexNormals();
       this.lastNormalElevGrid.set(this.pendingElevGrid);
     }
-  }
-
-  private applyPrediction(col: THREE.Color, code: number): void {
-    const kind = compareClassName(code);
-    if (kind === "none") return;
-    const tint =
-      kind === "pending"
-        ? PREDICT_PENDING
-        : kind === "hit"
-          ? PREDICT_HIT
-          : kind === "miss"
-            ? PREDICT_MISS
-            : PREDICT_UNEXPECTED;
-    col.lerp(tint, 0.72);
   }
 
   private applyOverlay(

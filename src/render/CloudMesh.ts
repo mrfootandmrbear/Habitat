@@ -39,6 +39,10 @@ export class CloudMesh {
         depthWrite: false,
       });
       const mesh = new THREE.Mesh(geo, mat);
+      // Fixed draw order (matches ocean=0/water=1/flowCue=2 elsewhere): without
+      // this, per-frame camera-distance transparency sort flips against the
+      // rain veil/groundCover as the camera orbits, reading as a flash.
+      mesh.renderOrder = 4;
       const ang = (i / count) * Math.PI * 2;
       const r = half * (0.35 + (i % 4) * 0.12);
       const homeX = Math.cos(ang) * r;

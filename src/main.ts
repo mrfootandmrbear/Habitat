@@ -14,10 +14,6 @@ import {
   paintIslandSoilDepth,
 } from "./sim/terrain/generateIsland";
 import { paintSubstrateMosaic, SUBSTRATE_SAND, type DepositMaterialId } from "./sim/terrain/substrates";
-import {
-  PredictionSession,
-  snapshotWaterReader,
-} from "./sim/prediction/PredictionSession";
 import { createScene } from "./render/Scene";
 import { TerrainMesh } from "./render/TerrainMesh";
 import { WaterMesh } from "./render/WaterMesh";
@@ -121,7 +117,6 @@ paintSubstrateMosaic(
   { elev: world.terrain.data },
 );
 let model = world.hydrologyModel;
-const prediction = new PredictionSession(n, n);
 const editUndo = new EditUndoStack();
 const formMemory = new FormMemory();
 const elevDeltaScratch = new Float32Array(n * n);
@@ -166,7 +161,6 @@ function regenerateIsland(seed: number): void {
   adoptWorld(next);
   branchSession = null;
   scenarioSession = null;
-  prediction.clear();
   formMemory.clear();
   editUndo.noteEditEpoch();
   steps = 0;
@@ -325,16 +319,6 @@ world.setAirTemperature(heatById(heatId).airTempC);
 }
 world.setSeasonPressure(seasonById(seasonId).pressure);
 world.setErosionIntensity(erosionById(erosionId).intensity);
-
-function runCompare(): void {
-  if (prediction.phase !== "committed" && prediction.phase !== "compared") {
-    return;
-  }
-  // Snapshot so compare cannot alias live buffers (P-006 write isolation).
-  const reader = snapshotWaterReader(n, n, world.water.data);
-  prediction.compare(reader);
-  syncMeshes();
-}
 
 function fillElevDelta(): Float32Array | null {
   if (branchSession?.compareMode) {
@@ -555,11 +539,6 @@ const ui = mountControls(
         ui.setHint(
           "Look mode · pick a tool for yellow cell cursor + cutaway",
         );
-      } else if (tool === "predict") {
-        sitingCursor.setVisible(true);
-        ui.setHint(
-          "Yellow cell = mark · Commit → set Rain regime → Compare",
-        );
       } else if (tool === "deposit") {
         sitingCursor.setVisible(true);
         ui.setHint(
@@ -613,18 +592,6 @@ const ui = mountControls(
     onDepositMaterial: (id) => {
       depositMaterial = id;
       ui.setDepositMaterial(id);
-    },
-    onCommitPrediction: () => {
-      if (prediction.commit(steps)) {
-        syncMeshes();
-      }
-    },
-    onComparePrediction: () => {
-      runCompare();
-    },
-    onClearPrediction: () => {
-      prediction.clear();
-      syncMeshes();
     },
     onRememberForm: () => {
       formMemory.capture(world.terrain.data, n, n);
@@ -689,7 +656,6 @@ const ui = mountControls(
         }
         editUndo.noteEditEpoch();
         formMemory.clear();
-        prediction.clear();
         steps = 0;
         clock.resetDroppedSteps();
         syncMeshes();
@@ -761,12 +727,6 @@ canvas.addEventListener("pointerup", (e) => {
   if (!cell) return;
   cutawayCell = cell;
   ui.setCutaway(formatCutaway(sampleCutaway(cell)));
-
-  if (sitingTool === "predict") {
-    prediction.toggleMark(cell.x, cell.z);
-    syncMeshes();
-    return;
-  }
 
   if (sitingTool === "berm") {
     editUndo.pushCheckpoint(world);
@@ -893,13 +853,7 @@ let lastFlowCueWall = 0;
 
 function syncMeshes(nowWall?: number): void {
   world.ensureStructureFresh();
-  terrainMesh.updateFrom(
-    model,
-    world,
-    inspector,
-    prediction.overlayClassify(),
-    fillElevDelta(),
-  );
+  terrainMesh.updateFrom(model, world, inspector, fillElevDelta());
   // Flow ticks every event look like strobe at 16× — refresh ~4 Hz max.
   if (nowWall === undefined || nowWall - lastFlowCueWall >= 0.25) {
     flowCue.updateFrom(model, world);
@@ -927,22 +881,6 @@ function climateDayIndex(): number {
 function syncWaterDisplay(wallDt: number, snap = false): void {
   if (snap) waterMesh.snapFrom(world);
   else waterMesh.updateFrom(world, wallDt, stormDisplayActive);
-}
-
-function predictionStatus(): string {
-  const nMarks = prediction.markCount;
-  if (prediction.phase === "compared" && prediction.lastCompare) {
-    const c = prediction.lastCompare;
-    return `pred hit ${c.hits} miss ${c.misses} extra ${c.unexpected}`;
-  }
-  if (prediction.phase === "committed") {
-    const since = prediction.stepsSinceCommit(steps) ?? 0;
-    return `pred committed ${nMarks} · ${since}/${config.predictionHorizonSteps}`;
-  }
-  if (prediction.phase === "marking") {
-    return `pred marking ${nMarks}`;
-  }
-  return "pred idle";
 }
 
 function conservationLine(): string {
@@ -1027,10 +965,6 @@ function frame(now: number): void {
   }
   rainCue.update(wallDt, wind.ux, wind.uz);
 
-  if (prediction.shouldAutoCompare(steps)) {
-    runCompare();
-  }
-
   if (stepsRun > 0) {
     editUndo.noteTimeAdvanced();
     ui.setUndoEnabled(false);
@@ -1062,13 +996,11 @@ function frame(now: number): void {
                   ? duplicateArmed
                     ? "duplicate: pick destination"
                     : "duplicate: pick source"
-                  : sitingTool === "ignite"
-                    ? "ignite"
-                    : "predict";
+                  : "ignite";
   ui.setStatus(
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +
-      ` · ${toolLabel} · ${predictionStatus()} · step ${steps}` +
+      ` · ${toolLabel} · step ${steps}` +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
       (droppedSteps > 0 ? ` · dropped ${droppedSteps} — lower the rate` : "") +
       ` · ${rainRegimeById(rainRegime).label}` +

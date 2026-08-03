@@ -167,9 +167,6 @@ export const config = {
   moldRadius: 5,
   /** Peak elev(+depth) delta (m) a mold stamp applies at full profile weight. */
   moldHeight: 3.0,
-  predictionWetThreshold: 0.01,
-  /** Horizon in event steps (~45 sim-hours at 15 min/event). */
-  predictionHorizonSteps: 180,
 
   /**
    * Cheap GW / baseflow (Slice 8b / C-001) — linear reservoir, not Richards.
@@ -438,7 +435,7 @@ export type InspectorLayer =
   | "shoreLongshore"
   | "salinity";
 
-/** Player land tools — causes (A-005) plus predict marks (P-006). */
+/** Player land tools — causes (A-005). */
 export type SitingTool =
   | "none"
   | "berm"
@@ -447,7 +444,6 @@ export type SitingTool =
   | "flatten"
   | "mold"
   | "duplicate"
-  | "predict"
   | "ignite";
 
 /** Sculpt footprint tier (C-028 / C-006) — bucket = fine, shovel = mass. */

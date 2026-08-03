@@ -134,6 +134,52 @@ describe("substrate table (Slice S / C-009 / T-004)", () => {
   });
 });
 
+describe("clay perches water instead of draining it (H-003)", () => {
+  const setup = (material: number) => {
+    const world = new WorldState(generateMountain(10, 10, 4, 1));
+    world.soilMaterial.fill(material);
+    world.soilMoisture.fill(substrateProps(material).porosity); // fully saturated
+    return world;
+  };
+
+  it("saturated clay recharges groundwater slower than saturated sand, per step", () => {
+    const clay = setup(SUBSTRATE_CLAY);
+    const sand = setup(SUBSTRATE_SAND);
+    clay.runGroundwaterStep(1);
+    sand.runGroundwaterStep(1);
+    // One step only — after this, baseflow recession (unrelated to material)
+    // starts bleeding groundwater back to the surface for both, which would
+    // confound a multi-step snapshot comparison.
+    expect(sand.getGroundwater(5, 5)).toBeGreaterThan(clay.getGroundwater(5, 5) * 2);
+  });
+
+  it("clay stays waterlogged; sand drains down to field capacity within a few days", () => {
+    const clay = setup(SUBSTRATE_CLAY);
+    const sand = setup(SUBSTRATE_SAND);
+    for (let i = 0; i < 5; i++) {
+      clay.runGroundwaterStep(1);
+      sand.runGroundwaterStep(1);
+    }
+    const clayFc = substrateProps(SUBSTRATE_CLAY).porosity * 0.55;
+    const sandFc = substrateProps(SUBSTRATE_SAND).porosity * 0.55;
+    // Sand's high rechargeCap drains its (small) excess almost immediately.
+    expect(sand.getSoilMoisture(5, 5)).toBeLessThanOrEqual(sandFc + 1e-3);
+    // Clay's low rechargeCap is the binding constraint — most of its excess
+    // is still sitting in the soil column as elevated moisture (waterlogged),
+    // not passed on to groundwater.
+    expect(clay.getSoilMoisture(5, 5)).toBeGreaterThan(clayFc + 0.05);
+  });
+
+  it("loam recharge is unaffected — worlds that never paint substrate keep prior behavior", () => {
+    const world = new WorldState(generateMountain(10, 10, 4, 1));
+    world.soilMoisture.fill(0.4);
+    const before = world.getGroundwater(5, 5);
+    world.runGroundwaterStep(1);
+    const rechargedLoam = world.getGroundwater(5, 5) - before;
+    expect(rechargedLoam).toBeGreaterThan(0);
+  });
+});
+
 describe("depositSubstrate (C-009 geological deposit)", () => {
   it("raises elev+depth and stamps material where mass lands", () => {
     const world = new WorldState(generateMountain(24, 24, 6, 2));

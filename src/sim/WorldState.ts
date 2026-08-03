@@ -83,6 +83,7 @@ import {
   MAX_SUBSTRATE_POROSITY,
   SUBSTRATE_LOAM,
   SUBSTRATE_ROCK,
+  relativePercolation,
   substrateProps,
 } from "./terrain/substrates";
 import {
@@ -1150,7 +1151,7 @@ export class WorldState {
     const acc = this.flowAccumulation;
     const minDepth = 1e-3;
     const nCells = this.width * this.height;
-    const rechargeCap = this.gwRechargeRate * scale;
+    const baseRechargeCap = this.gwRechargeRate * scale;
     // Linear reservoir: 1 − (1−α)^dt ≈ α·dt for small α·dt; clamp fraction ≤ 1.
     const recessionFrac = Math.min(1, this.gwRecessionAlpha * scale);
 
@@ -1158,6 +1159,10 @@ export class WorldState {
       const h = Math.max(depth[i]!, minDepth);
       const porosity = substrateProps(mat[i]!).porosity;
       const fc = porosity * this.gwFieldCapacityFraction;
+      // Clay perches water above it instead of draining it (H-003); sand lets
+      // it straight through. Same infiltration-rate column, one law (T-004),
+      // factor is 1 at loam so unpainted worlds are bit-identical.
+      const rechargeCap = baseRechargeCap * relativePercolation(mat[i]!);
 
       if (rechargeCap > 0 && m[i]! > fc) {
         const excess = (m[i]! - fc) * h;

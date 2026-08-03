@@ -91,17 +91,32 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "salinity", label: "Inspect: soil salinity" },
 ];
 
-/** Cause tools (A-005) + predict marks (P-006). Geological deposit = C-009. */
-const SITING: { id: SitingTool; label: string }[] = [
-  { id: "none", label: "Tool: look" },
-  { id: "predict", label: "Tool: predict wet" },
-  { id: "berm", label: "Tool: raise berm" },
-  { id: "dig", label: "Tool: dig channel" },
-  { id: "deposit", label: "Tool: deposit" },
-  { id: "flatten", label: "Tool: flatten" },
-  { id: "mold", label: "Tool: mold" },
-  { id: "duplicate", label: "Tool: duplicate" },
-  { id: "ignite", label: "Tool: ignite (authored)" },
+/**
+ * Cause tools (A-005), grouped by simulation domain rather than one flat
+ * list — scales more readably as tools accumulate (weather/animals will add
+ * their own groups later) than alphabetical or add-order would.
+ * Geological deposit = C-009.
+ */
+const SITING_NONE = { id: "none" as SitingTool, label: "Tool: look" };
+const SITING_GROUPS: { label: string; tools: { id: SitingTool; label: string }[] }[] = [
+  {
+    label: "Shape terrain",
+    tools: [
+      { id: "berm", label: "Tool: raise berm" },
+      { id: "dig", label: "Tool: dig channel" },
+      { id: "flatten", label: "Tool: flatten" },
+      { id: "mold", label: "Tool: mold" },
+      { id: "duplicate", label: "Tool: duplicate" },
+    ],
+  },
+  {
+    label: "Materials",
+    tools: [{ id: "deposit", label: "Tool: deposit" }],
+  },
+  {
+    label: "Disturbance",
+    tools: [{ id: "ignite", label: "Tool: ignite (authored)" }],
+  },
 ];
 
 /** Brush size tiers (C-028 / §4.55) — craft names, still causes. */
@@ -158,9 +173,6 @@ export function mountControls(
     onSitingBrushSize: (size: SitingBrushSize) => void;
     onMoldShape: (shape: MoldShape) => void;
     onDepositMaterial: (id: DepositMaterialId) => void;
-    onCommitPrediction: () => void;
-    onComparePrediction: () => void;
-    onClearPrediction: () => void;
     onSave: () => void;
     onLoad: () => void;
     onUndo: () => void;
@@ -627,12 +639,21 @@ export function mountControls(
 
   const sitingSelect = document.createElement("select");
   sitingSelect.id = "siting-tool";
-  sitingSelect.setAttribute("aria-label", "Tool");
-  for (const tool of SITING) {
-    const opt = document.createElement("option");
-    opt.value = tool.id;
-    opt.textContent = tool.label;
-    sitingSelect.appendChild(opt);
+  sitingSelect.setAttribute("aria-label", "Tool, grouped by simulation domain");
+  const noneOpt = document.createElement("option");
+  noneOpt.value = SITING_NONE.id;
+  noneOpt.textContent = SITING_NONE.label;
+  sitingSelect.appendChild(noneOpt);
+  for (const group of SITING_GROUPS) {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = group.label;
+    for (const tool of group.tools) {
+      const opt = document.createElement("option");
+      opt.value = tool.id;
+      opt.textContent = tool.label;
+      optgroup.appendChild(opt);
+    }
+    sitingSelect.appendChild(optgroup);
   }
   sitingSelect.value = initial.sitingTool;
   sitingSelect.addEventListener("change", () => {
@@ -657,29 +678,6 @@ export function mountControls(
   brushSelect.addEventListener("change", () => {
     handlers.onSitingBrushSize(brushSelect.value as SitingBrushSize);
   });
-
-  const predictGroup = document.createElement("div");
-  predictGroup.id = "predict-actions";
-  predictGroup.setAttribute("role", "group");
-  predictGroup.setAttribute("aria-label", "Prediction (P-006)");
-
-  const commitBtn = document.createElement("button");
-  commitBtn.type = "button";
-  commitBtn.textContent = "Commit prediction";
-  commitBtn.addEventListener("click", handlers.onCommitPrediction);
-
-  const compareBtn = document.createElement("button");
-  compareBtn.type = "button";
-  compareBtn.textContent = "Compare";
-  compareBtn.addEventListener("click", handlers.onComparePrediction);
-
-  const clearPredBtn = document.createElement("button");
-  clearPredBtn.type = "button";
-  clearPredBtn.textContent = "Clear prediction";
-  clearPredBtn.addEventListener("click", handlers.onClearPrediction);
-
-  predictGroup.append(commitBtn, compareBtn, clearPredBtn);
-  markFullOnly(predictGroup);
 
   const inspectorSelect = document.createElement("select");
   inspectorSelect.id = "inspector";
@@ -742,7 +740,6 @@ export function mountControls(
     branchGroup,
     saveBtn,
     loadBtn,
-    predictGroup,
     inspectorSelect,
   );
 

@@ -92,6 +92,22 @@ export function substrateProps(classId: number): SubstrateProps {
   return row ?? SUBSTRATES[SUBSTRATE_LOAM]!;
 }
 
+/**
+ * Relative percolation to groundwater vs. loam (H-003 — clay's low
+ * permeability perches water above it instead of draining it, the same way
+ * its infiltrationRate already slows surface intake). 1 at loam so worlds
+ * that never paint substrate are unaffected; clay << 1 (water lingers,
+ * waterlogs, ponds); sand > 1 (drains through, dries out); rock ≈ 0 (sheds).
+ * Reuses infiltrationRate rather than adding a second material column —
+ * one law, data-driven (T-004), no per-material process fork (C-002).
+ */
+export function relativePercolation(classId: number): number {
+  return (
+    substrateProps(classId).infiltrationRate /
+    SUBSTRATES[SUBSTRATE_LOAM]!.infiltrationRate
+  );
+}
+
 function hash2(ix: number, iz: number, seed: number): number {
   let n = Math.imul(ix, 374761393) ^ Math.imul(iz, 668265263) ^ (seed | 0);
   n = Math.imul(n ^ (n >>> 13), 1274126177);
