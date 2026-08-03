@@ -40,6 +40,40 @@ checkable points:
 A piece's critic scores its screenshot against whichever points apply to
 that piece and names the single biggest remaining gap each round.
 
+## Round 1 status (2026-08-03)
+
+Four pieces (terrain material, water/ocean, sky/atmosphere, vegetation)
+were fanned out as parallel worktree-isolated builders. All four were
+**terminated mid-round by the account's monthly API spend limit**, not by
+completing their work normally. The fifth piece (wildlife) never got past
+initial research before being cut off — no code was produced there.
+
+Recovery: all four terminated builders' uncommitted diffs typechecked
+clean and passed the full 508-test suite untouched, so the partial work
+was kept rather than discarded. Integrating all four onto the current
+foundation surfaced two real regressions from working on stale branches
+(their worktrees predated the Phase 0 foundation commit), fixed directly
+rather than by re-running agents:
+
+- **Water/ocean read as near-black.** Both shaders hardcoded the *old*
+  Scene.ts sun direction/sky-horizon color as literal constants (their
+  worktree branched before the new sun rig existed) — nearly opposite the
+  actual current sun direction. Fixed by recomputing the literal constants
+  against the real `sunDirectionFromSky(38, 205)` output.
+- **Sky rendered washed-out white**, not the seam the sky agent's own fix
+  addressed (that fix — spreading the mie sun-glow lobe — was correct and
+  is kept). The remaining whiteout was turbidity/rayleigh values that were
+  simply too high for this tone-mapping setup; cut hard (turbidity 1.0,
+  rayleigh 0.15) until the sky actually read as blue instead of clipped
+  white. Verified empirically, not assumed — an intermediate halfway cut
+  (rayleigh 1.35→0.75) barely moved the output at all, which is itself
+  informative: once tonemapping is deep in ACES's shoulder, small input
+  changes don't show up in the output.
+
+Wildlife (habitat-gated fauna via the foxel toolchain) is queued for a
+retry once the spend limit is lifted — see the live progress page for
+current per-piece status.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.

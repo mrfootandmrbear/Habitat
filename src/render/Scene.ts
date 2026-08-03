@@ -76,10 +76,16 @@ export function createScene(container: HTMLElement): SceneHandles {
   const sky = new Sky();
   sky.scale.setScalar(380);
   const skyUniforms = sky.material.uniforms;
-  skyUniforms.turbidity.value = 2.2;
-  skyUniforms.rayleigh.value = 1.1;
-  skyUniforms.mieCoefficient.value = 0.0025;
-  skyUniforms.mieDirectionalG.value = 0.78;
+  skyUniforms.turbidity.value = 1.0;
+  skyUniforms.rayleigh.value = 0.15;
+  // Mie (sun-glow) term was tuned down on coefficient alone before, but at
+  // mieDirectionalG≈0.78 the forward-scattering lobe stayed razor-tight —
+  // its hot core cleared the tonemapper's shoulder and clipped to a hard-
+  // edged bright patch near the sun instead of a soft glow. Spreading the
+  // lobe (lower g) trades peak intensity for width so the glow falls off
+  // smoothly instead of slamming into a seam.
+  skyUniforms.mieCoefficient.value = 0.0014;
+  skyUniforms.mieDirectionalG.value = 0.6;
   // CloudMesh already renders sim-driven clouds — Sky's own procedural
   // cloud layer would double up and drift out of sync with cloudWater.
   skyUniforms.cloudCoverage.value = 0;
