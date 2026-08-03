@@ -1,0 +1,22 @@
+{
+  "id": "succession-displace",
+  "title": "L5 guild competition / successional displacement (C-023)",
+  "simLoop": "runHabitatStep attenuates the insolation feeding herb's Liebig light factor through shrub's own canopy cover (existing Beer–Lambert evaluateLight, reused not duplicated), so a growing shrub canopy lowers herb's HSI and — combined with L3's mortality-as-a-rate — herb biomass can recede from a previously established peak as shrub rises. Zero shrub cover leaves the attenuated value bit-identical to open-sky insolation.",
+  "gameLoop": "A meadow that shrub moves into stops being a meadow: the pioneer cover that got there first visibly gives ground as the woody canopy closes over it, instead of both persisting at full strength forever in the same cell.",
+  "registerIds": ["C-023", "ES-006", "C-011", "T-001", "T-005"],
+  "invariantClass": "Monotonicity",
+  "tests": [
+    "src/sim/successionDisplace.test.ts"
+  ],
+  "probes": [
+    "succession-displace",
+    "deep-time"
+  ],
+  "fields": [
+    "habitat.suitability",
+    "veg.biomass.shrub",
+    "veg.biomass.herb"
+  ],
+  "notebookSeed": "The shrub that moved in didn't just add to the meadow — it started shading it out. Give it a few more years and you'll see the grass thin under the canopy.",
+  "tierO": "no owner-only question this closeout — leading direction adopted by owner delegation in session (2026-08-03); machine half (displacement direction, determinism, single-authority, ES-006 guard) is CI-judged via succession-displace probe + successionDisplace.test.ts. No new Process; D-007 clip gate does not apply."
+}

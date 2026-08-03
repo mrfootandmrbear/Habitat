@@ -1,0 +1,49 @@
+{
+  "scenario": "succession-displace",
+  "metrics": {
+    "competing.herbPeak": {
+      "value": 1.6901216506958008,
+      "abs": 0.00001
+    },
+    "competing.herbFinal": {
+      "value": 0.9754810333251953,
+      "abs": 0.00001
+    },
+    "competing.shrubFinal": {
+      "value": 1.5243836641311646,
+      "abs": 0.00001
+    },
+    "competing.declinedFromPeak": {
+      "value": 0.7146406173706055,
+      "abs": 0.00001
+    },
+    "noCompetition.herbFinal": {
+      "value": 2.0833332538604736,
+      "abs": 0.00001
+    },
+    "noCompetition.shrubFinal": {
+      "value": 0,
+      "abs": 0
+    },
+    "delta.declinedFromPeak": {
+      "value": 0.7146406173706055,
+      "abs": 0.00001
+    },
+    "delta.suppressedVsControl": {
+      "value": 1.1078522205352783,
+      "abs": 0.00001
+    },
+    "delta.dominantRises": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.replayMatch": {
+      "value": 1,
+      "abs": 0
+    },
+    "delta.hashN": {
+      "value": 1844580590,
+      "abs": 0
+    }
+  }
+}

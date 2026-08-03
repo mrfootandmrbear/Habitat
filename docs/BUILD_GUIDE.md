@@ -1040,13 +1040,21 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.40 Slice L5 — Guild competition *(blocked on C-023 — do not implement)*
+### 4.40 Slice L5 — Guild competition *(Done — agent, C-023 Locked)*
 
-**Why this exists.** Six guilds stack additively into `physicalCover` and **no guild is ever displaced**. Succession is parallel accumulation, not replacement. Filed as **C-023** Open ([register §16.5](DECISION_REGISTER.md), criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3).
+**Why this exists.** Six guilds stack additively into `physicalCover` and **no guild is ever displaced**. Succession is parallel accumulation, not replacement. Filed as **C-023**, [register §16.5](DECISION_REGISTER.md), criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3. Owner delegated the choice in session (2026-08-03, "pick the best option") — leading direction adopted as written; **C-023 Locked**.
 
-**Status.** Open candidate, owner-judged. Per §4.0.1, **implement nothing under it** — the entry exists so the question is filed rather than answered by an agent. Ordering is also causal, not just procedural: without L3's mortality rate there is no mechanism by which a suppressed guild can recede, so building this first would measure nothing.
+**Register:** C-023 Locked; ES-006 Locked; C-011; T-001 Locked; T-005.
+**New Process?** no — extends the existing daily-band `habitatProcess`. D-007 clip gate does not apply.
 
-**Likely shape (hypothesis only).** Shorter guilds read `light.understory` instead of open-sky `light.insolation` in their HSI, making displacement a consequence of the Beer–Lambert budget `lightCompetition.ts` already computes rather than a new rule or a dominance table.
+- [x] Shrub — the one structurally taller (woody) guild among the six (DESIGN_WIKI §4) — attenuates the insolation feeding herb's existing light arm (`factorLight`) via the existing Beer–Lambert `evaluateLight`, reused not duplicated: `runHabitatStep` computes `shrubCover = herbCoverFraction(shrubBiomass, shrubBiomassMax)` and passes `evaluateLight(insolation, shrubCover).understoryLight` where raw open-sky insolation went before. Scoped to shrub → herb only — strand/binder/marsh/crust have no light arm in their HSI today
+- [x] `habitatProcess.reads` gains `veg.biomass.shrub`, declared `lagged` (daily band reading a seasonal-band field)
+- [x] Zero shrub cover leaves the attenuated value bit-identical to open-sky insolation — the no-competition regression case
+- [x] Test: bare-shrub identity; dense-shrub attenuation matches `I·(1−cover)` exactly; a 30-tick run shows herb rise → peak → decline under a live shrub canopy while a shrub-suppressed twin (identical else) rises monotonically and never declines (`successionDisplace.test.ts`)
+- [x] New probe `succession-displace`: competing twin herb peak ≈1.690 → final ≈0.975 (shrub final ≈1.524); no-competition twin herb final ≈2.083, shrub exactly 0; replay-hash identity
+- [x] Baselines: only `deep-time` moved (small — Δ ≈ 4.4e-6 on `lateDelta.coverDelta`, conservation-level moves elsewhere); every other probe unchanged
+- [x] Composition + manifest: [succession-displace-composition.md](slices/succession-displace-composition.md), [succession-displace.json](slices/succession-displace.json)
+- [x] **Next-but-one:** Living wave / Track R both close out with this slice; **L8** stays blocked on **C-024** + **C-025**
 
 ---
 
@@ -1399,7 +1407,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Done** |
 | L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Done** — agent (`dieback-lag`) |
 | L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass |
-| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
+| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Done** — agent ([composition](slices/succession-displace-composition.md)); C-023 Locked |
 | L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Done** — hash-identity; skipFrac 0.3; baselines unmoved |
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |

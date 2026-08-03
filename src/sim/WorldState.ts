@@ -56,6 +56,7 @@ import {
 } from "./habitat/salinityComposition";
 import {
   eligibleRichness,
+  herbCoverFraction,
   localSeedPressureField,
   establishmentProbability,
   nextHerbBiomass,
@@ -1212,6 +1213,15 @@ export class WorldState {
     const salt = this.soilSalinity.data;
     const exposure = this.shoreExposure.data;
     const elev = this.terrain.data;
+    // §4.40 / C-023: shrub is the one woody, structurally taller guild among
+    // the six (DESIGN_WIKI §4) — a real overstory over herb's understory, the
+    // same stratification a person already reads as "bushes shade the grass
+    // underneath them" (C-011). Herb's light factor reads insolation
+    // attenuated through shrub's own canopy via the existing Beer–Lambert
+    // evaluateLight, not the generic light.understory field (that one tracks
+    // legacy veg.cover, an unrelated quantity — see runVegetationStep).
+    const shrubBio = this.shrubBiomass.data;
+    const shrubBiomassMax = config.shrubBiomassMax;
     const hsi = this.habitatSuitability.data;
     const lim = this.habitatLimitingFactor.data;
     const gap = this.habitatLimitingGap.data;
@@ -1239,6 +1249,11 @@ export class WorldState {
           x,
           z,
         );
+        const shrubCover = herbCoverFraction(shrubBio[i]!, shrubBiomassMax);
+        const understoryInsolation = evaluateLight(
+          insolation,
+          shrubCover,
+        ).understoryLight;
         const sample = evaluateHsi({
           moisture: m[i]!,
           soilDepth: depth[i]!,
@@ -1254,7 +1269,7 @@ export class WorldState {
           elevMeters: hasTide ? elev[i]! : undefined,
           mlwMeters: mlw,
           mhwMeters: mhw,
-          insolation,
+          insolation: understoryInsolation,
         });
         hsi[i] = sample.hsi;
         lim[i] = sample.limiting;

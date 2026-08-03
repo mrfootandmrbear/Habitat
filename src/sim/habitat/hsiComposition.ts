@@ -136,8 +136,15 @@ export function evaluateHsi(args: {
   mlwMeters?: number;
   mhwMeters?: number;
   /**
-   * Open-sky insolation [0,1] for light (C-007 / C-011). Omit → f_light = 1
-   * (flat / legacy call sites). Never pass understoryLight.
+   * Insolation [0,1] reaching this guild's own canopy layer (C-007 / C-011).
+   * Omit → f_light = 1 (flat / legacy call sites). For germination-stage
+   * arrival this is open-sky terrainInsolation; for an understory guild
+   * shaded by a taller one, the caller pre-attenuates it through that
+   * guild's Beer–Lambert canopy (L5 / C-023 — herb reads insolation under
+   * shrub's cover, not the unrelated generic `light.understory` field). What
+   * this function must never receive is the *reported display* understory
+   * value from a guild's own self-shading — that would double-count a
+   * canopy against itself.
    */
   insolation?: number;
 }): HsiSample {
