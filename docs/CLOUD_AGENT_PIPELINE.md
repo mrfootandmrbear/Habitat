@@ -52,7 +52,7 @@ Valid non-idle exits that still allow the chain to continue after merge:
 
 ## 3. Parallel tracks
 
-Two automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
+Three automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
 
 ### Track T — Terrain tools (C-028 structural) — **parked**
 
@@ -67,16 +67,26 @@ Two automations share the merge trigger but claim **disjoint** tip items. Rebase
 | Order | Slice | Notes |
 |---|---|---|
 | R1 | **§4.47** guild cover & light-competition | **Done** |
-| R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today — sole executable queue (Track T parked) |
+| R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today |
 | Rn | Next unblocked review-queue item | Skip owner-blocked Living remainder |
 
-**Never in either track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
+### Track A — Animal life (C-027 population fields) — **opened 2026-08-03**
+
+**F-001** (advanced ecosystem-engineer behaviors) undeferred by owner decision ([DECISION_REGISTER §15](DECISION_REGISTER.md)); **C-027**'s slice-trigger updated so non-competitive roles no longer wait on **L5** ([DECISION_CONFORMANCE C-027](DECISION_CONFORMANCE.md)). Scope stays split: mesopredator/apex-predator roles (food-web coupling) remain blocked behind **L5**/**C-023**; ecosystem-engineer remains blocked behind an unbuilt **E-005** write-back design. Do not implement either under this track.
+
+| Order | Slice | Notes |
+|---|---|---|
+| A1 | **§4.60** Herbivore population/trait fields | Tip today — registers the first `populations` Process; **D-007 clip gate applies**, record the clip verdict in the §4.60 entry before claiming any further new-Process slice on any track |
+| A2 | **§4.61** Seed disperser fields | Next-but-one — extends A1's Process, no new clip gate |
+| An | Pollinators, then owner choice among remaining non-competitive roles | Never mesopredator / apex-predator / ecosystem-engineer under this track |
+
+**Never in any track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, SWE, wet-sand, freeze, figurines, animal competition/predation (mesopredator/apex-predator roles), ecosystem-engineer write-back.
 
 ---
 
 ## 4. Cursor Automation setup (owner paste)
 
-Create **two** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
+Create **three** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
 
 ### Shared settings
 
@@ -140,6 +150,32 @@ Rules:
 Handoff: leave "Next (executable tip)" accurate for the next Track R agent.
 ```
 
+### Prompt — Track A (animal life)
+
+```
+You are a Habitat cloud succession agent on Track A (animal life — C-027 population fields).
+
+Cold start:
+1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md, docs/candidates/C-027-framing.md.
+2. Read "Next (executable tip)" and the Track A table in CLOUD_AGENT_PIPELINE.md.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track A slice (today: §4.60 Herbivore). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+
+Rules:
+- One slice per run. Do not start the next slice in the same run.
+- §4.60 registers the first `populations` Process — D-007 clip gate applies: record the clip verdict in the BUILD_GUIDE entry before this or any later slice on any track claims to register another new Process.
+- Every trait/pressure mapping needs a real-world referent (C-011, N-004) — do not invent one; if none exists, ship the field without that trait rather than guessing.
+- No individual entity/identity store (T-001, T-006) — field-simulated, individually-rendered only. No stochastic trait drift while C-003 is Open. No fixed carrying-capacity constant (ES-006). No player-authored creature bodies — species stays resolved through W-003's fixed pool.
+- Never implement mesopredator/apex-predator roles (blocked on L5/C-023), ecosystem-engineer write-back (E-005 path unbuilt), or animal competition/predation dynamics (ES-007/C-023/L5's separate scope) under this track.
+- Follow BUILD_GUIDE checklist for that §4.x entry. Green bar before done: npm run gate (skill /run-gate).
+- Update docs/BUILD_GUIDE.md, docs/MVP_SCOPE.md, README.md Current slice, slice manifest + composition in the same commit set (update-build-plan-on-commit). When editing the shared tip paragraph, change only the Track A clause.
+- If the Judge for a criterion (DECISION_CONFORMANCE C-027) is CI alone and it's met, promote in the evidence commit (skill /promote-candidate); if the owner is the Judge, write the dossier instead and leave C-027 Open.
+- On block: /blocked-note, name next queue item, stop.
+- Never invent Locked policy from Open candidates.
+- Open a draft PR. Summarize gate results in the PR body. Do not ask the owner to confirm numbers.
+
+Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track A's following item (today: §4.61 Seed disperser).
+```
+
 ---
 
 ## 5. Manual seed (first succession)
@@ -147,9 +183,9 @@ Handoff: leave "Next (executable tip)" accurate for the next Track R agent.
 Before enabling Automations:
 
 1. Land this doc on `main`.
-2. Launch **T1** (§4.57) and **R1** (§4.47) as separate cloud agents (disjoint branches).
-3. Merge each when CI green (rebase the second if tip-paragraph conflicts).
-4. Enable the matching Automation so the *next* merge starts T2 / R2.
+2. Launch **T1** (§4.57), **R1** (§4.47), and **A1** (§4.60) as separate cloud agents (disjoint branches).
+3. Merge each when CI green (rebase the others if tip-paragraph conflicts).
+4. Enable the matching Automation so the *next* merge starts T2 / R2 / A2.
 
 Owner still owns: merge clicks, Lock sittings (C-014 / C-021 / C-022 / …), Tier-O batches.
 
