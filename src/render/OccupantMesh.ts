@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { config } from "../config";
 import type { WorldState } from "../sim/WorldState";
 import type { WaterStateView } from "../sim/types";
+import { buildGuildGeometry, OCCUPANT_GUILDS } from "./guildGeometry";
 import {
   binderBiomassRgb,
   crustBiomassRgb,
@@ -23,11 +24,17 @@ import {
 /**
  * First-occupant shoots — presentation only (T-006).
  * Reads herb + strand + binder + marsh + shrub + crust biomass; does not create population state.
- * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal / shrub forest / crust sage).
+ * Dominant guild picks both the cell's silhouette (C-029: distinct geometry per guild — herb
+ * tuft / strand mat / binder tussock / marsh reeds / shrub branching form / crust flat patch,
+ * one InstancedMesh per guild under `object`) and its tint (herb / strand olive / binder khaki /
+ * marsh teal / shrub forest / crust sage).
  * L4: per-instance wind sway (forcing readout — calm is still; standing dead barely leans).
  */
 export class OccupantMesh {
-  readonly object: THREE.InstancedMesh;
+  /** One InstancedMesh per guild (C-029) — an Object3D, so callers add it exactly like before. */
+  readonly object: THREE.Group;
+  private readonly meshes: Record<SwayGuild, THREE.InstancedMesh>;
+  private readonly counts: Record<SwayGuild, number>;
   private readonly width: number;
   private readonly height: number;
   private readonly worldSize: number;
@@ -47,24 +54,35 @@ export class OccupantMesh {
     this.height = height;
     this.worldSize = worldSize;
     this.maxInstances = width * height;
-    const geo = new THREE.ConeGeometry(0.12, 0.55, 4);
-    geo.translate(0, 0.275, 0);
+    this.object = new THREE.Group();
+    this.object.name = "occupantShoots";
+    // Shared across guild meshes — color comes from per-instance instanceColor.
     const mat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.85,
       metalness: 0.05,
       flatShading: true,
     });
-    this.object = new THREE.InstancedMesh(geo, mat, this.maxInstances);
-    this.object.name = "occupantShoots";
-    this.object.frustumCulled = false;
-    this.object.count = 0;
-    this.object.castShadow = false;
-    this.object.receiveShadow = false;
-    this.object.instanceColor = new THREE.InstancedBufferAttribute(
-      new Float32Array(this.maxInstances * 3),
-      3,
-    );
+    const meshes = {} as Record<SwayGuild, THREE.InstancedMesh>;
+    const counts = {} as Record<SwayGuild, number>;
+    for (const guild of OCCUPANT_GUILDS) {
+      const geo = buildGuildGeometry(guild);
+      const mesh = new THREE.InstancedMesh(geo, mat, this.maxInstances);
+      mesh.name = `occupantShoots.${guild}`;
+      mesh.frustumCulled = false;
+      mesh.count = 0;
+      mesh.castShadow = false;
+      mesh.receiveShadow = false;
+      mesh.instanceColor = new THREE.InstancedBufferAttribute(
+        new Float32Array(this.maxInstances * 3),
+        3,
+      );
+      meshes[guild] = mesh;
+      counts[guild] = 0;
+      this.object.add(mesh);
+    }
+    this.meshes = meshes;
+    this.counts = counts;
   }
 
   /** Advance the sway clock (wall seconds). */
@@ -85,7 +103,7 @@ export class OccupantMesh {
     const { ux: windUx, uz: windUz } = world.wind;
     const windMag = Math.hypot(windUx, windUz);
     const timeSec = this.swayTimeSec;
-    let n = 0;
+    for (const guild of OCCUPANT_GUILDS) this.counts[guild] = 0;
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
@@ -113,6 +131,10 @@ export class OccupantMesh {
         let guild: SwayGuild = "herb";
         let tintBiomass = herb;
         let tintMax: number = herbMax;
+        // §4.48: each guild's own HSI (not herb's) proxies its living tissue
+        // for vitality — herb's own daily habitat.suitability is correct for
+        // herb and stays the default; other guilds override below.
+        let hsi = world.getHabitatSuitability(x, z);
         if (
           shrubVis >= herbVis &&
           shrubVis >= strandVis &&
@@ -124,6 +146,7 @@ export class OccupantMesh {
           guild = "shrub";
           tintBiomass = shrub;
           tintMax = shrubMax;
+          hsi = world.getShrubHsi(x, z);
         } else if (
           marshVis >= herbVis &&
           marshVis >= strandVis &&
@@ -135,6 +158,7 @@ export class OccupantMesh {
           guild = "marsh";
           tintBiomass = marsh;
           tintMax = marshMax;
+          hsi = world.getMarshHsi(x, z);
         } else if (
           strandVis >= herbVis &&
           strandVis >= binderVis &&
@@ -146,6 +170,7 @@ export class OccupantMesh {
           guild = "strand";
           tintBiomass = strand;
           tintMax = strandMax;
+          hsi = world.getStrandHsi(x, z);
         } else if (
           binderVis >= herbVis &&
           binderVis >= strandVis &&
@@ -157,6 +182,7 @@ export class OccupantMesh {
           guild = "binder";
           tintBiomass = binder;
           tintMax = binderMax;
+          hsi = world.getBinderHsi(x, z);
         } else if (
           crustVis >= herbVis &&
           crustVis >= strandVis &&
@@ -168,20 +194,17 @@ export class OccupantMesh {
           guild = "crust";
           tintBiomass = crust;
           tintMax = crustMax;
+          hsi = world.getCrustHsi(x, z);
         }
         const y = model.getTerrainHeight(x, z);
-        // Woody reads taller; crust stays low mat (presentation only — T-006).
-        const heightBoost =
-          guild === "shrub" ? 1.35 : guild === "crust" ? 0.45 : 1;
-        const scaleY = (0.35 + vis * 1.4) * heightBoost;
+        // C-029: each guild's own geometry now carries its height/bushiness
+        // signal (marsh tall and thin, crust flat, shrub branching) — no
+        // per-guild heightBoost multiplier on top of that anymore.
+        const scaleY = 0.35 + vis * 1.4;
         const scaleXZ = 0.45 + vis * 0.9;
         const yaw = ((x * 17 + z * 31) % 360) * (Math.PI / 180);
         // Cell HSI proxies living tissue — standing excess under L3 barely leans.
-        const vitality = livingVitality(
-          tintBiomass,
-          tintMax,
-          world.getHabitatSuitability(x, z),
-        );
+        const vitality = livingVitality(tintBiomass, tintMax, hsi);
         const amp = swayAmplitude(windMag, guildFlex(guild), vitality);
         const tilt = swayTilt(amp, swayPhase(x, z), timeSec);
 
@@ -194,7 +217,10 @@ export class OccupantMesh {
           this.dummy.rotateOnAxis(this.leanAxis, tilt);
         }
         this.dummy.updateMatrix();
-        this.object.setMatrixAt(n, this.dummy.matrix);
+
+        const mesh = this.meshes[guild];
+        const idx = this.counts[guild]++;
+        mesh.setMatrixAt(idx, this.dummy.matrix);
         const [r, g, b] =
           guild === "shrub"
             ? shrubBiomassRgb(tintBiomass, tintMax)
@@ -208,14 +234,14 @@ export class OccupantMesh {
                     ? crustBiomassRgb(tintBiomass, tintMax)
                     : herbBiomassRgb(tintBiomass, tintMax);
         this.color.setRGB(r, g, b);
-        this.object.setColorAt(n, this.color);
-        n++;
+        mesh.setColorAt(idx, this.color);
       }
     }
-    this.object.count = n;
-    this.object.instanceMatrix.needsUpdate = true;
-    if (this.object.instanceColor) {
-      this.object.instanceColor.needsUpdate = true;
+    for (const guild of OCCUPANT_GUILDS) {
+      const mesh = this.meshes[guild];
+      mesh.count = this.counts[guild];
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
   }
 }

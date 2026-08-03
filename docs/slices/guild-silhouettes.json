@@ -1,0 +1,26 @@
+{
+  "id": "guild-silhouettes",
+  "title": "Distinct per-guild occupant silhouettes (C-029)",
+  "simLoop": "No sim change — OccupantMesh is presentation-only (T-006). Six new procedural geometries (src/render/guildGeometry.ts) replace the single shared cone; dominant-guild selection, biomass-driven scale, sway, and tint are unchanged. Bonus fix: occupant vitality now reads each guild's own veg.hsi.* (available since §4.48) instead of herb's habitat.suitability for every guild.",
+  "gameLoop": "Six vegetation guilds now read as six different life-forms on sight — herb tuft, strand mound, binder tussock, marsh reeds, shrub's branching form, crust's flat patch — not one shape in six colors.",
+  "registerIds": ["C-029", "T-006", "ART-001"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/render/guildGeometry.test.ts"],
+  "probes": [],
+  "fields": [
+    "veg.biomass.herb",
+    "veg.biomass.strand",
+    "veg.biomass.binder",
+    "veg.biomass.marsh",
+    "veg.biomass.shrub",
+    "veg.biomass.crust",
+    "veg.hsi.strand",
+    "veg.hsi.binder",
+    "veg.hsi.marsh",
+    "veg.hsi.shrub",
+    "veg.hsi.crust",
+    "habitat.suitability"
+  ],
+  "notebookSeed": "Six different shapes are growing here now, not six colors of the same blade — a reed isn't a tussock isn't a shrub.",
+  "tierO": "no owner-only question — geometric distinctness is CI-judged (guildGeometry.test.ts asserts every pair of silhouettes clears an aspect-ratio floor, the geometric analogue of colorDistance); D-007 clip gate does not apply (no new Process, presentation only)."
+}

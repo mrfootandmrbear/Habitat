@@ -1724,6 +1724,21 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 ---
 
+### C-029 — Distinct per-guild occupant silhouettes
+**Status:** Locked
+
+**Question.** Should the six vegetation guilds (herb, strand, binder, marsh, shrub, crust) each render with their own low-poly silhouette, or keep sharing one cone shape distinguished only by color and uniform scale?
+
+**Why now.** `OccupantMesh` (L4) instanced one `ConeGeometry` for every guild — color and a per-guild height multiplier were the only signal that six different life-forms were present. Owner, in session, asked for distinct visual rendering per plant species as the next step after **§4.48** made the underlying per-guild data (biomass, HSI) trustworthy.
+
+**Owner sitting (this session).** Two questions asked and answered directly, live: (1) ambition — distinct simple procedural shapes per guild, not a push of the existing color/scale-only encoding, and not fully custom sculpted models; (2) growth — shape stays static per guild, scaled/tinted by biomass exactly as before (no per-instance morphing between young and mature form). **Locked** on both.
+
+**Constraints.** Stylized low-poly primitives only (ART-001 scientific impressionism) — no vendored 3D assets. Presentation only, no WorldState writes (T-006). Every shape's base must sit at `y=0` so the existing per-cell `scaleXZ`/`scaleY` (biomass-driven) continues to apply unchanged. `THREE.InstancedMesh` requires one shared geometry per batch, so six distinct shapes means six instanced meshes (one per guild), not six geometries fighting inside one buffer.
+
+**Leading direction.** Herb = sparse three-blade tuft (closest to the original cone); strand = a low rounded splash-zone mound; binder = a tighter five-blade tussock; marsh = a tall thin reed pair; shrub = the only branching form (trunk + three canopy clusters); crust = a flat ground-hugging patch. Built in `src/render/guildGeometry.ts`, wired into `OccupantMesh` as one `InstancedMesh` per guild under a `THREE.Group`. Tier-P proof: `guildGeometry.test.ts` asserts every pair of guild silhouettes clears a real aspect-ratio gap (the geometric analogue of `colorDistance`'s color-delta floor), and that crust reads flattest / marsh reads tallest-and-thinnest by construction. Bonus fix while touching this code: occupant sway `vitality` previously used herb's `habitat.suitability` for every guild's standing-dead check; now reads each guild's own `veg.hsi.*` (available since **§4.48**), closing a defect L4's own composition doc had flagged as deferred.
+
+---
+
 ## 17. Document Authority
 
 This register governs GAME_DESIGN_OVERVIEW.md, SIMULATION_MODEL.md, HYDROLOGY_SPEC.md, PLAYER_INTERACTION_SPEC.md, SPECIES_AND_HABITAT.md, SCENARIO_AUTHORING.md, FIELD_NOTEBOOK_SPEC.md, UI_INFORMATION_ARCHITECTURE.md, ART_DIRECTION.md, MVP_SCOPE.md, BUILD_GUIDE.md, and DECISION_CONFORMANCE.md.
