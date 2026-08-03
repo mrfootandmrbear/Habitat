@@ -1166,18 +1166,18 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.48 Slice — Habitat/dispersal determinism hygiene *(queued)*
+### 4.48 Slice — Habitat/dispersal determinism hygiene *(Done — agent)*
 
 **Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.4. Three independent hygiene defects in the same code region: `habitatProcess`'s declared `reads` (`habitatProcess.ts:12-18`) omits `this.terrain.data` and `this.soilMaterial.data`, both silently consumed inside `runHabitatStep` — invisible to any future scheduler dependency analysis. `runHerbEstablishmentStep` updates guilds sequentially with downstream guilds reading already-updated upstream values in the same tick (`WorldState.ts:1661,1718,1738-1742`) — a Gauss-Seidel update where the §2.1 Symmetry invariant class calls for order-independence. `runDispersalStep` and `runHerbEstablishmentStep` compute the identical six-guild HSI math twice, at different cadences (annual vs. seasonal, `WorldState.ts:1498-1559` vs. `1670-1747`), so the displayed `veg.establishment.*` field can silently disagree with what actually drove growth.
 
 **Register:** T-001 Locked; T-005 (registered fields inspectable — undeclared reads undermine this)
 **New Process?** no — scheduling/read-declaration and code-dedup hygiene only. D-007 clip gate does not apply.
 
-- [ ] `habitatProcess.reads` declares `terrain.elevation` (or whatever field backs `terrain.data`) and `soil.material`
-- [ ] Guild establishment update switches to a Jacobi snapshot at tick start, removing same-tick order dependence
-- [ ] `runHerbEstablishmentStep` reads the HSI values `runDispersalStep` already computed and wrote, instead of recomputing them
-- [ ] Test: swapping the guild update order in source produces byte-identical results (closes the Symmetry gap directly)
-- [ ] Composition + manifest; **Next-but-one:** §4.49 Drainage flat-routing correctness
+- [x] `habitatProcess.reads` declares `terrain.elevation` (or whatever field backs `terrain.data`) and `soil.material`
+- [x] Guild establishment update removes same-tick order dependence — every cross-guild biomass read (shrub ← herb, crust ← herb/strand/binder/marsh/shrub) moved into `runDispersalStep`, which only ever reads biomass and never mutates it: a stronger fix than a snapshot-and-guard, since nothing left in the mutating loop reads a sibling guild's live array at all
+- [x] `runHerbEstablishmentStep` reads the HSI values `runDispersalStep` already computed and wrote (new `veg.hsi.{strand,binder,marsh,shrub,crust}` cache fields), instead of recomputing them
+- [x] Test: the six guild updates commute — forward vs. reverse order from an identical tick-start snapshot agree exactly, and both match the real step's output (`habitatDispersalHygiene.test.ts`)
+- [x] Composition + manifest: [habitat-dispersal-hygiene-composition.md](slices/habitat-dispersal-hygiene-composition.md), [habitat-dispersal-hygiene.json](slices/habitat-dispersal-hygiene.json); **Next-but-one:** C-023 judged + L5 guild competition shipped (this session)
 
 ---
 
@@ -1408,7 +1408,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Fuel / scar numeric fix | T-001, S-009 | §4.45 **Done** — analytic Olson + scar; `fuel-scar-refine` |
 | — | HSI curve-shape corrections | C-007, C-011, S-007, N-004 | §4.46 **Done** — agent ([composition](slices/hsi-curve-shape-composition.md)) |
 | — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Done** — agent ([composition](slices/guild-cover-light-composition.md)) |
-| — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |
+| — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Done** — agent ([composition](slices/habitat-dispersal-hygiene-composition.md)) |
 | — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Done** |
 | — | Surface-flux stability guard | T-001, H-004 | §4.50 **Done** |
 | — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Done** |

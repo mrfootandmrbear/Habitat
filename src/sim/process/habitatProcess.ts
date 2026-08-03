@@ -15,6 +15,10 @@ export const habitatProcess: Process = {
     "soil.salinity",
     "groundwater.storage",
     "shore.exposure",
+    // §4.48: runHabitatStep also reads terrain (aspect/slope insolation) and
+    // soil material (porosity lookup) — both silently consumed, undeclared.
+    "terrain.elevation",
+    "soil.material",
   ],
   writes: [
     "habitat.suitability",

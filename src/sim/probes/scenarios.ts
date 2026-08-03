@@ -3078,6 +3078,9 @@ export function probeMarshArrival(): ProbeResult {
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
     world.runHabitatStep(1);
+    // §4.48: marsh HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     world.herbSeedBank.fill(config.seedSourceStrength);
     world.strandSeedBank.fill(config.seedSourceStrength);
     world.binderSeedBank.fill(config.seedSourceStrength);
@@ -3218,6 +3221,9 @@ export function probeShrubArrival(): ProbeResult {
     world.shoreExposure.fill(0);
     world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
     world.runHabitatStep(1);
+    // §4.48: shrub HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     const herbSeed = bareSeed ? 0 : config.seedSourceStrength;
     world.herbSeedBank.fill(herbSeed);
     world.strandSeedBank.fill(config.seedSourceStrength);
@@ -3335,6 +3341,9 @@ export function probeCrustArrival(): ProbeResult {
     world.herbBiomass.fill(config.herbBiomassMax * opts.herbFrac);
     world.runHabitatStep(1);
     world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+    // §4.48: crust HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     world.herbSeedBank.fill(0);
     world.strandSeedBank.fill(0);
     world.binderSeedBank.fill(0);

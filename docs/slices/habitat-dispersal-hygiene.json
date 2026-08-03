@@ -1,0 +1,33 @@
+{
+  "id": "habitat-dispersal-hygiene",
+  "title": "Habitat/dispersal determinism hygiene (§4.48)",
+  "simLoop": "habitatProcess declares the terrain and soil-material fields it reads; runHerbEstablishmentStep no longer reads a sibling guild's same-tick result (every cross-guild biomass read moved into the non-mutating runDispersalStep); strand/binder/marsh/shrub/crust HSI is computed once per dispersal tick and cached, not recomputed a second time at a different cadence inside establishment.",
+  "gameLoop": "No player-visible change in verbs or controls — this is scheduler/read-declaration and code-dedup hygiene. The establishment probability shown in the field notebook / inspector now always matches the HSI that actually drove that season's growth.",
+  "registerIds": ["T-001", "T-005"],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/habitatDispersalHygiene.test.ts",
+    "src/sim/shrubArrival.test.ts",
+    "src/sim/crustArrival.test.ts",
+    "src/sim/time-invariance.test.ts"
+  ],
+  "probes": [
+    "deep-time",
+    "shrub-arrival",
+    "crust-arrival",
+    "marsh-arrival",
+    "living-hollow"
+  ],
+  "fields": [
+    "veg.hsi.strand",
+    "veg.hsi.binder",
+    "veg.hsi.marsh",
+    "veg.hsi.shrub",
+    "veg.hsi.crust",
+    "habitat.suitability",
+    "terrain.elevation",
+    "soil.material"
+  ],
+  "notebookSeed": "What the inspector says a patch needs, and what actually grew there this season, used to have two separate sources of truth. Now they're the same number.",
+  "tierO": "no owner-only question — declared-reads coverage and update-order commutativity are CI-judged (habitatDispersalHygiene.test.ts). No new Process; D-007 clip gate does not apply."
+}

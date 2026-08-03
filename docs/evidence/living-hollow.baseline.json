@@ -10,15 +10,15 @@
       "abs": 0.00001
     },
     "colonized.downslope": {
-      "value": 0.15636354684829712,
+      "value": 0.16893228888511658,
       "abs": 0.00001
     },
     "colonized.roughness": {
-      "value": 0.1455686241388321,
+      "value": 0.13333332538604736,
       "abs": 0.000001
     },
     "colonized.infiltrated": {
-      "value": 25.33001333475113,
+      "value": 23.920000076293945,
       "abs": 0.0001
     },
     "bare.cover": {
@@ -46,11 +46,11 @@
       "abs": 0.00001
     },
     "delta.downslopeDelta": {
-      "value": 0.26665574312210083,
+      "value": 0.25408700108528137,
       "abs": 0.00001
     },
     "delta.infilDelta": {
-      "value": 13.810013592243195,
+      "value": 12.40000033378601,
       "abs": 0.0001
     },
     "delta.hashMatch": {
