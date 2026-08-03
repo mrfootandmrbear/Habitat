@@ -74,6 +74,10 @@ Wildlife (habitat-gated fauna via the foxel toolchain) is queued for a
 retry once the spend limit is lifted — see the live progress page for
 current per-piece status.
 
+**To resume:** this workflow is now captured as a reusable skill —
+`.claude/skills/gauntlet-loop/`. Say "restart the gauntlet loop" and it
+reconstructs state from this note + git log rather than starting over.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
