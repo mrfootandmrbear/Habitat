@@ -130,6 +130,7 @@ const MOLD_SHAPES: { id: MoldShape; label: string }[] = [
   { id: "cylinder", label: "Mold: cylinder mound" },
   { id: "pyramid", label: "Mold: pyramid" },
   { id: "terrace", label: "Mold: square terrace" },
+  { id: "glacier", label: "Mold: glacial trough" },
 ];
 
 const MATERIAL_LABEL: Record<DepositMaterialId, string> = {

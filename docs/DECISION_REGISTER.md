@@ -1728,6 +1728,8 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Leading direction.** Structural form tools (brush size → flatten/trowel → molds / duplicator) ship under Locked **C-006** / **A-005** as hypotheses; watering can = Force rain; smoothing sponge = **C-013** undo first, optional flatten edit later; decorative flags/banners are owner chrome taste off tip; freeze and figurines stay banned. Framing: [C-028-framing.md](candidates/C-028-framing.md). First cut: BUILD_GUIDE §4.55.
 
+**Glacial trough mold (2026-08-03).** A fourth mold shape, alongside cylinder/pyramid/terrace: a U-shaped trough carved along the local downhill direction with a terminal moraine ridge at the foot (`WorldState.stampGlacierTrough`). Same category as the existing molds — a one-shot authored-history stamp, not a running Process, so **GEO-002**'s "earns its cost" test doesn't apply (nothing here evolves after the click). Sits squarely under **GEO-001** ("preserve authoring includes geological history or its simplified consequences") rather than opening new toolbox territory. Directional and two-signed (carve + deposit in one stamp), unlike the other three, so it bypasses the shared `moldProfileWeight` radius/height path — its own method, same clamp rules. Machine: `siting.test.ts` (carve + moraine direction, ΣΔelev=ΣΔdepth, no veg/material write, undo, determinism).
+
 ---
 
 ## 17. Document Authority

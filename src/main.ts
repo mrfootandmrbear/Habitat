@@ -586,7 +586,9 @@ const ui = mountControls(
           ? "Mold: cylinder mound — round flat-top disc"
           : shape === "pyramid"
             ? "Mold: pyramid — square base, peaked top"
-            : "Mold: square terrace — square flat-top mesa",
+            : shape === "terrace"
+              ? "Mold: square terrace — square flat-top mesa"
+              : "Mold: glacial trough — carves downhill from where you click, moraine ridge at the foot",
       );
     },
     onDepositMaterial: (id) => {

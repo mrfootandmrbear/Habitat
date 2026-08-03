@@ -2638,6 +2638,10 @@ export class WorldState {
     height: number = config.moldHeight,
     radius: number = config.moldRadius,
   ): void {
+    if (shape === "glacier") {
+      this.stampGlacierTrough(cx, cz, height, radius);
+      return;
+    }
     const r = radius;
     const zFloor = config.elevationFloor;
     const minDepth = 1e-3;
@@ -2680,6 +2684,124 @@ export class WorldState {
         }
 
         if (dh === 0) continue;
+
+        const oldH = Math.max(depth0, minDepth);
+        const newH = Math.max(nextDepth, minDepth);
+        this.adjustMoistureForDepthChange(i, oldH, newH, nextDepth);
+        this.soilDepth.data[i]! = nextDepth;
+        this.terrain.data[i]! = nextElev;
+      }
+    }
+    this.markStructureDirty();
+  }
+
+  /**
+   * Glacial trough mold (C-028 / GEO-001): one-shot U-shaped valley carved
+   * along the local downhill direction, with a terminal moraine ridge where
+   * the ice would have stalled and dropped its load — the moraine is the
+   * tell that reads as glacier-made rather than "a valley" (C-011 real-world
+   * referent). Authored pre-history like the other molds, not a running
+   * Process (GEO-002 does not apply — nothing here evolves after the stamp).
+   * `depth` (signed height's magnitude) sets carve depth; `scale` (radius)
+   * sets trough length/width. Shape-only: elev(+depth), no material, no
+   * vegetation (C-006) — same clamp rules as `stampMold`.
+   */
+  private stampGlacierTrough(
+    cx: number,
+    cz: number,
+    depth: number,
+    scale: number,
+  ): void {
+    const [dirX, dirZ] = downhillDirection(
+      this.terrain.data,
+      this.width,
+      this.height,
+      cx,
+      cz,
+      Math.max(2, Math.round(scale * 0.6)),
+    );
+    const length = scale * 2.6;
+    const halfWidth = Math.max(1, scale * 0.55);
+    const carveDepth = Math.abs(depth);
+    const moraineHeight = carveDepth * 0.4;
+    const moraineCenter = length * 1.08;
+    const moraineHalfSpan = halfWidth * 1.35;
+    const bound = Math.ceil(length + moraineHalfSpan) + 1;
+    const zFloor = config.elevationFloor;
+    const minDepth = 1e-3;
+
+    for (let z = cz - bound; z <= cz + bound; z++) {
+      for (let x = cx - bound; x <= cx + bound; x++) {
+        if (!this.terrain.inBounds(x, z)) continue;
+        const dx = x - cx;
+        const dz = z - cz;
+        // Rotate into the trough's own (along, across) frame.
+        const along = dx * dirX + dz * dirZ;
+        const across = -dx * dirZ + dz * dirX;
+
+        let dh = 0;
+
+        // U-shaped carve: flat bottom out to ~55% of the half-width, smooth
+        // (not linear — that would read as a pyramid) falloff to the walls
+        // past that, tapering to nothing at both ends so it blends into the
+        // surrounding terrain instead of leaving a cliff.
+        if (along >= -halfWidth * 0.6 && along <= length) {
+          const crossT = Math.min(1, Math.abs(across) / halfWidth);
+          const crossWeight =
+            crossT <= 0.55
+              ? 1
+              : Math.max(0, 1 - ((crossT - 0.55) / 0.45) ** 2);
+          const headFade = smoothstep(-halfWidth * 0.6, halfWidth * 0.3, along);
+          const footFade = 1 - smoothstep(length * 0.75, length, along);
+          dh -= carveDepth * crossWeight * headFade * footFade;
+        }
+
+        // Terminal moraine — a raised arc just past the foot of the trough.
+        if (
+          along >= moraineCenter - halfWidth * 0.5 &&
+          along <= moraineCenter + halfWidth * 0.5 &&
+          Math.abs(across) <= moraineHalfSpan
+        ) {
+          const alongT =
+            1 - Math.abs(along - moraineCenter) / (halfWidth * 0.5);
+          const acrossT = 1 - Math.abs(across) / moraineHalfSpan;
+          dh += moraineHeight * Math.max(0, alongT) * Math.max(0, acrossT);
+        }
+
+        if (dh === 0) continue;
+
+        const i = z * this.width + x;
+        const elev0 = this.terrain.data[i]!;
+        const depth0 = this.soilDepth.data[i]!;
+        let appliedDh = dh;
+        let nextDepth = depth0 + appliedDh;
+        let nextElev = elev0 + appliedDh;
+        if (nextDepth < 0) {
+          appliedDh = -depth0;
+          nextDepth = 0;
+          nextElev = elev0 + appliedDh;
+        }
+        if (nextDepth > 5) {
+          appliedDh = 5 - depth0;
+          nextDepth = 5;
+          nextElev = elev0 + appliedDh;
+        }
+        if (nextElev < zFloor) {
+          appliedDh = zFloor - elev0;
+          nextElev = zFloor;
+          nextDepth = depth0 + appliedDh;
+          if (nextDepth < 0) {
+            nextDepth = 0;
+            appliedDh = -depth0;
+            nextElev = elev0 + appliedDh;
+          }
+          if (nextDepth > 5) {
+            nextDepth = 5;
+            appliedDh = 5 - depth0;
+            nextElev = elev0 + appliedDh;
+          }
+        }
+        if (appliedDh === 0) continue;
 
         const oldH = Math.max(depth0, minDepth);
         const newH = Math.max(nextDepth, minDepth);
@@ -3534,6 +3656,44 @@ export class WorldState {
     ];
     for (const f of fields) this.registry.register(f);
   }
+}
+
+/**
+ * Steepest-descent unit direction at (cx, cz), via a central-difference
+ * gradient sampled `sampleR` cells out (wider than one cell so single-cell
+ * noise doesn't jitter the trough's orientation). Falls back to pointing
+ * away from the map center on ground flat enough that no downhill exists —
+ * an island's ice caps sit inland and flow toward the coast either way.
+ */
+function downhillDirection(
+  elev: Float32Array,
+  width: number,
+  height: number,
+  cx: number,
+  cz: number,
+  sampleR: number,
+): [number, number] {
+  const loX = Math.max(0, cx - sampleR);
+  const hiX = Math.min(width - 1, cx + sampleR);
+  const loZ = Math.max(0, cz - sampleR);
+  const hiZ = Math.min(height - 1, cz + sampleR);
+  const gx = (elev[cz * width + hiX]! - elev[cz * width + loX]!) / Math.max(1, hiX - loX);
+  const gz = (elev[hiZ * width + cx]! - elev[loZ * width + cx]!) / Math.max(1, hiZ - loZ);
+  let dx = -gx;
+  let dz = -gz;
+  const mag = Math.hypot(dx, dz);
+  if (mag > 1e-4) return [dx / mag, dz / mag];
+
+  dx = cx - width / 2;
+  dz = cz - height / 2;
+  const fallbackMag = Math.hypot(dx, dz);
+  return fallbackMag > 1e-4 ? [dx / fallbackMag, dz / fallbackMag] : [0, 1];
+}
+
+/** Cubic-smoothed 0→1 ramp between `edge0` and `edge1` (Hermite smoothstep). */
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - edge0) / Math.max(1e-6, edge1 - edge0)));
+  return t * t * (3 - 2 * t);
 }
 
 /** Max 4-neighbor slope (rise/run) on a heightfield. */

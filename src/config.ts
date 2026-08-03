@@ -458,10 +458,15 @@ export function sitingBrushRadiusFor(
 /**
  * Geometric mold footprints (C-028 / §4.57) — fixed-form terrain stamps.
  * `cylinder` = round flat-top disc; `pyramid` = square base tapering to a peak;
- * `terrace` = square flat-top mesa. Shape-only (elev+depth); no material, no
- * vegetation (C-006). Material stays on the separate deposit path (C-009).
+ * `terrace` = square flat-top mesa; `glacier` = U-shaped trough + terminal
+ * moraine carved along the local downhill direction (GEO-001 — authored
+ * geological history, not a running Process; see
+ * `WorldState.stampGlacierTrough`, which bypasses `moldProfileWeight` below
+ * since its footprint is directional and two-signed, not a single radius ×
+ * height). Shape-only (elev+depth); no material, no vegetation (C-006).
+ * Material stays on the separate deposit path (C-009).
  */
-export type MoldShape = "cylinder" | "pyramid" | "terrace";
+export type MoldShape = "cylinder" | "pyramid" | "terrace" | "glacier";
 
 /**
  * Relative profile weight in [0, 1] of a mold at footprint offset (dx, dz)
@@ -487,6 +492,11 @@ export function moldProfileWeight(
       const cheb = Math.max(Math.abs(dx), Math.abs(dz));
       if (cheb > r + 0.01) return 0;
       return 1 - cheb / (r + 1);
+    }
+    case "glacier": {
+      // Directional and two-signed (carve + moraine) — WorldState.stampMold
+      // dispatches this shape to stampGlacierTrough before reaching here.
+      return 0;
     }
   }
 }

@@ -309,6 +309,91 @@ describe("geometric mold stamps (§4.57, C-028 / A-005)", () => {
   });
 });
 
+describe("glacial trough mold (GEO-001 / C-028 / A-005)", () => {
+  const r = config.moldRadius;
+  const h = config.moldHeight;
+  // A perfect tilt (not generateMountain's noisy radial+basins shape) so the
+  // downhill direction is unambiguous: elevation only decreases with +z,
+  // so downhill is exactly (0, 1).
+  function tiltedPlane(size: number, base: number, slope: number): Grid2D {
+    const g = new Grid2D(size, size);
+    for (let z = 0; z < size; z++) {
+      for (let x = 0; x < size; x++) g.set(x, z, base - z * slope);
+    }
+    return g;
+  }
+
+  it("carves a trough downhill and drops a moraine ridge at the foot", () => {
+    const size = 60;
+    const cx = 30;
+    const cz = 30;
+    const world = new WorldState(tiltedPlane(size, 20, 0.15));
+    const before = world.terrain.data.slice();
+    world.stampMold(cx, cz, "glacier", h, r);
+
+    // Just downhill of center: carved below the untouched plane.
+    expect(world.terrain.get(cx, cz + 4)).toBeLessThan(before[(cz + 4) * size + cx]!);
+    // Well past the trough's foot: a moraine ridge raised above the plane.
+    const moraineZ = cz + 15;
+    expect(world.terrain.get(cx, moraineZ)).toBeGreaterThan(
+      before[moraineZ * size + cx]!,
+    );
+    // Off to the side, at the trough's own row: untouched by the (narrow,
+    // directional) footprint.
+    expect(world.terrain.get(cx + 12, cz + 4)).toBe(
+      before[(cz + 4) * size + (cx + 12)]!,
+    );
+  });
+
+  it("conserves ΣΔelev = ΣΔdepth (C-002)", () => {
+    const size = 60;
+    const world = new WorldState(tiltedPlane(size, 20, 0.15));
+    const elevBefore = world.terrain.data.slice();
+    const depthBefore = world.soilDepth.data.slice();
+    world.stampMold(30, 30, "glacier", h, r);
+    let dElev = 0;
+    let dDepth = 0;
+    for (let i = 0; i < elevBefore.length; i++) {
+      dElev += world.terrain.data[i]! - elevBefore[i]!;
+      dDepth += world.soilDepth.data[i]! - depthBefore[i]!;
+    }
+    expect(Math.abs(dElev - dDepth)).toBeLessThan(1e-3);
+    // Net carve dominates the (smaller, lower) moraine — this stamp is
+    // primarily excavation, not a wash.
+    expect(dElev).toBeLessThan(0);
+  });
+
+  it("writes no vegetation or material (C-006 / C-009)", () => {
+    const size = 60;
+    const world = new WorldState(tiltedPlane(size, 20, 0.15));
+    const cover0 = world.vegCover.data.slice();
+    const material0 = world.soilMaterial.data.slice();
+    world.stampMold(30, 30, "glacier", h, r);
+    expect([...world.vegCover.data]).toEqual([...cover0]);
+    expect([...world.soilMaterial.data]).toEqual([...material0]);
+  });
+
+  it("undo restores state hash (C-013)", () => {
+    const world = new WorldState(tiltedPlane(48, 20, 0.15));
+    const undo = new EditUndoStack();
+    const before = world.stateHash();
+    undo.pushCheckpoint(world);
+    world.stampMold(24, 24, "glacier", h, r);
+    expect(world.stateHash()).not.toBe(before);
+    expect(undo.undo(world)).toBe(true);
+    expect(world.stateHash()).toBe(before);
+  });
+
+  it("same seed, same terrain — deterministic (T-001)", () => {
+    const run = () => {
+      const world = new WorldState(tiltedPlane(48, 20, 0.15));
+      world.stampMold(24, 24, "glacier", h, r);
+      return Array.from(world.terrain.data);
+    };
+    expect(run()).toEqual(run());
+  });
+});
+
 describe("duplicator stamp (§4.59, C-028 / A-005 / C-009)", () => {
   const r = config.moldRadius;
 
