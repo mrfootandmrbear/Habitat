@@ -1,10 +1,10 @@
 # C-027 — Animal trait expression: population fields, procedural morph + threshold swap (framing)
 
 **Status:** Framing only (Open — do not implement as Locked)
-**Date:** 2026-07-31
-**Gate:** **F-001** remains Deferred; **L2** (local seed rain), **L3** (mortality as a rate), **L4** (biotic motion), and **L5** (guild competition, itself blocked on **C-023**) land for the plant substrate first. This is architecture for when animal work is unblocked, not a request to start it. AGENTS.md: *"Keep nutrients / animals / SWE off the tip."*
+**Date:** 2026-07-31 · **Updated 2026-08-03** (§4 food-web backbone added; owner direction in session)
+**Gate:** **F-001** remains Deferred — the sole remaining gate. **L2** (local seed rain), **L3** (mortality as a rate), **L4** (biotic motion), and **L5** (guild competition, **C-023 Locked**) have all landed for the plant substrate. This is architecture for when animal work is unblocked, not a request to start it. AGENTS.md: *"Keep nutrients / animals / SWE off the tip."*
 
-Authority: register **E-004**, **E-005**, **E-006**, **E-007**, **E-008**, **E-009**, **ES-006**, **ES-007**, **W-003**, **N-003**, **N-004**, **N-005**, **D-001**, **T-001**, **T-002**, **T-006**, **F-001**; [SIMULATION_MODEL.md](../SIMULATION_MODEL.md) §3.7 (Populations); [DESIGN_WIKI.md](../DESIGN_WIKI.md) §4 (Species and Functional Groups); **C-007** Locked (arrival), **C-011** (real-world intuition), **C-019** Locked (island biogeography), **C-003** Open (stochastic vs. authored forcing), **C-023** Open (guild competition).
+Authority: register **E-004**, **E-005**, **E-006**, **E-007**, **E-008**, **E-009**, **ES-006**, **ES-007**, **W-003**, **N-003**, **N-004**, **N-005**, **D-001**, **T-001**, **T-002**, **T-006**, **F-001**; [SIMULATION_MODEL.md](../SIMULATION_MODEL.md) §3.7 (Populations); [DESIGN_WIKI.md](../DESIGN_WIKI.md) §4 (Species and Functional Groups); **C-007** Locked (arrival), **C-011** (real-world intuition), **C-019** Locked (island biogeography), **C-003** Open (stochastic vs. authored forcing), **C-023** Locked (guild competition, 2026-08-03).
 
 ---
 
@@ -48,9 +48,9 @@ The seven DESIGN_WIKI §4 consumer/heterotroph roles, excluding primary producer
 | **Pollinators** | Density/trait fields keyed to flowering-vegetation cover (reads existing biomass fields); no new physical write-back |
 | **Seed dispersers** | Same density/trait shape; eventually a local term in the L2 seed-rain kernel — the biological analog of what L2 already proposes for plants |
 | **Herbivores** | Worked example, §3.5 |
-| **Ecosystem engineers** | Needs the **E-005** write-back path (SIMULATION_MODEL §11 owned-property / delta-inbox) in addition to trait fields — flagged as a gap this document does not resolve; see §5 |
-| **Mesopredators** | Density/trait fields plus a prey-dependency term — first real touch of **ES-007**'s food-web coupling, out of scope here (§4) |
-| **Apex predators** | Same shape as mesopredators, one trophic level up; **E-009** readiness ("often signals a relatively mature ecosystem") suggests this role's density target should read a longer habitat history than the others |
+| **Ecosystem engineers** | Needs the **E-005** write-back path (SIMULATION_MODEL §11 owned-property / delta-inbox) in addition to trait fields — flagged as a gap this document does not resolve; see the F-001 row below ("Relationship to queued / blocked work") |
+| **Mesopredators** | Density/trait fields plus a prey-dependency term — first real touch of **ES-007**'s food-web coupling, specified in §4 |
+| **Apex predators** | Same shape as mesopredators, one trophic level up (§4); **E-009** readiness ("often signals a relatively mature ecosystem") suggests this role's density target should read a longer habitat history than the others |
 | **Decomposers** | DESIGN_WIKI: "rarely observed directly by the player." May not need visible instancing at all — a decomposition-rate field decomposers modulate could stay presentation-free, same as most soil chemistry today |
 
 ### 3.2 Sim-side fields
@@ -96,6 +96,55 @@ Density's own habitat requirement ("sufficient carrying capacity, appropriate ve
 
 ---
 
+## 4. Food-web coupling (ES-007 backbone)
+
+**Owner direction (2026-08-03, in session).** Retain the food web as the organizing structure; keep every role terrain-adaptive; keep the render payoff. Narrow everything else — this document does not need to grow beyond those three things. This section resolves §3.1's forward references to "§4" and replaces the Hard-bans line that previously deferred population interaction wholesale: that mechanism is specified below, using **ES-007**'s own Locked criterion — *"role introduction has indirect consequences... predator and prey readiness cannot be assessed independently... simplification may aggregate relationships but cannot remove causality."*
+
+### 4.1 Trophic backbone
+
+The seven §3.1 roles plus the six already-built plant guilds form one chain, not seven independent bars:
+
+```
+Producers (6 plant guilds — built; L5 / C-023 gives them competition)
+  → Herbivores · Pollinators · Seed dispersers        (primary consumers)
+      → Mesopredators
+          → Apex predators
+  ↺ Decomposers — read standing-dead biomass at every level, close the loop back to soil
+Ecosystem engineers — cross-cutting write-back (E-005), not a trophic level (§3.1 gap, still open)
+```
+
+Pollinators and seed dispersers read producer fields as §3.1 already says (flowering cover, biomass) but are mutualists, not extractive consumers — they contribute no mortality term to what they read, only a future dispersal-kernel term (L2 precedent, §3.1). Herbivores are the one primary-consumer role with a real extractive coupling to producers, and grazing pressure is not a new mechanism: it is a mortality-rate term on the guild(s) grazed, identical in shape to what **L3** already ships for guild dieback.
+
+### 4.2 Bottom-up: capacity
+
+Repeats **ES-006** at every level instead of once: a role's carrying capacity is a deterministic function of the standing density or biomass of the role(s) below it, never a stored constant —
+
+```
+capacity(role) = f(density_or_biomass(preyRole), habitatSuitability(role))
+```
+
+Herbivore capacity already reads vegetation biomass (§3.5's "sufficient carrying capacity, appropriate vegetation"). Mesopredator capacity reads herbivore density the same way; apex predator capacity reads mesopredator density the same way again — one function shape, reapplied up the chain, not three bespoke rules.
+
+### 4.3 Top-down: predation as a mortality-rate term
+
+The missing half of the coupling, and the reason ES-007 names independent predator/prey readiness a rejected alternative. Reuses the exact update law **L3** shipped for guild dieback — first-order decline toward a lower target, never an instant clamp — the same reuse §3.3 already cites for the trait law, now applied to density:
+
+```
+preyDensity += -predationRate · predatorDensity · dt   (bounded, same clamp family as L3)
+```
+
+`predationRate` is a per-pair tuned constant the way `herbMortalityRate` etc. already live in `config.ts` — a rate, not a capacity, so it does not trip **ES-006**. This is what turns the chain into a cascade instead of decoration: apex predators suppress mesopredators → mesopredator pressure on herbivores relaxes → herbivore pressure on producers rises → producers meet the competition mechanism **L5** already shipped. Four already-Locked or already-shipped mechanisms (**ES-006** capacity, **L3**'s mortality-rate shape, **L5** competition, **E-005** write-back for engineers) compose into the food web; nothing in this section is a new kind of law, only a new set of neighbors for existing laws to read.
+
+### 4.4 Terrain adaptation at every level
+
+**§3.3's trait law is already role-agnostic** — restated here to apply to every row of §3.1's table, not only herbivore's worked example. Mesopredator and apex build should read the same kind of terrain pressure herbivore's `limbLength` does: open ground favors a pursuit build (longer legs, lower cover-dependence), broken or forested terrain favors an ambush build (shorter legs, higher cover-dependence) — the pursuit-vs-ambush predator morphology a person's intuition already has (a cheetah is a plains animal; a jaguar is a forest animal), the identical **C-011** referent test §3.5 already applies to herbivore limb length, one trophic level up.
+
+### 4.5 Render — unchanged
+
+§3.4 already generalizes without modification: one `InstancedMesh` per role, sampling that role's own density and trait-mean fields. Nothing in §4.1–§4.4 changes the render contract — a mesopredator's instances read `pop.mesopredator.density` / `.trait.*` exactly as a herbivore's do; the trophic coupling above only changes what feeds those fields, never how they get drawn.
+
+---
+
 ## Hard bans
 
 - **No individual entity or identity store.** Every other system in this sim is a field; an animal is not exempt (**T-001**, **T-006**).
@@ -104,7 +153,8 @@ Density's own habitat requirement ("sufficient carrying capacity, appropriate ve
 - **No trait or morph without a real-world referent** a player could already reason about (**C-011**) — a morph must read as a known adaptation story, never an invented "because the game says so" transformation.
 - **No fixed carrying-capacity constant** anywhere in the trait or population model (**ES-006**).
 - **No GPU-only or render-only authoritative state** — the trait-mean field is the only place a trait exists in truth; the instanced render is always downstream of it (**T-006**).
-- **Does not reopen or duplicate L5 / C-023's scope.** Population competition and predation dynamics are a separate, later mechanism; this document specs trait expression for one role's morphology, not population interaction.
+- **Does not reopen or duplicate L5 / C-023's scope.** L5 governs *plant* guild competition (light budget); §4's predation term governs cross-*role* animal density coupling. Same mortality-as-a-rate shape, different populations — §4 does not reimplement or re-tune L5's own mechanism.
+- **No trophic shortcut.** §4.3's predation term may not skip a level (apex predators do not directly suppress herbivores) — the cascade must run through the chain §4.1 states, or it stops being the food web ES-007 requires and becomes an authored effect.
 
 ---
 
@@ -114,9 +164,9 @@ Density's own habitat requirement ("sufficient carrying capacity, appropriate ve
 |---|---|
 | **F-001** (Deferred) | This document is the "extensible write-back path" F-001 asks be preserved for engineers — but the actual SIMULATION_MODEL §11 owned-property / delta-inbox mechanism for ecosystem engineers is **not** designed here; flagged as the next framing gap (§3.1) |
 | **L2 / L3 / L4** (queued, plants) | Sequencing precedent this document follows: the plant substrate (local seeding, mortality-as-a-rate, motion) ships first. This document does not ask to jump that queue |
-| **L5 / C-023** (guild competition, blocked) | The population-dynamics gap this document leaves open (§4, mesopredators/apex predators) will eventually need the same competition mechanism L5 is blocked on for plants. Do not build animal competition before L5 lands |
+| **L5 / C-023** (guild competition, Locked, shipped) | Landed 2026-08-03. §4.3's predation term reuses its mortality-as-a-rate shape directly; §4.1's cascade closes through L5's producer-level competition rather than around it |
 | **C-019** (island biogeography, Locked) | Animal dispersal (seed dispersers, and eventually any colonizing role) should follow the same Locked MacArthur–Wilson pool-eligibility / overseas-pressure shape already shipped for plants, once a dispersal mechanism exists for fauna |
-| **ES-007** (food webs, Locked) | Trophic interaction — predator/prey coupling, herbivory pressure on vegetation — is explicitly out of scope here. This document specs trait expression for one role in isolation, not the food web |
+| **ES-007** (food webs, Locked) | No longer out of scope — §4 is this document's ES-007 backbone: bottom-up capacity, top-down predation-as-mortality-rate, the trophic chain in §4.1. Still framing, not an implement slice |
 
 ---
 
@@ -126,10 +176,11 @@ Not a playtest ask now — this is framing, not an implement slice. When the tip
 
 1. Confirm the seven-role list (§3.1) is the right starting set, or narrow it further.
 2. Confirm herbivore is the right first worked example, given **E-005**'s ecosystem-engineer write-back requirement is Locked but still architecturally unbuilt — an engineer might be the more load-bearing first case despite being harder.
-3. Once **L2**–**L5** land and **F-001** is undeferred: walk the worked scenario (a herbivore population's limb-length / insulation / webbing trait-means visibly drifting after a force-dial change) and judge whether it reads as legible, earned adaptation, or as an arbitrary game effect — the same clip-test spirit **D-007** already applies elsewhere.
+3. Confirm §4.1's trophic backbone (which roles eat which) and §4.4's ambush-vs-pursuit terrain referent read as correct before any mesopredator/apex slice starts — cheaper to correct in this document than after a species-specific asset exists.
+4. **L2**–**L5** have landed. Once **F-001** is undeferred: walk the worked scenario (a herbivore population's limb-length / insulation / webbing trait-means visibly drifting after a force-dial change, and — once §4 ships — visibly receding under real predation pressure) and judge whether it reads as legible, earned adaptation, or as an arbitrary game effect — the same clip-test spirit **D-007** already applies elsewhere.
 
 ---
 
 ## Tip placement
 
-Framing only — **do not implement**. Stays off tip per AGENTS.md ("Keep nutrients / animals / SWE off the tip") until **F-001** is undeferred and **L2**–**L5** land for the plant substrate.
+Framing only — **do not implement**. Stays off tip per AGENTS.md ("Keep nutrients / animals / SWE off the tip") until **F-001** is undeferred. **L2**–**L5** have already landed for the plant substrate; **F-001** is the sole remaining gate.
