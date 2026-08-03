@@ -35,6 +35,9 @@ export class OccupantMesh {
   private readonly dummy = new THREE.Object3D();
   private readonly color = new THREE.Color();
   private readonly leanAxis = new THREE.Vector3();
+  private readonly upAxis = new THREE.Vector3(0, 1, 0);
+  private readonly yawQuat = new THREE.Quaternion();
+  private readonly leanQuat = new THREE.Quaternion();
   /** Wall-clock seconds for the sway sine (observer time — T-006). */
   private swayTimeSec = 0;
 
@@ -187,11 +190,26 @@ export class OccupantMesh {
 
         this.dummy.position.set(ox + x * cellW, y, oz + z * cellW);
         this.dummy.scale.set(scaleXZ, scaleY, scaleXZ);
-        this.dummy.rotation.set(0, yaw, 0);
+        // Yaw only spins the cone's own facets for visual variety; the lean
+        // below must stay a fixed *world* axis so every instance leans the
+        // same way regardless of its yaw. Object3D.rotateOnAxis rotates in
+        // local (post-yaw) space, so composing it after the yaw silently
+        // re-rotated the lean axis by that same per-cell random yaw — every
+        // cone leaned a different direction instead of uniformly downwind.
+        // Composing quaternions explicitly (yaw applied first, world-axis
+        // lean applied second, outermost) keeps the lean axis fixed in world
+        // space no matter what the yaw is.
+        this.yawQuat.setFromAxisAngle(this.upAxis, yaw);
         if (tilt !== 0 && windMag > 0) {
-          // Lean downwind: axis = up × windDir in XZ.
+          // Lean downwind: axis = up × windDir in XZ, fixed in world space.
           this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
-          this.dummy.rotateOnAxis(this.leanAxis, tilt);
+          this.leanQuat.setFromAxisAngle(this.leanAxis, tilt);
+          this.dummy.quaternion.multiplyQuaternions(
+            this.leanQuat,
+            this.yawQuat,
+          );
+        } else {
+          this.dummy.quaternion.copy(this.yawQuat);
         }
         this.dummy.updateMatrix();
         this.object.setMatrixAt(n, this.dummy.matrix);
