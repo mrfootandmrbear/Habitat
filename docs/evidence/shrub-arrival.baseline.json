@@ -2,7 +2,7 @@
   "scenario": "shrub-arrival",
   "metrics": {
     "warmCovered.shrubBiomass": {
-      "value": 1.923076868057251,
+      "value": 1.7647058963775635,
       "abs": 0.000001
     },
     "warmCovered.herbBiomass": {
@@ -42,7 +42,7 @@
       "abs": 0
     },
     "delta.climateDelta": {
-      "value": 1.923076868057251,
+      "value": 1.7647058963775635,
       "abs": 0.000001
     },
     "delta.guildSeedMatch": {
@@ -54,7 +54,7 @@
       "abs": 0
     },
     "delta.hashN": {
-      "value": 4114849551,
+      "value": 1453507804,
       "abs": 0
     }
   }

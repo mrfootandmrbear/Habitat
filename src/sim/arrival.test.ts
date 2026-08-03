@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { config } from "../config";
 import {
+  applyGuildEstablishment,
   distanceToPreserveEdge,
   establishmentProbability,
   nextHerbBiomass,
   seedPressureAt,
+  type GuildEstablishmentInputs,
 } from "./habitat/arrivalComposition";
 import { evaluateHsi } from "./habitat/hsiComposition";
 import { generateMountain } from "./terrain/generateMountain";
@@ -100,6 +102,124 @@ describe("arrival composition (Slice 12 / C-007)", () => {
       dt: 1,
     });
     expect(blocked).toBe(0);
+  });
+});
+
+describe("guild establishment order-independence (§4.48, BUILD_GUIDE §2.1 Symmetry)", () => {
+  it("processing guilds in a different order yields byte-identical biomass per guild", () => {
+    // Six distinct specs — deliberately different biomass/seed/suitability/rate
+    // per guild so a bug that accidentally shares or cross-wires state between
+    // entries would show up as a mismatch, not pass by coincidence.
+    const specs: GuildEstablishmentInputs[] = [
+      {
+        biomass: Float32Array.from([0.2, 1.5, 0]),
+        seedBank: Float32Array.from([3, 0, 12]),
+        suitability: Float32Array.from([0.8, 0.5, 0.1]),
+        establishmentScale: 0.05,
+        establishmentRate: 0.2,
+        mortalityRate: 0.1,
+        biomassMax: 3,
+      },
+      {
+        biomass: Float32Array.from([0, 2.5, 0.4]),
+        seedBank: Float32Array.from([10, 1, 0]),
+        suitability: Float32Array.from([0.3, 0.9, 0]),
+        establishmentScale: 0.02,
+        establishmentRate: 0.4,
+        mortalityRate: 0.05,
+        biomassMax: 2,
+      },
+      {
+        biomass: Float32Array.from([1.1, 0, 0.9]),
+        seedBank: Float32Array.from([0, 6, 2]),
+        suitability: Float32Array.from([0.6, 0.2, 0.75]),
+        establishmentScale: 0.09,
+        establishmentRate: 0.15,
+        mortalityRate: 0.3,
+        biomassMax: 1.5,
+      },
+      {
+        biomass: Float32Array.from([0.05, 0.05, 5]),
+        seedBank: Float32Array.from([20, 20, 0]),
+        suitability: Float32Array.from([1, 0, 0.4]),
+        establishmentScale: 0.12,
+        establishmentRate: 0.5,
+        mortalityRate: 0.2,
+        biomassMax: 5,
+      },
+      {
+        biomass: Float32Array.from([3, 0.2, 0.2]),
+        seedBank: Float32Array.from([1, 8, 8]),
+        suitability: Float32Array.from([0.15, 0.55, 0.55]),
+        establishmentScale: 0.03,
+        establishmentRate: 0.25,
+        mortalityRate: 0.4,
+        biomassMax: 4,
+      },
+      {
+        biomass: Float32Array.from([0.6, 0.6, 0.6]),
+        seedBank: Float32Array.from([4, 4, 4]),
+        suitability: Float32Array.from([0.45, 0.45, 0.45]),
+        establishmentScale: 0.07,
+        establishmentRate: 0.1,
+        mortalityRate: 0.6,
+        biomassMax: 1,
+      },
+    ];
+
+    const clone = (g: GuildEstablishmentInputs): GuildEstablishmentInputs => ({
+      ...g,
+      biomass: g.biomass.slice(),
+    });
+
+    const forward = specs.map(clone);
+    const reversed = [...specs].reverse().map(clone);
+
+    applyGuildEstablishment(forward, 1);
+    applyGuildEstablishment(reversed, 1);
+
+    // reversed[] holds the same six guilds in the opposite order — match each
+    // guild back up by its original index and compare.
+    for (let k = 0; k < specs.length; k++) {
+      expect(Array.from(forward[k]!.biomass)).toEqual(
+        Array.from(reversed[specs.length - 1 - k]!.biomass),
+      );
+    }
+  });
+
+  it("a guild never reads another guild's biomass, seed bank, or suitability", () => {
+    // If guild 0 accidentally read guild 1's arrays, changing only guild 1's
+    // inputs would move guild 0's result. It must not.
+    const makeSpec = (): GuildEstablishmentInputs => ({
+      biomass: Float32Array.from([0.5]),
+      seedBank: Float32Array.from([5]),
+      suitability: Float32Array.from([0.5]),
+      establishmentScale: 0.05,
+      establishmentRate: 0.2,
+      mortalityRate: 0.1,
+      biomassMax: 2,
+    });
+
+    const baseline = [makeSpec(), makeSpec()];
+    applyGuildEstablishment(baseline, 1);
+
+    const perturbed = [
+      makeSpec(),
+      {
+        biomass: Float32Array.from([1.9]),
+        seedBank: Float32Array.from([50]),
+        suitability: Float32Array.from([1]),
+        establishmentScale: 0.5,
+        establishmentRate: 0.9,
+        mortalityRate: 0.9,
+        biomassMax: 2,
+      },
+    ];
+    applyGuildEstablishment(perturbed, 1);
+
+    expect(Array.from(perturbed[0]!.biomass)).toEqual(
+      Array.from(baseline[0]!.biomass),
+    );
   });
 });
 
@@ -283,6 +403,30 @@ describe("arrival WorldState (Slice 12)", () => {
     expect(world.getHerbBiomass(1, 6)).toBeGreaterThan(0.05);
     expect(world.getHerbBiomass(6, 6)).toBe(0);
     expect(world.getHabitatSuitability(6, 6)).toBe(0);
+  });
+
+  it("establishment step doesn't recompute guild suitability — frozen at what dispersal committed (§4.48)", () => {
+    const world = new WorldState(generateMountain(8, 8, 2, 4));
+    // Mid-crest exposure (0.5) sits at the peak of the binder's exposure
+    // hump (factorCrestExposure) — a clearly nonzero HSI to start from.
+    world.shoreExposure.fill(0.5);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
+    world.runHabitatStep(1);
+    world.runDispersalStep(1);
+    const before = world.binderSuitability.get(3, 3);
+    expect(before).toBeGreaterThan(0);
+
+    // Mutate exactly the raw inputs the old (recompute-every-tick)
+    // implementation would have read live — exposure 0 sits at the hump's
+    // zero edge, so a live recompute would drop binder HSI to 0. If
+    // runHerbEstablishmentStep still recomputed guild HSI itself, this
+    // would move binderSuitability — it must not, since only
+    // runDispersalStep (annual band) writes this field.
+    world.shoreExposure.fill(0);
+    world.soilMoisture.fill(0);
+    world.runHerbEstablishmentStep(1);
+
+    expect(world.binderSuitability.get(3, 3)).toBe(before);
   });
 
   it("rejects saves that omit legacy seed bank", () => {

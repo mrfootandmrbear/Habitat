@@ -1,0 +1,37 @@
+{
+  "id": "habitat-dispersal-hygiene",
+  "title": "Habitat/dispersal determinism hygiene (§4.48)",
+  "simLoop": "habitatProcess.reads now names terrain.elevation and soil.material, which runHabitatStep already consumed for insolation and porosity. Five new registered fields (habitat.{strand,binder,marsh,shrub,crust}Suitability) carry each guild's HSI from the annual runDispersalStep, where it is computed once, to the seasonal runHerbEstablishmentStep, which now reads it instead of recomputing the same evaluateXHsi math itself. Because that recompute is what used to read a co-guild's already-updated biomass within the same tick (shrub reading herb's post-update value; crust reading all five), removing it also removes the order dependence: applyGuildEstablishment processes six guild specs that each read only pre-call biomass plus already-committed fields and write only their own biomass, so the six can run in any order with byte-identical results.",
+  "gameLoop": "No visible change to what a player does — this is a correctness/hygiene fix behind the existing habitat suitability and guild establishment loops, not a new tool or dial. What a guild's inspector suitability shows now always matches what actually drove its growth that season, instead of two copies of the same formula being free to disagree.",
+  "registerIds": ["T-001", "T-005"],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/arrival.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/sim/shrubArrival.test.ts",
+    "src/sim/crustArrival.test.ts",
+    "src/sim/time-invariance.test.ts"
+  ],
+  "probes": [
+    "shrub-arrival",
+    "crust-arrival",
+    "strand-arrival",
+    "binder-arrival",
+    "marsh-arrival",
+    "deep-time",
+    "living-hollow",
+    "disturbance-recovery"
+  ],
+  "fields": [
+    "habitat.suitability",
+    "habitat.strandSuitability",
+    "habitat.binderSuitability",
+    "habitat.marshSuitability",
+    "habitat.shrubSuitability",
+    "habitat.crustSuitability",
+    "terrain.elevation",
+    "soil.material"
+  ],
+  "notebookSeed": "The shrub's suitability reading in the inspector finally matches what actually grew it — before, the display and the growth law were quietly running two different sums.",
+  "tierO": "no owner-only question — declared-reads accuracy, Jacobi order-independence, and single-source-of-truth suitability are all CI-judged (unit tests + probes named above). Does not implement C-023 (guild competition/displacement stays Open, owner-judged, gated on L2/L3)."
+}

@@ -15,6 +15,8 @@ export const habitatProcess: Process = {
     "soil.salinity",
     "groundwater.storage",
     "shore.exposure",
+    "terrain.elevation",
+    "soil.material",
   ],
   writes: [
     "habitat.suitability",

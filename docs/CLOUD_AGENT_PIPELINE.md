@@ -67,7 +67,8 @@ Two automations share the merge trigger but claim **disjoint** tip items. Rebase
 | Order | Slice | Notes |
 |---|---|---|
 | R1 | **§4.47** guild cover & light-competition | **Done** |
-| R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today — sole executable queue (Track T parked) |
+| R2 | **§4.48** habitat/dispersal determinism hygiene | **Done** — closes the second queue's nine defect-fix slices (§4.44–§4.52) entirely |
+| R3 | **§4.60** vegetation/habitat minor findings (cast shadow, cover decay shape) | Tip today — sole executable queue (Track T parked); after this, Track R has no further machine slice either unless a review names one |
 | Rn | Next unblocked review-queue item | Skip owner-blocked Living remainder |
 
 **Never in either track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
@@ -125,11 +126,11 @@ You are a Habitat cloud succession agent on Track R (review correctness — vege
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md.
 2. Read "Next (executable tip)" and the Track R table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice (today: §4.48; §4.47 Done). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track R slice (today: §4.60; §4.47 and §4.48 Done). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.
-- §4.47 does NOT implement C-023 — only cover combination + absorbed-light / LAI correctness per the checklist.
+- §4.47 does NOT implement C-023 — only cover combination + absorbed-light / LAI correctness per the checklist. §4.60 corrects `terrainInsolation` cast-shadow and `veg.cover` decay shape only — do not fold in any other §2.5 item or expand into a general shadow-mapping system (GEO-002 earn-its-cost).
 - Follow BUILD_GUIDE checklist. Green bar: npm run gate.
 - Baseline moves require a stated reason in the commit body.
 - Update BUILD_GUIDE / MVP_SCOPE / README / slice manifest + composition (build-plan-on-commit). When editing the shared tip paragraph, change only the Track R clause.

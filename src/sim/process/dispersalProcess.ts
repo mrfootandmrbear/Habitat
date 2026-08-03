@@ -14,6 +14,10 @@ import type { Process } from "./Process";
  * by band order rather than enforced by the sort — declaring it keeps the edge
  * visible in the registry and citable in review (SIMULATION_MODEL §5), and
  * makes the cycle explicit if a biomass writer ever joins this band.
+ *
+ * §4.48 — also the single source of truth for strand/binder/marsh/shrub/crust
+ * HSI (`habitat.*Suitability`); `vegetationSeasonalProcess` reads these
+ * instead of recomputing the same `evaluateXHsi` math on the seasonal band.
  */
 export const dispersalProcess: Process = {
   id: "dispersal",
@@ -46,14 +50,19 @@ export const dispersalProcess: Process = {
     "veg.establishment.herb",
     "veg.seedBank.strand",
     "veg.establishment.strand",
+    "habitat.strandSuitability",
     "veg.seedBank.binder",
     "veg.establishment.binder",
+    "habitat.binderSuitability",
     "veg.seedBank.marsh",
     "veg.establishment.marsh",
+    "habitat.marshSuitability",
     "veg.seedBank.shrub",
     "veg.establishment.shrub",
+    "habitat.shrubSuitability",
     "veg.seedBank.crust",
     "veg.establishment.crust",
+    "habitat.crustSuitability",
   ],
   step(world, dt) {
     world.runDispersalStep(dt);

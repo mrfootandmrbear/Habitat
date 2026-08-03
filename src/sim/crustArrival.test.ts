@@ -83,6 +83,13 @@ describe("Cryptogam crust bootstrap (Slice N11)", () => {
       world.runHabitatStep(1);
       // Restore moisture after habitat (HSI may leave it unchanged; keep twin honest).
       world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+      // §4.48: runHerbEstablishmentStep reads crustSuitability from the
+      // field runDispersalStep writes, instead of recomputing evaluateCrustHsi
+      // itself. The constructor already ran one dispersal pass (t=0 seed
+      // pressure), but that was against pre-setup defaults — re-run it now
+      // that moisture/herbBiomass/salinity reflect this scenario, same as the
+      // strand/binder/salinity/heat probes already do.
+      world.runDispersalStep(1);
       const herbSeed = opts.herbSeed === false ? 0 : config.seedSourceStrength;
       world.herbSeedBank.fill(herbSeed);
       world.strandSeedBank.fill(0);

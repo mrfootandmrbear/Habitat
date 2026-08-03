@@ -66,6 +66,24 @@ describe("process ownership (§4 / §5 / §11)", () => {
     expect(fireProcess.writes).not.toContain("veg.biomass.herb");
     expect(vegetationProcess.writes).toContain("veg.cover");
   });
+
+  it("habitat declares terrain.elevation and soil.material (§4.48 — runHabitatStep reads both for insolation/porosity, previously undeclared)", () => {
+    expect(habitatProcess.reads).toContain("terrain.elevation");
+    expect(habitatProcess.reads).toContain("soil.material");
+  });
+
+  it("vegetationSeasonal reads dispersal's committed guild suitability instead of recomputing it (§4.48)", () => {
+    for (const fieldId of [
+      "habitat.strandSuitability",
+      "habitat.binderSuitability",
+      "habitat.marshSuitability",
+      "habitat.shrubSuitability",
+      "habitat.crustSuitability",
+    ]) {
+      expect(dispersalProcess.writes).toContain(fieldId);
+      expect(vegetationSeasonalProcess.reads).toContain(fieldId);
+    }
+  });
 });
 
 describe("scheduler order (SIMULATION_MODEL §5.1)", () => {

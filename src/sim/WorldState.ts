@@ -55,10 +55,10 @@ import {
   mixTowardSeawater,
 } from "./habitat/salinityComposition";
 import {
+  applyGuildEstablishment,
   eligibleRichness,
   localSeedPressureField,
   establishmentProbability,
-  nextHerbBiomass,
   overseasSeedPressure,
   physicalCoverFrom,
   seedPressureAt,
@@ -199,6 +199,13 @@ export class WorldState {
    */
   readonly strandBiomass: Grid2D;
   /**
+   * Strand HSI [0,1] — §4.48. Computed once on the annual band inside
+   * `runDispersalStep`; the seasonal establishment step reads this instead
+   * of recomputing `evaluateStrandHsi` from scratch, so the two bands can
+   * never silently disagree about what suitability actually drove growth.
+   */
+  readonly strandSuitability: Grid2D;
+  /**
    * Sand-binder seed bank — C-009 crest guild (same overseas/perimeter schedule).
    * Owner: dispersal, band: annual. Legacy colonization memory.
    */
@@ -210,6 +217,8 @@ export class WorldState {
    * Owner: vegetation, band: seasonal.
    */
   readonly binderBiomass: Grid2D;
+  /** Binder HSI [0,1] — §4.48, single source of truth (see strandSuitability). */
+  readonly binderSuitability: Grid2D;
   /**
    * Salt-marsh seed bank — C-016 mid-envelope guild (same overseas/perimeter schedule).
    * Owner: dispersal, band: annual. Legacy colonization memory.
@@ -222,6 +231,8 @@ export class WorldState {
    * Owner: vegetation, band: seasonal.
    */
   readonly marshBiomass: Grid2D;
+  /** Marsh HSI [0,1] — §4.48, single source of truth (see strandSuitability). */
+  readonly marshSuitability: Grid2D;
   /**
    * Woody shrub seed bank — Slice N10 climate-capped inland (same overseas/perimeter schedule).
    * Owner: dispersal, band: annual. Legacy colonization memory.
@@ -234,6 +245,8 @@ export class WorldState {
    * Owner: vegetation, band: seasonal. Legacy standing woody (SIMULATION_MODEL).
    */
   readonly shrubBiomass: Grid2D;
+  /** Shrub HSI [0,1] — §4.48, single source of truth (see strandSuitability). */
+  readonly shrubSuitability: Grid2D;
   /**
    * Cryptogam crust seed bank — Slice N11 stage-2 bootstrap (same overseas/perimeter schedule).
    * Owner: dispersal, band: annual. Legacy colonization memory.
@@ -246,6 +259,8 @@ export class WorldState {
    * Owner: vegetation, band: seasonal. Legacy standing cover (SIMULATION_MODEL).
    */
   readonly crustBiomass: Grid2D;
+  /** Crust HSI [0,1] — §4.48, single source of truth (see strandSuitability). */
+  readonly crustSuitability: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -455,18 +470,23 @@ export class WorldState {
     this.strandSeedBank = new Grid2D(this.width, this.height);
     this.strandEstablishment = new Grid2D(this.width, this.height);
     this.strandBiomass = new Grid2D(this.width, this.height);
+    this.strandSuitability = new Grid2D(this.width, this.height);
     this.binderSeedBank = new Grid2D(this.width, this.height);
     this.binderEstablishment = new Grid2D(this.width, this.height);
     this.binderBiomass = new Grid2D(this.width, this.height);
+    this.binderSuitability = new Grid2D(this.width, this.height);
     this.marshSeedBank = new Grid2D(this.width, this.height);
     this.marshEstablishment = new Grid2D(this.width, this.height);
     this.marshBiomass = new Grid2D(this.width, this.height);
+    this.marshSuitability = new Grid2D(this.width, this.height);
     this.shrubSeedBank = new Grid2D(this.width, this.height);
     this.shrubEstablishment = new Grid2D(this.width, this.height);
     this.shrubBiomass = new Grid2D(this.width, this.height);
+    this.shrubSuitability = new Grid2D(this.width, this.height);
     this.crustSeedBank = new Grid2D(this.width, this.height);
     this.crustEstablishment = new Grid2D(this.width, this.height);
     this.crustBiomass = new Grid2D(this.width, this.height);
+    this.crustSuitability = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
     this.shoreExposure = new Grid2D(this.width, this.height);
@@ -1617,6 +1637,13 @@ export class WorldState {
     const marshBio = this.marshBiomass.data;
     const shrubBio = this.shrubBiomass.data;
     const crustBio = this.crustBiomass.data;
+    // §4.48 — single source of truth: written here, read (not recomputed)
+    // by runHerbEstablishmentStep on the seasonal band.
+    const strandSuit = this.strandSuitability.data;
+    const binderSuit = this.binderSuitability.data;
+    const marshSuit = this.marshSuitability.data;
+    const shrubSuit = this.shrubSuitability.data;
+    const crustSuit = this.crustSuitability.data;
     const exposure = this.shoreExposure.data;
     const salt = this.soilSalinity.data;
     const moisture = this.soilMoisture.data;
@@ -1697,6 +1724,7 @@ export class WorldState {
         salinity: salt[i]!,
         airTempC,
       });
+      strandSuit[i] = strand.hsi;
       strandEst[i] = establishmentProbability(
         strandPressure,
         strand.hsi,
@@ -1717,6 +1745,7 @@ export class WorldState {
           this.height,
         ),
       });
+      binderSuit[i] = binder.hsi;
       binderEst[i] = establishmentProbability(
         binderPressure,
         binder.hsi,
@@ -1731,6 +1760,7 @@ export class WorldState {
         salinity: salt[i]!,
         airTempC,
       });
+      marshSuit[i] = marsh.hsi;
       marshEst[i] = establishmentProbability(
         marshPressure,
         marsh.hsi,
@@ -1748,6 +1778,7 @@ export class WorldState {
         mlwMeters: mlw,
         mhwMeters: mhw,
       });
+      shrubSuit[i] = shrub.hsi;
       shrubEst[i] = establishmentProbability(
         shrubPressure,
         shrub.hsi,
@@ -1768,6 +1799,7 @@ export class WorldState {
         mlwMeters: mlw,
         mhwMeters: mhw,
       });
+      crustSuit[i] = crust.hsi;
       crustEst[i] = establishmentProbability(
         crustPressure,
         crust.hsi,
@@ -1802,14 +1834,19 @@ export class WorldState {
         herbEst[i] = 0;
         strandSeed[i] = 0;
         strandEst[i] = 0;
+        strandSuit[i] = 0;
         binderSeed[i] = 0;
         binderEst[i] = 0;
+        binderSuit[i] = 0;
         marshSeed[i] = 0;
         marshEst[i] = 0;
+        marshSuit[i] = 0;
         shrubSeed[i] = 0;
         shrubEst[i] = 0;
+        shrubSuit[i] = 0;
         crustSeed[i] = 0;
         crustEst[i] = 0;
+        crustSuit[i] = 0;
         continue;
       }
       writeCell(i, overseasSeedPressure(dist[i]!, strength, mean));
@@ -1820,174 +1857,84 @@ export class WorldState {
    * Seasonal guild establishment — herb + strand + binder + marsh + shrub + crust (Slice N11).
    * Zero guild HSI blocks that guild. Does not write veg.cover
    * (physical contribution via physicalCover in runVegetationStep — Slice 13).
+   *
+   * §4.48: each guild's HSI is read from the field `runDispersalStep` already
+   * computed on the annual band (`habitat.suitability` for herb;
+   * `habitat.{strand,binder,marsh,shrub,crust}Suitability` for the rest),
+   * never recomputed here. That removes the old duplicate-math drift hazard
+   * (the same six `evaluateXHsi` calls used to run twice, at different
+   * cadences, and could silently disagree) and, as a direct consequence,
+   * the guild loop below now reads only pre-call biomass and already-settled
+   * suitability/seed-bank fields — no guild's update depends on another
+   * guild's output within this call, so `applyGuildEstablishment` is a
+   * Jacobi update: the six entries below may run in any order and each
+   * produces a byte-identical result (BUILD_GUIDE §2.1 Symmetry;
+   * `arrival.test.ts`'s "guild establishment order-independence" suite).
    */
   runHerbEstablishmentStep(dt: number): void {
     // Season pressure (C-021) scales how strongly this tick pushes every
     // guild's establishment — a day-length / growing-season referent
     // distinct from Heat's temperature gate (C-011).
     const scale = Math.max(0, dt) * this.seasonPressureMultiplier;
-    const herbSeed = this.herbSeedBank.data;
-    const herbHsi = this.habitatSuitability.data;
-    const herbBiomass = this.herbBiomass.data;
-    const strandSeed = this.strandSeedBank.data;
-    const strandBiomass = this.strandBiomass.data;
-    const binderSeed = this.binderSeedBank.data;
-    const binderBiomass = this.binderBiomass.data;
-    const marshSeed = this.marshSeedBank.data;
-    const marshBiomass = this.marshBiomass.data;
-    const shrubSeed = this.shrubSeedBank.data;
-    const shrubBiomass = this.shrubBiomass.data;
-    const crustSeed = this.crustSeedBank.data;
-    const crustBiomass = this.crustBiomass.data;
-    const exposure = this.shoreExposure.data;
-    const salt = this.soilSalinity.data;
-    const moisture = this.soilMoisture.data;
-    const mat = this.soilMaterial.data;
-    const longshore = this.shoreLongshore.data;
-    const elev = this.terrain.data;
-    const airTempC = this.airTemperature;
-    const herbEstScale = config.herbEstablishmentScale;
-    const herbRate = config.herbEstablishmentRate;
-    const herbMort = config.herbMortalityRate;
-    const herbMax = config.herbBiomassMax;
-    const strandEstScale = config.strandEstablishmentScale;
-    const strandRate = config.strandEstablishmentRate;
-    const strandMort = config.strandMortalityRate;
-    const strandMax = config.strandBiomassMax;
-    const binderEstScale = config.binderEstablishmentScale;
-    const binderRate = config.binderEstablishmentRate;
-    const binderMort = config.binderMortalityRate;
-    const binderMax = config.binderBiomassMax;
-    const marshEstScale = config.marshEstablishmentScale;
-    const marshRate = config.marshEstablishmentRate;
-    const marshMort = config.marshMortalityRate;
-    const marshMax = config.marshBiomassMax;
-    const shrubEstScale = config.shrubEstablishmentScale;
-    const shrubRate = config.shrubEstablishmentRate;
-    const shrubMort = config.shrubMortalityRate;
-    const shrubMax = config.shrubBiomassMax;
-    const crustEstScale = config.crustEstablishmentScale;
-    const crustRate = config.crustEstablishmentRate;
-    const crustMort = config.crustMortalityRate;
-    const crustMax = config.crustBiomassMax;
-    const hasTide =
-      this.seaLevelMeters !== undefined && this.tidalAmplitudeMeters > 0;
-    const mlw = hasTide
-      ? meanLowWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
-      : undefined;
-    const mhw = hasTide
-      ? meanHighWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
-      : undefined;
-
-    for (let i = 0; i < herbBiomass.length; i++) {
-      herbBiomass[i] = nextHerbBiomass({
-        biomass: herbBiomass[i]!,
-        seedBank: herbSeed[i]!,
-        habitatSuitability: herbHsi[i]!,
-        establishmentScale: herbEstScale,
-        establishmentRate: herbRate,
-        mortalityRate: herbMort,
-        biomassMax: herbMax,
-        dt: scale,
-      });
-      const strandHsi = evaluateStrandHsi({
-        shoreExposure: exposure[i]!,
-        salinity: salt[i]!,
-        airTempC,
-      }).hsi;
-      strandBiomass[i] = nextHerbBiomass({
-        biomass: strandBiomass[i]!,
-        seedBank: strandSeed[i]!,
-        habitatSuitability: strandHsi,
-        establishmentScale: strandEstScale,
-        establishmentRate: strandRate,
-        mortalityRate: strandMort,
-        biomassMax: strandMax,
-        dt: scale,
-      });
-      const binderHsi = evaluateBinderHsi({
-        moisture: moisture[i]!,
-        porosity: substrateProps(mat[i]!).porosity,
-        shoreExposure: exposure[i]!,
-        materialClassId: mat[i]!,
-        transportDivergence: longshoreTransportDivergence(
-          longshore,
-          i,
-          this.width,
-          this.height,
-        ),
-      }).hsi;
-      binderBiomass[i] = nextHerbBiomass({
-        biomass: binderBiomass[i]!,
-        seedBank: binderSeed[i]!,
-        habitatSuitability: binderHsi,
-        establishmentScale: binderEstScale,
-        establishmentRate: binderRate,
-        mortalityRate: binderMort,
-        biomassMax: binderMax,
-        dt: scale,
-      });
-      const marshHsi = evaluateMarshHsi({
-        elevMeters: hasTide ? elev[i]! : undefined,
-        mlwMeters: mlw,
-        mhwMeters: mhw,
-        salinity: salt[i]!,
-        airTempC,
-      }).hsi;
-      marshBiomass[i] = nextHerbBiomass({
-        biomass: marshBiomass[i]!,
-        seedBank: marshSeed[i]!,
-        habitatSuitability: marshHsi,
-        establishmentScale: marshEstScale,
-        establishmentRate: marshRate,
-        mortalityRate: marshMort,
-        biomassMax: marshMax,
-        dt: scale,
-      });
-      const shrubHsi = evaluateShrubHsi({
-        airTempC,
-        herbBiomass: herbBiomass[i]!,
-        moisture: moisture[i]!,
-        porosity: substrateProps(mat[i]!).porosity,
-        salinity: salt[i]!,
-        elevMeters: hasTide ? elev[i]! : undefined,
-        mlwMeters: mlw,
-        mhwMeters: mhw,
-      }).hsi;
-      shrubBiomass[i] = nextHerbBiomass({
-        biomass: shrubBiomass[i]!,
-        seedBank: shrubSeed[i]!,
-        habitatSuitability: shrubHsi,
-        establishmentScale: shrubEstScale,
-        establishmentRate: shrubRate,
-        mortalityRate: shrubMort,
-        biomassMax: shrubMax,
-        dt: scale,
-      });
-      const crustHsi = evaluateCrustHsi({
-        moisture: moisture[i]!,
-        porosity: substrateProps(mat[i]!).porosity,
-        herbBiomass: herbBiomass[i]!,
-        strandBiomass: strandBiomass[i]!,
-        binderBiomass: binderBiomass[i]!,
-        marshBiomass: marshBiomass[i]!,
-        shrubBiomass: shrubBiomass[i]!,
-        salinity: salt[i]!,
-        elevMeters: hasTide ? elev[i]! : undefined,
-        mlwMeters: mlw,
-        mhwMeters: mhw,
-      }).hsi;
-      crustBiomass[i] = nextHerbBiomass({
-        biomass: crustBiomass[i]!,
-        seedBank: crustSeed[i]!,
-        habitatSuitability: crustHsi,
-        establishmentScale: crustEstScale,
-        establishmentRate: crustRate,
-        mortalityRate: crustMort,
-        biomassMax: crustMax,
-        dt: scale,
-      });
-    }
+    applyGuildEstablishment(
+      [
+        {
+          biomass: this.herbBiomass.data,
+          seedBank: this.herbSeedBank.data,
+          suitability: this.habitatSuitability.data,
+          establishmentScale: config.herbEstablishmentScale,
+          establishmentRate: config.herbEstablishmentRate,
+          mortalityRate: config.herbMortalityRate,
+          biomassMax: config.herbBiomassMax,
+        },
+        {
+          biomass: this.strandBiomass.data,
+          seedBank: this.strandSeedBank.data,
+          suitability: this.strandSuitability.data,
+          establishmentScale: config.strandEstablishmentScale,
+          establishmentRate: config.strandEstablishmentRate,
+          mortalityRate: config.strandMortalityRate,
+          biomassMax: config.strandBiomassMax,
+        },
+        {
+          biomass: this.binderBiomass.data,
+          seedBank: this.binderSeedBank.data,
+          suitability: this.binderSuitability.data,
+          establishmentScale: config.binderEstablishmentScale,
+          establishmentRate: config.binderEstablishmentRate,
+          mortalityRate: config.binderMortalityRate,
+          biomassMax: config.binderBiomassMax,
+        },
+        {
+          biomass: this.marshBiomass.data,
+          seedBank: this.marshSeedBank.data,
+          suitability: this.marshSuitability.data,
+          establishmentScale: config.marshEstablishmentScale,
+          establishmentRate: config.marshEstablishmentRate,
+          mortalityRate: config.marshMortalityRate,
+          biomassMax: config.marshBiomassMax,
+        },
+        {
+          biomass: this.shrubBiomass.data,
+          seedBank: this.shrubSeedBank.data,
+          suitability: this.shrubSuitability.data,
+          establishmentScale: config.shrubEstablishmentScale,
+          establishmentRate: config.shrubEstablishmentRate,
+          mortalityRate: config.shrubMortalityRate,
+          biomassMax: config.shrubBiomassMax,
+        },
+        {
+          biomass: this.crustBiomass.data,
+          seedBank: this.crustSeedBank.data,
+          suitability: this.crustSuitability.data,
+          establishmentScale: config.crustEstablishmentScale,
+          establishmentRate: config.crustEstablishmentRate,
+          mortalityRate: config.crustMortalityRate,
+          biomassMax: config.crustBiomassMax,
+        },
+      ],
+      scale,
+    );
   }
 
   /**
@@ -3187,6 +3134,16 @@ export class WorldState {
         range: [0, config.strandBiomassMax] as const,
       },
       {
+        id: "habitat.strandSuitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.strandSuitability.data,
+        range: [0, 1] as const,
+      },
+      {
         id: "veg.seedBank.binder",
         units: "seeds/m²",
         shape: "cell" as const,
@@ -3215,6 +3172,16 @@ export class WorldState {
         legacy: false,
         data: this.binderBiomass.data,
         range: [0, config.binderBiomassMax] as const,
+      },
+      {
+        id: "habitat.binderSuitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.binderSuitability.data,
+        range: [0, 1] as const,
       },
       {
         id: "veg.seedBank.marsh",
@@ -3247,6 +3214,16 @@ export class WorldState {
         range: [0, config.marshBiomassMax] as const,
       },
       {
+        id: "habitat.marshSuitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.marshSuitability.data,
+        range: [0, 1] as const,
+      },
+      {
         id: "veg.seedBank.shrub",
         units: "seeds/m²",
         shape: "cell" as const,
@@ -3277,6 +3254,16 @@ export class WorldState {
         range: [0, config.shrubBiomassMax] as const,
       },
       {
+        id: "habitat.shrubSuitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.shrubSuitability.data,
+        range: [0, 1] as const,
+      },
+      {
         id: "veg.seedBank.crust",
         units: "seeds/m²",
         shape: "cell" as const,
@@ -3305,6 +3292,16 @@ export class WorldState {
         legacy: true,
         data: this.crustBiomass.data,
         range: [0, config.crustBiomassMax] as const,
+      },
+      {
+        id: "habitat.crustSuitability",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "dispersal",
+        band: "annual" as const,
+        legacy: false,
+        data: this.crustSuitability.data,
+        range: [0, 1] as const,
       },
       {
         id: "ledger.fuelConsumed",

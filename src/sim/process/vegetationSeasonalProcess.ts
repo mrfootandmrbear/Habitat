@@ -5,12 +5,23 @@ import type { Process } from "./Process";
  * from seed × guild HSI. Same process id as daily vegetation — single vegetation
  * owner, second band. Does not write veg.cover (biology→physics via physicalCover
  * in daily step — Slice 13).
+ *
+ * §4.48 — reads `habitat.suitability` / `habitat.*Suitability`, the values
+ * `dispersalProcess` already computed on the annual band, instead of
+ * recomputing guild HSI from the raw environmental fields (moisture,
+ * salinity, substrate, exposure, longshore, elevation) here — those are no
+ * longer read in this process at all.
  */
 export const vegetationSeasonalProcess: Process = {
   id: "vegetation",
   band: "seasonal",
   reads: [
     "habitat.suitability",
+    "habitat.strandSuitability",
+    "habitat.binderSuitability",
+    "habitat.marshSuitability",
+    "habitat.shrubSuitability",
+    "habitat.crustSuitability",
     "veg.seedBank.herb",
     "veg.seedBank.strand",
     "veg.seedBank.binder",
@@ -18,12 +29,6 @@ export const vegetationSeasonalProcess: Process = {
     "veg.seedBank.shrub",
     "veg.seedBank.crust",
     "veg.biomass.herb",
-    "shore.exposure",
-    "soil.salinity",
-    "soil.moisture",
-    "soil.material",
-    "shore.longshore",
-    "terrain.elevation",
   ],
   writes: [
     "veg.biomass.herb",

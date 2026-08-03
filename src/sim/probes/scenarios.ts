@@ -3218,6 +3218,11 @@ export function probeShrubArrival(): ProbeResult {
     world.shoreExposure.fill(0);
     world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
     world.runHabitatStep(1);
+    // §4.48: shrubSuitability comes from runDispersalStep, not a live
+    // recompute inside the establishment step — re-run it now that
+    // airTemp/herbBiomass reflect this scenario (constructor's initial pass
+    // only saw pre-setup defaults).
+    world.runDispersalStep(1);
     const herbSeed = bareSeed ? 0 : config.seedSourceStrength;
     world.herbSeedBank.fill(herbSeed);
     world.strandSeedBank.fill(config.seedSourceStrength);
@@ -3335,6 +3340,11 @@ export function probeCrustArrival(): ProbeResult {
     world.herbBiomass.fill(config.herbBiomassMax * opts.herbFrac);
     world.runHabitatStep(1);
     world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+    // §4.48: crustSuitability comes from runDispersalStep, not a live
+    // recompute inside the establishment step — re-run it now that
+    // moisture/herbBiomass/salinity reflect this scenario (constructor's
+    // initial pass only saw pre-setup defaults).
+    world.runDispersalStep(1);
     world.herbSeedBank.fill(0);
     world.strandSeedBank.fill(0);
     world.binderSeedBank.fill(0);

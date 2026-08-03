@@ -284,6 +284,53 @@ export function nextHerbBiomass(args: {
 }
 
 /**
+ * One guild's seasonal-establishment inputs (§4.48). `suitability` is read,
+ * never recomputed here — the caller is expected to source it from a field
+ * an earlier band already committed (e.g. `runDispersalStep`'s annual HSI),
+ * so establishment and the suitability that justified it can never drift
+ * apart into two silently disagreeing numbers.
+ */
+export interface GuildEstablishmentInputs {
+  biomass: Float32Array;
+  seedBank: Float32Array;
+  suitability: Float32Array;
+  establishmentScale: number;
+  establishmentRate: number;
+  mortalityRate: number;
+  biomassMax: number;
+}
+
+/**
+ * Jacobi update across guilds (§4.48, closes the BUILD_GUIDE §2.1 Symmetry
+ * gap): every entry reads only its own pre-call biomass plus fields already
+ * committed by an earlier band, and writes only its own biomass array — no
+ * entry's result depends on another entry's output this call, so `guilds`
+ * may be processed in any order and every entry's result is byte-identical
+ * regardless of that order. Contrast the prior Gauss-Seidel version, where
+ * a later guild in the loop read a biomass array an earlier guild in the
+ * same tick had already overwritten.
+ */
+export function applyGuildEstablishment(
+  guilds: readonly GuildEstablishmentInputs[],
+  dt: number,
+): void {
+  for (const g of guilds) {
+    for (let i = 0; i < g.biomass.length; i++) {
+      g.biomass[i] = nextHerbBiomass({
+        biomass: g.biomass[i]!,
+        seedBank: g.seedBank[i]!,
+        habitatSuitability: g.suitability[i]!,
+        establishmentScale: g.establishmentScale,
+        establishmentRate: g.establishmentRate,
+        mortalityRate: g.mortalityRate,
+        biomassMax: g.biomassMax,
+        dt,
+      });
+    }
+  }
+}
+
+/**
  * Slice 13 — cover-equivalent from earned herb biomass for physical writes only.
  * Never dual-writes veg.cover (docs/slices/13-composition.md).
  */

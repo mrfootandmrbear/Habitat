@@ -78,6 +78,13 @@ describe("Climate-capped woody shrub (Slice N10)", () => {
       world.shoreExposure.fill(0);
       world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
       world.runHabitatStep(1);
+      // §4.48: runHerbEstablishmentStep reads shrubSuitability from the
+      // field runDispersalStep writes, instead of recomputing evaluateShrubHsi
+      // itself. The constructor already ran one dispersal pass (t=0 seed
+      // pressure), but that was against pre-setup defaults — re-run it now
+      // that airTemp/herbBiomass/moisture reflect this scenario, same as the
+      // strand/binder/salinity/heat probes already do.
+      world.runDispersalStep(1);
       // Bare case: no herb seed so cover cannot bootstrap mid-run.
       const herbSeed = opts?.bareSeed ? 0 : config.seedSourceStrength;
       world.herbSeedBank.fill(herbSeed);
