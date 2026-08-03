@@ -96,7 +96,9 @@ uniform sampler2D uFireScarTex;
 uniform sampler2D uSalinityTex;
 uniform sampler2D uMaterialTex;
 uniform sampler2D uErosionPulseTex;
+uniform sampler2D uElevationTex;
 uniform vec2 uFieldSize;
+uniform float uTexelWorldSize;
 uniform float uSeaLevel;
 uniform float uMeanHighWater;
 uniform float uHasSea;
@@ -126,6 +128,101 @@ float materialPorosity(int idx) {
     if (i == idx) result = uMaterialPorosity[i];
   }
   return result;
+}
+
+// --- Procedural surface detail (no texture assets — hand-authored GLSL
+// noise). Feeds three independent shading passes below: micro-normal
+// perturbation, per-substrate roughness, and a curvature-based AO
+// approximation. Kept separate from the color-per-cell logic above, which
+// must not change.
+float terrainHash(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+float terrainValueNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  float a = terrainHash(i);
+  float b = terrainHash(i + vec2(1.0, 0.0));
+  float c = terrainHash(i + vec2(0.0, 1.0));
+  float d = terrainHash(i + vec2(1.0, 1.0));
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+float terrainFbm(vec2 p) {
+  float sum = terrainValueNoise(p) * 0.62;
+  sum += terrainValueNoise(p * 2.31 + 19.19) * 0.26;
+  sum += terrainValueNoise(p * 4.87 - 7.4) * 0.12;
+  return sum;
+}
+
+/** Field-grid-space world XZ (meters-ish) — a stable, seamless coordinate
+ * for procedural detail regardless of mesh transform or upsample factor. */
+vec2 terrainWorldXZ(vec2 planeUv) {
+  return planeUv * uFieldSize * uTexelWorldSize;
+}
+
+/** Per-substrate procedural bump height: sand reads as soft low-frequency
+ * ripple, rock as sharp fine grain, loam/clay in between. Substrate ids
+ * match sim/terrain/substrates.ts (0 loam, 1 sand, 2 clay, 3 rock). */
+float terrainBumpHeight(vec2 worldXZ, int matId) {
+  float coarseFreq = matId == 1 ? 0.55 : (matId == 3 ? 1.1 : 0.8);
+  float fineFreq = matId == 1 ? 2.6 : (matId == 3 ? 6.5 : 4.2);
+  float coarseAmt = matId == 1 ? 0.7 : (matId == 3 ? 0.35 : 0.55);
+  return terrainFbm(worldXZ * coarseFreq) * coarseAmt
+    + terrainFbm(worldXZ * fineFreq + 41.7) * (1.0 - coarseAmt);
+}
+
+vec2 terrainBumpGradient(vec2 worldXZ, int matId) {
+  vec2 dx = dFdx(worldXZ);
+  vec2 dy = dFdy(worldXZ);
+  float h0 = terrainBumpHeight(worldXZ, matId);
+  float hx = terrainBumpHeight(worldXZ + dx, matId);
+  float hy = terrainBumpHeight(worldXZ + dy, matId);
+  return vec2(hx - h0, hy - h0);
+}
+
+/** Perturb a shading normal by a screen-space height differential without a
+ * precomputed tangent basis (Mikkelsen's surface-gradient method — the same
+ * math as three.js's own bumpMap chunk, applied to a procedural height
+ * instead of a texture since this repo has no asset pipeline). */
+vec3 terrainPerturbNormal(vec3 surfPos, vec3 surfNormal, vec2 dHdxy, float faceDir) {
+  vec3 vSigmaX = normalize(dFdx(surfPos));
+  vec3 vSigmaY = normalize(dFdy(surfPos));
+  vec3 r1 = cross(vSigmaY, surfNormal);
+  vec3 r2 = cross(surfNormal, vSigmaX);
+  float det = dot(vSigmaX, r1) * faceDir;
+  vec3 grad = sign(det) * (dHdxy.x * r1 + dHdxy.y * r2);
+  return normalize(abs(det) * surfNormal - grad);
+}
+
+/** Cheap curvature-based ambient occlusion: darkens concave creases/hollows
+ * (channel cuts, footings) using the elevation field's discrete Laplacian —
+ * reuses the same elevation texture the normal/displacement already sample,
+ * no separate AO bake. Ridges/convex crusts are left untouched. */
+float terrainCurvatureAO(vec2 fUv) {
+  vec2 invSize = 1.0 / uFieldSize;
+  float h = sampleFieldBilinear(uElevationTex, fUv, uFieldSize);
+  float hL = sampleFieldBilinear(uElevationTex, fUv - vec2(invSize.x, 0.0), uFieldSize);
+  float hR = sampleFieldBilinear(uElevationTex, fUv + vec2(invSize.x, 0.0), uFieldSize);
+  float hD = sampleFieldBilinear(uElevationTex, fUv - vec2(0.0, invSize.y), uFieldSize);
+  float hU = sampleFieldBilinear(uElevationTex, fUv + vec2(0.0, invSize.y), uFieldSize);
+  vec2 invSize2 = invSize * 2.0;
+  float hL2 = sampleFieldBilinear(uElevationTex, fUv - vec2(invSize2.x, 0.0), uFieldSize);
+  float hR2 = sampleFieldBilinear(uElevationTex, fUv + vec2(invSize2.x, 0.0), uFieldSize);
+  float hD2 = sampleFieldBilinear(uElevationTex, fUv - vec2(0.0, invSize2.y), uFieldSize);
+  float hU2 = sampleFieldBilinear(uElevationTex, fUv + vec2(0.0, invSize2.y), uFieldSize);
+
+  float lap = (hL + hR + hD + hU - 4.0 * h) + (hL2 + hR2 + hD2 + hU2 - 4.0 * h) * 0.5;
+  float dx = max(uTexelWorldSize, 1e-4);
+  float curvature = lap / (dx * dx);
+  // Negative curvature = concave (channel/hollow/crease) -> darken;
+  // positive curvature (ridges) is left alone.
+  float occlusion = clamp(-curvature * 0.6, 0.0, 0.6);
+  return 1.0 - occlusion;
 }
 `;
 
@@ -169,6 +266,57 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
   }
 
   diffuseColor.rgb = col;
+}
+`;
+
+// Per-substrate roughness (porosity-driven wetness reuses the same soilT
+// shape as TERRAIN_COLOR_INJECT, so a puddled low-porosity rock face reads
+// "wet" at the same threshold it reads visually darker/wet-colored) plus a
+// fine noise jitter so a substrate doesn't read as one flat painted value.
+const TERRAIN_ROUGHNESS_INJECT = /* glsl */ `
+{
+  vec2 rFieldUv = fieldUv(vUv);
+  int rMatId = int(sampleFieldNearest(uMaterialTex, rFieldUv, uFieldSize) + 0.5);
+  float rMoisture = sampleFieldBilinear(uSoilMoistureTex, rFieldUv, uFieldSize);
+  float rPorosity = max(materialPorosity(rMatId), 1e-6);
+  float rSoilT = clamp(rMoisture / rPorosity, 0.0, 1.0);
+
+  // Dry baseline: sand matte/rough, rock less porous & harder (smoother),
+  // clay/loam in between. Wet: everything glosses up, mud/clay most of all;
+  // rock stays a touch rougher than mud even wet (fracture, not slick).
+  float dryRough = rMatId == 1 ? 0.96 : (rMatId == 2 ? 0.84 : (rMatId == 3 ? 0.66 : 0.9));
+  float wetRough = rMatId == 3 ? 0.3 : (rMatId == 1 ? 0.72 : 0.32);
+  float substrateRough = mix(dryRough, wetRough, rSoilT);
+
+  float jitter = (terrainValueNoise(terrainWorldXZ(vUv) * 5.2) - 0.5) * 0.07;
+  // Clamped off both ends of [0,1]: never fully mirror-smooth (clipped
+  // highlight) and never fully matte-flat (crushed, lifeless black).
+  roughnessFactor = clamp(substrateRough + jitter, 0.18, 0.97);
+}
+`;
+
+// Fragment-rate micro-normal perturbation — the vertex-stage analytic normal
+// (fieldHeightNormal) is smooth across the upsampled mesh; this adds
+// per-pixel grain so the surface reads as hand-crafted rather than a flat
+// low-poly shell, independent of geometry/upsample resolution.
+const TERRAIN_NORMAL_DETAIL_INJECT = /* glsl */ `
+{
+  vec2 nFieldUv = fieldUv(vUv);
+  int nMatId = int(sampleFieldNearest(uMaterialTex, nFieldUv, uFieldSize) + 0.5);
+  vec2 nWorldXZ = terrainWorldXZ(vUv);
+  vec2 dHdxy = terrainBumpGradient(nWorldXZ, nMatId) * 0.14;
+  normal = terrainPerturbNormal(-vViewPosition, normal, dHdxy, faceDirection);
+}
+`;
+
+// Curvature AO darkens only the indirect (ambient/env) light contribution —
+// direct sun stays untouched — so creases/channel cuts read as shadowed
+// without double-darkening what the directional light already models.
+const TERRAIN_AO_INJECT = /* glsl */ `
+{
+  float terrainAo = terrainCurvatureAO(fieldUv(vUv));
+  reflectedLight.indirectDiffuse *= terrainAo;
+  reflectedLight.indirectSpecular *= terrainAo;
 }
 `;
 
@@ -268,6 +416,12 @@ export class TerrainMesh {
     });
     this.cpuMesh = new THREE.Mesh(this.cpuGeometry, cpuMaterial);
     this.cpuMesh.name = "terrain-cpu-fallback";
+    // Ground plane: receives cast shadows (occupants, terrain self-shadow
+    // once a shadow-casting light is configured) and casts onto itself
+    // across ridges/berms. No-op today (no shadow-casting light is set up
+    // yet) but correct so terrain participates the moment one is added.
+    this.cpuMesh.receiveShadow = true;
+    this.cpuMesh.castShadow = true;
 
     // --- GPU default mesh (upsampled, shader-driven) ---
     const gpuGeometry = new THREE.PlaneGeometry(
@@ -331,15 +485,34 @@ export class TerrainMesh {
         TERRAIN_DISPLACE_INJECT,
       );
       shader.vertexShader = `${TERRAIN_VERTEX_HEADER}\n${vertexShader}`;
-      shader.fragmentShader = `${TERRAIN_FRAGMENT_HEADER}\n${injectAfterInclude(
+
+      let fragmentShader = injectAfterInclude(
         shader.fragmentShader,
         "#include <color_fragment>",
         TERRAIN_COLOR_INJECT,
-      )}`;
+      );
+      fragmentShader = injectAfterInclude(
+        fragmentShader,
+        "#include <roughnessmap_fragment>",
+        TERRAIN_ROUGHNESS_INJECT,
+      );
+      fragmentShader = injectAfterInclude(
+        fragmentShader,
+        "#include <normal_fragment_maps>",
+        TERRAIN_NORMAL_DETAIL_INJECT,
+      );
+      fragmentShader = injectAfterInclude(
+        fragmentShader,
+        "#include <aomap_fragment>",
+        TERRAIN_AO_INJECT,
+      );
+      shader.fragmentShader = `${TERRAIN_FRAGMENT_HEADER}\n${fragmentShader}`;
     };
 
     this.gpuMesh = new THREE.Mesh(gpuGeometry, this.gpuMaterial);
     this.gpuMesh.name = "terrain-gpu";
+    this.gpuMesh.receiveShadow = true;
+    this.gpuMesh.castShadow = true;
 
     this.mesh = new THREE.Group();
     this.mesh.name = "terrain";

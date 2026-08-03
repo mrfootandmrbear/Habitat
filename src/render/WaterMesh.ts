@@ -34,6 +34,7 @@ uniform float uTexelWorldSize;
 uniform float uShowEps;
 uniform float uStormActive;
 varying vec3 vWorldNormal;
+varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
 ${FIELD_SAMPLE_GLSL}
@@ -77,24 +78,121 @@ void main() {
   vec3 displaced = vec3(position.x, y, position.z);
   vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
   vWorldNormal = normalize(mat3(modelMatrix) * localNormal);
+  vWorldPos = worldPos.xyz;
   gl_Position = projectionMatrix * viewMatrix * worldPos;
 }
 `;
 
 const waterFragment = /* glsl */ `
 varying vec3 vWorldNormal;
+varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
 uniform vec3 uShallowColor;
 uniform vec3 uDeepColor;
+uniform float uTime;
+
+// Sun direction/color mirror Scene.ts's THREE.DirectionalLight (position
+// (24,40,16), color 0xfff2dd) so the specular hot-spot lands where the
+// scene's actual sun is, not a mismatched second light source. Sky
+// zenith/horizon mirror Scene.ts's fog/background (0xb8c9d4) at the horizon
+// so reflected sky blends into the real backdrop instead of reading as a
+// foreign color (bar item 11: coherent palette). Uploaded as uniforms
+// (rather than GLSL consts) computed once in TS — GLSL ES 1.00 forbids
+// normalize() in a const initializer.
+uniform vec3 uSunDirection;
+uniform vec3 uSunColor;
+uniform vec3 uSkyZenith;
+uniform vec3 uSkyHorizon;
+uniform vec3 uFoamColor;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
+float valueNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+float fbm(vec2 p) {
+  float sum = 0.0;
+  float amp = 0.5;
+  for (int i = 0; i < 3; i++) {
+    sum += amp * valueNoise(p);
+    p *= 2.03;
+    amp *= 0.5;
+  }
+  return sum;
+}
+
+// Two panning fbm layers = cheap animated ripple field, no texture assets.
+float rippleHeight(vec2 p, float t) {
+  vec2 p1 = p * 0.35 + vec2(t * 0.07, t * 0.045);
+  vec2 p2 = p * 0.83 - vec2(t * 0.05, t * 0.09);
+  return fbm(p1) * 0.65 + fbm(p2) * 0.35;
+}
+
+// Small-scale normal perturbation from the ripple field (central difference).
+vec2 rippleTilt(vec2 p, float t) {
+  float eps = 0.12;
+  float hL = rippleHeight(p - vec2(eps, 0.0), t);
+  float hR = rippleHeight(p + vec2(eps, 0.0), t);
+  float hD = rippleHeight(p - vec2(0.0, eps), t);
+  float hU = rippleHeight(p + vec2(0.0, eps), t);
+  return vec2(hL - hR, hD - hU) / (2.0 * eps);
+}
 
 void main() {
   if (vAlpha < 0.01) discard;
-  vec3 n = normalize(vWorldNormal);
-  vec3 lightDir = normalize(vec3(0.4, 1.0, 0.25));
-  float ndl = 0.35 + 0.65 * max(dot(n, lightDir), 0.0);
-  vec3 col = mix(uShallowColor, uDeepColor, clamp(vDepthT, 0.0, 1.0)) * ndl;
-  gl_FragColor = vec4(col, vAlpha);
+  vec2 p = vWorldPos.xz;
+
+  // Blend the fine ripple tilt into the analytic (large-scale slope) normal
+  // rather than replacing it — river/sheet-flow tilt still reads, ripples
+  // just add sparkle-scale detail on top.
+  vec2 tilt = rippleTilt(p, uTime);
+  vec3 n = normalize(vWorldNormal + vec3(tilt.x, 0.0, tilt.y) * 0.45);
+
+  vec3 viewDir = normalize(cameraPosition - vWorldPos);
+  vec3 reflectDir = reflect(-viewDir, n);
+  float skyT = smoothstep(0.0, 0.7, reflectDir.y * 0.5 + 0.5);
+  vec3 skyColor = mix(uSkyHorizon, uSkyZenith, skyT);
+
+  float ndv = clamp(dot(n, viewDir), 0.0, 1.0);
+  float fresnel = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
+
+  float ndl = 0.35 + 0.65 * max(dot(n, uSunDirection), 0.0);
+  vec3 baseColor = mix(uShallowColor, uDeepColor, clamp(vDepthT, 0.0, 1.0)) * ndl;
+  vec3 col = mix(baseColor, skyColor, fresnel * 0.6);
+
+  // Sun specular sparkle: high-frequency noise breaks one big Phong blob
+  // into many small glints, and the reinhard-style compress below keeps it
+  // from ever hard-clipping to flat white (bar item 10).
+  vec3 halfDir = normalize(viewDir + uSunDirection);
+  float spec = pow(max(dot(n, halfDir), 0.0), 140.0);
+  float sparkle = 0.5 + 0.9 * valueNoise(p * 9.0 + uTime * 0.6);
+  spec *= sparkle * (0.3 + 0.7 * fresnel);
+  vec3 specCol = uSunColor * spec * 1.4;
+  specCol = specCol / (1.0 + specCol);
+  col += specCol;
+
+  // Shoreline foam: fades in as depth -> 0 with a noisy soft edge instead
+  // of a hard cutoff (bar item 5).
+  float foamNoiseV = fbm(p * 2.2 + uTime * vec2(0.15, 0.1));
+  float edge = vDepthT + (foamNoiseV - 0.5) * 0.45;
+  float foam = 1.0 - smoothstep(0.05, 0.34, edge);
+  col = mix(col, uFoamColor, foam * 0.85);
+  float alpha = mix(vAlpha, max(vAlpha, 0.75), foam);
+
+  gl_FragColor = vec4(col, alpha);
 }
 `;
 
@@ -112,6 +210,9 @@ export class WaterMesh {
   private lastOceanCells: ReadonlySet<number> | undefined = undefined;
   private readonly uniforms: Record<string, THREE.IUniform>;
   private palette: WaterPalette;
+  /** Wall-clock accumulator driving ripple/sparkle animation; wrapped to
+   *  keep float precision sane across long play sessions. */
+  private elapsedSeconds = 0;
 
   constructor(
     width: number,
@@ -147,6 +248,18 @@ export class WaterMesh {
       uStormActive: { value: 0 },
       uShallowColor: { value: new THREE.Color() },
       uDeepColor: { value: new THREE.Color() },
+      uTime: { value: 0 },
+      // Mirrors Scene.ts's DirectionalLight/fog/background so reflection
+      // and specular land in the same place the rest of the scene expects
+      // (bar items 4, 11) — see the fragment shader comment above.
+      // Matches Scene.ts's sunDirectionFromSky(38, 205) — kept as a literal
+      // constant here rather than imported so this file stays self-contained
+      // (see comment above); update together if Scene.ts's sun angle changes.
+      uSunDirection: { value: new THREE.Vector3(-0.333, 0.6157, -0.7142) },
+      uSunColor: { value: new THREE.Color(0xfff2dd) },
+      uSkyZenith: { value: new THREE.Color(0.53, 0.7, 0.86) },
+      uSkyHorizon: { value: new THREE.Color(0xcdd9e2) },
+      uFoamColor: { value: new THREE.Color(0.93, 0.97, 0.98) },
     };
     this.applyPaletteToUniforms();
 
@@ -215,6 +328,11 @@ export class WaterMesh {
       }
       this.displayDepth[i] = next;
     }
+    // Wrapped so ripple/sparkle noise phase never loses float precision
+    // across a long-running session; the wrap point is well past any
+    // period used by rippleHeight/valueNoise so it's visually seamless.
+    this.elapsedSeconds = (this.elapsedSeconds + Math.max(0, wallDt)) % 10000;
+    this.uniforms.uTime!.value = this.elapsedSeconds;
     this.applyDisplay(world, stormActive);
   }
 

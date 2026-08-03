@@ -1,4 +1,5 @@
 import "./style.css";
+import * as THREE from "three";
 import {
   config,
   sitingBrushRadiusFor,
@@ -188,9 +189,16 @@ function regenerateIsland(seed: number): void {
   ui.setUndoEnabled(false);
 }
 
-const { scene, camera, renderer, controls } = createScene(viewport);
+const { scene, camera, renderer, controls, render: renderFrame } = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
+terrainMesh.mesh.traverse((obj) => {
+  if (obj instanceof THREE.Mesh) {
+    obj.castShadow = true;
+    obj.receiveShadow = true;
+  }
+});
+waterMesh.mesh.receiveShadow = true;
 let extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
   seaLevel: world.seaLevel,
   meanHighWater: world.meanHighWater,
@@ -1082,7 +1090,7 @@ function frame(now: number): void {
   );
 
   controls.update();
-  renderer.render(scene, camera);
+  renderFrame();
   requestAnimationFrame(frame);
 }
 
