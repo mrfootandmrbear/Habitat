@@ -147,7 +147,7 @@ Summary only — do not reopen unless fixing regressions.
 
 ### 4.0 Autonomous session protocol
 
-Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). **Gated multi-agent succession** (one slice per cloud run, merge into `main` starts the next): [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) — Track T terrain tools shipped through §4.59 (parked on owner taste, no further machine slice) and Track R review correctness (§4.47→§4.48); copy-paste Automation prompts live there. Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
+Cold-start one-pager: [AGENTS.md](../AGENTS.md). Procedural skills (slash or auto): `/run-gate`, `/author-probe`, `/write-playtest`, `/promote-candidate`, `/study-steal`, `/nature-study`, `/blocked-note` under `.cursor/skills/`. Cloud Agents: `.cursor/environment.json` (`npm install`; headless gate preferred). **Gated multi-agent succession** (one slice per cloud run, merge into `main` starts the next): [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) — Track T terrain tools shipped through §4.59 (parked on owner taste, no further machine slice), Track R review correctness (§4.47→§4.48), and Track A animal life (§4.60 Herbivore tip, opened 2026-08-03 after F-001 undeferred); copy-paste Automation prompts live there. Always-on policy stays in `.cursor/rules/` — do not migrate vision / verify-before-asking into skippable skills.
 
 Every agent session that advances the sim or build plan:
 
@@ -1373,6 +1373,52 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
+### 4.60 Slice A1 — Herbivore population/trait fields *(queued — Track A tip, F-001 undeferred 2026-08-03)*
+
+**Why this exists.** Habitat has zero animals today — "life" is six plant-guild biomass fields on the 96×96 grid (`WorldState.ts`), rendered as static colored cones through one `OccupantMesh` `InstancedMesh`. **F-001** (advanced ecosystem-engineer behaviors) moved Deferred → Current by owner decision ([DECISION_REGISTER §15](DECISION_REGISTER.md)); **C-027** ([framing](candidates/C-027-framing.md)) already specs the architecture this slice implements: population trait-mean fields per role per cell, updated deterministically toward a pressure-derived target — the same shape **L3** already ships for biomass mortality — rendered as instanced individuals sampling density (literal count) and trait-mean (morph/swap). Herbivore is C-027 §3.5's fully worked example and the lowest-risk first cut: every pressure term it needs — terrain slope, `factorTemperature`, `f_inundation` — is already computed by existing terrain/climate/**NS-008** machinery; no new resource field, no write-back path (**E-005**), no food-web coupling (**ES-007**) required.
+
+**Register:** E-004 Locked; E-005 Locked (write-back — not touched by this slice); ES-006 Locked; ES-007 Locked (food web — out of scope here); W-003 Locked; N-003 / N-004 / N-005 Locked; D-001 Locked; T-001 Locked; T-006 Locked; C-011 Open; C-003 Open (no stochastic drift); C-019 Locked; C-027 Open (this slice is C-027's machine half for one role)
+**New Process?** **yes** — the first `populations` band process in `SimScheduler` ([SIMULATION_MODEL §3.7](SIMULATION_MODEL.md)). **D-007 clip gate applies:** this entry must record a clip verdict before any *other* slice registers a new Process. A2 (§4.61) extends this same Process rather than registering a new one and is not blocked by the clip.
+
+- [ ] Register `pop.herbivore.density`, `pop.herbivore.stage[k]`, `pop.herbivore.occupancy` per §3.7 (already spec'd, not yet implemented); band annual, legacy yes
+- [ ] New field family `pop.herbivore.trait.limbLength` / `.insulation` / `.webbing` — trait-mean fields, same band/legacy status as density (C-027 §3.2)
+- [ ] Carrying capacity derived each annual step from habitat/resources/competition/predation — **never a stored constant** (**ES-006**); this slice's predation term is honestly absent (mesopredator/apex predator roles don't exist yet), not a hidden `K`
+- [ ] Trait update law: `traitMean += traitRate · (pressureOptimum(habitatState) − traitMean) · dt` — first-order toward target, deterministic, no RNG (**C-003** Open)
+- [ ] Three pressure mappings, each with a real-world referent (**C-011**): `limbLength` ← terrain slope factor (continuous morph); `insulation` ← `factorTemperature` (`temperatureComposition.ts`, continuous morph); `webbing` ← `f_inundation` (**NS-008**, discrete socket-swap at a threshold)
+- [ ] Density target reads existing vegetation-biomass fields within a home-range neighborhood — no new resource field invented (C-027 §3.5)
+- [ ] Render: one new `InstancedMesh` (or shared pool) extending `OccupantMesh`'s existing pattern; instance count = `density × cellAreaKm2` capped at a render budget — literal readout, never tuned (C-027 §2); per-instance deterministic seed from `(cellIndex, instanceIndex[, tick])`, no persisted identity across frames (**T-001**, **T-006**)
+- [ ] Continuous traits as morph-target influence or bone scale; `webbing` as a discrete socket-mesh attach/detach at a fixed threshold
+- [ ] Tier-M: conservation/bounds on density and trait-mean fields; determinism (identical seed/state → identical trajectory and render sample); new probe (shape of `arrival-earned`) showing a trait-mean tracking a synthetic pressure change — C-027's own CI-judged criterion
+- [ ] Tier-P: instance count and morph amount visibly track a forced pressure change (e.g. Force-panel temperature dial) without an inspector
+- [ ] Inspector overlay: `pop.herbivore.*` fields registered and inspectable (**T-005**)
+- [ ] Notebook seed: e.g. "The herd here has gone shaggy since the cold set in."
+- [ ] **D-007 clip verdict** recorded once shipped — owner judges legible-earned-adaptation vs. arbitrary-effect, the same test C-027's owner-judged half names
+- [ ] Composition + manifest: `docs/slices/A1-herbivore-composition.md`, `docs/slices/A1.json`
+- [ ] **Promote C-027**'s CI-judged half (determinism, no-fixed-K, literal density mapping) in the evidence commit if the criterion is met (DECISION_CONFORMANCE §3.0); owner half stays a dossier, entry stays Open
+- [ ] **Next-but-one:** A2 — Seed disperser fields (§4.61)
+
+---
+
+### 4.61 Slice A2 — Seed disperser fields *(specified to §4.3 depth — not started)*
+
+**Why this exists.** Second role in C-027 §3.1's list; the framing names it the biological analog of what **L2** already ships for plants. Natural second cut after A1 proves the `populations` Process end-to-end, because it reuses A1's field/render machinery wholesale and adds exactly one new coupling: a local term in the L2 seed-rain kernel (`dispersalProcess`, [L2-composition.md](slices/L2-composition.md)) so disperser density modulates local seed pressure alongside the existing biomass-driven term. Pollinators (C-027 §3.1) are architecturally identical to this slice minus the dispersal write-back and are the fallback swap if the coupling proves harder than expected.
+
+**Register:** C-007 Locked; C-019 Locked; E-004 Locked; W-003 Locked; ES-006 Locked; T-001 Locked; C-011 Open; C-003 Open; C-027 Open
+**New Process?** no — extends the `populations` Process A1 registers with a second role; A1's D-007 clip already discharges the gate for this slice.
+
+- [ ] Register `pop.seedDisperser.density` / `.stage[k]` / `.occupancy` (§3.7 shape, same as A1)
+- [ ] Trait fields TBD pending a referent search (**C-011**, **N-004**) — do not invent a trait without one; a disperser-only slice with density/occupancy and zero trait fields is an acceptable, honest scope if no referent is found
+- [ ] Density requirement: existing vegetation cover + connected habitat (DESIGN_WIKI §4) — reuse `connectivity.currentDensity` (SIMULATION_MODEL §3.9, already registered), not a new field
+- [ ] Local dispersal coupling: disperser density enters `dispersalProcess`'s local seed-pressure term as an additional multiplicative factor, bounded so zero disperser density reduces to today's L2 term exactly — same zero-is-a-no-op discipline L2 itself proved against pre-L2 baselines
+- [ ] Render: same `OccupantMesh`-pattern instancing as A1, new archetype
+- [ ] Tier-M: determinism; bounds; the disperser-coupling regression proves inert at zero density (style of L2's arrival-family no-op proof)
+- [ ] Tier-P: seed-front spread rate visibly faster with disperser density present vs. absent, probe shaped like L2's `spread-front`
+- [ ] Bans: no stochastic dispersal (**C-003** Open); no predator/competition term (**ES-007**/**C-023**/L5 — out of scope); no species catalog, roles only (**E-004**)
+- [ ] Composition + manifest: `docs/slices/A2-seed-disperser-composition.md`, `docs/slices/A2.json`
+- [ ] **Next-but-one:** A3 — Pollinators, or owner choice among remaining non-competitive roles; mesopredator / apex-predator / ecosystem-engineer roles stay blocked behind **L5**/**C-023** (competition) and the **E-005** write-back gap (framing §5) respectively
+
+---
+
 ### Later stubs
 
 | Slice | Focus | Register | Gate |
@@ -1421,6 +1467,10 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Duplicator stamp | C-006, C-002, C-028, A-005, C-009 | §4.59 **Done** |
 | — | Simple / Full control density | U-001, U-003, C-004, T-005 | §4.58 **Done** |
 | C-026 | CVD-safe cross-domain palette | D-007, U-003, C-011 | **Open**, owner-judged — did not block §4.52, which shipped without it |
+| A1 | Herbivore population/trait fields | F-001, C-027, E-004, W-003, ES-006, T-001, T-006, C-011 | §4.60 **Queued — Track A tip** |
+| A2 | Seed disperser fields | C-027, C-007, C-019, E-004 | §4.61 **Specified — next-but-one** |
+
+**Track A (animal life) opened 2026-08-03.** Owner undeferred **F-001**; **C-027**'s slice-trigger updated so non-competitive roles no longer wait on **L5** (DECISION_REGISTER §15 / §16.5, DECISION_CONFORMANCE C-027). **A1 Herbivore** (§4.60) is the new tip for this track, parallel to Track R's §4.48 and Track T (parked); **A2 Seed disperser** (§4.61) is specified to next-but-one depth. Mesopredator / apex-predator roles stay blocked behind **L5**/**C-023**; ecosystem-engineer stays blocked behind an unbuilt **E-005** write-back design — see [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) §3 Track A.
 
 Slices **14** / **16** / **15** Tier-O **Pass** (§4.10–4.11). **Slice F** / **17**–**21** Done. **Slice S** / **Slice R** Done; D-007 clip **Pass**. **Slice A+** Done (machine). C-018 / C-019 Tier-O **Pass**. **Field Notebook** Done (**U-006 Locked**). **Full C-020 clouds** Done (**C-020 Locked** v2.0.13). **NS-006** / **NS-002** / **NS-004** / **NS-003** / **NS-005** / **NS-008** / **NS-007** / **NS-009** / **NS-010** / **NS-011** Done. **Slice B** Done (**C-005 Locked tooling**). **C-006** / **C-013** / **C-002 Locked**. **C-010** framing Done. **Slice G** Done — machine half only; **C-021**/**C-022** Open pending owner Lock sitting. **L1** / **L6** Done (§4.36 / §4.41) — deferred time debt plus a rate ladder in real-world units (`1 s/s` … `1 week/s`); no baseline or `GOLDEN_*` hash moved. **L2** / **L3** / **L7** Done — local seed rain, mortality-as-rate, activity-gated event band (hash-identity, skipFrac 0.3, baselines unmoved). **§4.49 flat-routing correctness** Done — drainage cycles fixed at the flat-resolver tie-break, not by epsilon; `aNorm`-downstream baselines refreshed. **§4.50 surface-flux stability guard** Done — per-face CFL cap + roughness floor inside `fluxStep`; no baseline moved (traced inert against every parameter the game currently exercises). **§4.51 coastal base-level & substrate coupling** Done — ocean-neighbor stage reads `seaLevel` not bed elevation, a non-outlet rim cell is excluded from hillslope erosion (structural/dynamic boundary disagreement), coastal erosion reads per-substrate `erosionK` as a ratio against loam (ratio 1 on loam, so the pre-fix calibration is unchanged there); nine `aNorm`-downstream baselines refreshed, same family §4.49 moved. **§4.52 encoding delta correctness** Done — occupant/light ramps no longer saturate before the top of their domain, delta floors switched to a luminance-weighted metric (grey deltas unchanged, blue discounted, green boosted vs. raw Euclidean), the binder/intertidal cross-file color collision fixed and checked, terrain overlay compositing made proportional instead of sequential (CPU + GLSL), `substrateEncodingDelta` now checks all substrate pairs at each one's own porosity, and the `timeRates.ts` "fastest sustains" label now derives from `sustainableRates()`; two Tier-P floors and one probe baseline (`tidal-envelope`) moved for documented reasons, not regressions. **§4.46 HSI curve-shape corrections** Done — Liebig curves honest at extremes; arrival-family baselines refreshed with stated reasons. **§4.56 flatten/trowel** Done — player edit toward mean elev in brush with depth riding (C-002); distinct from C-022 force dial; undo + no veg write; next is §4.57 molds. **§4.58 Simple/Full chrome** Done — control strip defaults to Simple (sculpt · Rain/Sea/Wind · time · undo); Full reveals secondary dials and session/inspect chrome on demand (U-001).
 
@@ -1432,7 +1482,7 @@ L1 throughput defect [Done]  →  L6 real-world time units [Done]  →  L2 local
    (L5 / L8 blocked — tip moves to §4.45 fuel/scar)
 ```
 
-L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L3** shipped next: first-order dieback, `dieback-lag` probe, guild-ordered half-lives. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / animals / SWE off the tip.
+L1 and L6 led because they are small, move no baselines, and are how L2/L3 get observed at all — both are about ecological timescales; both shipped in one commit with every baseline and `GOLDEN_*` hash unmoved (§4.36 / §4.41). **L3** shipped next: first-order dieback, `dieback-lag` probe, guild-ordered half-lives. **L1, L2, L3, L4, L6, L7 register no new `Process`** (D-007 clip gate does not apply) and **need no new candidate**: each implements a Locked entry or a written spec section the code falls short of. Blocked, owner-judged: **L5** on **C-023**; **L8** on **C-024** + **C-025**. Owner Lock backlog runs in parallel: residual **C-014**, **C-021**/**C-022** taste sitting, **C-010** implement later ([owner-lock-batch.md](candidates/owner-lock-batch.md)). Keep nutrients / SWE off the tip. Animal life is **no longer** blanket off-tip: **F-001** undeferred 2026-08-03 opened **Track A** (§4.60–§4.61, non-competitive roles) in parallel to this Living wave; mesopredator / apex-predator / ecosystem-engineer roles stay off tip (gated behind **L5**/**C-023** and an unbuilt **E-005** write-back design, respectively).
 
 **Two standing risks recorded, not resolved.** (1) L2 and L3 introduce per-band rate constants; if **C-024** later changes band periods, those constants need retuning — accepted rather than waiting on an owner-judged candidate (§4.0.1). (2) Any partial deep-time shortcut that skips bands "only a little" breaks **T-001** replay, **P-006** fairness, and **C-005** comparison *without going red*. Do not build one.
 
