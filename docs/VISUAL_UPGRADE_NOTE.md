@@ -314,6 +314,12 @@ owner supplied real Godus reference images and named the direction:
 sandbox terrain editing, and Godus is the closest existing execution of the
 same idea. Reference images live in `docs/reference/`.
 
+**What the Godus references are and are not for.** They are the bar for
+**visual clarity**: saturated palette, clean colour separation, instantly
+readable materials and water depth. They are **not** the bar for terrain
+shape — that is RCT3-like and smooth. Read every point below with that split
+in mind, and see point 1 before touching terrain geometry.
+
 This replaces a rubric that was written to describe **physically-blended
 naturalism**, and in three places that rubric asked for the *opposite* of the
 stated direction. Those points are retired, not merely reworded:
@@ -328,21 +334,34 @@ stated direction. Those points are retired, not merely reworded:
 was recorded as *"feather/blend the substrate-patch edges instead of the
 current hard cutoff."* Against the Godus bar that is backwards — hard-edged
 material boundaries following terrain contours are the target. Do not action
-it. The same applies to my own earlier read that the cone's stair-stepped
-silhouette is "the most prototype thing in frame": **stepping is the style**,
-it is simply the wrong *kind* of stepping (see point 1 below).
+it — clarity favours clean boundaries, not feathered ones.
+
+The cone's faceted, stair-stepped silhouette **is** a real defect, though.
+(A retracted revision of this section briefly claimed stepping was the style,
+on the mistaken reading that the Godus references governed shape. They do
+not — see point 1.)
 
 ### v2 — twelve checkable points
 
-**Terrain shape language**
-1. Terrain reads as stacked contour *terraces* — flat plateaus separated by
-   distinct vertical risers, following the landform's contours. Not smooth,
-   and not the current arbitrary polygon faceting: the steps must be
-   horizontal bands that trace elevation, not triangle edges.
-2. Terrace risers are visible as their own surface, catching light
-   differently from the plateau above and below.
-3. Substrate/material boundaries follow terrace contours with **crisp edges**.
-   No feathering, no triplanar blend.
+**Terrain shape language — RCT3-like, explicitly NOT terraced**
+
+> Owner correction (2026-08-04): the Godus references were supplied to show
+> **visual clarity** — saturation, readability, clean colour separation — and
+> *not* shape language. Terrain should look closer to **RCT3**: a smooth
+> continuous rolling heightfield. **Do not implement terracing.** An earlier
+> revision of this section called for stacked contour terraces; that was a
+> misread of what the references were for, and is retracted.
+
+1. Terrain reads as a **smooth continuous landform**. No terraces, and no
+   visible triangle faceting or stair-stepped shoreline — today's cone shows
+   both, and both are genuine defects.
+2. Material follows the landform legibly: steep faces read as exposed
+   rock/substrate, gentle ground as soil/vegetation, and the transition is
+   driven by the terrain itself rather than looking stamped on.
+3. Material zones are **clearly readable** — one substrate is unmistakably a
+   different material from its neighbour. Clarity is the goal, so favour clean
+   boundaries over physical feathering, but they follow the smooth surface,
+   not contour steps.
 
 **Palette**
 4. Land palette is saturated and warm — yellow-greens, ochres, tans. Measured:
@@ -377,9 +396,10 @@ Godus the camera looks down and sky is barely in frame. The dominant visual
 signal is terraced terrain + saturated palette + depth-banded water. Sky
 still needs to stop being flat grey (point 5), but it is not the lever.
 
-Ranked by distance from the bar, worst first: **water colour/banding** (7),
-**terrace shape language** (1–3), **palette saturation** (4), **vegetation
-type variety** (9–10), then sky (5, 12).
+Ranked by distance from the bar, worst first: **water colour/banding** (6–8),
+**palette saturation** (4), **smooth terrain silhouette — de-facet, fix the
+stair-stepped shoreline** (1), **vegetation type variety** (9–10), then
+sky (5, 12).
 
 ## Resolved: the double-tonemapping hypothesis was wrong (2026-08-04, post-merge)
 
