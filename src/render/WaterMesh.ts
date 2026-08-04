@@ -6,6 +6,12 @@ import {
   updateFieldTexture,
   FIELD_SAMPLE_GLSL,
 } from "./fieldTexture";
+import {
+  SUN_COLOR,
+  sunDirectionFromSky,
+  type SkyLighting,
+  type SkyLightingConsumer,
+} from "./lightingRig";
 
 /**
  * Water palette — data the renderer accepts, not shader-baked constants.
@@ -196,7 +202,7 @@ void main() {
 }
 `;
 
-export class WaterMesh {
+export class WaterMesh implements SkyLightingConsumer {
   readonly mesh: THREE.Mesh;
   private readonly geometry: THREE.PlaneGeometry;
   private readonly dryEpsilon: number;
@@ -249,14 +255,12 @@ export class WaterMesh {
       uShallowColor: { value: new THREE.Color() },
       uDeepColor: { value: new THREE.Color() },
       uTime: { value: 0 },
-      // Mirrors Scene.ts's DirectionalLight/fog/background so reflection
-      // and specular land in the same place the rest of the scene expects
-      // (bar items 4, 11) — see the fragment shader comment above.
-      // Matches Scene.ts's sunDirectionFromSky(38, 205) — kept as a literal
-      // constant here rather than imported so this file stays self-contained
-      // (see comment above); update together if Scene.ts's sun angle changes.
-      uSunDirection: { value: new THREE.Vector3(-0.333, 0.6157, -0.7142) },
-      uSunColor: { value: new THREE.Color(0xfff2dd) },
+      // Reflection and specular have to land where the rest of the scene
+      // expects them (bar items 4, 11). Seeded from the shared rig, then
+      // overwritten by `setSkyLighting` with tones probed off the real sky —
+      // never hand-matched literals, which is how these last went stale.
+      uSunDirection: { value: sunDirectionFromSky() },
+      uSunColor: { value: new THREE.Color(SUN_COLOR) },
       uSkyZenith: { value: new THREE.Color(0.53, 0.7, 0.86) },
       uSkyHorizon: { value: new THREE.Color(0xcdd9e2) },
       uFoamColor: { value: new THREE.Color(0.93, 0.97, 0.98) },
@@ -281,6 +285,14 @@ export class WaterMesh {
     this.mesh = new THREE.Mesh(this.geometry, material);
     this.mesh.renderOrder = 1;
     this.mesh.name = "water";
+  }
+
+  /** Adopt the scene's measured sun/sky so reflections match the real sky. */
+  setSkyLighting(lighting: SkyLighting): void {
+    (this.uniforms.uSunDirection!.value as THREE.Vector3).copy(lighting.sunDirection);
+    (this.uniforms.uSunColor!.value as THREE.Color).copy(lighting.sunColor);
+    (this.uniforms.uSkyZenith!.value as THREE.Color).copy(lighting.skyZenith);
+    (this.uniforms.uSkyHorizon!.value as THREE.Color).copy(lighting.skyHorizon);
   }
 
   /** Swap the water palette (preserve data — see WaterPalette). */
