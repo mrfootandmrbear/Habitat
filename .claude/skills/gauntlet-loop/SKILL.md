@@ -192,13 +192,48 @@ Two habits that prevent it:
   tone-mapping; to check, toggle `OutputPass` and re-measure" invites the
   next session to spend ten minutes instead of replanning around it.
 
+## Step 4.6 — Keep a domain-knowledge file, separate from status
+
+Status notes answer *where are we*. They are the wrong home for *how does this
+thing actually work*, and mixing the two loses the second kind: it gets buried
+in a round's narrative, and the next session — reading for status — skims past
+it and pays to rediscover it.
+
+So keep a second durable file, in the repo, for **facts about the system being
+built**: engine and library behaviour that surprised you, conventions the code
+depends on but does not state, measurement techniques that work and the obvious
+ones that don't, and things that look like bugs but are deliberate.
+
+This is not bookkeeping. In one project the same handful of facts — that a sky
+dome's scale parameter was a diameter, that materials skip tone mapping when
+rendering to a target, that a readback returns all zeros without
+`preserveDrawingBuffer` — were each worked out more than once, in separate
+rounds, because the only place they had been written was a round summary.
+
+Rules that make it worth reading:
+
+- **State how each fact was verified**, in the entry. Untested mechanisms must
+  be labelled untested in the same sentence (Step 4.5) or they harden into
+  planning assumptions.
+- **Record the tell**, not just the fact — "the symptom is every band reporting
+  100% clipped-black" is what lets someone recognise it next time.
+- **Include the deliberate non-bugs.** A critic or a builder that "fixes" an
+  intentional feature costs a round, and this is the cheapest place to prevent
+  it.
+- **Delete entries that turn out wrong.** A stale entry is worse than none,
+  because it carries the authority of having been written down.
+- Point critics and builders at it in their briefs, so they inherit the
+  knowledge instead of rebuilding it.
+
 ## Step 5 — Keep a live progress record
 
 Two layers, both cheap:
 
 - A short, durable note in the repo (what changed, why, current status per
   piece, anything interrupted or blocked) — this is what makes "restart"
-  possible days later in a fresh session.
+  possible days later in a fresh session. Keep it distinct from the
+  domain-knowledge file (Step 4.6): status ages and gets superseded, knowledge
+  accumulates.
 - Optionally, a visual progress page (e.g. an Artifact) updated as rounds land,
   if the work is visual — good for the user, not load-bearing for resumption
   (the repo note and git history are).

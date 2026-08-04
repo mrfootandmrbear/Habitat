@@ -672,6 +672,22 @@ evidence than either alone.
 transparency belong to the water piece and the terrain skirt, which is now the
 top-ranked item.
 
+### Engine knowledge now has a home (2026-08-04)
+
+Owner observation, watching this round's reasoning: agents keep rediscovering
+how the renderer works. True, and measurable — three separate facts were worked
+out twice in this project because the only place they had been written was a
+round summary, which the next session skims for status.
+
+[RENDER_NOTES.md](RENDER_NOTES.md) is now the durable home for that: engine and
+library behaviour, conventions the code depends on but does not state,
+measurement techniques that work and the obvious ones that don't, and things
+that look like bugs but are deliberate. Every entry says how it was verified.
+
+The gauntlet-loop skill gained a Step 4.6 requiring it, so this does not depend
+on anyone remembering. Status and knowledge are deliberately separate files:
+status ages and gets superseded, knowledge accumulates.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
