@@ -306,6 +306,72 @@ now be tuned without dragging exposure with it.
 in the Round 1 critique section. It is shared foundation, not a piece — fix
 and confirm it before re-critiquing anything, per the skill's Step 2.
 
+## Resolved: the double-tonemapping hypothesis was wrong (2026-08-04, post-merge)
+
+Tested on resume, as the Round 1 section said to. **There is no double
+tone-mapping, and the washout it was invented to explain no longer
+reproduces.** Both halves checked:
+
+- **Mechanism — disproven by engine source.** three r185 only applies tone
+  mapping in a material's shader when rendering *directly to screen*:
+  `WebGLPrograms.js:180` gates it on `currentRenderTarget === null`.
+  `RenderPass` renders into the composer's target, so materials there emit
+  raw linear radiance with `NoToneMapping`, and `OutputPass` applies ACES
+  exactly once. The postFx path and the direct path each tonemap once.
+- **Symptom — no longer present.** Measured with the new harness at
+  1280x800: `quality=high` sky is rgb(181.4, 183.3, 184.2) with
+  **0.00% clipped-white and 0.00% clipped-black**; `quality=low` is
+  rgb(181.3, 183.2, 184.2), also 0%. Round 2's "up to 86% of sky pixels
+  hard-clipped" and "washes out to a pale white/blue haze" do not
+  reproduce.
+
+Why it looked real at the time: the observation (01:21) predates Phase 0
+(02:27), which is exactly the fix. Phase 0's radiance calibration brought
+the dome from `rawView=4.655` into range (`scale=0.0752` → `view=0.350`),
+so the clipping that motivated the hypothesis was already gone by the time
+the two branches landed together. The hypothesis was reasonable from where
+that session stood; it was just never tested before being written down.
+`SSAOPass` and `EffectComposer` were also checked and both use
+`HalfFloatType`, so there is no hidden LDR clamp in the chain either.
+
+### The real remaining sky defect (new, replaces the tonemapping item)
+
+postFx is *working* — `high` differs from `low` in mid/ground bands
+(rgb 129/132/134 vs 112/113/112) where SSAO and bloom act. The sky is
+where the failure actually is, and it is **desaturation, not clipping**:
+
+| source | sky blue/red ratio |
+|---|---|
+| rig's own calibration probe | **1.59** (blue) |
+| rendered frame, both tiers | **1.015** (achromatic grey) |
+
+`SKY_RAYLEIGH` is 2.6 and exposure is 1.0, so the atmosphere model is not
+crushed — Phase 0 restored those. The gap is *what the probe measures*: it
+renders the dome into an offscreen render target, where per the mechanism
+above materials get `NoToneMapping`. So the rig calibrates a pre-tonemap
+radiance the viewer never sees, then ACES desaturates the real frame toward
+white. **The calibration optimises the wrong signal.**
+
+That is a shared-foundation fix (it lives in `lightingRig.ts`), so per the
+skill's Step 2 it still comes before any per-piece fan-out. Rubric points 6
+and 11 cannot pass until it lands.
+
+### Measurement harness — now in the repo (`scripts/shot.ts`)
+
+Round 2's harness was kept in a session scratchpad and was lost with that
+session. Rebuilt and committed this time: `npm run shot` drives the real app
+in headless Chrome via `playwright-core` against the *system* Chrome (no
+bundled-browser download), shoots each quality tier, and reports mean RGB,
+clipped-white % and clipped-black % per band. Rubric item 10 is a number
+again.
+
+One trap worth keeping written down: the obvious implementation,
+`gl.readPixels` on the live canvas, returns **all zeros**. The renderer is
+created without `preserveDrawingBuffer`, so the backbuffer is cleared once
+the frame composites. The tell is every band reporting 100% clipped-black.
+The harness screenshots first and decodes that PNG in-page instead.
+Captured PNGs are gitignored — regenerate with `npm run shot`.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.

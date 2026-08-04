@@ -3,3 +3,6 @@ dist
 .DS_Store
 *.local
 .claude/worktrees/
+
+# Gauntlet Loop capture output — regenerate with `npm run shot`, not worth versioning
+docs/evidence/shots/
