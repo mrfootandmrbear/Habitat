@@ -96,6 +96,60 @@ the reconciliation I'd propose — bucket in phase one, tide in phase two — bu
 §2 is owner-authored and load-bearing for the sand-castle analogy, so it is
 left standing and the conflict is recorded here. Worth an owner ruling.
 
+### 2.4 What the player is trying to do (owner, 2026-08-04)
+
+**Build a habitable world with a diverse, well-supported ecosystem — land,
+sea, and air — by experimenting. The reward is emergent surprise: plants and
+animals colonise and evolve, if the habitat is right.**
+
+Four things in that sentence are load-bearing, and two of them are new.
+
+**The goal is habitability, not arrangement.** The player never places an
+ecosystem (N-001). They make somewhere *liveable* and find out what lives
+there. This is §5's "arrival, not introduction" stated as an intention rather
+than a mechanism: the player's verb is making conditions, and diversity is the
+thing that answers.
+
+**The method is experimentation.** Change a force, run time, compare. §4's
+loop and §6's prediction habit are not features attached to this goal — they
+*are* the goal's method. "Same castle, more rain" is the experiment.
+
+**The reward is emergent surprise.** Not a score, not a completion state. The
+payoff is the world doing something the player did not place and did not fully
+predict, but that makes sense in hindsight (§2.2's contract — a surprise must
+resolve into *"oh — the ground was already saturated"*, never into arbitrary).
+
+**Land, sea, and air — new scope.** The thesis has been terrestrial. §2 says
+the engine is heightfield hydrology and that reefs are "a property of the
+thesis, not a roadmap item." Naming sea and air as first-class parts of the
+creative goal changes that: aquatic and aerial habitat become things the
+player is *supposed* to be able to build for. This is a scope expansion, not
+a restatement, and nothing in the build serves it yet.
+
+**Evolution — new, and the largest claim here.** Today's biology is
+*colonisation*: arrival gated on habitat suitability (C-007 Locked, the
+limiting-factor / HSI spine). Evolution is a different mechanism — lineages
+*changing* in response to the world rather than merely arriving in it or
+failing to. Nothing in the register covers it. There is unlanded work on the
+branch `claude/evolution-simulation-phases-woku8v` (§4.40 L5 guild
+competition and related) that is the nearest existing foothold.
+
+#### Tensions this creates, flagged not resolved
+
+- **"Diverse and well-supported" vs. G-001 / N-002 (no score, thriving is
+  observed and not tallied).** If diversity is what the player is aiming at,
+  something must make it legible — and the moment it becomes a number on
+  screen it is a score, which the register rejects. Legible without being
+  tallied is the needle to thread.
+- **"Creative goal" vs. G-001 (sandbox has no win condition).** These are
+  compatible only if the goal is *player-set*, never game-set: Habitat must
+  not declare the world finished or sufficient. Worth stating explicitly
+  before anything builds toward it.
+- **Evolution vs. D-001 / N-004 (surprises must be informative, never
+  arbitrary).** Evolution is the easiest place in this design to produce
+  changes a player cannot trace back to a cause. Whatever form it takes has
+  to survive §2.2's contract.
+
 ---
 
 ## 3. What "restoration" means here
