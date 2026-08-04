@@ -6,3 +6,20 @@ dist
 
 # Gauntlet Loop capture output — regenerate with `npm run shot`, not worth versioning
 docs/evidence/shots/
+
+# Gauntlet Loop reference images — third-party and deliberately NOT committed.
+# This repo is public, and these are other people's work: watermarked stock
+# photography (Alamy, Getty), press screenshots (TheGamer), and copyrighted
+# game art (Godus / 22cans). Using them locally as a quality bar is ordinary
+# reference use; republishing them from a public repo is not, and git history
+# makes that hard to walk back.
+#
+# Nothing is lost by ignoring them: critics read the files off disk, and
+# docs/reference/OBSERVATIONS.md — which IS committed — records what each image
+# shows and what the owner ruled it governs. That prose is the durable artifact.
+# See docs/reference/README.md for how to restore them in a fresh clone.
+docs/reference/*.png
+docs/reference/*.jpg
+docs/reference/*.jpeg
+docs/reference/*.webp
+docs/reference/*.avif

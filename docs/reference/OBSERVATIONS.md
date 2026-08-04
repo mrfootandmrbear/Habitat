@@ -50,28 +50,86 @@ Owner-supplied as the shape authority: *"spiritual successors to RCT3."*
 - **Vegetation:** several distinct species silhouettes (palms, conifers,
   broadleaf, low shrubs, flowering clumps) in irregular clusters.
 
-### The four conversation-attached references (not yet on disk — see below)
+### The stylized set — `godus-*` (owner-supplied, on disk 2026-08-04)
 
-Described here so a critic has *something* concrete until the files land.
+Godus is the closest existing execution of Habitat's seed idea (THESIS §1).
+**Everything in this set governs colour, water and vegetation — none of it
+governs shape.** All four show terracing; ignore it.
 
-1. **Painterly stylized island (top-down).** Layered ochre/rust cliff strata,
-   saturated yellow-green meadow, deep conifers, turquoise shallows against
-   near-black deep water. The strongest example of **biome readability** —
-   every zone is a different hue, not a different shade. Frame is ~100% world;
-   no sky at all.
-2. **Godus.** Terraced contour steps (**shape — does not govern**), olive-green
-   grass, pale sand shore, vivid turquoise pools and sea. Water is transparent
-   over pale sand. Palms and rounded shrubs, clustered irregularly.
-3. **Godus, wider shot.** Saturated yellow-green hills, ochre-red rock uplands,
-   pale sand beach, turquoise sea. Small strip of light blue sky at top.
-4. **Stylized island map (top-down).** The clearest **water transparency**
-   example: pale turquoise shallows shading to teal deep, with the submerged
-   landform plainly visible through the water. Distinct biome patches —
-   yellow-green, olive, tan, brown upland.
+- **`godus-biome-cliffs.webp`** — the strongest single image for **biome
+  readability**. Reads as five unmistakably different materials in one frame:
+  ochre-rust cliff, pale cream rock shelf, saturated yellow-green meadow, dark
+  conifer stand, pale sand shore. Each zone is a different *hue*, not a
+  different brightness of the same hue. Note also the water: pale turquoise
+  shallow → mid cyan → deep navy, with the drowned landform plainly visible
+  through the shallow band.
+- **`godus-island-topdown.webp`** — the clearest **water transparency** case,
+  and the frame is ~100% world with no sky at all. The submerged shelf reads as
+  *shape* through the water, and — the important part for the terrain skirt —
+  the depth bands are irregular and follow the drowned coastline everywhere.
+  Nothing is straight.
+- **`godus-terraced-lagoon.jpg`** — vivid turquoise pools against olive-green
+  grass and pale sand. Best example of **shallow water being the most saturated
+  thing in frame**, which is the exact point the C0 critic scored as failing.
+- **`godus-wide-island.jpg`** — saturated yellow-green hills, ochre-red rock
+  upland, pale beach, turquoise sea, with a thin band of light blue sky. Useful
+  as a whole-composition reference.
 
-### Cold-island aerial photograph (owner-supplied 2026-08-04, not yet on disk)
+### The natural set — `natural-*` (owner-supplied, on disk 2026-08-04)
 
-A real aerial photo of a snow-covered polar island group. Owner's words:
+Owner framing: *"natural images of islands."* These are photographs, so they
+are **not** a style target — Habitat is stylized, not photoreal. What they
+establish is what the stylization must stay *true to*: how real water actually
+bands by depth, and how a coastline actually reads from above.
+
+- **`natural-palau-aerial-wide.jpg`**, **`natural-palau-aerial-close.jpg`** —
+  aerial reef-and-island. The single best answer to "what should the shelf
+  look like": shallow reef is bright saturated turquoise, deep water is
+  saturated navy, and the boundary is a ragged organic edge following
+  bathymetry. Submerged reef structure is legible through the water for a long
+  way out, not just at the shore.
+- **`natural-barrier-reef-aerial.jpg`** — pure bathymetry study. Every value
+  from pale cyan to deep blue, all of it chromatic, boundaries entirely
+  irregular.
+- **`natural-antarctic-king-george.webp`** — the cold-island ruling. Owner:
+  *"this is how islands look when cold, the water seems to be pretty similar to
+  tropical look just with more white."* Water keeps the full saturated
+  turquoise-to-navy ramp; the difference from tropical is **white snow, not
+  grey desaturation**. Habitat accumulates snow in-sim, so this rules directly
+  on what a cold biome should look like.
+- **`natural-canada-forest-islands.webp`** — temperate/boreal analogue: dense
+  dark conifer, pale grey rock shore, deep blue-green water. The vegetation
+  here is *clustered to the landform*, thick on top and thinning at the rock
+  edge — relevant to vegetation placement, not just species mix.
+- **`natural-mauritius-lagoon.webp`** — the pale-sand shoreline band that bar
+  v2 point 8 asks for, clearly visible as a distinct bright ring between beach
+  and turquoise lagoon.
+- **`natural-seychelles-boulders.jpg`** — smooth rounded granite against clear
+  shallow water. Corroborates the Planet Coaster shape ruling from nature:
+  landforms are smooth and rounded, never stepped.
+- **`natural-rock-islet-clear-shallows.jpg`** — small islet with vegetation
+  capping rock, and clear water showing the submerged base.
+- **`natural-split-view-lagoon-reef.jpg`**, **`natural-split-view-reef-dusk.jpg`**
+  — half-above/half-below waterline shots. These are the literal illustration
+  of the owner's *"transparent to see the underwater world"* requirement: what
+  is under the surface is a whole populated world, not a tint.
+
+### Licensing — why these files are not committed
+
+These are third-party images: watermarked stock photography (Alamy, Getty),
+press screenshots (TheGamer), and copyrighted game art (Godus / 22cans). This
+repo is **public**, so they are gitignored — using them locally as a quality
+bar is ordinary reference use, republishing them from a public repo is not, and
+git history makes that hard to walk back.
+
+Nothing about the workflow depends on committing them. Critics read the files
+off disk; this file records what each one shows and what it governs, and *this
+file* is what survives in the repo and in a fresh clone.
+
+### The cold-island ruling — `natural-antarctic-king-george.webp`
+
+Called out separately from the list above because it is a *ruling*, not just a
+picture. Owner's words:
 *"this is how islands look when cold, the water seems to be pretty similar to
 tropical look just with more white."*
 
@@ -100,20 +158,28 @@ Phase C section of `../VISUAL_UPGRADE_NOTE.md`): that shallow water must be the
 *most* saturated water in frame rather than the least, and that the shelf-to-deep
 transition must follow bathymetry rather than trace a rectangle.
 
-## Getting the four attachments onto disk
+## Which references go to which critic
 
-They arrived as chat attachments, which live in the conversation, not the
-filesystem — and **a subagent critic cannot see conversation attachments**, only
-files. Until they are saved here, critics score piece 2–5 against the written
-descriptions above plus bar v2, which is weaker than a side-by-side.
+A critic shown fifteen images grades against an average of them. Each piece's
+critic gets only the ones that bear on its piece, plus this file:
 
-To fix, save each image into this folder, e.g.:
+| piece | references to attach |
+|---|---|
+| terrain skirt / bathymetry | `natural-palau-aerial-*`, `natural-barrier-reef-aerial`, `godus-island-topdown` |
+| water colour & transparency | `godus-terraced-lagoon`, `natural-split-view-*`, `natural-mauritius-lagoon`, `natural-antarctic-king-george` |
+| palette & biome readability | `godus-biome-cliffs`, `godus-wide-island`, `natural-canada-forest-islands` |
+| terrain shape / de-facet | `planet-coaster-terrain`, `natural-seychelles-boulders` — **and the anti-terracing guard in the brief** |
+| vegetation variety & clustering | `godus-biome-cliffs`, `natural-canada-forest-islands`, `natural-rock-islet-clear-shallows` |
+| camera framing | `godus-island-topdown`, `godus-wide-island`, `planet-coaster-terrain` |
 
-    docs/reference/godus-terraces.png
-    docs/reference/godus-wide.png
-    docs/reference/painterly-island.png
-    docs/reference/stylized-island-map.png
+Every brief must carry the shape ruling, because two thirds of the stylized set
+shows terracing and a critic that infers the bar from the images alone will ask
+for it. A previous critic on this project did exactly that, and it cost a round.
 
-Then add a one-line note per image here saying *why* it was picked. Per the
-folder README, that note is worth more than the image alone — it tells a critic
-what to look at instead of leaving it to guess.
+## In a fresh clone the images will be missing
+
+They are gitignored (see above), so a new checkout has this file but no
+pictures. That is the intended trade. If a round needs the real side-by-side
+again, ask the owner to re-supply them into this folder under the same
+filenames — the names in the table above are the contract, and nothing else
+needs to change.

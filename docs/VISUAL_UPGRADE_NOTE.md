@@ -519,12 +519,23 @@ Summary:
   enough to read the submerged landform through it*, not merely depth-banded on
   its surface. Bar v2 point 6 covers banding; it did not cover see-through.
 
-**Caveat that limits this round's bar:** four of the five references arrived as
-chat attachments, which do not exist on the filesystem, and **a subagent critic
-cannot see conversation attachments**. Until they are saved into
-`docs/reference/`, per-piece critics grade against the written descriptions in
-OBSERVATIONS.md plus bar v2 — better than the old prose-only bar, still short of
-a true side-by-side.
+**Resolved same session: the bar is now real reference artifacts.** The owner
+supplied fifteen images into `docs/reference/` — a stylized `godus-*` set and a
+`natural-*` set of island/reef photography. Every one was viewed and given a
+per-image note in OBSERVATIONS.md saying what it shows and what it governs, plus
+a table assigning specific images to specific piece critics (a critic shown
+fifteen images grades against their average).
+
+The image files themselves are **gitignored**. They are third-party — watermarked
+Alamy/Getty stock, a TheGamer press screenshot, Godus game art — and this repo is
+public, so redistributing them from it is a different thing from using them as a
+local quality bar. Owner confirmed the intent is reference only, not reproduction.
+Critics read them off disk; OBSERVATIONS.md is what survives in a fresh clone.
+
+The owner's *"natural images of islands"* set carries a ruling of its own worth
+stating plainly: they are **not** a photoreal style target. Habitat is stylized.
+What they fix is what the stylization has to stay true to — how water actually
+bands by depth, and how a coastline actually reads from above.
 
 ### The grey sky: hypothesis tested, only *partly* confirmed
 

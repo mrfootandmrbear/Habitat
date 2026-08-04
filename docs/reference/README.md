@@ -28,3 +28,18 @@ the references relevant to that piece.
 A short note on *why* you picked an image ("the way wet sand darkens at the
 waterline", "this cloud shading") is worth more than the image alone — it
 tells a critic what to look at instead of leaving it to guess.
+
+## Status (2026-08-04)
+
+**[OBSERVATIONS.md](OBSERVATIONS.md) is the file to read**, not this one. It
+records every reference on disk, what each one shows, what the owner ruled they
+govern (and what they explicitly do *not* — terrain shape), and which images go
+to which piece's critic.
+
+**The image files are gitignored on purpose.** They are third-party — watermarked
+stock photography, a press screenshot, and copyrighted game art — and this repo
+is public. Using them locally as a quality bar is ordinary reference use;
+republishing them from a public repo is not. So a fresh clone gets
+OBSERVATIONS.md and no pictures. If a round needs a real side-by-side again, ask
+the owner to re-supply them under the filenames listed in OBSERVATIONS.md — those
+names are the contract the critic briefs are written against.

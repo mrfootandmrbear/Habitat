@@ -7,9 +7,22 @@
     "rubric": "docs/VISUAL_UPGRADE_NOTE.md \u2014 'The bar, v2'",
     "references": "docs/reference/OBSERVATIONS.md",
     "onDisk": [
-      "docs/reference/planet-coaster-terrain.png"
+      "godus-biome-cliffs.webp",
+      "godus-island-topdown.webp",
+      "godus-terraced-lagoon.jpg",
+      "godus-wide-island.jpg",
+      "natural-antarctic-king-george.webp",
+      "natural-barrier-reef-aerial.jpg",
+      "natural-canada-forest-islands.webp",
+      "natural-mauritius-lagoon.webp",
+      "natural-palau-aerial-close.jpg",
+      "natural-palau-aerial-wide.jpg",
+      "natural-rock-islet-clear-shallows.jpg",
+      "natural-seychelles-boulders.jpg",
+      "natural-split-view-lagoon-reef.jpg",
+      "natural-split-view-reef-dusk.jpg",
+      "planet-coaster-terrain.png"
     ],
-    "missing": "5 owner references arrived as chat attachments (4 stylized + 1 cold-island aerial photo); subagent critics cannot see those. Until saved into docs/reference/, critics grade against OBSERVATIONS.md prose + bar v2 + planet-coaster-terrain.png.",
     "governs": [
       "palette & biome readability",
       "water look & transparency",
@@ -18,7 +31,10 @@
     ],
     "doesNotGovern": [
       "terrain shape \u2014 owner ruled 'still smooth' 2026-08-04; no terracing"
-    ]
+    ],
+    "referencesGitignored": "Third-party (Alamy/Getty stock, TheGamer press shot, Godus game art) and this repo is public, so the image files are gitignored \u2014 reference use, not redistribution. Owner confirmed intent is reference only. A fresh clone has OBSERVATIONS.md but no pictures; re-supply under the same filenames if a round needs the side-by-side again.",
+    "perPieceRouting": "docs/reference/OBSERVATIONS.md \u2014 \"Which references go to which critic\"",
+    "naturalSetIsNotAStyleTarget": "The natural-* photos fix what the stylization must stay true to (how water bands by depth, how a coastline reads from above). Habitat is stylized, not photoreal."
   },
   "baseline": {
     "commit": "4ad65ad",
