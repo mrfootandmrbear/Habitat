@@ -78,6 +78,82 @@ current per-piece status.
 `.claude/skills/gauntlet-loop/`. Say "restart the gauntlet loop" and it
 reconstructs state from this note + git log rather than starting over.
 
+## Round 1 critique (2026-08-04)
+
+Build/tests re-verified green on HEAD (508/508 tests, clean typecheck) before
+critiquing. Fresh screenshots were captured via headless Chromium against the
+dev server — one clean low-angle 3/4 shot with no vegetation (terrain/water/
+sky baseline), one with vegetation biomass seeded directly via a temporary
+debug hook (reverted, never committed) so the vegetation renderer could be
+judged without waiting on real-time simulated growth, plus two closer detail
+shots (shoreline ring, vegetated slope).
+
+Each piece went to a separate fresh-context critic agent with no prior
+context, scored cold against the relevant rubric points only. A canary
+(terrain) ran first per the skill's post-interruption guidance, came back
+sharp and specific rather than a rubber stamp, so the other three were fanned
+out. All four came back **prototype-tier, not production** — a real step
+back from the optimistic "shipped" framing in Round 1 status above:
+
+- **Terrain material — fails the bar.** No visible ambient occlusion in
+  creases (the slope reads as flat directional N·L shading only). Substrate
+  patches (the brown/tan/yellow blotches visible on the cone in every
+  screenshot) have crisp, polygon-straight edges rather than blended
+  material transitions — the critic's read: "looks like an unblended
+  texture-splat/debug layer stamped onto the base terrain color." Shadow
+  contact is gapless but hard-edged, not soft. **Biggest gap:** feather/blend
+  the substrate-patch edges (or move to a triplanar/slope-based material
+  blend) instead of the current hard cutoff.
+- **Water/ocean — fails the bar.** Reads as a muddy, non-reflective
+  brown-gray plane, not blue — no visible sky reflection, no specular glint,
+  hard shoreline cutoff with zero foam. Likely cause (source-verified, not
+  just guessed): `OceanMesh`'s `uOpacity` is only 0.55 and the seafloor
+  terrain underneath is dark and warm-toned, so at that opacity the seafloor
+  color dominates the alpha blend instead of the shader's actual blue
+  `uBaseColor`/sky-reflection math. The shader itself does implement
+  reflection + Fresnel + specular sparkle (confirmed by reading
+  `OceanMesh.ts`) — it just isn't winning the blend against what's under it.
+  **Biggest gap:** raise opacity and/or darken-mask the seafloor under the
+  ocean plane so the water's own color and reflection actually read.
+- **Sky/atmosphere — partially fails, one finding downgraded on
+  verification.** Gradient is smooth (no banding/seam) and the palette is
+  coherent with water/terrain. Clouds have soft edges but no internal
+  volumetric shading. The critic reported no sun disc or glow visible in any
+  frame — **verified against source**: `Sky.js`'s sun disc uses the real
+  astronomical angular diameter (~0.5°), so it is only visible within a
+  fraction of a degree of dead-on camera aim; my screenshots' orbit angles
+  almost certainly just never framed it. Treating "no sun visible" as
+  **unconfirmed** (a likely artifact of ad hoc camera framing, not a proven
+  defect) pending a shot deliberately aimed at azimuth 205° / elevation 38°.
+  **Biggest gap (of the confirmed findings):** clouds need internal
+  light/shadow shading to read as volumetric rather than flat soft blobs.
+- **Vegetation & grounding — fails the bar.** Grass instances read as an
+  obvious grid of near-identical cones, not individual plants. **Source-
+  confirmed root cause:** `OccupantMesh.ts` jitters per-instance scale and
+  rotation (`hash01(x, z, …)`, lines ~389–393) but places every instance at
+  the exact grid-cell center (`this.dummy.position.set(ox + x * cellW, y, oz
+  + z * cellW)`, no sub-cell offset) — so the underlying placement is
+  perfectly regular no matter how much scale/rotation varies, and at the
+  near-full-coverage density used for this test it reads as visible rows.
+  Contact shadowing under individual plants is weak-to-absent. **Biggest
+  gap:** add a small deterministic sub-cell position jitter (same `hash01`
+  pattern already used for scale/rotation) so instances stop sitting on a
+  perfect lattice.
+
+**Caveat on vegetation testing methodology:** headless real-time playback
+couldn't grow vegetation naturally in reasonable wall-clock time (even ~24
+sim-days under heavy rain produced 0% cover — succession is slower than that
+in this model), so biomass was seeded directly for rendering verification
+only, at a denser and more uniform coverage than real gameplay would produce.
+The grid-alignment defect itself is real and density-independent, but take
+the *density/pattern* shown in the screenshots with that grain of salt.
+
+Net: none of the four Round 1 pieces clear the bar yet. This is useful
+signal, not a setback — the critique step did its job by catching gaps that
+"looks shipped in the diff" didn't. Next step is a Round 2 builder pass
+per piece against the four concrete, source-verified gaps above, then
+re-critique.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
