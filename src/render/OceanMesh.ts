@@ -134,7 +134,7 @@ void main() {
   // standard box distance, so it is 0 everywhere inside and grows smoothly
   // outward with rounded rather than mitred corners.
   vec2 outsideXZ = abs(vWorldPos.xz) - uWorldSize * 0.5;
-  float outside = length(max(outsideXZ, 0.0));
+  float outside = seabedOutside(vWorldPos.xz, length(max(outsideXZ, 0.0)));
 
   // Continue the seabed past the map footprint. This MUST be the same function
   // TerrainMesh's skirt geometry uses, which is why it lives in seabed.ts and

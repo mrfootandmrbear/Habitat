@@ -19,7 +19,7 @@ import {
   updateFieldTexture,
   FIELD_SAMPLE_GLSL,
 } from "./fieldTexture";
-import { SKIRT_REACH, seabedDrop } from "./seabed";
+import { SKIRT_REACH, seabedDrop, seabedOutside } from "./seabed";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET_OVERLAY = new THREE.Color(0x4a5c3a);
@@ -145,7 +145,10 @@ function buildSkirtGeometry(worldSize: number): THREE.BufferGeometry {
 
     const dx = Math.abs(x) - half;
     const dz = Math.abs(z) - half;
-    const outside = Math.hypot(Math.max(dx, 0), Math.max(dz, 0));
+    // Distance past the wandering shelf break, not past the grid boundary —
+    // see seabed.ts. Zero across the flat shelf, so the break is the only
+    // crease and it never runs parallel to the footprint.
+    const outside = seabedOutside(x, z, Math.hypot(Math.max(dx, 0), Math.max(dz, 0)));
     const inside = Math.max(-Math.max(dx, dz), 0);
 
     // Shared with the ocean shader so colour and geometry cannot disagree —

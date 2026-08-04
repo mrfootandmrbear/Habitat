@@ -135,8 +135,8 @@
         7,
         8
       ],
-      "status": "done-awaiting-critic",
-      "round": 1,
+      "status": "round-2-done-awaiting-recritique",
+      "round": 2,
       "note": "Seabed skirt built as GEOMETRY (TerrainMesh.buildSkirtGeometry), reusing the terrain's own material with clamped edge UVs so its colour cannot drift from the terrain edge it continues. Shape shared with the ocean shader via src/render/seabed.ts.",
       "landed": [
         "skirt carries the seabed SKIRT_REACH=60 units past the grid on a warped slope",
@@ -145,7 +145,22 @@
         "open-sea-near red channel 0 -> 36.6, resolving the undiagnosed clip from round 2"
       ],
       "bugFoundAndFixed": "First cut wrote the seabed shape TWICE \u2014 geometry in TerrainMesh, depth in OceanMesh \u2014 and they disagreed on screen: water painted shallow turquoise over troughs the geometry had sunk, dark ridges where the ramp expected open blue. Unified into seabed.ts, the same single-source-of-truth fix lightingRig.ts records for sun direction.",
-      "notADefect": "The thin line tracing the grid boundary is ExtentCage \u2014 an intentional sea-level horizon ring (C-015 / 4.2), NOT a crack. Checked before touching it."
+      "notADefect": "The thin line tracing the grid boundary is ExtentCage \u2014 an intentional sea-level horizon ring (C-015 / 4.2), NOT a crack. Checked before touching it.",
+      "critiqueR1": {
+        "pass": [
+          "submerged landform reads as shape through water",
+          "shelf-to-deep is a continuous crack-free slope"
+        ],
+        "fail": [
+          "grid end still identifiable",
+          "depth bands still trace a rectangle"
+        ],
+        "headline": "\"The shelf break is the map footprint, and it is dead straight\" \u2014 measured straight to within 1% over a 420px run, a constant ~10px off the footprint across the whole frame. The fall-off warped fine; the RADIUS AT WHICH IT BEGAN was the grid boundary exactly.",
+        "creditWhereDue": "Critic confirmed the original defect is fixed: \"the map border is no longer the largest colour step in frame... nothing here reads as a tray edge or a plinth any more.\""
+      },
+      "round2Fix": "Shelf break now wanders OUTWARD by a long-wavelength warp (seabed.ts shelfStartWarp, delay 4-26 world units, never zero), so it crosses irregularly instead of paralleling the footprint, and reads as a broad flat shelf breaking on an organic line \u2014 which is what the Palau and barrier-reef aerials actually show. Outward-only by necessity: inside the grid the seabed is simulation state, and warping the water depth there would put colour back out of agreement with terrain.",
+      "alsoResolved": "The critic's unconfirmed suspicion was right and is now confirmed by construction: depth was flat inside the grid and started climbing the instant boxDist went positive, so the footprint carried a gradient crease no amount of fall-off warping could remove. The delay moves that crease onto the wandering break line.",
+      "deferred": "Critic noted the seabed inside the footprint shows blocky per-cell stair-steps while the skirt outside is smooth \u2014 two surface characters meeting at the boundary. That is the C2 de-facet piece, not this one."
     },
     {
       "id": "C4",

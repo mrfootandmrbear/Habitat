@@ -20,6 +20,32 @@
 /** How far past the sim grid the seabed continues, in world units. */
 export const SKIRT_REACH = 60;
 
+/**
+ * The shelf break has to wander, and it can only wander *outward*.
+ *
+ * A cold critic measured the first version's break as straight to within 1%
+ * over a 420px run, sitting a constant ~10px off the map footprint across the
+ * whole frame: the fall-off itself warped nicely, but the *radius at which the
+ * fall-off began* was the grid boundary exactly, so the eye still read a
+ * straight shelf break. Its verdict: "it reads as a shelf break in the wrong
+ * place." In the reference aerials the reef-to-navy boundary is the raggedest
+ * line in the picture and never runs parallel to anything.
+ *
+ * That also removes a gradient kink the critic suspected but could not confirm
+ * from a still, and which is real: depth is flat inside the grid and starts
+ * climbing the instant `boxDist` goes positive, so the footprint carried a
+ * crease in the depth function regardless of how well the fall-off was warped.
+ *
+ * Outward-only, because inward is not ours to move: inside the grid the seabed
+ * is simulation state, and warping the water's depth there would put the colour
+ * back out of agreement with the terrain — the exact bug seabed.ts exists to
+ * prevent. So the drop is *delayed* by a wandering distance that is never zero,
+ * which reads as a broad flat shelf breaking at an irregular line. That is also
+ * what the Palau and barrier-reef references actually show.
+ */
+const SHELF_DELAY_MIN = 4;
+const SHELF_DELAY_RANGE = 22;
+
 /** Metres of depth gained per world unit travelled away from the grid. */
 export const SKIRT_SLOPE = 0.34;
 
@@ -44,7 +70,19 @@ export function skirtWarp(x: number, z: number): number {
   );
 }
 
-/** GLSL twin of `skirtWarp` + `seabedDrop`. Keep identical to the TS above. */
+/**
+ * Lower-frequency companion to `skirtWarp`, driving *where* the shelf breaks
+ * rather than how steeply it falls. Deliberately long-wavelength (~140–220
+ * world units) so the break reads as coastline-scale, not as noise.
+ */
+export function shelfStartWarp(x: number, z: number): number {
+  return (
+    0.6 * Math.sin(x * 0.045 + 1.7) * Math.cos(z * 0.038 - 0.9) +
+    0.4 * Math.sin((x + z) * 0.028 + 2.3)
+  );
+}
+
+/** GLSL twin of the functions above. Keep identical, line for line. */
 export const SEABED_GLSL = /* glsl */ `
 float skirtWarp(vec2 p) {
   return 0.55 * sin(p.x * 0.11) * cos(p.y * 0.13)
@@ -52,11 +90,35 @@ float skirtWarp(vec2 p) {
        + 0.15 * cos(p.x * 0.037 - p.y * 0.041);
 }
 
+float shelfStartWarp(vec2 p) {
+  return 0.6 * sin(p.x * 0.045 + 1.7) * cos(p.y * 0.038 - 0.9)
+       + 0.4 * sin((p.x + p.y) * 0.028 + 2.3);
+}
+
+float seabedOutside(vec2 p, float boxDist) {
+  float delay = ${SHELF_DELAY_MIN.toFixed(4)}
+              + ${SHELF_DELAY_RANGE.toFixed(4)} * clamp(0.5 + 0.5 * shelfStartWarp(p), 0.0, 1.0);
+  return max(boxDist - delay, 0.0);
+}
+
 float seabedDrop(vec2 p, float outside) {
   return outside * ${SKIRT_SLOPE.toFixed(4)}
        * (1.0 + ${SKIRT_WARP_AMOUNT.toFixed(4)} * skirtWarp(p));
 }
 `;
+
+/**
+ * How far past the *shelf break* a point is, given its distance past the grid
+ * boundary. Zero across the whole flat shelf, so depth stays continuous with
+ * the simulated seabed inside the grid and the only crease in the function sits
+ * on the wandering break line.
+ */
+export function seabedOutside(x: number, z: number, boxDist: number): number {
+  const delay =
+    SHELF_DELAY_MIN +
+    SHELF_DELAY_RANGE * Math.min(1, Math.max(0, 0.5 + 0.5 * shelfStartWarp(x, z)));
+  return Math.max(boxDist - delay, 0);
+}
 
 /**
  * Depth gained at `outside` world units past the grid boundary, at world XZ
