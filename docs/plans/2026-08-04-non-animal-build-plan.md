@@ -129,8 +129,50 @@ A1 herbivore / A2 seed disperser) and
 `claude/animal-addition-reconciliation-19zg1l` (separates adaptation from
 acclimation).
 
-**Open question before starting: what is the "foxel" toolchain?** The owner has
-named it as the intended vehicle. It appears exactly once in the repo — a
-passing mention in VISUAL_UPGRADE_NOTE — with no definition, no dependency, and
-no decision entry. It needs defining and reconciling against **T-006** (no
-render-authoritative state) and **T-001** before any animal slice depends on it.
+### The foxel toolchain — answered (owner, 2026-08-04)
+
+Source: [github.com/elliottdehn/foxel](https://github.com/elliottdehn/foxel).
+
+**What it is.** Foxel (FXL) is *"a plain-text language for colored voxel models
+— modeling, rigging, and animation in one ASCII file — designed so AI agents
+can build and iterate on 3D assets with a human in the loop."* Pure Python,
+numpy only. CLI: `render.py` (PNG/APNG previews), `fxl2gltf.py` (exports
+`.glb` — mesh + skeleton + baked animations; IK is sampled and baked because
+glTF has no IK). Ships a Claude agent skill via plugin marketplace.
+
+**How it fits Habitat.** It is an **offline asset pipeline**, not a runtime
+dependency and not a simulation engine — so AGENTS.md's *"do not vendor
+third-party sim engines"* does not bite. Python stays a build-time tool; the
+app keeps loading `.glb`. That also keeps **T-006** clean: Foxel produces
+*render assets only*, and no simulation state ever lives in them.
+
+**The finding that shapes the design.** Foxel has **no morph targets or blend
+shapes**. Variation comes from *parametric Python generators* that emit
+families of related models — vary the parameters, regenerate, get a new `.glb`.
+Worse for blending: marching-cubes output has **no consistent topology across
+parameter values**, so you cannot cheaply build glTF morph targets between two
+generated variants either.
+
+Consequences, and they are good news for C-027:
+
+- **Continuous runtime morphing is off the table.** Nothing blends one animal
+  smoothly into another at runtime.
+- **Discrete variant swap is easy and cheap**, which is *exactly* what C-027
+  already specifies — *"procedural morph + threshold swap"* driven by
+  population trait-mean fields. Foxel supplies a pre-generated ladder of
+  variants per role; the trait-mean field picks which rung renders.
+- **Determinism is unaffected** (T-001): assets are static build output. No
+  runtime generation, no RNG in the render path.
+
+**Open questions before an animal slice depends on it:**
+
+1. **How many rungs per trait axis?** THESIS §2.4's finches want two islands'
+   herbivores to *look* different. Discrete swap delivers that only if the
+   ladder is fine enough to read as variety rather than as a handful of
+   presets. This is a taste call, not a technical one.
+2. **New asset pipeline.** Habitat renders everything procedurally today —
+   there are no `.glb` assets in the repo at all. Adding them brings build
+   size, load timing, and an iPad-Safari budget question (the quality tiers
+   exist precisely because of that constraint).
+3. **Plugin install is an owner action.** `/plugin install foxel@foxel` pulls
+   third-party code; not something to do unprompted.
