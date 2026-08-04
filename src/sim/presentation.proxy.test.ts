@@ -35,7 +35,14 @@ import {
   crustOccupantEncodingDelta,
   binderBiomassRgb,
 } from "../ui/occupantEncoding";
-import { guildFlex, livingVitality, swayAmplitude } from "../ui/occupantSway";
+import {
+  guildFlex,
+  livingVitality,
+  swayAmplitude,
+  swayTilt,
+} from "../ui/occupantSway";
+import { OccupantMesh } from "../render/OccupantMesh";
+import * as THREE from "three";
 import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
 import { notebookChromePresent } from "../ui/notebookChrome";
@@ -601,6 +608,74 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     expect(swayAmplitude(1, guildFlex("herb"), dead)).toBeLessThan(
       swayAmplitude(1, guildFlex("herb"), 1),
     );
+  });
+
+  it("occupant sway holds a steady lean with only gentle flutter, never rocking through vertical (L4 readability fix)", () => {
+    const amplitude = 0.55;
+    const max = swayTilt(amplitude, Math.PI / 2, 0); // sin = +1, peak of the sine
+    const min = swayTilt(amplitude, -Math.PI / 2, 0); // sin = -1, trough of the sine
+    // Always leaning the same way — a windswept plant never swings back
+    // past its own resting lean, let alone through vertical.
+    expect(min).toBeGreaterThan(0);
+    expect(max).toBeCloseTo(amplitude, 5);
+    // Some flutter, but held to a minority of the peak lean.
+    expect(max - min).toBeLessThan(amplitude * 0.7);
+    expect(swayTilt(0, 0, 0)).toBe(0);
+  });
+
+  it("occupant lean is coherent in world space regardless of per-cell yaw (L4 sway-direction fix)", () => {
+    // Regression test: OccupantMesh used to apply the downwind lean with
+    // Object3D.rotateOnAxis *after* setting a per-cell random yaw. That
+    // method rotates about an axis in the object's own (already-yawed)
+    // local space, so the "world-space" wind axis silently got re-rotated
+    // by each cell's own random yaw — every cone leaned a different way
+    // even though the wind is one uniform vector. Fixed by composing the
+    // yaw and lean as quaternions with the lean's axis outermost (fixed in
+    // world space). Every visible instance below must lean the same
+    // horizontal direction, independent of its yaw.
+    const w = 12;
+    const wind = windById("west");
+    const world = new WorldState(new Grid2D(w, w, 1), {
+      windUx: wind.ux,
+      windUz: wind.uz,
+    });
+    world.herbBiomass.fill(config.herbBiomassMax);
+    world.habitatSuitability.fill(1);
+    const mesh = new OccupantMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+
+    const m = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    const up = new THREE.Vector3(0, 1, 0);
+    // Per-guild meshes: only herb is seeded here, and instances are
+    // packed in fill order rather than at grid index z * w + x, so sample the
+    // herb mesh's own instances instead of addressing cells directly. The
+    // assertion is unchanged -- every visible instance must lean the same way.
+    const herb = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("herb"),
+    );
+    expect(herb).toBeDefined();
+    expect(herb!.count).toBeGreaterThan(3);
+    const leanDir = (i: number): THREE.Vector2 => {
+      herb!.getMatrixAt(i, m);
+      m.decompose(pos, quat, scale);
+      const tip = up.clone().applyQuaternion(quat);
+      return new THREE.Vector2(tip.x, tip.z);
+    };
+
+    const sampled = [0, 1, Math.floor(herb!.count / 2), herb!.count - 1];
+    const dirs = sampled.map((i) => leanDir(i));
+    const first = dirs[0]!;
+    expect(first.length()).toBeGreaterThan(0.01);
+    for (const dir of dirs.slice(1)) {
+      expect(dir.length()).toBeGreaterThan(0.01);
+      const cos = dir.dot(first) / (dir.length() * first.length());
+      expect(cos).toBeGreaterThan(0.999);
+    }
   });
 
   it("Simple chrome is leaner than Full so the world keeps real estate (U-001)", () => {

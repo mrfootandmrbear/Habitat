@@ -222,6 +222,11 @@ export class OccupantMesh {
   private readonly leanAxis = new THREE.Vector3();
   private readonly meshes: Record<SwayGuild, THREE.InstancedMesh>;
   private readonly counts: Record<SwayGuild, number>;
+  private readonly upAxis = new THREE.Vector3(0, 1, 0);
+  private readonly yawQuat = new THREE.Quaternion();
+  private readonly leanQuat = new THREE.Quaternion();
+  private readonly restQuat = new THREE.Quaternion();
+  private readonly restEuler = new THREE.Euler();
   /** Wall-clock seconds for the sway sine (observer time — T-006). */
   private swayTimeSec = 0;
 
@@ -398,11 +403,42 @@ export class OccupantMesh {
           scaleY * jitterY,
           scaleXZ * jitterXZ2,
         );
-        this.dummy.rotation.set(restLeanX, yaw, restLeanZ);
+        // Composition order matters, and getting it wrong was the bug this
+        // replaced. The wind lean below must stay on a fixed *world* axis so
+        // every instance leans the same way; Object3D.rotateOnAxis and Euler
+        // composition both rotate in local (post-yaw) space, which silently
+        // re-rotated the lean axis by each instance's own random yaw and made
+        // every cone lean a different direction instead of uniformly downwind.
+        // So the quaternions are composed explicitly, innermost first:
+        //   rest tilt (local, per-instance random - variety, yaw-relative is
+        //   fine because it is random anyway)
+        //   -> yaw (spins the cone's own facets)
+        //   -> wind lean (world axis, outermost, identical for every instance).
+        this.restEuler.set(restLeanX, 0, restLeanZ);
+        this.restQuat.setFromEuler(this.restEuler);
+        this.yawQuat.setFromAxisAngle(this.upAxis, yaw);
         if (tilt !== 0 && windMag > 0) {
-          // Lean downwind: axis = up × windDir in XZ.
+          // Lean downwind: axis = up × windDir in XZ, fixed in world space.
+          // Per-instance variety rides the lean's *magnitude*, never its axis.
+          // Applying the random rest tilt here instead (as a local rotation
+          // composed under the lean) would tilt each instance's axis and
+          // scatter the lean direction by several degrees — the same class of
+          // bug this fix exists to remove, just smaller.
+          const tiltVaried = tilt * (0.86 + hash01(x, z, 4) * 0.28);
           this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
-          this.dummy.rotateOnAxis(this.leanAxis, tilt);
+          this.leanQuat.setFromAxisAngle(this.leanAxis, tiltVaried);
+          this.dummy.quaternion.multiplyQuaternions(
+            this.leanQuat,
+            this.yawQuat,
+          );
+        } else {
+          // Calm: no wind direction to stay coherent with, so the random rest
+          // tilt is free to apply — it is what keeps a still field from
+          // reading as a grid of perfectly vertical cones.
+          this.dummy.quaternion.multiplyQuaternions(
+            this.yawQuat,
+            this.restQuat,
+          );
         }
         this.dummy.updateMatrix();
         const mesh = this.meshes[guild];

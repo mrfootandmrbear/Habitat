@@ -1,0 +1,19 @@
+{
+  "id": "§4.60",
+  "title": "Occupant sway direction correctness",
+  "simLoop": "No sim change — OccupantMesh is still presentation-only (T-006). The downwind lean is now composed as quaternions (yaw first, world-axis lean outermost) instead of Object3D.rotateOnAxis after the yaw, so the lean axis stays fixed in world space regardless of each cell's random facet-spin yaw. swayTilt now holds a lean (70% of peak amplitude) with a minority flutter (30%) riding on top, instead of a symmetric sine through zero.",
+  "gameLoop": "Every visible shoot leans the same horizontal direction under one wind vector — the meadow reads as plants bent by the wind, not as a field of independently animated characters.",
+  "registerIds": [
+    "D-007",
+    "T-006",
+    "C-011"
+  ],
+  "invariantClass": "Write isolation",
+  "tests": [
+    "src/sim/presentation.proxy.test.ts"
+  ],
+  "probes": [],
+  "fields": [],
+  "notebookSeed": "The grass leans one way, the way the wind is blowing.",
+  "tierO": "no owner-only question — corrects L4's own D-007 clip verdict to match the code; owner screenshot was the trigger. Local-slope/erosion-angle lean (vs. the global wind vector) deferred as a plant-diversity-slice candidate."
+}

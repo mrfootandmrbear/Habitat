@@ -53,7 +53,19 @@ export function swayAmplitude(
   return lean;
 }
 
-/** Instantaneous tilt from one sine; phase is stable per cell index. */
+/**
+ * Share of peak amplitude that flutters; the rest is a held lean. A
+ * windswept plant leans steady into the prevailing wind and flutters a
+ * little on top — it does not swing symmetrically through vertical like a
+ * pendulum, which reads as an animated character rather than a forced plant.
+ */
+const FLUTTER_FRACTION = 0.3;
+
+/**
+ * Instantaneous tilt from one sine, biased toward a held downwind lean with
+ * a small flutter riding on top (never crosses back past the lean's own
+ * midpoint, let alone vertical). Phase is stable per cell index.
+ */
 export function swayTilt(
   amplitude: number,
   phase: number,
@@ -61,7 +73,9 @@ export function swayTilt(
   angularFreq = 2.4,
 ): number {
   if (!(amplitude > 0)) return 0;
-  return amplitude * Math.sin(timeSec * angularFreq + phase);
+  const flutter = amplitude * FLUTTER_FRACTION;
+  const lean = amplitude - flutter;
+  return lean + flutter * Math.sin(timeSec * angularFreq + phase);
 }
 
 /** Cell-stable phase from grid index (matches OccupantMesh yaw salt). */
