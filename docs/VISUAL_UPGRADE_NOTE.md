@@ -78,6 +78,90 @@ current per-piece status.
 `.claude/skills/gauntlet-loop/`. Say "restart the gauntlet loop" and it
 reconstructs state from this note + git log rather than starting over.
 
+## Round 2 (2026-08-04)
+
+### The honest verdict on round 1
+
+Round 1's four pieces were salvaged, integrated, typechecked and
+test-green — but **never actually critiqued**. Scored cold against the
+rubric for the first time this round, the integrated result fails it:
+
+| # | rubric point | round 1 result |
+|---|---|---|
+| 4 | water reflects sky | FAIL — inner ocean near-black |
+| 5 | shoreline foam/blend | FAIL — hard blocky cutoff |
+| 6 | sky gradient + sun glow | FAIL — flat near-white wash, no gradient |
+| 10 | no clipped white/black | FAIL — up to 86% of sky pixels hard-clipped |
+
+"Typechecks and passes tests" was never evidence about any of these. The
+lesson is the one the skill already warns about: a piece is not done until
+a critic has looked at its output.
+
+### Measurement harness
+
+Tuning by eye was the bottleneck, so round 2 added one (kept in the
+session scratchpad, not the repo):
+
+- `capture.js` drives the real app in headless chromium (heavy rain, warm,
+  1 week/s) and shoots several camera angles.
+- `analyze.js` decodes those PNGs *inside* chromium — no image library
+  needed on the host — and reports clipped-white %, clipped-black % and
+  mean RGB per region. Rubric item 10 becomes a number.
+- `column.js` prints a vertical pixel profile, which is what finally
+  settled "is that pale band the sky or something else".
+- The rig logs its own calibration in dev, so sky tuning is a ~10s loop
+  instead of a ~4min screenshot loop.
+
+Two findings only came out of measuring, not looking: the baseline sky was
+*already* a flat wash sitting just under the clip point (mean luma 245,
+zero saturation), and the white island in run-forward captures is **snow
+accumulating in-sim**, not overexposure — at step 0 the terrain is a
+correct tan (129,118,91).
+
+### Phase 0 — shared foundation (landed, `2060e6c`)
+
+Per the skill's step 2, the shared foundation was built and committed
+sequentially *before* any fan-out, because every piece depends on it.
+
+three's `Sky` emits raw Preetham radiance far above display range, so ACES
+desaturates it to grey at any exposure — verified still grey at exposure
+0.12. Round 1 had worked around this by crushing `rayleigh` to 0.15 and
+`environmentIntensity` to 0.045, which switches the atmosphere off rather
+than scaling it. `render/lightingRig.ts` now:
+
+- patches a radiance-scale uniform into `Sky` and calibrates it at startup
+  by rendering the dome into an offscreen probe and measuring it, so
+  exposure returns to 1.0 and IBL is meaningful again;
+- anchors that calibration on the camera's own view direction through a
+  narrow cone — the camera looks *down* at the island, so the frame never
+  contains the blue zenith, only the horizon band. Anchoring on the zenith
+  left the visible band at 213,213,213; on a four-azimuth horizon average,
+  218,218,217; a wide cone at the view direction still left it 2x hot;
+- moves the sun off the camera's axis (azimuth 205 → 130). At 205 the
+  camera stared into the mie glare and the sky washed white; at 42 the sun
+  sat behind the camera and the sky went gradientless. The side sun also
+  gives the island cross-lit relief instead of flat frontal light;
+- is the single source of truth for sun direction/colour and sky tones.
+  `WaterMesh` and `OceanMesh` consume it via `setSkyLighting` instead of
+  each carrying their own literal copy — which is precisely what went
+  stale and produced round 1's near-black water.
+
+Water now reads as a lit sea and terrain holds its substrate colour under
+cross-light. The sky no longer clips, but is still short of "coherent
+gradient with sun glow" — that is the sky piece's round 2 job, and it can
+now be tuned without dragging exposure with it.
+
+### Round 2 per-piece status
+
+| piece | status |
+|---|---|
+| phase 0 lighting rig | done, committed, verified (508 tests, build clean) |
+| sky & atmosphere | queued — no gradient/glow yet (rubric 6, 7) |
+| water & shoreline | queued — hard shoreline cutoff, square ocean seam (4, 5) |
+| terrain material | queued — blocky stair-step silhouette, hard-edged patches (1, 2) |
+| vegetation | queued — needs a non-snowed grown world to judge (8, 9) |
+| wildlife | still not started |
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
