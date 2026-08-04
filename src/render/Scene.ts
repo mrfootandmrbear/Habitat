@@ -58,11 +58,24 @@ export function createScene(container: HTMLElement): SceneHandles {
   // the sky exists.
   scene.fog = new THREE.Fog(0xcdd9e2, FOG_NEAR, FOG_FAR);
 
+  // Far plane has to clear the sea plane's far corner, or the sea gets cut off
+  // inside the frustum and the below-horizon sky dome shows through the gap —
+  // which is the exact defect SEA_HORIZON_HALF_EXTENT exists to remove. That
+  // corner sits ~1270 units out, so 2400 leaves room to orbit.
+  //
+  // Near moves 0.1 -> 0.5 in the same breath, deliberately. Depth precision
+  // goes as far/near, and pushing far out 4.8x while leaving near alone would
+  // have made the buffer 4.8x coarser — a live regression risk, because the
+  // shoreline z-fight that showed up as a per-frame flash in playtest is held
+  // off by a tuned polygonOffset in OceanMesh. Moving near by the same factor
+  // keeps the ratio at 4800, marginally *better* than the 5000 that fix was
+  // tuned against, so this change cannot reintroduce it. 0.5 is still far
+  // closer than the camera can orbit.
   const camera = new THREE.PerspectiveCamera(
     50,
     container.clientWidth / Math.max(container.clientHeight, 1),
-    0.1,
-    500,
+    0.5,
+    2400,
   );
   const cameraHome = new THREE.Vector3(32, 28, 36);
   const cameraTarget = new THREE.Vector3(0, 3, 0);

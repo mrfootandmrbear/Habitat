@@ -43,6 +43,8 @@ uniform float uWorldSize;
 uniform float uShallowDepth;
 uniform float uMidDepth;
 uniform float uEdgeFade;
+uniform float uDetailNear;
+uniform float uDetailFar;
 
 float hash21(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -90,10 +92,20 @@ vec2 rippleTilt(vec2 p, float t) {
 void main() {
   vec2 p = vWorldPos.xz;
 
+  // The plane now runs out to the visible horizon (see SEA_HORIZON_HALF_EXTENT),
+  // which is hundreds of units past the sim grid. Two things break out there:
+  // the ripple fbm's fract() math loses precision at large coordinates and
+  // shimmers, and both ripples and sun sparkle are far below a pixel anyway,
+  // so they alias into crawling noise. Fade the detail out with view distance
+  // and let the far sea settle into a clean flat band — which is also how the
+  // references read: saturated, calm open water, not textured to the horizon.
+  float viewDist = length(cameraPosition - vWorldPos);
+  float detail = 1.0 - smoothstep(uDetailNear, uDetailFar, viewDist);
+
   // Fragment-only normal perturbation — the plane's vertex Y is left
   // untouched (no vertex displacement) so the depthWrite/polygonOffset
   // shoreline z-fight fix noted below still applies exactly as tuned.
-  vec2 tilt = rippleTilt(p, uTime);
+  vec2 tilt = rippleTilt(p, uTime) * detail;
   vec3 n = normalize(vec3(0.0, 1.0, 0.0) + vec3(tilt.x, 0.0, tilt.y) * 0.5);
 
   vec3 viewDir = normalize(cameraPosition - vWorldPos);
@@ -130,14 +142,20 @@ void main() {
   waterColor = mix(waterColor, uDeepColor, deepT);
 
   float ndl = 0.35 + 0.65 * max(dot(n, uSunDirection), 0.0);
-  vec3 col = mix(waterColor * ndl, skyColor, fresnel * 0.65);
+  // Fresnel runs to 1 at the grazing angles that fill the top of frame, so a
+  // full-strength sky mirror out there turns the whole far sea into a pale
+  // band of sky colour — trading the old grey sky dome for an equally grey
+  // sea. The references keep deep water saturated all the way to the frame
+  // edge, so the sky mirror is damped with the same distance term.
+  float skyMix = fresnel * 0.65 * mix(0.35, 1.0, detail);
+  vec3 col = mix(waterColor * ndl, skyColor, skyMix);
 
   // Sun specular sparkle, softly compressed so it never hard-clips to a
   // flat white disc (bar item 10).
   vec3 halfDir = normalize(viewDir + uSunDirection);
   float spec = pow(max(dot(n, halfDir), 0.0), 140.0);
   float sparkle = 0.5 + 0.9 * valueNoise(p * 9.0 + uTime * 0.6);
-  spec *= sparkle * (0.3 + 0.7 * fresnel);
+  spec *= sparkle * (0.3 + 0.7 * fresnel) * detail;
   vec3 specCol = uSunColor * spec * 1.4;
   specCol = specCol / (1.0 + specCol);
   col += specCol;
@@ -163,6 +181,33 @@ void main() {
 `;
 
 /**
+ * Half-width of the sea plane, in world units — far enough that the sea runs
+ * past the horizon instead of stopping inside the camera frustum.
+ *
+ * It used to be `worldSize * 1.35` (half-width 32.4) while the camera sits at
+ * a horizontal radius of ~48, i.e. **the camera was outside the sea plane
+ * entirely**. That single fact was behind two separately-tracked defects:
+ *
+ *  - the "square ocean seam" — the plane's own straight edge, visible as a
+ *    rectangle cutting across open water; and
+ *  - the flat grey band filling the top ~25% of frame, which every previous
+ *    round read as a *sky* defect and tried to fix by tuning the atmosphere.
+ *    It is not sky-as-the-player-would-know-it: the camera pitches down 27.4°
+ *    with a 50° vertical FOV, so the top of frame sits ~2.4° *below*
+ *    horizontal, and what shows past the sea plane's edge is the Preetham
+ *    dome's below-horizon region. Measured directly with the rig's own probe:
+ *    that region is b/r **1.05** in linear space — it is nearly achromatic
+ *    before tone mapping ever touches it, so no amount of rayleigh, exposure
+ *    or calibration tuning could have made it blue.
+ *
+ * Sized from the geometry rather than guessed: the top-of-frame ray leaves the
+ * camera (height 28) at 2.4° below horizontal and so meets sea level at
+ * 28 / tan(2.4°) ≈ 670 units. 900 clears that with margin for orbiting the
+ * camera, and it is two triangles either way.
+ */
+export const SEA_HORIZON_HALF_EXTENT = 900;
+
+/**
  * Visual ocean plane at sea level (observer only — T-006).
  * C-015: shoreline reads against this plane without an inspector.
  */
@@ -182,7 +227,12 @@ export class OceanMesh implements SkyLightingConsumer {
     gridWidth = config.gridSize,
     gridHeight = config.gridSize,
   ) {
-    const geo = new THREE.PlaneGeometry(worldSize * 1.35, worldSize * 1.35);
+    // `worldSize` stays the *grid* size — it is what the depth-banding shader
+    // maps world XZ onto — while the plane's own extent is independent of it.
+    const geo = new THREE.PlaneGeometry(
+      SEA_HORIZON_HALF_EXTENT * 2,
+      SEA_HORIZON_HALF_EXTENT * 2,
+    );
     geo.rotateX(-Math.PI / 2);
     this.elevationTex = createFieldTexture(gridWidth, gridHeight);
     this.uniforms = {
@@ -203,6 +253,11 @@ export class OceanMesh implements SkyLightingConsumer {
       // Fraction of the grid's half-width over which the plane fades from the
       // sampled seafloor to open deep water, hiding the grid's square edge.
       uEdgeFade: { value: 0.08 },
+      // View distances over which ripple detail and sun sparkle fade out.
+      // `near` sits beyond the grid's far corner as seen from the camera home
+      // (~85 units), so nothing inside the playable world loses its ripples.
+      uDetailNear: { value: 90 },
+      uDetailFar: { value: 300 },
       uTime: { value: 0 },
       // Seeded from the shared rig so the plane is lit correctly even before
       // the measured sky lands; `setSkyLighting` overwrites both with the
