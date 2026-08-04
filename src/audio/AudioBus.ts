@@ -8,7 +8,7 @@
  * AUD-003 — recovery bed from veg.cover (visible life field; no invented wildlife).
  */
 
-/** Observer contract — mirrors predictionObserver (reads only, empty writes). */
+/** Observer contract — reads only, writes nothing (T-006). */
 export const audioObserver = {
   id: "audio",
   reads: ["water.surfaceDepth", "veg.cover"] as const,

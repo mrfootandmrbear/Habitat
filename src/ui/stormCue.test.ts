@@ -81,6 +81,26 @@ describe("storm cue presentation (C-020 G1–G5)", () => {
     cue.dispose();
   });
 
+  it("snow reads distinct from rain: falls slower over the same wall time", () => {
+    const rain = new RainCueMesh(48, 1400);
+    const snow = new RainCueMesh(48, 1400);
+    rain.setStorm(true, 1, 0);
+    snow.setStorm(true, 1, 2);
+    const rainStart = rain.meanHeight();
+    const snowStart = snow.meanHeight();
+    for (let i = 0; i < 3; i++) {
+      rain.update(0.05, 0, 0);
+      snow.update(0.05, 0, 0);
+    }
+    const rainDrop = rainStart - rain.meanHeight();
+    const snowDrop = snowStart - snow.meanHeight();
+    expect(rainDrop).toBeGreaterThan(0);
+    expect(snowDrop).toBeGreaterThan(0);
+    expect(rainDrop).toBeGreaterThan(snowDrop * 2);
+    rain.dispose();
+    snow.dispose();
+  });
+
   it("G4: windward bias shifts cloud mass toward the arrival side", () => {
     const calm = new CloudMesh(48, 5);
     const windy = new CloudMesh(48, 5);

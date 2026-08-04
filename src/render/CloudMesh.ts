@@ -154,7 +154,11 @@ export class CloudMesh {
     for (let i = 0; i < count; i++) {
       const rand = mulberry32(0x9e3779b9 ^ (i * 2654435761));
       const cloudGroup = new THREE.Group();
-
+      // Fixed draw order (matches ocean=0/water=1/flowCue=2 elsewhere): without
+      // this, per-frame camera-distance transparency sort flips against the
+      // rain veil/groundCover as the camera orbits, reading as a flash. Set on
+      // the puff group rather than a single mesh — the sprites inherit it.
+      cloudGroup.renderOrder = 4;
 
       const ang = (i / count) * Math.PI * 2;
       const r = half * (0.35 + (i % 4) * 0.12);

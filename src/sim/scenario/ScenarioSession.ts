@@ -19,7 +19,7 @@ import type {
 } from "./types";
 
 /**
- * Scenario evaluator observer — mirrors PredictionSession write isolation.
+ * Scenario evaluator observer — T-006 write isolation.
  * Declared contract: reads criterion fields; writes nothing on WorldState.
  */
 export const scenarioObserver = {

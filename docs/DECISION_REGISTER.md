@@ -543,13 +543,15 @@ A Current entry is not a candidate for Locked status until its promotion criteri
 **Promotion.** Criterion in DECISION_CONFORMANCE discharged 2026-07-28 by `deep-time` probe + `src/sim/save.test.ts` (agent, Judge CI).
 
 ### P-006 — Prediction is an explicit commit-and-compare mechanic
-**Status:** Current
+**Status:** Superseded by owner override (2026-08-03)
 
 **Decision.** The player marks where an environmental event is expected to occur — initially where rainfall or runoff will land or move — commits the prediction, then sees it overlaid against the simulated result.
 
 **Why.** Observation alone can collapse into waiting. Committing a prediction turns attention into an action, makes learning visible, and gives the player a reason to study terrain before time advances.
 
-**Implications.** Prediction is load-bearing for the core observation loop and should not be cut as polish. The overlay must clearly compare expected and actual results. The mechanic rewards attention, not optimization through hidden scores. Scope begins with one highly readable water prediction rather than many prediction types.
+**Implications (as designed).** Prediction was intended as load-bearing for the core observation loop, not polish. The overlay compared expected and actual results. The mechanic aimed to reward attention, not optimization through hidden scores.
+
+**Superseded by.** Owner override (2026-08-03) — cut outright, not replaced. The mechanic was not the owner's idea originally and did not play as fun once built. The sharper reason, on reflection: predicting an outcome has no payoff by itself — nobody wants to play a game where they predict erosion. The fun is in **using** that read of the terrain to steer the forces that cause erosion (P-001: players modify forcings, not outcomes) — a berm, a dig, the erosion-intensity dial (C-022). Commit-and-compare asked the player to guess correctly, then simply watch; it never connected the guess to an action, so it competed with control for the same attention instead of feeding it. `PredictionSession`, the predict tool, and the overlay classification path are removed from `src/`. Attention-as-action (D-006) and observation-as-primary (P-003) stand without a commit-and-compare instrument; C-011's "real-world intuition is the instrument" claim (THESIS §6) loses its P-006-based measurement apparatus and needs a different evaluation method before it can be judged again — filed as open follow-up, not answered here. Ambient legibility of upcoming conditions (darkening sky, wind/pressure cues) remains open territory for the water/weather backlog, but any future version should hand the player a lever to pull with what they noticed, not just a scorecard for noticing it.
 
 **Rejected alternatives.** Passive observation only. Forecasting through menus. A hidden prediction score with no spatial commitment. Removing prediction to reduce scope while retaining "observation" as a slogan.
 
@@ -1483,7 +1485,9 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Evidence.** Probe `substrate-contrast`: sand infil 56.3 vs clay 6.4; channel loss diverges. Probe `substrate-deposit`; Tier-P `substrateEncodingDelta` > 0.12. Owner Pass. Artifacts: `docs/candidates/C-009-dossier.md`, `docs/evidence/substrate-contrast.baseline.json`, `src/sim/terrain/substrates.ts`.
 
-**Constraints.** GEO-002, T-004, N-001, S-006.
+**H-003 amendment (2026-08-03).** Clay and dirt/loam had overlapping jobs — both just "moisture capacity" — leaving clay without a distinct reason to place it. `runGroundwaterStep` (C-001 baseflow) now scales its per-cell recharge cap by `relativePercolation` (`substrates.ts`; reuses `infiltrationRate`, still the one data-driven law — no second column, no per-material process fork). Clay's low relative percolation (0.31× loam) means water that infiltrates it can't pass on to groundwater as fast, so it perches as elevated soil moisture — waterlogging, and standing water in a clay-bottomed depression — while sand (2.75× loam) drains straight through and dries out. Factor is exactly 1 at loam, so any world that never paints substrate is bit-identical to before. Clay's job is now hydrological (perches/waterlogs, H-003), distinct from loam's growth-substrate job (GEO-001) and sand's fast-drain job. Machine: `substrate.test.ts` — saturated clay recharges groundwater less than half as fast as saturated sand per step; sand drains to field capacity within a few days while clay stays measurably above it.
+
+**Constraints.** GEO-002, T-004, N-001, S-006, H-003.
 
 ### C-010 — Legacy substances (contaminant load)
 **Status:** Open
@@ -1636,7 +1640,9 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Owner Lock (2026-07-31).** G1–G5 fixed; re-ask Pass ([C-020-weather-lock.md](playtests/C-020-weather-lock.md)): weather the atmosphere made, including cold spells reading as snow. **Locked.**
 
-**Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) and prediction fairness (P-006) still bind — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Rain-regime dial remains the climate moisture budget under atmospheric delivery.
+**G6 amendment (2026-08-03, owner-authorized reopen).** "Cold spells reading as snow" had only shipped as a tint/size/ground-hold change on the same rain-streak sprite — owner sitting found snow still read as "rain dots," not flakes. `RainCueMesh` now swaps a distinct billboard sprite per phase (elongated streak for rain/sleet, soft round flake for snow), scales snow's fall speed to ~22% of rain's, and adds per-particle lateral sway so flakes wander instead of dropping straight — motion difference alone now reads as snow before color does. `stormCue.test.ts` gained a headless check that snow's mean descent per wall-second is more than half rain's. Still Locked; this closes a gap in G1–G5's original intent rather than reopening the underlying decision.
+
+**Constraints.** Must not become cell-targeted smiting (C-004 Locked / THESIS §9). Determinism (T-001) binds — no free-running stochastic storm arrivals while **C-003** is Open; any atmospheric generator is seeded / authored at the climate layer. Phase of water (rain/snow/sleet) needs real-world referents (N-004), not invented materials. Rain-regime dial remains the climate moisture budget under atmospheric delivery. (Prediction fairness / **P-006** dropped from this constraint — P-006 is Superseded by owner override, 2026-08-03.)
 
 **Leading direction.** Yes — Locked. Climate-mean + orographic + atmosphere Process + clouds; precip phase from heat; presentation holds (G1–G5). Optional SWE store is a later enhancement, not a Lock requirement.
 
@@ -1733,6 +1739,8 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Constraints.** No wet-sand sculpt physics (THESIS §2.2). No freeze / lock / protect against tide, waves, erosion, or fire (**C-004**, S-007, THESIS §2). No placing life or life-like props (**N-001**, **C-007**, **F-001**). No edit budget on any sculpt verb (**C-006**). No copying vegetation or water as a finished habitat. Player flatten/smooth edits stay distinct from the **C-022** erosion *force* dial. Facade-scale carving needs a real Δx referent (**C-012**) before it can exist.
 
 **Leading direction.** Structural form tools (brush size → flatten/trowel → molds / duplicator) ship under Locked **C-006** / **A-005** as hypotheses; watering can = Force rain; smoothing sponge = **C-013** undo first, optional flatten edit later; decorative flags/banners are owner chrome taste off tip; freeze and figurines stay banned. Framing: [C-028-framing.md](candidates/C-028-framing.md). First cut: BUILD_GUIDE §4.55.
+
+**Glacial trough mold (2026-08-03).** A fourth mold shape, alongside cylinder/pyramid/terrace: a U-shaped trough carved along the local downhill direction with a terminal moraine ridge at the foot (`WorldState.stampGlacierTrough`). Same category as the existing molds — a one-shot authored-history stamp, not a running Process, so **GEO-002**'s "earns its cost" test doesn't apply (nothing here evolves after the click). Sits squarely under **GEO-001** ("preserve authoring includes geological history or its simplified consequences") rather than opening new toolbox territory. Directional and two-signed (carve + deposit in one stamp), unlike the other three, so it bypasses the shared `moldProfileWeight` radius/height path — its own method, same clamp rules. Machine: `siting.test.ts` (carve + moraine direction, ΣΔelev=ΣΔdepth, no veg/material write, undo, determinism).
 
 ---
 

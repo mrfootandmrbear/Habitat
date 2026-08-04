@@ -167,9 +167,6 @@ export const config = {
   moldRadius: 5,
   /** Peak elev(+depth) delta (m) a mold stamp applies at full profile weight. */
   moldHeight: 3.0,
-  predictionWetThreshold: 0.01,
-  /** Horizon in event steps (~45 sim-hours at 15 min/event). */
-  predictionHorizonSteps: 180,
 
   /**
    * Cheap GW / baseflow (Slice 8b / C-001) — linear reservoir, not Richards.
@@ -438,7 +435,7 @@ export type InspectorLayer =
   | "shoreLongshore"
   | "salinity";
 
-/** Player land tools — causes (A-005) plus predict marks (P-006). */
+/** Player land tools — causes (A-005). */
 export type SitingTool =
   | "none"
   | "berm"
@@ -447,7 +444,6 @@ export type SitingTool =
   | "flatten"
   | "mold"
   | "duplicate"
-  | "predict"
   | "ignite";
 
 /** Sculpt footprint tier (C-028 / C-006) — bucket = fine, shovel = mass. */
@@ -462,10 +458,15 @@ export function sitingBrushRadiusFor(
 /**
  * Geometric mold footprints (C-028 / §4.57) — fixed-form terrain stamps.
  * `cylinder` = round flat-top disc; `pyramid` = square base tapering to a peak;
- * `terrace` = square flat-top mesa. Shape-only (elev+depth); no material, no
- * vegetation (C-006). Material stays on the separate deposit path (C-009).
+ * `terrace` = square flat-top mesa; `glacier` = U-shaped trough + terminal
+ * moraine carved along the local downhill direction (GEO-001 — authored
+ * geological history, not a running Process; see
+ * `WorldState.stampGlacierTrough`, which bypasses `moldProfileWeight` below
+ * since its footprint is directional and two-signed, not a single radius ×
+ * height). Shape-only (elev+depth); no material, no vegetation (C-006).
+ * Material stays on the separate deposit path (C-009).
  */
-export type MoldShape = "cylinder" | "pyramid" | "terrace";
+export type MoldShape = "cylinder" | "pyramid" | "terrace" | "glacier";
 
 /**
  * Relative profile weight in [0, 1] of a mold at footprint offset (dx, dz)
@@ -491,6 +492,11 @@ export function moldProfileWeight(
       const cheb = Math.max(Math.abs(dx), Math.abs(dz));
       if (cheb > r + 0.01) return 0;
       return 1 - cheb / (r + 1);
+    }
+    case "glacier": {
+      // Directional and two-signed (carve + moraine) — WorldState.stampMold
+      // dispatches this shape to stampGlacierTrough before reaching here.
+      return 0;
     }
   }
 }

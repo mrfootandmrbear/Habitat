@@ -53,7 +53,7 @@ describe("chrome density (U-001)", () => {
     }
   });
 
-  it("Full is where inspect, branch, predict, and secondary forces live", () => {
+  it("Full is where inspect, branch, and secondary forces live", () => {
     for (const id of [
       "heat-regime",
       "tide-envelope",
@@ -61,7 +61,6 @@ describe("chrome density (U-001)", () => {
       "erosion-intensity",
       "inspector",
       "branch-actions",
-      "predict-actions",
       "seed-actions",
     ] as const) {
       expect(FULL_ONLY_CONTROL_IDS).toContain(id);

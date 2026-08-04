@@ -271,6 +271,23 @@ The prediction habit is not a feature bolted onto this; it is the mental activit
 
 That is **P-006** commit-and-compare, already built and mechanically proven. Its unproven half — whether committing a prediction actually changes what a person does next — is the thesis question, not a bookkeeping promotion.
 
+> **P-006 was Superseded by owner override (2026-08-03) and the prediction tool
+> has been cut from the build** — rationale: *control is the fun, not
+> prediction*. The paragraph above is left standing because the **habit** it
+> describes survives the mechanic: *I think the water will cut through here* is
+> still what the player does, and §2.4's "the method is experimentation" is the
+> same act. What is gone is the explicit commit-and-compare **UI**, not the
+> thinking. Two consequences worth naming rather than leaving implicit:
+>
+> - **§2.4's experimentation loop no longer has a tool backing it.** Change a
+>   force, run time, compare — the comparing is now unaided. Whether that needs
+>   *any* affordance is an open design question, not a settled one.
+> - **Determinism lost one of its justifications.** §7 rests partly on
+>   "prediction review"; with P-006 gone, the case for **T-001** now rests on
+>   branch-and-compare, shareable seeds, and the probe/`GOLDEN_*` gate. It is
+>   still a strong case — but it is a *narrower* one, which matters for the
+>   open T-001 question in §2.4.
+
 ---
 
 ## 7. Determinism is a feature, not just hygiene
