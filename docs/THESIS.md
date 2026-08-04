@@ -64,6 +64,38 @@ Consequences worth holding:
 - **This is what P-006 is measuring.** Commit-and-compare is not a study aid bolted onto a simulator; it is the mechanism by which the contract is tested, one prediction at a time (§6).
 - **It is also the honest ceiling on simplification.** U-002 permits simplifying presentation, not ecological truth — because the truth is precisely what the intuition is being tested against.
 
+### 2.3 Who the player is — nature, not a god (owner, 2026-08-04)
+
+**You are not a god. You are Mother Nature. You are simply nature.**
+
+This is the positive statement of what §9 has only ever said negatively ("not
+smiting," "not god-mode targeting") and what MVP_SCOPE called *steward*.
+Steward is close but not right: a steward tends a system from outside it. The
+player is not outside. **The player is the processes themselves** — the
+rainfall, the wind, the tide, the season, the fire, the passage of time.
+
+Why this matters beyond vocabulary: it explains *why* the boundaries in §9
+are boundaries rather than restrictions. Dragging a storm onto a hill you
+dislike is not withheld from the player as a balance decision — it is simply
+not a thing nature does. Nature sets a regime; where the rain falls is the
+landscape's business. Every "you may not" in §9 stops reading as a limit on
+player power and starts reading as a description of what being nature *is*.
+A god game asks "what will you command?" This asks "what will you become the
+weather for?"
+
+It also sharpens §4's two phases. Phase one you sculpt, and there you really
+are a person with a bucket. Phase two your verb changes to setting which
+forces are at work and how hard — and that is not a person acting on nature,
+that is nature acting. The loop is the handoff between the two.
+
+**A tension this creates, flagged rather than resolved.** §2 says: *"You are
+not the caretaker of the system. You are a person with a bucket, and the tide
+is larger than you."* If the player is nature, the player is also the tide,
+and "larger than you" no longer lands the same way. The phase split above is
+the reconciliation I'd propose — bucket in phase one, tide in phase two — but
+§2 is owner-authored and load-bearing for the sand-castle analogy, so it is
+left standing and the conflict is recorded here. Worth an owner ruling.
+
 ---
 
 ## 3. What "restoration" means here
@@ -162,7 +194,7 @@ This is a self-check the owner can run alone, at any time, in twenty seconds. Us
 
 ## 9. Boundaries this thesis keeps
 
-- **Regimes and pulses, not smiting.** You set the rainfall; you site an ignition. You do not drag a storm onto a hill you dislike. Force control must not become god-mode targeting, or D-001 and N-001 both die.
+- **Regimes and pulses, not smiting.** You set the rainfall; you site an ignition. You do not drag a storm onto a hill you dislike. Force control must not become god-mode targeting, or D-001 and N-001 both die. Per §2.3 this is not a restriction on the player — it is what being nature *is*. Nature sets a regime; where the rain lands is the landscape's business.
 - **Terrain is a cause; ecosystems are not painted.** Sculpting freely is fine. Placing a finished wetland is not (N-001).
 - **No score, no win.** Sandbox continues (G-001). Thriving is observed, not tallied (N-002).
 - **Abundance in sculpting; scarcity in ecological time.** RC-004 already rejects an action economy — the constraint is what time does, not how many clicks you get.

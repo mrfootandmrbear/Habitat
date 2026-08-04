@@ -27,7 +27,7 @@ Habitat is a coupled product. Interesting behavior lives in **feedback**, not in
 
 ## 2. Target game graph (player loops)
 
-The player fantasy is steward, not god (Design Wiki). Engagement is attention (D-006), not action throughput.
+The player fantasy is **nature itself — Mother Nature, not a god** (THESIS §2.3, owner 2026-08-04; supersedes the earlier "steward, not god" from the Design Wiki, which put the player outside the system). Engagement is attention (D-006), not action throughput.
 
 ```mermaid
 flowchart LR
