@@ -9,6 +9,25 @@ import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { config } from "../config";
 import { detectQualityTier, type QualityTier } from "./QualityTier";
+import {
+  ENVIRONMENT_INTENSITY,
+  FOG_FAR,
+  FOG_NEAR,
+  HEMI_GROUND_COLOR,
+  HEMI_INTENSITY,
+  HEMI_SKY_COLOR,
+  SKY_MIE_COEFFICIENT,
+  SKY_MIE_DIRECTIONAL_G,
+  SKY_RAYLEIGH,
+  SKY_TURBIDITY,
+  SUN_COLOR,
+  SUN_INTENSITY,
+  TONE_MAPPING_EXPOSURE,
+  calibrateSkyLighting,
+  installSkyRadianceScale,
+  sunDirectionFromSky,
+  type SkyLighting,
+} from "./lightingRig";
 
 export type SceneHandles = {
   scene: THREE.Scene;
@@ -17,33 +36,27 @@ export type SceneHandles = {
   controls: OrbitControls;
   /** Shadow-casting key light — module agents (terrain/water/veg) read its direction. */
   sun: THREE.DirectionalLight;
+  /**
+   * Measured sun/sky values for anything that reflects or fades into the sky.
+   * Read this instead of re-deriving light constants locally — see
+   * `lightingRig.ts` for why duplicated literals are a standing bug source.
+   */
+  skyLighting: SkyLighting;
   qualityTier: QualityTier;
   /** Draws one frame — routes through the post-fx composer on tiers that have one. */
   render: () => void;
   dispose: () => void;
 };
 
-/**
- * Sun position on the Preetham sky dome — high enough for long, soft-edged
- * shadows across the island rather than harsh noon shadows underfoot.
- */
-const SUN_ELEVATION_DEG = 38;
-const SUN_AZIMUTH_DEG = 205;
-
-function sunDirectionFromSky(elevationDeg: number, azimuthDeg: number): THREE.Vector3 {
-  const phi = THREE.MathUtils.degToRad(90 - elevationDeg);
-  const theta = THREE.MathUtils.degToRad(azimuthDeg);
-  return new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
-}
-
 export function createScene(container: HTMLElement): SceneHandles {
   const qualityTier = detectQualityTier();
 
   const scene = new THREE.Scene();
-  // Fog color matches the sky's horizon tone (Preetham low-turbidity pale
-  // blue) so distant terrain fades into atmosphere instead of a flat wall.
-  const fogColor = 0xcdd9e2;
-  scene.fog = new THREE.Fog(fogColor, 75, 165);
+  // Fog colour is measured off the real sky dome further down (the horizon
+  // probe) so distant terrain always fades into the atmosphere that is
+  // actually being rendered. This placeholder only covers the window before
+  // the sky exists.
+  scene.fog = new THREE.Fog(0xcdd9e2, FOG_NEAR, FOG_FAR);
 
   const camera = new THREE.PerspectiveCamera(
     50,
@@ -51,14 +64,16 @@ export function createScene(container: HTMLElement): SceneHandles {
     0.1,
     500,
   );
-  camera.position.set(32, 28, 36);
+  const cameraHome = new THREE.Vector3(32, 28, 36);
+  const cameraTarget = new THREE.Vector3(0, 3, 0);
+  camera.position.copy(cameraHome);
 
   const renderer = new THREE.WebGLRenderer({ antialias: !qualityTier.postFx });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, qualityTier.pixelRatioCap));
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = TONE_MAPPING_EXPOSURE;
   renderer.shadowMap.enabled = qualityTier.shadows;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
@@ -67,34 +82,34 @@ export function createScene(container: HTMLElement): SceneHandles {
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.maxPolarAngle = Math.PI * 0.49;
-  controls.target.set(0, 3, 0);
+  controls.target.copy(cameraTarget);
   controls.update();
 
   // --- Sky dome + sun rig -----------------------------------------------
-  const sunDirection = sunDirectionFromSky(SUN_ELEVATION_DEG, SUN_AZIMUTH_DEG);
+  const sunDirection = sunDirectionFromSky();
 
   const sky = new Sky();
   sky.scale.setScalar(380);
   const skyUniforms = sky.material.uniforms;
-  skyUniforms.turbidity.value = 1.0;
-  skyUniforms.rayleigh.value = 0.15;
-  // Mie (sun-glow) term was tuned down on coefficient alone before, but at
-  // mieDirectionalG≈0.78 the forward-scattering lobe stayed razor-tight —
-  // its hot core cleared the tonemapper's shoulder and clipped to a hard-
-  // edged bright patch near the sun instead of a soft glow. Spreading the
-  // lobe (lower g) trades peak intensity for width so the glow falls off
-  // smoothly instead of slamming into a seam.
-  skyUniforms.mieCoefficient.value = 0.0014;
-  skyUniforms.mieDirectionalG.value = 0.6;
+  skyUniforms.turbidity.value = SKY_TURBIDITY;
+  skyUniforms.rayleigh.value = SKY_RAYLEIGH;
+  skyUniforms.mieCoefficient.value = SKY_MIE_COEFFICIENT;
+  skyUniforms.mieDirectionalG.value = SKY_MIE_DIRECTIONAL_G;
   // CloudMesh already renders sim-driven clouds — Sky's own procedural
   // cloud layer would double up and drift out of sync with cloudWater.
   skyUniforms.cloudCoverage.value = 0;
   skyUniforms.cloudDensity.value = 0;
   skyUniforms.sunPosition.value.copy(sunDirection).multiplyScalar(200);
+  if (!installSkyRadianceScale(sky.material)) {
+    console.warn(
+      "lightingRig: could not patch Sky's radiance scale — three.js shader changed. " +
+        "Sky will render overbright and desaturated until lightingRig.ts is updated.",
+    );
+  }
   scene.add(sky);
 
-  const hemi = new THREE.HemisphereLight(0xe8f0f8, 0x6b5a45, 0.22);
-  const sun = new THREE.DirectionalLight(0xfff2dd, 1.15);
+  const hemi = new THREE.HemisphereLight(HEMI_SKY_COLOR, HEMI_GROUND_COLOR, HEMI_INTENSITY);
+  const sun = new THREE.DirectionalLight(SUN_COLOR, SUN_INTENSITY);
   sun.position.copy(sunDirection).multiplyScalar(45);
   sun.target.position.set(0, 0, 0);
   sun.castShadow = qualityTier.shadows;
@@ -120,14 +135,33 @@ export function createScene(container: HTMLElement): SceneHandles {
   const pmrem = new THREE.PMREMGenerator(renderer);
   const showSunDisc = skyUniforms.showSunDisc.value;
   skyUniforms.showSunDisc.value = 0; // avoid a blown-out firefly pixel in the irradiance map
+  // Normalise and measure the sky while the scene is still sky-only, so
+  // nothing else bleeds into the reading — and crucially *before* the PMREM
+  // bake, so the environment map inherits the corrected radiance scale rather
+  // than the raw Preetham values.
+  // Anchored on the camera's home view direction, nudged up toward the top of
+  // frame — that band is the only sky the player ever sees, and it is the one
+  // that has to land at a sane brightness. See SKY_VIEW_TARGET_LUMINANCE.
+  const viewDirection = cameraTarget
+    .clone()
+    .sub(cameraHome)
+    .normalize()
+    .setY(0.08)
+    .normalize();
+  const skyLighting = calibrateSkyLighting(
+    renderer,
+    scene,
+    sky.material,
+    sunDirection,
+    viewDirection,
+  );
   const envRenderTarget = pmrem.fromScene(scene, 0.02, 1, 700);
   skyUniforms.showSunDisc.value = showSunDisc;
   scene.environment = envRenderTarget.texture;
-  // Preetham sky radiance is very high relative to the sun+hemi light
-  // levels tuned below — heavily tamed so IBL only contributes a subtle
-  // reflection/ambient tint instead of blowing every material to white.
-  scene.environmentIntensity = 0.045;
+  scene.environmentIntensity = ENVIRONMENT_INTENSITY;
   pmrem.dispose();
+
+  scene.fog.color.copy(skyLighting.skyHorizon);
 
   // --- Post-processing (skipped on the low tier — direct render instead) -
   let composer: EffectComposer | null = null;
@@ -176,6 +210,7 @@ export function createScene(container: HTMLElement): SceneHandles {
     renderer,
     controls,
     sun,
+    skyLighting,
     qualityTier,
     render,
     dispose: () => {

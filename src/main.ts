@@ -189,7 +189,14 @@ function regenerateIsland(seed: number): void {
   ui.setUndoEnabled(false);
 }
 
-const { scene, camera, renderer, controls, render: renderFrame } = createScene(viewport);
+const {
+  scene,
+  camera,
+  renderer,
+  controls,
+  skyLighting,
+  render: renderFrame,
+} = createScene(viewport);
 const terrainMesh = new TerrainMesh(n, n, config.worldSize);
 const waterMesh = new WaterMesh(n, n, config.worldSize);
 terrainMesh.mesh.traverse((obj) => {
@@ -205,6 +212,10 @@ let extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
 });
 const oceanMesh = new OceanMesh(config.worldSize);
 oceanMesh.setSeaLevel(world.seaLevel);
+// Both water surfaces reflect the sky the scene actually renders, measured
+// off the dome at startup rather than copied as literals into each shader.
+waterMesh.setSkyLighting(skyLighting);
+oceanMesh.setSkyLighting(skyLighting);
 const sitingCursor = new SitingCursor(n, n, config.worldSize);
 const flowCue = new FlowCueMesh(n, n, config.worldSize);
 const occupantMesh = new OccupantMesh(n, n, config.worldSize);

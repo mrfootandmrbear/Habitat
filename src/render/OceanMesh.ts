@@ -1,13 +1,19 @@
 import * as THREE from "three";
 import { config } from "../config";
+import {
+  SUN_COLOR,
+  sunDirectionFromSky,
+  type SkyLighting,
+  type SkyLightingConsumer,
+} from "./lightingRig";
 
 // Same panning-fbm ripple + sky-reflection + sun-specular treatment as
-// WaterMesh's shader (kept as a separate copy, not a shared import — this
-// file and WaterMesh.ts are each meant to be self-contained render pieces).
-// See WaterMesh.ts's fragment shader comment: sun/sky constants mirror
-// Scene.ts's DirectionalLight (position (24,40,16), color 0xfff2dd) and
-// fog/background (0xb8c9d4) so the surrounding sea plane reads as the same
-// water/light system as the inland WaterMesh, not a flat unlit backdrop.
+// WaterMesh's shader (kept as a separate copy, not a shared import — the
+// shader bodies are each meant to be self-contained render pieces). The
+// *lighting* is not duplicated: sun direction/colour and the sky tones this
+// plane reflects come from the shared rig via `setSkyLighting`, so the sea
+// reads as the same water/light system as the inland WaterMesh and can never
+// drift out of sync with the sun the way a hardcoded copy did.
 const oceanVertex = /* glsl */ `
 varying vec3 vWorldPos;
 
@@ -113,7 +119,7 @@ void main() {
  * Visual ocean plane at sea level (observer only — T-006).
  * C-015: shoreline reads against this plane without an inspector.
  */
-export class OceanMesh {
+export class OceanMesh implements SkyLightingConsumer {
   readonly mesh: THREE.Mesh;
   private readonly material: THREE.ShaderMaterial;
   private readonly uniforms: Record<string, THREE.IUniform>;
@@ -129,11 +135,11 @@ export class OceanMesh {
       uBaseColor: { value: new THREE.Color(0x1a4a6e) },
       uOpacity: { value: 0.55 },
       uTime: { value: 0 },
-      // Matches Scene.ts's sunDirectionFromSky(38, 205) — kept as a literal
-      // constant here rather than imported so this file stays self-contained
-      // (see comment above); update together if Scene.ts's sun angle changes.
-      uSunDirection: { value: new THREE.Vector3(-0.333, 0.6157, -0.7142) },
-      uSunColor: { value: new THREE.Color(0xfff2dd) },
+      // Seeded from the shared rig so the plane is lit correctly even before
+      // the measured sky lands; `setSkyLighting` overwrites both with the
+      // values probed off the real sky dome.
+      uSunDirection: { value: sunDirectionFromSky() },
+      uSunColor: { value: new THREE.Color(SUN_COLOR) },
       uSkyZenith: { value: new THREE.Color(0.53, 0.7, 0.86) },
       uSkyHorizon: { value: new THREE.Color(0xcdd9e2) },
     };
@@ -171,6 +177,14 @@ export class OceanMesh {
       this.elapsedSeconds = (this.elapsedSeconds + dt) % 10000;
       this.uniforms.uTime!.value = this.elapsedSeconds;
     };
+  }
+
+  /** Adopt the scene's measured sun/sky so reflections match the real sky. */
+  setSkyLighting(lighting: SkyLighting): void {
+    (this.uniforms.uSunDirection!.value as THREE.Vector3).copy(lighting.sunDirection);
+    (this.uniforms.uSunColor!.value as THREE.Color).copy(lighting.sunColor);
+    (this.uniforms.uSkyZenith!.value as THREE.Color).copy(lighting.skyZenith);
+    (this.uniforms.uSkyHorizon!.value as THREE.Color).copy(lighting.skyHorizon);
   }
 
   /** Show ocean at sea level (m). Pass undefined to hide. */

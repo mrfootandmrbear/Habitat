@@ -78,7 +78,7 @@ current per-piece status.
 `.claude/skills/gauntlet-loop/`. Say "restart the gauntlet loop" and it
 reconstructs state from this note + git log rather than starting over.
 
-## Round 1 critique (2026-08-04)
+## Round 1 critique (2026-08-04, 01:12–01:21 UTC)
 
 Build/tests re-verified green on HEAD (508/508 tests, clean typecheck) before
 critiquing. Fresh screenshots were captured via headless Chromium against the
@@ -196,6 +196,115 @@ in surfaced a more serious, previously-hidden bug:
 writing any Round 2 code. Not yet confirmed by actually toggling
 `renderer.toneMapping` or `OutputPass` to test the hypothesis — that's the
 first thing to try on resume.
+## Two parallel critique sessions — reconciled 2026-08-04 (merge note)
+
+The section above and the section below were written by **two different
+sessions working on separate branches at the same time**, neither able to
+see the other's note. Both independently critiqued Round 1 cold against the
+rubric; both concluded it fails. They were merged into `main` together on
+2026-08-04, in timestamp order.
+
+Read the Round 2 section below with that in mind: its claim that Round 1 was
+"never actually critiqued" was true *from that session's vantage point* — the
+01:12 critique existed only on an unmerged branch it couldn't see. It is no
+longer accurate now that both have landed. **The two critiques corroborate
+each other** (water fails, sky clipped, terrain patches hard-edged,
+vegetation on a lattice) — independent agreement from separate cold reads,
+which is stronger evidence than either alone, not a duplicate to discard.
+
+One finding exists only in the Round 1 section and is the most important
+item on resume: **postFx was disabled in every Round 1 screenshot**
+(`detectQualityTier()` returns `"low"` at `cores <= 4`), so all AO and bloom
+findings in *both* sections were made blind to those features. Fix the
+tonemapping chain before trusting any per-piece critique.
+
+## Round 2 (2026-08-04, 02:27–02:28 UTC)
+
+### The honest verdict on round 1
+
+Round 1's four pieces were salvaged, integrated, typechecked and
+test-green — but **never actually critiqued**. Scored cold against the
+rubric for the first time this round, the integrated result fails it:
+
+| # | rubric point | round 1 result |
+|---|---|---|
+| 4 | water reflects sky | FAIL — inner ocean near-black |
+| 5 | shoreline foam/blend | FAIL — hard blocky cutoff |
+| 6 | sky gradient + sun glow | FAIL — flat near-white wash, no gradient |
+| 10 | no clipped white/black | FAIL — up to 86% of sky pixels hard-clipped |
+
+"Typechecks and passes tests" was never evidence about any of these. The
+lesson is the one the skill already warns about: a piece is not done until
+a critic has looked at its output.
+
+### Measurement harness
+
+Tuning by eye was the bottleneck, so round 2 added one (kept in the
+session scratchpad, not the repo):
+
+- `capture.js` drives the real app in headless chromium (heavy rain, warm,
+  1 week/s) and shoots several camera angles.
+- `analyze.js` decodes those PNGs *inside* chromium — no image library
+  needed on the host — and reports clipped-white %, clipped-black % and
+  mean RGB per region. Rubric item 10 becomes a number.
+- `column.js` prints a vertical pixel profile, which is what finally
+  settled "is that pale band the sky or something else".
+- The rig logs its own calibration in dev, so sky tuning is a ~10s loop
+  instead of a ~4min screenshot loop.
+
+Two findings only came out of measuring, not looking: the baseline sky was
+*already* a flat wash sitting just under the clip point (mean luma 245,
+zero saturation), and the white island in run-forward captures is **snow
+accumulating in-sim**, not overexposure — at step 0 the terrain is a
+correct tan (129,118,91).
+
+### Phase 0 — shared foundation (landed, `2060e6c`)
+
+Per the skill's step 2, the shared foundation was built and committed
+sequentially *before* any fan-out, because every piece depends on it.
+
+three's `Sky` emits raw Preetham radiance far above display range, so ACES
+desaturates it to grey at any exposure — verified still grey at exposure
+0.12. Round 1 had worked around this by crushing `rayleigh` to 0.15 and
+`environmentIntensity` to 0.045, which switches the atmosphere off rather
+than scaling it. `render/lightingRig.ts` now:
+
+- patches a radiance-scale uniform into `Sky` and calibrates it at startup
+  by rendering the dome into an offscreen probe and measuring it, so
+  exposure returns to 1.0 and IBL is meaningful again;
+- anchors that calibration on the camera's own view direction through a
+  narrow cone — the camera looks *down* at the island, so the frame never
+  contains the blue zenith, only the horizon band. Anchoring on the zenith
+  left the visible band at 213,213,213; on a four-azimuth horizon average,
+  218,218,217; a wide cone at the view direction still left it 2x hot;
+- moves the sun off the camera's axis (azimuth 205 → 130). At 205 the
+  camera stared into the mie glare and the sky washed white; at 42 the sun
+  sat behind the camera and the sky went gradientless. The side sun also
+  gives the island cross-lit relief instead of flat frontal light;
+- is the single source of truth for sun direction/colour and sky tones.
+  `WaterMesh` and `OceanMesh` consume it via `setSkyLighting` instead of
+  each carrying their own literal copy — which is precisely what went
+  stale and produced round 1's near-black water.
+
+Water now reads as a lit sea and terrain holds its substrate colour under
+cross-light. The sky no longer clips, but is still short of "coherent
+gradient with sun glow" — that is the sky piece's round 2 job, and it can
+now be tuned without dragging exposure with it.
+
+### Round 2 per-piece status
+
+| piece | status |
+|---|---|
+| phase 0 lighting rig | done, committed, verified (508 tests, build clean) |
+| sky & atmosphere | queued — no gradient/glow yet (rubric 6, 7) |
+| water & shoreline | queued — hard shoreline cutoff, square ocean seam (4, 5) |
+| terrain material | queued — blocky stair-step silhouette, hard-edged patches (1, 2) |
+| vegetation | queued — needs a non-snowed grown world to judge (8, 9) |
+| wildlife | still not started |
+
+**Blocking all of the above:** the postFx double-tonemapping bug documented
+in the Round 1 critique section. It is shared foundation, not a piece — fix
+and confirm it before re-critiquing anything, per the skill's Step 2.
 
 ## Honest scope note
 
