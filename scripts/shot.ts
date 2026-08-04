@@ -105,7 +105,21 @@ const measureExpr = (dataUrl: string): string => `(async () => {
       clippedBlackPct: +(100*cb/n).toFixed(2),
     };
   };
-  return { size: [w, h], sky: band(0.0, 0.28), mid: band(0.28, 0.65), ground: band(0.65, 1.0), whole: band(0, 1) };
+  // Vertical profile down the image centre — the thing that settles "is that
+  // pale band actually the sky, and does it have a gradient at all?"
+  const column = [];
+  const cx = Math.floor(w * 0.5);
+  for (let f = 0; f <= 1.0001; f += 0.05) {
+    const y = Math.min(h - 1, Math.floor(h * f));
+    let r = 0, g = 0, b = 0;
+    for (let x = cx - 8; x <= cx + 8; x++) {
+      const i = (y * w + x) * 4;
+      r += buf[i]; g += buf[i+1]; b += buf[i+2];
+    }
+    const n = 17;
+    column.push({ yPct: +(f*100).toFixed(0), rgb: [Math.round(r/n), Math.round(g/n), Math.round(b/n)] });
+  }
+  return { size: [w, h], sky: band(0.0, 0.28), mid: band(0.28, 0.65), ground: band(0.65, 1.0), whole: band(0, 1), column };
 })()`;
 
 async function shoot(page: Page, args: Args, quality: string): Promise<void> {
