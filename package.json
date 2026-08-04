@@ -12,7 +12,8 @@
     "conformance": "tsx scripts/generate-conformance-ledger.ts",
     "conformance:check": "tsx scripts/generate-conformance-ledger.ts --check",
     "gate": "npm test && npm run build && npm run conformance:check && npm run probe -- --all --check",
-    "shot": "tsx scripts/shot.ts"
+    "shot": "tsx scripts/shot.ts",
+    "tonemap": "tsx scripts/tonemap.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

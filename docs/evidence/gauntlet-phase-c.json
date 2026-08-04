@@ -1,0 +1,33 @@
+{
+  "_comment": "Gauntlet Loop live status, Phase C (Stream C — visual, bar v2). Written after every checkpoint, not just at completion, per the skill's Step 3. If a session dies mid-round, this file says exactly how far it got instead of leaving silence. Narrative record lives in docs/VISUAL_UPGRADE_NOTE.md; this is the machine-readable tip.",
+  "phase": "C",
+  "opened": "2026-08-04",
+  "budgetMode": "subscription — builder is the main thread, subagents are critics only, pieces run sequentially",
+  "bar": {
+    "rubric": "docs/VISUAL_UPGRADE_NOTE.md — 'The bar, v2'",
+    "references": "docs/reference/OBSERVATIONS.md",
+    "onDisk": ["docs/reference/planet-coaster-terrain.png"],
+    "missing": "4 owner references arrived as chat attachments; subagent critics cannot see those. Until saved into docs/reference/, critics grade against OBSERVATIONS.md prose + bar v2.",
+    "governs": ["palette & biome readability", "water look & transparency", "vegetation type variety & clustering", "camera framing"],
+    "doesNotGovern": ["terrain shape — owner ruled 'still smooth' 2026-08-04; no terracing"]
+  },
+  "baseline": {
+    "commit": "4ad65ad",
+    "tests": "531/531 pass",
+    "shot": {
+      "sky": { "low": [181.3, 183.2, 184.1], "high": [181.4, 183.3, 184.2], "blueOverRed": 1.015 },
+      "ground": { "low": [41.6, 57.2, 59.8], "high": [55.9, 87.2, 95.4], "blueOverRedHigh": 1.707 },
+      "clippedWhitePct": 0,
+      "clippedBlackPct": 0
+    }
+  },
+  "pieces": [
+    { "id": "C0", "name": "sky/lighting foundation", "points": [5, 11], "status": "in-progress", "round": 1, "note": "ACES desaturation confirmed as a real contributor (1.59 -> ~1.165) but does NOT explain measured 1.015. Second contributor unidentified. Untested candidate: probe anchored above horizon while visible sky is below it. Disconfirming test recorded in the note." },
+    { "id": "C1", "name": "palette saturation & biome readability", "points": [4, 2, 3], "status": "queued", "round": 0 },
+    { "id": "C2", "name": "de-facet terrain + stair-stepped shoreline", "points": [1], "status": "queued", "round": 0 },
+    { "id": "C3", "name": "terrain skirt / square ocean seam", "points": [6, 7, 8], "status": "queued", "round": 0 },
+    { "id": "C4", "name": "vegetation type variety & clustering", "points": [9, 10], "status": "queued", "round": 0 },
+    { "id": "C5", "name": "camera framing", "points": [], "status": "queued", "round": 0, "note": "New this round. Owner ruled framing in-scope; every reference looks down steeply and fills frame with world, ours wastes ~25% of frame on empty sky at -27.4 deg pitch." },
+    { "id": "C-water", "name": "water colour / depth banding", "points": [6, 7], "status": "done-but-uncritiqued", "round": 1, "commit": "567ae8b", "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it." }
+  ]
+}

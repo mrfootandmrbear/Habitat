@@ -467,6 +467,127 @@ the frame composites. The tell is every band reporting 100% clipped-black.
 The harness screenshots first and decodes that PNG in-page instead.
 Captured PNGs are gitignored — regenerate with `npm run shot`.
 
+## Phase C — opened 2026-08-04 (Stream C of the non-animal build plan)
+
+Owner instruction: *"start up phase c using gauntlet loop skill."* Confirmed to
+mean **Stream C** of [the non-animal build plan](plans/2026-08-04-non-animal-build-plan.md)
+— the visual work against bar v2.
+
+**Budget mode: subscription, not API.** Per the skill's Step 0, that inverts the
+original fan-out economics. **I am the builder, inline, in the main thread.**
+Subagents are spawned *only* as fresh-context critics, one per piece, because
+grading your own output cold is the one job that genuinely cannot be done
+inline. Pieces run **sequentially**, each committed before the next starts.
+No parallel worktrees this round — parallelism bought wall-clock, not quality,
+and it is what made every Round 1 interruption so expensive.
+
+### Baseline, re-measured on HEAD before touching anything
+
+531/531 tests green, clean typecheck. `npm run shot` at 1280x800:
+
+| band | low tier | high tier | note |
+|---|---|---|---|
+| sky | rgb(181.3, 183.2, 184.1) **b/r 1.015** | rgb(181.4, 183.3, 184.2) **b/r 1.015** | achromatic — bar v2 point 5 **fail** |
+| mid | rgb(94.8, 103.4, 103.7) b/r 1.094 | rgb(108.9, 130.3, 135.2) b/r 1.242 | |
+| ground | rgb(41.6, 57.2, 59.8) b/r 1.437 | rgb(55.9, 87.2, 95.4) **b/r 1.707** | ocean banding landed (`567ae8b`) |
+
+Zero clipped-white and zero clipped-black in every band on both tiers, so the
+old clipping findings remain dead. postFx is doing real work — `high` and `low`
+diverge in mid/ground exactly where SSAO and bloom act — and the two tiers'
+skies are identical to within 0.1, which independently rules bloom out as the
+cause of the grey sky.
+
+### Owner rulings on the references (2026-08-04)
+
+Real reference images arrived this round, so the bar moves up a tier from
+"written rubric" to "reference artifacts" — but only once they are **on disk**.
+See [reference/OBSERVATIONS.md](reference/OBSERVATIONS.md) for the full record.
+Summary:
+
+- **They govern:** palette & biome readability; water look *and transparency*
+  (owner, verbatim: *"I like how the water is transparent to see the underwater
+  world"*); vegetation type variety & clustering; camera framing.
+- **They do NOT govern terrain shape.** Asked directly whether the contour
+  banding in three of the four Godus-lineage references now governs shape, the
+  owner answered **"still smooth"** and supplied a **Planet Coaster 2**
+  reference (`docs/reference/planet-coaster-terrain.png`, fetched — outbound
+  web works from this machine, unlike the container the loop started in) as the
+  shape authority: *"spiritual successors to RCT3."* That image is smooth,
+  continuous, rounded rock with zero terracing. **The no-terracing correction
+  stands.**
+- **New requirement, not previously in the bar:** water must be *transparent
+  enough to read the submerged landform through it*, not merely depth-banded on
+  its surface. Bar v2 point 6 covers banding; it did not cover see-through.
+
+**Caveat that limits this round's bar:** four of the five references arrived as
+chat attachments, which do not exist on the filesystem, and **a subagent critic
+cannot see conversation attachments**. Until they are saved into
+`docs/reference/`, per-piece critics grade against the written descriptions in
+OBSERVATIONS.md plus bar v2 — better than the old prose-only bar, still short of
+a true side-by-side.
+
+### The grey sky: hypothesis tested, only *partly* confirmed
+
+The pre-Phase-C note claimed the rig "calibrates a pre-tonemap radiance the
+viewer never sees, then ACES desaturates the real frame toward white," and
+that this explains the 1.59 → 1.015 gap. Per the skill's Step 4.5 that was an
+untested mechanism, so it was tested before being built against.
+
+**Result: the mechanism is real but does not account for the whole gap.**
+Running the probe's reported radiance (luminance 0.350, b/r 1.59) through
+three r185's exact ACES matrices and RRT/ODT fit, then sRGB-encoding:
+
+| | b/r | red channel |
+|---|---|---|
+| probe, linear | 1.590 | — |
+| after ACES + sRGB (predicted) | **~1.165** | ~162–167 |
+| actually measured on screen | **1.015** | **181** |
+
+Bracketing the one unknown (the log prints luminance and b/r but not green)
+across g-biased-to-red, midpoint, and g-biased-to-blue moved the prediction by
+less than 0.01, so that guess is not what the discrepancy rides on.
+
+So ACES really does eat most of the chroma — 1.59 → 1.17 — but the frame is
+both **flatter and brighter** than tone-mapping alone predicts. There is a
+second contributor and it has not been identified yet. The leading candidate,
+**explicitly untested and labelled as such**: the probe anchors a 24° cone at
+`viewDirection` (`setY(0.08)`, ~+4.6° above horizontal), while the sky actually
+visible in frame sits *below* the horizon line — camera at (32,28,36) toward
+(0,3,0) is a −27.4° pitch with a 50° vertical FOV, putting the top of frame at
+≈ −2.4° and the horizon at ~25% image height. The Preetham model's `1 - Fex`
+term saturates hardest below the horizon, which is its whitest, least chromatic
+region. If so, the calibration is anchored on sky the player never sees — the
+same class of bug the anchor comment already documents twice.
+
+**Disconfirming test, for whoever picks this up:** re-anchor `viewDirection`'s
+Y to a *negative* value (aim the probe where the frame actually looks) and
+re-run `npm run shot`. If the rendered b/r moves, the anchor is the second
+contributor. If it does not, look elsewhere — do not assume.
+
+Note also that fixing brightness anchoring alone cannot fix chroma: the
+below-horizon Preetham band has little chroma to recover regardless of what it
+is scaled to.
+
+### Phase C piece list
+
+Shared foundation first per the skill's Step 2, then pieces worst-first per bar
+v2's own ranking. Live status: [`docs/evidence/gauntlet-phase-c.json`](evidence/gauntlet-phase-c.json).
+
+| # | piece | bar v2 points | status |
+|---|---|---|---|
+| C0 | sky/lighting foundation — kill the achromatic band | 5, 11 | foundation, in progress |
+| C1 | palette saturation & biome readability | 4, 2, 3 | queued |
+| C2 | de-facet terrain, fix stair-stepped shoreline | 1 | queued |
+| C3 | terrain skirt / square ocean seam | 6–8 | queued |
+| C4 | vegetation type variety & clustering | 9, 10 | queued |
+| C5 | camera framing | new — owner-ruled this round | queued |
+| — | water colour / depth banding | 6, 7 | **done** `567ae8b`, uncritiqued |
+
+Water banding landed before Phase C opened and **has never been critiqued** —
+it is done-but-uncritiqued, not done. It also now carries a requirement it was
+not built against (see-through to the submerged landform), so it needs a critic
+pass against the references rather than a pass by assertion.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
