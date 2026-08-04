@@ -42,7 +42,11 @@ uniform float uSeaLevel;
 uniform float uWorldSize;
 uniform float uShallowDepth;
 uniform float uMidDepth;
-uniform float uEdgeFade;
+uniform float uShelfSlope;
+uniform float uOpaqueMargin;
+uniform float uShelfWander;
+uniform vec3 uFoamColor;
+uniform float uFoamDepth;
 uniform float uDetailNear;
 uniform float uDetailFar;
 
@@ -117,21 +121,35 @@ void main() {
   float fresnel = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
 
   // --- Depth banding (bar v2 points 6-8) --------------------------------
-  // The ocean plane is wider than the sim grid, so map world XZ onto the
-  // terrain field and treat everything beyond its edge as open deep water.
-  // Sampled nearest-equivalent via a direct tap: the band edges are smoothed
-  // by smoothstep below, so bilinear filtering would buy nothing here.
+  // Map world XZ onto the terrain field to get the real seabed inside the
+  // sim grid. The texture is ClampToEdge, so sampling past the grid returns
+  // the edge row rather than wrapping.
   vec2 gridUv = vWorldPos.xz / uWorldSize + 0.5;
   // fieldUv's V flip (see fieldTexture.ts) — fields upload row-major in +Z.
   float bed = texture2D(uElevationTex, vec2(gridUv.x, 1.0 - gridUv.y)).r;
   float gridDepth = max(uSeaLevel - bed, 0.0);
-  // Beyond the grid there is no bed to sample, so fall back to open deep
-  // water — but fade into it rather than switching. A hard step here draws a
-  // visible rectangle around the sim grid (the long-standing "square ocean
-  // seam"), and it gets far louder once inside and outside differ in colour.
-  vec2 edgeDist = min(gridUv, 1.0 - gridUv);
-  float gridFalloff = smoothstep(0.0, uEdgeFade, min(edgeDist.x, edgeDist.y));
-  float depth = mix(uMidDepth * 2.0, gridDepth, gridFalloff);
+
+  // How far outside the sim grid this fragment is, in world units — the
+  // standard box distance, so it is 0 everywhere inside and grows smoothly
+  // outward with rounded rather than mitred corners.
+  vec2 outsideXZ = abs(vWorldPos.xz) - uWorldSize * 0.5;
+  float outside = length(max(outsideXZ, 0.0));
+
+  // Continue the seabed past the map footprint instead of switching to a
+  // constant. The previous version blended to a fixed deep value across 8% of
+  // the grid half-width, which drew a hard rectangle around the sim grid: a
+  // cold critic read the result as "a square tray dropped into an ocean" and
+  // measured that step as a bigger colour jump than any shore transition in
+  // the frame. Every reference in docs/reference/ has the shelf falling away
+  // on a ragged organic edge, so the distance is warped by fbm before it
+  // drives depth — the contours wander instead of tracing the footprint.
+  //
+  // Note this is the OPPOSITE of terracing (see the shape ruling in
+  // reference/OBSERVATIONS.md): it turns the one hard geometric step in the
+  // frame into a continuous slope.
+  float shelfNoise = (fbm(vWorldPos.xz * 0.035) - 0.5) * uShelfWander;
+  float shelfOut = max(outside + shelfNoise, 0.0);
+  float depth = gridDepth + shelfOut * uShelfSlope;
 
   // Two-stage ramp: sand-lit shallow -> turquoise -> deep teal. Godus reads
   // as distinct depth bands rather than one plane colour, so the stages are
@@ -141,7 +159,15 @@ void main() {
   vec3 waterColor = mix(uShallowColor, uMidColor, shallowT);
   waterColor = mix(waterColor, uDeepColor, deepT);
 
-  float ndl = 0.35 + 0.65 * max(dot(n, uSunDirection), 0.0);
+  // Bar v2 point 8 — "the shoreline shows a distinct pale band between land
+  // and shallow water" — scored FAIL: on the east shore the frame stepped
+  // from land straight to teal in a single pixel. This is that band, and it
+  // is squared so it stays tight to the waterline instead of washing the
+  // whole shelf pale. natural-mauritius-lagoon is the reference.
+  float foam = 1.0 - smoothstep(0.0, uFoamDepth, depth);
+  waterColor = mix(waterColor, uFoamColor, foam * foam * 0.9);
+
+  float ndl = 0.52 + 0.48 * max(dot(n, uSunDirection), 0.0);
   // Fresnel runs to 1 at the grazing angles that fill the top of frame, so a
   // full-strength sky mirror out there turns the whole far sea into a pale
   // band of sky colour — trading the old grey sky dome for an equally grey
@@ -166,6 +192,22 @@ void main() {
   // cause of the old muddy near-neutral plane — the dark bed dominated the
   // blend everywhere, including where it should have been bright sand.
   float bedOpacity = mix(uShallowOpacity, uOpacity, smoothstep(0.0, uMidDepth, depth));
+  // The terrain mesh stops dead at the sim grid, so past that edge there is
+  // no seabed behind the water — only the sky dome, whose below-horizon band
+  // is a bright pale grey. Semi-transparent water over that reads as a bright
+  // halo tracing the map footprint, and bloom amplifies it.
+  //
+  // So the water has to reach full opacity slightly *inside* the boundary,
+  // not at it: ramping outward still leaves a band of see-through water with
+  // nothing behind it. Signed box distance, negative inside, opaque by the
+  // time it reaches 0.
+  //
+  // This is a containment measure, not the fix. The real fix is a terrain
+  // skirt carrying the seabed past the footprint — the water can only hide
+  // the symptom, because it is the transparency itself that reveals where the
+  // terrain ends.
+  float signedOut = max(outsideXZ.x, outsideXZ.y);
+  bedOpacity = mix(bedOpacity, 1.0, smoothstep(-uOpaqueMargin, 0.0, signedOut));
   // Let the specular sparkle read through the transparency instead of
   // being washed out flat by the fixed low opacity.
   float alpha = clamp(bedOpacity + spec * 0.35, 0.0, 1.0);
@@ -249,19 +291,30 @@ export class OceanMesh implements SkyLightingConsumer {
       // reading off lit sand, a turquoise mid band, and a deep blue-teal. The
       // single dark navy this replaced (0x1a4a6e) is what measured
       // rgb(42,48,52) on screen — a near-neutral plane with no depth read.
-      uShallowColor: { value: new THREE.Color(0x5fd8d0) },
+      uShallowColor: { value: new THREE.Color(0x36e0d2) },
       uMidColor: { value: new THREE.Color(0x1f9fb5) },
-      uDeepColor: { value: new THREE.Color(0x15556e) },
+      uDeepColor: { value: new THREE.Color(0x1b5f78) },
       uOpacity: { value: 0.88 },
-      uShallowOpacity: { value: 0.42 },
+      uShallowOpacity: { value: 0.58 },
       uElevationTex: { value: this.elevationTex },
       uSeaLevel: { value: 0 },
       uWorldSize: { value: worldSize },
       uShallowDepth: { value: 0.9 },
       uMidDepth: { value: 3.5 },
-      // Fraction of the grid's half-width over which the plane fades from the
-      // sampled seafloor to open deep water, hiding the grid's square edge.
-      uEdgeFade: { value: 0.08 },
+      // How fast the seabed falls away once past the sim grid, in metres of
+      // depth per world unit. 0.35 reaches full deep-water colour about 20
+      // units out — far enough to read as a slope rather than an edge, close
+      // enough that the island still sits in its own shelf.
+      uShelfSlope: { value: 0.35 },
+      // World units of fbm warp applied to that distance, so the depth
+      // contours wander instead of tracing the grid's rectangle.
+      uShelfWander: { value: 9.0 },
+      // World units inside the grid boundary over which the water finishes
+      // going opaque, so no see-through band survives past the terrain edge.
+      uOpaqueMargin: { value: 5.0 },
+      // Pale wet-sand band right at the waterline (bar v2 point 8).
+      uFoamColor: { value: new THREE.Color(0xd9f2e4) },
+      uFoamDepth: { value: 0.32 },
       // View distances over which ripple detail and sun sparkle fade out.
       // `near` sits beyond the grid's far corner as seen from the camera home
       // (~85 units), so nothing inside the playable world loses its ripples.

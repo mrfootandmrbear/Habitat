@@ -137,7 +137,7 @@
       ],
       "status": "next",
       "round": 0,
-      "note": "PROMOTED to top rank by the C0 critic and independently corroborated by the owner's cold-island photo. The sim grid's shallow shelf ends in a hard rectangle against deep water. Needs the seabed carried past the map footprint on a continuous irregular slope, with deep-water colour driven off real depth so the band curves with bathymetry. Explicitly NOT terracing \u2014 the opposite."
+      "note": "PROMOTED to top rank by the C0 critic and independently corroborated by the owner's cold-island photo. The sim grid's shallow shelf ends in a hard rectangle against deep water. Needs the seabed carried past the map footprint on a continuous irregular slope, with deep-water colour driven off real depth so the band curves with bathymetry. Explicitly NOT terracing \u2014 the opposite. CONFIRMED by the round-2 water pass: shader-side shelf slope improves the colour ramp but cannot remove the footprint, because transparency exposes the terrain mesh boundary regardless of what the water colour does."
     },
     {
       "id": "C4",
@@ -164,10 +164,30 @@
         6,
         7
       ],
-      "status": "critiqued-failing",
-      "round": 1,
+      "status": "improved-not-done",
+      "round": 2,
       "commit": "567ae8b",
-      "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it. CRITIQUED as part of C0: point 7 FAIL \u2014 shallow water measures HSV sat 0.25 vs deep 0.61, i.e. the shallow band is the LEAST saturated water in frame, backwards from every reference. Point 8 FAIL \u2014 no pale shoreline band on the east shore."
+      "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it. CRITIQUED as part of C0: point 7 FAIL \u2014 shallow water measures HSV sat 0.25 vs deep 0.61, i.e. the shallow band is the LEAST saturated water in frame, backwards from every reference. Point 8 FAIL \u2014 no pale shoreline band on the east shore.",
+      "measured": {
+        "shelfShallowSaturation": {
+          "before": 0.431,
+          "after": 0.563,
+          "critiqueBaseline": 0.25
+        },
+        "openSeaFarSaturation": 0.928,
+        "note": "shallow is now clearly cyan rather than \"milky pale seafoam\"; deep stays saturated navy, so the two are distinct. Whether point 7 now PASSES is a critic call, not mine."
+      },
+      "landed": [
+        "shelf slope continues the seabed past the grid with fbm-warped contours",
+        "pale wet-sand foam band at the waterline (point 8)",
+        "water reaches full opacity just inside the grid edge so sky cannot show through the gap",
+        "deep colour lifted out of an ACES red-channel clamp, then pulled back when it flattened the depth read"
+      ],
+      "openDefects": [
+        "Bright cyan halo still traces the shelf boundary as a rounded rectangle.",
+        "open-sea-near probe measures red channel exactly 0 \u2014 a channel clip. MEASURED, cause NOT diagnosed. Do not guess; the tonemap tool predicts red=23 for the deep colour at that luminance, so something else is driving it down. Disconfirming test: probe the same point with skyMix forced to 0."
+      ],
+      "realFix": "Terrain skirt. The water shader can only hide the footprint, because it is the TRANSPARENCY that reveals where the terrain mesh stops \u2014 semi-transparent water past the grid edge has only the bright below-horizon sky dome behind it. Carrying the seabed out as geometry is the fix the C0 critic asked for and it is now the top-ranked item."
     }
   ]
 }
