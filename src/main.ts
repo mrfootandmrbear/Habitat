@@ -210,7 +210,8 @@ let extentCage = createExtentCage(config.worldSize, config.mountainPeak, {
   seaLevel: world.seaLevel,
   meanHighWater: world.meanHighWater,
 });
-const oceanMesh = new OceanMesh(config.worldSize);
+const oceanMesh = new OceanMesh(config.worldSize, n, n);
+oceanMesh.setTerrain(world.terrain.data);
 oceanMesh.setSeaLevel(world.seaLevel);
 // Both water surfaces reflect the sky the scene actually renders, measured
 // off the dome at startup rather than copied as literals into each shader.
@@ -946,6 +947,9 @@ function climateDayIndex(): number {
 function syncWaterDisplay(wallDt: number, snap = false): void {
   if (snap) waterMesh.snapFrom(world);
   else waterMesh.updateFrom(world, wallDt, stormDisplayActive);
+  // The ocean bands its colour by depth, so it needs the seafloor as sculpting
+  // and erosion move it — otherwise the shallows stay where the bed used to be.
+  oceanMesh.setTerrain(world.terrain.data);
 }
 
 function predictionStatus(): string {

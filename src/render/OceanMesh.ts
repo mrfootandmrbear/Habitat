@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { config } from "../config";
+import { createFieldTexture, updateFieldTexture } from "./fieldTexture";
 import {
   SUN_COLOR,
   sunDirectionFromSky,
@@ -26,13 +27,22 @@ void main() {
 
 const oceanFragment = /* glsl */ `
 varying vec3 vWorldPos;
-uniform vec3 uBaseColor;
+uniform vec3 uShallowColor;
+uniform vec3 uMidColor;
+uniform vec3 uDeepColor;
 uniform float uOpacity;
+uniform float uShallowOpacity;
 uniform float uTime;
 uniform vec3 uSunDirection;
 uniform vec3 uSunColor;
 uniform vec3 uSkyZenith;
 uniform vec3 uSkyHorizon;
+uniform sampler2D uElevationTex;
+uniform float uSeaLevel;
+uniform float uWorldSize;
+uniform float uShallowDepth;
+uniform float uMidDepth;
+uniform float uEdgeFade;
 
 float hash21(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -94,8 +104,33 @@ void main() {
   float ndv = clamp(dot(n, viewDir), 0.0, 1.0);
   float fresnel = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
 
+  // --- Depth banding (bar v2 points 6-8) --------------------------------
+  // The ocean plane is wider than the sim grid, so map world XZ onto the
+  // terrain field and treat everything beyond its edge as open deep water.
+  // Sampled nearest-equivalent via a direct tap: the band edges are smoothed
+  // by smoothstep below, so bilinear filtering would buy nothing here.
+  vec2 gridUv = vWorldPos.xz / uWorldSize + 0.5;
+  // fieldUv's V flip (see fieldTexture.ts) — fields upload row-major in +Z.
+  float bed = texture2D(uElevationTex, vec2(gridUv.x, 1.0 - gridUv.y)).r;
+  float gridDepth = max(uSeaLevel - bed, 0.0);
+  // Beyond the grid there is no bed to sample, so fall back to open deep
+  // water — but fade into it rather than switching. A hard step here draws a
+  // visible rectangle around the sim grid (the long-standing "square ocean
+  // seam"), and it gets far louder once inside and outside differ in colour.
+  vec2 edgeDist = min(gridUv, 1.0 - gridUv);
+  float gridFalloff = smoothstep(0.0, uEdgeFade, min(edgeDist.x, edgeDist.y));
+  float depth = mix(uMidDepth * 2.0, gridDepth, gridFalloff);
+
+  // Two-stage ramp: sand-lit shallow -> turquoise -> deep teal. Godus reads
+  // as distinct depth bands rather than one plane colour, so the stages are
+  // deliberately separated instead of a single linear gradient.
+  float shallowT = smoothstep(0.0, uShallowDepth, depth);
+  float deepT = smoothstep(uShallowDepth, uMidDepth, depth);
+  vec3 waterColor = mix(uShallowColor, uMidColor, shallowT);
+  waterColor = mix(waterColor, uDeepColor, deepT);
+
   float ndl = 0.35 + 0.65 * max(dot(n, uSunDirection), 0.0);
-  vec3 col = mix(uBaseColor * ndl, skyColor, fresnel * 0.65);
+  vec3 col = mix(waterColor * ndl, skyColor, fresnel * 0.65);
 
   // Sun specular sparkle, softly compressed so it never hard-clips to a
   // flat white disc (bar item 10).
@@ -107,9 +142,21 @@ void main() {
   specCol = specCol / (1.0 + specCol);
   col += specCol;
 
+  // Opacity ramps with depth for the same reason the colour does: Godus
+  // shallows glow because the lit sand reads *through* them, while deep water
+  // hides its bed entirely. A single fixed opacity (0.55) was the diagnosed
+  // cause of the old muddy near-neutral plane — the dark bed dominated the
+  // blend everywhere, including where it should have been bright sand.
+  float bedOpacity = mix(uShallowOpacity, uOpacity, smoothstep(0.0, uMidDepth, depth));
   // Let the specular sparkle read through the transparency instead of
   // being washed out flat by the fixed low opacity.
-  float alpha = clamp(uOpacity + spec * 0.35, 0.0, 1.0);
+  float alpha = clamp(bedOpacity + spec * 0.35, 0.0, 1.0);
+  // NOT forced opaque at the grid edge. Tried mix(1.0, alpha, gridFalloff)
+  // to hide the terrain mesh's boundary showing through; it traded the
+  // rectangle for worse — fully opaque water made the sun glint read as hard
+  // bright streaks off the plane's corners. The residual seam is a geometry
+  // problem (the terrain mesh simply stops) and wants a terrain skirt, not
+  // more shader compensation here.
 
   gl_FragColor = vec4(col, alpha);
 }
@@ -123,17 +170,39 @@ export class OceanMesh implements SkyLightingConsumer {
   readonly mesh: THREE.Mesh;
   private readonly material: THREE.ShaderMaterial;
   private readonly uniforms: Record<string, THREE.IUniform>;
+  /** Seafloor elevation, so the plane can band its colour by water depth. */
+  private readonly elevationTex: THREE.DataTexture;
   /** Wall-clock accumulator driving ripple/sparkle animation; wrapped to
    *  keep float precision sane across long play sessions. */
   private elapsedSeconds = 0;
   private lastRenderMs: number | undefined = undefined;
 
-  constructor(worldSize = config.worldSize) {
+  constructor(
+    worldSize = config.worldSize,
+    gridWidth = config.gridSize,
+    gridHeight = config.gridSize,
+  ) {
     const geo = new THREE.PlaneGeometry(worldSize * 1.35, worldSize * 1.35);
     geo.rotateX(-Math.PI / 2);
+    this.elevationTex = createFieldTexture(gridWidth, gridHeight);
     this.uniforms = {
-      uBaseColor: { value: new THREE.Color(0x1a4a6e) },
-      uOpacity: { value: 0.55 },
+      // Godus-clarity palette (bar v2 points 6-8): a bright saturated shallow
+      // reading off lit sand, a turquoise mid band, and a deep blue-teal. The
+      // single dark navy this replaced (0x1a4a6e) is what measured
+      // rgb(42,48,52) on screen — a near-neutral plane with no depth read.
+      uShallowColor: { value: new THREE.Color(0x5fd8d0) },
+      uMidColor: { value: new THREE.Color(0x1f9fb5) },
+      uDeepColor: { value: new THREE.Color(0x15556e) },
+      uOpacity: { value: 0.88 },
+      uShallowOpacity: { value: 0.42 },
+      uElevationTex: { value: this.elevationTex },
+      uSeaLevel: { value: 0 },
+      uWorldSize: { value: worldSize },
+      uShallowDepth: { value: 0.9 },
+      uMidDepth: { value: 3.5 },
+      // Fraction of the grid's half-width over which the plane fades from the
+      // sampled seafloor to open deep water, hiding the grid's square edge.
+      uEdgeFade: { value: 0.08 },
       uTime: { value: 0 },
       // Seeded from the shared rig so the plane is lit correctly even before
       // the measured sky lands; `setSkyLighting` overwrites both with the
@@ -187,6 +256,15 @@ export class OceanMesh implements SkyLightingConsumer {
     (this.uniforms.uSkyHorizon!.value as THREE.Color).copy(lighting.skyHorizon);
   }
 
+  /**
+   * Upload the seafloor the plane is sitting over, so depth banding tracks
+   * sculpting. Cheap enough to call whenever terrain changes; the texture is
+   * a single-channel float the size of the sim grid.
+   */
+  setTerrain(elevation: Float32Array): void {
+    updateFieldTexture(this.elevationTex, elevation);
+  }
+
   /** Show ocean at sea level (m). Pass undefined to hide. */
   setSeaLevel(seaLevel: number | undefined): void {
     if (seaLevel === undefined) {
@@ -195,6 +273,9 @@ export class OceanMesh implements SkyLightingConsumer {
     }
     // Hair below datum so land foreshore verts at ~sea win depth cleanly.
     this.mesh.position.y = seaLevel - 0.02;
+    // The shader needs the true datum, not the offset mesh position, or every
+    // depth would be biased by the z-fight hair above.
+    this.uniforms.uSeaLevel!.value = seaLevel;
     this.mesh.visible = true;
   }
 }
