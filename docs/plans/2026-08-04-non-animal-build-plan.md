@@ -174,5 +174,21 @@ Consequences, and they are good news for C-027:
    there are no `.glb` assets in the repo at all. Adding them brings build
    size, load timing, and an iPad-Safari budget question (the quality tiers
    exist precisely because of that constraint).
-3. **Plugin install is an owner action.** `/plugin install foxel@foxel` pulls
-   third-party code; not something to do unprompted.
+3. ~~**Plugin install is an owner action.**~~ **Installed 2026-08-04** at
+   `~/.claude/skills/foxel/SKILL.md` (owner-directed, fetched from the repo's
+   `skills/foxel/SKILL.md`). `numpy 2.5.1` installed into the active
+   miniconda base env — the skill's one stated prerequisite, which was
+   missing. Python 3.13.13.
+
+**Setup shape when the animal phase starts.** The skill clones the toolchain
+*into the project* (`git clone https://github.com/elliottdehn/foxel`) and
+gitignores `foxel/` as tooling rather than source. So the repo gains a
+gitignored Python checkout plus whatever `.glb` output we choose to commit —
+worth deciding deliberately which build artifacts are versioned, given
+Habitat has none today.
+
+**Also available: a 2D pixel-art mode.** The same language does frame-by-frame
+sprite animation (`2d` as the first line, `--scale N` for nearest-neighbour
+output, PNG/APNG). Not needed for fauna, but potentially relevant to UI
+iconography and to C-026 (CVD-safe palette) work — noted so it is not
+rediscovered later.
