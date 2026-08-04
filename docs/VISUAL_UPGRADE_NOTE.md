@@ -154,6 +154,49 @@ signal, not a setback — the critique step did its job by catching gaps that
 per piece against the four concrete, source-verified gaps above, then
 re-critique.
 
+## Discovery mid-Round-2: postFx pipeline likely double-tonemapping (2026-08-04)
+
+Before writing Round 2 builder briefs, checked whether the terrain "no
+visible AO" and sky "can't verify bloom" findings were real gaps or just an
+artifact of this test environment. They were partly the latter, but digging
+in surfaced a more serious, previously-hidden bug:
+
+- This container reports 4 CPU cores. `QualityTier.ts`'s `detectQualityTier()`
+  selects `"low"` whenever `cores <= 4`, and `"low"` sets `postFx: false` —
+  so **every Round 1 critique screenshot was captured with SSAO, bloom, and
+  the whole post-processing composer entirely disabled.** The terrain/sky
+  critics' AO and bloom findings above were made blind to those features.
+- Forcing `?quality=high` (the tier most real users on modern multi-core
+  desktops would actually get) to check fairly: the result is **worse, not
+  better** — the entire scene washes out to a pale white/blue haze, terrain
+  and water barely distinguishable, far less legible than the low-tier
+  direct-render path. Screenshots: `quality-high-1.png` and
+  `quality-high-detail.png` (see the progress artifact).
+- **Leading hypothesis (diagnosed, not yet fixed or confirmed by a code
+  change):** likely double tone-mapping. `Scene.ts` sets
+  `renderer.toneMapping = THREE.ACESFilmicToneMapping` globally, which is
+  baked into every standard material's shader output — so `RenderPass`'s
+  intermediate render already comes out ACES-tonemapped. `OutputPass`, the
+  last pass in the composer chain, then applies tone-mapping/colorspace
+  conversion *again* on data that's already been compressed once, pushing
+  everything further toward white. This would explain the exact symptom
+  (overexposed, low-contrast, pale) without touching any of the four
+  critiqued pieces' own shaders.
+- **Why this matters more than the four piece-specific gaps:** this is
+  shared rendering foundation (the composer/tonemapping chain), not any one
+  piece. It's a prerequisite per the gauntlet-loop skill's Step 2, not a
+  fifth piece to fan out — fixing it changes what "critiqued" even means
+  for terrain/sky's AO and bloom, since those were never actually seen with
+  postFx on. It should be fixed (or at least confirmed and root-caused)
+  before re-critiquing terrain/sky specifically, and probably before the
+  water/vegetation Round 2 passes too, since a shared foundation change
+  mid-round is exactly the staleness trap the skill warns about.
+
+**Status: diagnosed, not fixed.** Paused here on owner instruction before
+writing any Round 2 code. Not yet confirmed by actually toggling
+`renderer.toneMapping` or `OutputPass` to test the hypothesis — that's the
+first thing to try on resume.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
