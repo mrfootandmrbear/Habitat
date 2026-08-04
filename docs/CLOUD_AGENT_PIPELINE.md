@@ -52,7 +52,7 @@ Valid non-idle exits that still allow the chain to continue after merge:
 
 ## 3. Parallel tracks
 
-Two automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
+Three automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
 
 ### Track T — Terrain tools (C-028 structural) — **parked**
 
@@ -70,13 +70,22 @@ Two automations share the merge trigger but claim **disjoint** tip items. Rebase
 | R2 | **§4.48** habitat/dispersal determinism hygiene | Tip today — sole executable queue (Track T parked) |
 | Rn | Next unblocked review-queue item | Skip owner-blocked Living remainder |
 
-**Never in either track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
+### Track V — Plant rendering (presentation)
+
+| Order | Slice | Notes |
+|---|---|---|
+| V1 | **§4.60** per-guild silhouette geometry | Tip today — new track, owner agreed 2026-08-03 to ship plant rendering now over animals |
+| V2 | **§4.61** per-cell clustering | Queued after V1 |
+| V3 | **§4.62** composite runner-up guild | Queued after V2 |
+| Vn | **§4.63** distance silhouette LOD | Deferred — not agent-executable until V1–V3 are shipped and frame-timing profiled |
+
+**Never in any track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
 
 ---
 
 ## 4. Cursor Automation setup (owner paste)
 
-Create **two** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
+Create **three** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
 
 ### Shared settings
 
@@ -140,6 +149,30 @@ Rules:
 Handoff: leave "Next (executable tip)" accurate for the next Track R agent.
 ```
 
+### Prompt — Track V (plant rendering)
+
+```
+You are a Habitat cloud succession agent on Track V (plant rendering — presentation).
+
+Cold start:
+1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md, docs/reviews/2026-08-03-plant-rendering-review.md.
+2. Read "Next (executable tip)" and the Track V table in CLOUD_AGENT_PIPELINE.md.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track V slice (today: §4.60; §4.61/§4.62 come after, in order; §4.63 is deferred — do not claim it before §4.60–§4.62 ship and are profiled). If the named tip item is already Done or not yet unblocked, write a one-line status and STOP — do not invent work.
+
+Rules:
+- One slice per run. Do not start the next slice in the same run.
+- Presentation-only: read src/render/OccupantMesh.ts, src/ui/occupantEncoding.ts, src/ui/occupantSway.ts before touching geometry. No new WorldState field, no new Process, no new sim read beyond what the review names for that slice.
+- No vendored/imported plant assets — procedural THREE.BufferGeometry only (T-007). No per-frame stochastic jitter — any offset/selection must be a stable hash of cell index, matching the existing yaw salt (x*17+z*31) in OccupantMesh.ts.
+- Do not touch occupantEncoding.ts's six hues or occupantSway.ts's sway math unless the slice's own checklist says so — this track is shape, not color or motion.
+- Follow BUILD_GUIDE checklist for that §4.6x entry exactly. Green bar: npm run gate.
+- Update BUILD_GUIDE / MVP_SCOPE / README / slice manifest + composition (build-plan-on-commit). When editing the shared tip paragraph, change only the Track V clause.
+- On block: /blocked-note, name next queue item, stop.
+- Never implement L5/L8/nutrients/animals/SWE/wet-sand/freeze, and never implement §4.63 before §4.60–§4.62 are shipped and profiled.
+- Open a draft PR. Summarize gate results. Do not ask the owner to confirm numbers.
+
+Handoff: leave "Next (executable tip)" accurate for the next Track V agent.
+```
+
 ---
 
 ## 5. Manual seed (first succession)
@@ -147,9 +180,9 @@ Handoff: leave "Next (executable tip)" accurate for the next Track R agent.
 Before enabling Automations:
 
 1. Land this doc on `main`.
-2. Launch **T1** (§4.57) and **R1** (§4.47) as separate cloud agents (disjoint branches).
-3. Merge each when CI green (rebase the second if tip-paragraph conflicts).
-4. Enable the matching Automation so the *next* merge starts T2 / R2.
+2. Launch **T1** (§4.57), **R1** (§4.47), and **V1** (§4.60) as separate cloud agents (disjoint branches).
+3. Merge each when CI green (rebase the others if tip-paragraph conflicts).
+4. Enable the matching Automation so the *next* merge starts T2 / R2 / V2.
 
 Owner still owns: merge clicks, Lock sittings (C-014 / C-021 / C-022 / …), Tier-O batches.
 
@@ -159,7 +192,7 @@ Owner still owns: merge clicks, Lock sittings (C-014 / C-021 / C-022 / …), Tie
 
 | Risk | Mitigation |
 |---|---|
-| Both tracks edit BUILD_GUIDE tip | Each agent edits only its track’s tip clause; rebase before push |
+| Multiple tracks edit BUILD_GUIDE tip | Each agent edits only its track’s tip clause; rebase before push |
 | Shared sim files (WorldState, etc.) | Serialize via merge; never force-push `main` |
 | Double automation fire | Prefer single trigger (PR merged); prompt checks tip still names the slice |
 | Agent tries whole ladder | Prompt hard-stops at one slice |
