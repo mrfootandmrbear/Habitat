@@ -3078,6 +3078,9 @@ export function probeMarshArrival(): ProbeResult {
     world.soilSalinity.fill(0);
     world.shoreExposure.fill(0);
     world.runHabitatStep(1);
+    // §4.48: marsh HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     world.herbSeedBank.fill(config.seedSourceStrength);
     world.strandSeedBank.fill(config.seedSourceStrength);
     world.binderSeedBank.fill(config.seedSourceStrength);
@@ -3218,6 +3221,9 @@ export function probeShrubArrival(): ProbeResult {
     world.shoreExposure.fill(0);
     world.herbBiomass.fill(config.herbBiomassMax * herbFrac);
     world.runHabitatStep(1);
+    // §4.48: shrub HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     const herbSeed = bareSeed ? 0 : config.seedSourceStrength;
     world.herbSeedBank.fill(herbSeed);
     world.strandSeedBank.fill(config.seedSourceStrength);
@@ -3335,6 +3341,9 @@ export function probeCrustArrival(): ProbeResult {
     world.herbBiomass.fill(config.herbBiomassMax * opts.herbFrac);
     world.runHabitatStep(1);
     world.soilMoisture.fill(config.soilPorosity * opts.moistureFrac);
+    // §4.48: crust HSI is cached by dispersal (annual), not recomputed
+    // inside establishment — populate the cache before looping establishment.
+    world.runDispersalStep(1);
     world.herbSeedBank.fill(0);
     world.strandSeedBank.fill(0);
     world.binderSeedBank.fill(0);
@@ -5032,6 +5041,117 @@ export function probeDiebackLag(): ProbeResult {
   };
 }
 
+/**
+ * L5 / C-023 — guild competition / successional displacement.
+ * Rule: docs/candidates/C-023 criterion (DECISION_CONFORMANCE.md). Shrub's
+ * overstory canopy attenuates the insolation herb's light factor sees
+ * (habitat/hsiComposition.ts factorLight, via runHabitatStep). On identical
+ * terrain/seed/forcing: with shrub able to establish, herb rises, peaks,
+ * then *declines* from that peak as shrub's own cover keeps rising —
+ * displacement, not parallel accumulation. A no-competition twin (shrub
+ * seed suppressed every tick, otherwise identical) is the regression case:
+ * herb must rise monotonically to the same ceiling it always has, proving
+ * the competing twin's decline is caused by shrub's shade and nothing else.
+ */
+export function probeSuccessionDisplace(): ProbeResult {
+  const w = 8;
+  const h = 8;
+  const sx = 4;
+  const sz = 4;
+  const ticks = 30;
+
+  const make = (suppressShrub: boolean) => {
+    const world = new WorldState(new Grid2D(w, h, 2.5));
+    world.setAirTemperature(heatById("warm").airTempC);
+    world.vegCover.fill(0);
+    world.soilDepth.fill(config.hsiDepthRefMeters);
+    world.soilMoisture.fill(config.soilPorosity * 0.5);
+    world.groundwaterStorage.fill(config.hsiGwRefMeters);
+    world.soilSalinity.fill(0);
+    world.shoreExposure.fill(0);
+    let herbPeak = 0;
+    for (let tick = 0; tick < ticks; tick++) {
+      world.runHabitatStep(1);
+      world.runDispersalStep(1);
+      if (suppressShrub) world.shrubSeedBank.fill(0);
+      world.runHerbEstablishmentStep(1);
+      herbPeak = Math.max(herbPeak, world.getHerbBiomass(sx, sz));
+    }
+    return { world, herbPeak };
+  };
+
+  const competingA = make(false);
+  const competingB = make(false);
+  const replayMatch =
+    competingA.world.stateHash() === competingB.world.stateHash() ? 1 : 0;
+  if (replayMatch !== 1) {
+    throw new Error("succession-displace: replay hash mismatch");
+  }
+
+  const noCompetition = make(true);
+
+  const herbFinal = competingA.world.getHerbBiomass(sx, sz);
+  const shrubFinal = competingA.world.getShrubBiomass(sx, sz);
+  const herbPeak = competingA.herbPeak;
+  const controlHerbFinal = noCompetition.world.getHerbBiomass(sx, sz);
+  const controlShrubFinal = noCompetition.world.getShrubBiomass(sx, sz);
+
+  const declinedFromPeak = herbPeak - herbFinal;
+  const suppressedVsControl = controlHerbFinal - herbFinal;
+
+  if (!(shrubFinal > 0.5)) {
+    throw new Error(`succession-displace: shrub too low (${shrubFinal})`);
+  }
+  if (!(declinedFromPeak > 0.1)) {
+    throw new Error(
+      `succession-displace: herb did not decline from its peak (peak=${herbPeak}, final=${herbFinal})`,
+    );
+  }
+  if (controlShrubFinal !== 0) {
+    throw new Error(
+      `succession-displace: control shrub expected 0 (got ${controlShrubFinal})`,
+    );
+  }
+  if (!(suppressedVsControl > 0.5)) {
+    throw new Error(
+      `succession-displace: competing herb not suppressed vs. no-competition control (control=${controlHerbFinal}, competing=${herbFinal})`,
+    );
+  }
+  // Regression case: the control's own trajectory must not itself decline —
+  // otherwise the "control" isn't actually free of the mechanism.
+  if (controlHerbFinal < herbPeak) {
+    throw new Error(
+      `succession-displace: control herb declined too (${controlHerbFinal} < peak ${herbPeak}) — control is not a clean regression case`,
+    );
+  }
+
+  return {
+    scenario: "succession-displace",
+    records: [
+      {
+        label: "competing",
+        herbPeak,
+        herbFinal,
+        shrubFinal,
+        declinedFromPeak,
+      },
+      {
+        label: "noCompetition",
+        herbFinal: controlHerbFinal,
+        shrubFinal: controlShrubFinal,
+      },
+      {
+        label: "delta",
+        declinedFromPeak,
+        suppressedVsControl,
+        dominantRises: shrubFinal > 0.5 ? 1 : 0,
+        replayMatch,
+        hashN: Number.parseInt(competingA.world.stateHash().slice(0, 8), 16),
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -5074,6 +5194,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "event-band-gate": probeEventBandGate,
   "season-regime": probeSeasonRegime,
   "erosion-intensity": probeErosionIntensity,
+  "succession-displace": probeSuccessionDisplace,
 };
 
 export function runProbe(name: string): ProbeResult {

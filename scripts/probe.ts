@@ -718,6 +718,19 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.replayMatch": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "succession-displace": {
+    "competing.herbPeak": { abs: 1e-5 },
+    "competing.herbFinal": { abs: 1e-5 },
+    "competing.shrubFinal": { abs: 1e-5 },
+    "competing.declinedFromPeak": { abs: 1e-5 },
+    "noCompetition.herbFinal": { abs: 1e-5 },
+    "noCompetition.shrubFinal": { abs: 0 },
+    "delta.declinedFromPeak": { abs: 1e-5 },
+    "delta.suppressedVsControl": { abs: 1e-5 },
+    "delta.dominantRises": { abs: 0 },
+    "delta.replayMatch": { abs: 0 },
+    "delta.hashN": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

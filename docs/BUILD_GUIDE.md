@@ -1040,13 +1040,21 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.40 Slice L5 — Guild competition *(blocked on C-023 — do not implement)*
+### 4.40 Slice L5 — Guild competition *(Done — agent, C-023 Locked)*
 
-**Why this exists.** Six guilds stack additively into `physicalCover` and **no guild is ever displaced**. Succession is parallel accumulation, not replacement. Filed as **C-023** Open ([register §16.5](DECISION_REGISTER.md), criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3).
+**Why this exists.** Six guilds stack additively into `physicalCover` and **no guild is ever displaced**. Succession is parallel accumulation, not replacement. Filed as **C-023**, [register §16.5](DECISION_REGISTER.md), criterion in [DECISION_CONFORMANCE.md](DECISION_CONFORMANCE.md) §3. Owner delegated the choice in session (2026-08-03, "pick the best option") — leading direction adopted as written; **C-023 Locked**.
 
-**Status.** Open candidate, owner-judged. Per §4.0.1, **implement nothing under it** — the entry exists so the question is filed rather than answered by an agent. Ordering is also causal, not just procedural: without L3's mortality rate there is no mechanism by which a suppressed guild can recede, so building this first would measure nothing.
+**Register:** C-023 Locked; ES-006 Locked; C-011; T-001 Locked; T-005.
+**New Process?** no — extends the existing daily-band `habitatProcess`. D-007 clip gate does not apply.
 
-**Likely shape (hypothesis only).** Shorter guilds read `light.understory` instead of open-sky `light.insolation` in their HSI, making displacement a consequence of the Beer–Lambert budget `lightCompetition.ts` already computes rather than a new rule or a dominance table.
+- [x] Shrub — the one structurally taller (woody) guild among the six (DESIGN_WIKI §4) — attenuates the insolation feeding herb's existing light arm (`factorLight`) via the existing Beer–Lambert `evaluateLight`, reused not duplicated: `runHabitatStep` computes `shrubCover = herbCoverFraction(shrubBiomass, shrubBiomassMax)` and passes `evaluateLight(insolation, shrubCover).understoryLight` where raw open-sky insolation went before. Scoped to shrub → herb only — strand/binder/marsh/crust have no light arm in their HSI today
+- [x] `habitatProcess.reads` gains `veg.biomass.shrub`, declared `lagged` (daily band reading a seasonal-band field)
+- [x] Zero shrub cover leaves the attenuated value bit-identical to open-sky insolation — the no-competition regression case
+- [x] Test: bare-shrub identity; dense-shrub attenuation matches `I·(1−cover)` exactly; a 30-tick run shows herb rise → peak → decline under a live shrub canopy while a shrub-suppressed twin (identical else) rises monotonically and never declines (`successionDisplace.test.ts`)
+- [x] New probe `succession-displace`: competing twin herb peak ≈1.690 → final ≈0.975 (shrub final ≈1.524); no-competition twin herb final ≈2.083, shrub exactly 0; replay-hash identity
+- [x] Baselines: only `deep-time` moved (small — Δ ≈ 4.4e-6 on `lateDelta.coverDelta`, conservation-level moves elsewhere); every other probe unchanged
+- [x] Composition + manifest: [succession-displace-composition.md](slices/succession-displace-composition.md), [succession-displace.json](slices/succession-displace.json)
+- [x] **Next-but-one:** Living wave / Track R both close out with this slice; **L8** stays blocked on **C-024** + **C-025**
 
 ---
 
@@ -1166,18 +1174,18 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.48 Slice — Habitat/dispersal determinism hygiene *(queued)*
+### 4.48 Slice — Habitat/dispersal determinism hygiene *(Done — agent)*
 
 **Why this exists.** [Vegetation/habitat review](reviews/2026-07-31-vegetation-habitat-review.md) §2.4. Three independent hygiene defects in the same code region: `habitatProcess`'s declared `reads` (`habitatProcess.ts:12-18`) omits `this.terrain.data` and `this.soilMaterial.data`, both silently consumed inside `runHabitatStep` — invisible to any future scheduler dependency analysis. `runHerbEstablishmentStep` updates guilds sequentially with downstream guilds reading already-updated upstream values in the same tick (`WorldState.ts:1661,1718,1738-1742`) — a Gauss-Seidel update where the §2.1 Symmetry invariant class calls for order-independence. `runDispersalStep` and `runHerbEstablishmentStep` compute the identical six-guild HSI math twice, at different cadences (annual vs. seasonal, `WorldState.ts:1498-1559` vs. `1670-1747`), so the displayed `veg.establishment.*` field can silently disagree with what actually drove growth.
 
 **Register:** T-001 Locked; T-005 (registered fields inspectable — undeclared reads undermine this)
 **New Process?** no — scheduling/read-declaration and code-dedup hygiene only. D-007 clip gate does not apply.
 
-- [ ] `habitatProcess.reads` declares `terrain.elevation` (or whatever field backs `terrain.data`) and `soil.material`
-- [ ] Guild establishment update switches to a Jacobi snapshot at tick start, removing same-tick order dependence
-- [ ] `runHerbEstablishmentStep` reads the HSI values `runDispersalStep` already computed and wrote, instead of recomputing them
-- [ ] Test: swapping the guild update order in source produces byte-identical results (closes the Symmetry gap directly)
-- [ ] Composition + manifest; **Next-but-one:** §4.49 Drainage flat-routing correctness
+- [x] `habitatProcess.reads` declares `terrain.elevation` (or whatever field backs `terrain.data`) and `soil.material`
+- [x] Guild establishment update removes same-tick order dependence — every cross-guild biomass read (shrub ← herb, crust ← herb/strand/binder/marsh/shrub) moved into `runDispersalStep`, which only ever reads biomass and never mutates it: a stronger fix than a snapshot-and-guard, since nothing left in the mutating loop reads a sibling guild's live array at all
+- [x] `runHerbEstablishmentStep` reads the HSI values `runDispersalStep` already computed and wrote (new `veg.hsi.{strand,binder,marsh,shrub,crust}` cache fields), instead of recomputing them
+- [x] Test: the six guild updates commute — forward vs. reverse order from an identical tick-start snapshot agree exactly, and both match the real step's output (`habitatDispersalHygiene.test.ts`)
+- [x] Composition + manifest: [habitat-dispersal-hygiene-composition.md](slices/habitat-dispersal-hygiene-composition.md), [habitat-dispersal-hygiene.json](slices/habitat-dispersal-hygiene.json); **Next-but-one:** C-023 judged + L5 guild competition shipped (this session)
 
 ---
 
@@ -1399,7 +1407,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Done** |
 | L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Done** — agent (`dieback-lag`) |
 | L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass |
-| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
+| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Done** — agent ([composition](slices/succession-displace-composition.md)); C-023 Locked |
 | L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Done** — hash-identity; skipFrac 0.3; baselines unmoved |
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |
@@ -1408,7 +1416,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | — | Fuel / scar numeric fix | T-001, S-009 | §4.45 **Done** — analytic Olson + scar; `fuel-scar-refine` |
 | — | HSI curve-shape corrections | C-007, C-011, S-007, N-004 | §4.46 **Done** — agent ([composition](slices/hsi-curve-shape-composition.md)) |
 | — | Guild cover & light-competition correctness | C-023, ES-006, C-011 | §4.47 **Done** — agent ([composition](slices/guild-cover-light-composition.md)) |
-| — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Queued** — after cover/light |
+| — | Habitat/dispersal determinism hygiene | T-001, T-005 | §4.48 **Done** — agent ([composition](slices/habitat-dispersal-hygiene-composition.md)) |
 | — | Drainage flat-routing correctness | GEO-001, T-001 | §4.49 **Done** |
 | — | Surface-flux stability guard | T-001, H-004 | §4.50 **Done** |
 | — | Coastal base-level & substrate coupling | C-015, C-009, T-001 | §4.51 **Done** |

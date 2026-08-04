@@ -14,6 +14,11 @@ import type { Process } from "./Process";
  * by band order rather than enforced by the sort — declaring it keeps the edge
  * visible in the registry and citable in review (SIMULATION_MODEL §5), and
  * makes the cycle explicit if a biomass writer ever joins this band.
+ *
+ * §4.48 — also the sole writer of `veg.hsi.{strand,binder,marsh,shrub,crust}`:
+ * the guild HSI computed here for establishment probability is cached so the
+ * seasonal vegetation process reads it instead of recomputing the identical
+ * Liebig math at a different cadence.
  */
 export const dispersalProcess: Process = {
   id: "dispersal",
@@ -46,14 +51,19 @@ export const dispersalProcess: Process = {
     "veg.establishment.herb",
     "veg.seedBank.strand",
     "veg.establishment.strand",
+    "veg.hsi.strand",
     "veg.seedBank.binder",
     "veg.establishment.binder",
+    "veg.hsi.binder",
     "veg.seedBank.marsh",
     "veg.establishment.marsh",
+    "veg.hsi.marsh",
     "veg.seedBank.shrub",
     "veg.establishment.shrub",
+    "veg.hsi.shrub",
     "veg.seedBank.crust",
     "veg.establishment.crust",
+    "veg.hsi.crust",
   ],
   step(world, dt) {
     world.runDispersalStep(dt);
