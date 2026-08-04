@@ -24,6 +24,31 @@ container filesystem outside git.
 
 ## Screenshot verification without a browser GUI
 
+Commit this as a repo script, not a scratchpad file — see SKILL.md Step 5.
+On a developer machine, prefer `playwright-core` pointed at the system Chrome
+(`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS) over
+`playwright`, which downloads its own ~150 MB browser.
+
+**Measure the screenshot, not the live canvas.** The obvious approach —
+`gl.readPixels` on the page's WebGL canvas — returns **all zeros** whenever the
+renderer was created without `preserveDrawingBuffer`, because the backbuffer is
+cleared once the frame composites. The tell is every region reporting 100%
+clipped-black. Screenshot first, then decode that PNG in-page via an `Image`
+and a 2D canvas, and measure there.
+
+Two more traps that cost real time here:
+
+- **`page.evaluate` with a string does not bind arguments.** Passing a real
+  function instead fails differently under `tsx`, which injects esbuild's
+  `__name` helper into the function source — the browser then throws
+  `ReferenceError: __name is not defined`. Simplest fix that works in both:
+  build a self-invoking expression string with the argument already inlined
+  via `JSON.stringify`.
+- **Comments inside a GLSL template literal cannot contain backticks.** Writing
+  `` `mix(1.0, a, b)` `` in a shader comment terminates the JS template string
+  and produces a parse error far from the apparent cause. It surfaces as a
+  blank/error page and suspiciously uniform pixel stats.
+
 Headless Chromium is commonly pre-installed in agent sandboxes but not always
 on `$PATH` in a way `playwright install` expects — check for an existing
 binary before trying to download one (a download often isn't possible/allowed

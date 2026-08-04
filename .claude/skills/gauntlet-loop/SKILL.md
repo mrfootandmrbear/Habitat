@@ -30,6 +30,35 @@ or blindly re-running everything from zero. Checkpointing is not a nice-to-have
 bolted onto the loop; treat it as load-bearing as the builder/critic mechanic
 itself.
 
+## Step 0 — Budget shape: build inline, spawn only critics
+
+**Read this before deciding how many agents to run.** The loop was first
+written against API billing, where fanning out five parallel builders was the
+obvious move. On a **Pro/Max subscription there is no API budget**, and the
+economics invert: every subagent starts cold and re-derives context the main
+thread already has, so wide fan-out is the *expensive* path, and usage limits
+cut work off mid-round exactly the way a spend limit does.
+
+Default shape on a subscription:
+
+- **You are the builder.** Implement inline, in the main thread, where the
+  context already lives. Do not spawn a builder agent to do work you could do
+  directly — that is paying cold-start cost for nothing.
+- **Spawn subagents only as critics.** This is the one role that genuinely
+  cannot be done inline: grading your own output cold is precisely what the
+  loop exists to prevent. A critic needs fresh context, so it must be a
+  separate agent. Keep its brief small — the bar, the artifact, one question.
+- **Work pieces sequentially.** One piece at a time, committed before the next
+  starts. You lose the parallelism, but parallelism was buying wall-clock, not
+  quality, and it was what made every Round 1 interruption so expensive.
+- **Parallel worktrees are now the exception**, not the default. They only pay
+  off when pieces genuinely cannot touch the same files *and* you have budget
+  headroom to burn. Most rounds do not.
+
+If you are on API billing with real budget, the original fan-out still applies
+— but say which mode you are in at the top of the round, because it changes
+the whole plan.
+
 ## Step 1 — Pick the bar, and say so in one sentence
 
 The bar is whatever a critic scores the work against. In order of strength:
@@ -45,11 +74,41 @@ The bar is whatever a critic scores the work against. In order of strength:
    not.
 
 Before committing to option 2, actually try option 1 — attempt to fetch or
-request real references first. Only fall back to a rubric if that genuinely
-isn't available, and say so explicitly (to the user and in whatever status doc
-you're keeping) rather than silently substituting a weaker bar. Log the bar
+request real references first. **Ask the user for reference images.** They
+very often have them, or can produce them in seconds, and one supplied
+screenshot outranks any rubric you can write. If network access is blocked,
+check whether that block is environmental rather than permanent — a cloud
+container's policy is not the local machine's, and "we couldn't fetch
+references" can silently persist as a fact long after it stopped being true.
+Only fall back to a rubric if option 1 genuinely isn't available, and say so
+explicitly rather than silently substituting a weaker bar. Log the bar
 somewhere durable (a note in the repo, not just the chat) — the critic and any
 future resumed session need to find it without re-deriving it.
+
+### Confirm the bar governs what you think it governs
+
+**A critic scoring against a mis-specified bar produces confidently wrong
+direction, and it is worse than no critique at all** — it is a specific,
+authoritative-sounding instruction to make the work worse, and the builder has
+no reason to doubt it.
+
+This is not hypothetical. In this project a rubric written for *physically
+blended naturalism* was used to judge work whose actual target was *stylized
+clarity*. The critic's headline finding was "feather the hard-edged material
+boundaries" — the exact opposite of the art direction. It read as rigorous and
+was wrong at the root.
+
+So before any critic runs:
+
+- **Get the direction from the user in their words**, not inferred from the
+  code or from what the artifact currently looks like.
+- **When references arrive, ask what they are references *for*.** A user
+  supplying game screenshots may mean "match this colour and clarity" and not
+  "match this shape language." Guessing wrong sends a whole round sideways.
+  Ask which aspects govern and which do not, and write that split into the bar.
+- **Re-read old findings against the corrected bar and explicitly void the
+  ones that no longer hold.** Do not leave them sitting in the notes to be
+  actioned later by someone who won't know.
 
 ## Step 2 — Decompose, then build shared foundation *first*
 
@@ -108,6 +167,31 @@ Use isolated worktrees for parallel builders touching the same repo (the Agent
 tool's `isolation: "worktree"` option) so simultaneous edits can't collide.
 Give each builder a narrow, explicit file scope.
 
+## Step 4.5 — Never record an untested hypothesis as a finding
+
+When you diagnose a cause, **test it before you write it down**, and if you
+cannot test it yet, label it loudly as untested in the same sentence that
+states it. A plausible mechanism written into a status note hardens into fact:
+the next session reads it as established, plans around it, and can pause real
+work waiting on it.
+
+The cost is not theoretical. A round here was halted on a "leading hypothesis"
+that the post-processing chain was double tone-mapping. Nobody had toggled
+anything to check. On resume it took minutes to disprove on two independent
+grounds — the engine does not tonemap into render targets at all, and the
+symptom it was invented to explain had already been fixed by a commit that
+landed an hour after the diagnosis was written. A whole round was blocked on a
+guess that a ten-minute test would have killed.
+
+Two habits that prevent it:
+
+- **Timestamp findings, and check what landed after them.** A symptom observed
+  at 01:21 may already be fixed by a 02:27 commit. If a finding predates
+  intervening work, re-observe before acting on it.
+- **State the disconfirming test alongside the hypothesis.** "Likely double
+  tone-mapping; to check, toggle `OutputPass` and re-measure" invites the
+  next session to spend ten minutes instead of replanning around it.
+
 ## Step 5 — Keep a live progress record
 
 Two layers, both cheap:
@@ -118,6 +202,22 @@ Two layers, both cheap:
 - Optionally, a visual progress page (e.g. an Artifact) updated as rounds land,
   if the work is visual — good for the user, not load-bearing for resumption
   (the repo note and git history are).
+
+**Tooling you build to judge the work is part of the work — commit it.** A
+measurement harness kept in a session scratchpad is deleted when that session
+ends, and the next round pays to rebuild it before it can even start. If you
+wrote a script to capture screenshots, measure pixels, or otherwise turn the
+bar into numbers, it belongs in the repo with an npm script and a comment
+saying what trap it exists to avoid. Prefer a dependency that uses a browser
+already on the machine over one that downloads its own.
+
+**Two sessions editing the same note will contradict each other.** Parallel
+branches each appending to one status file is normal here, and neither can see
+the other. On merge, do not just concatenate: read both, and if they disagree,
+say which is current and why. Two independent cold critiques reaching the same
+verdict is *corroboration* and worth keeping as such — but a claim like "this
+was never critiqued," true from one branch's vantage point, becomes false once
+both land, and will mislead whoever reads it next.
 
 ## Step 6 — When integrating multiple pieces, re-verify the *whole*
 
