@@ -128,10 +128,22 @@ forgotten. It starts at zero distance (the seam stays exact) and never *raises*
 the seabed (genuinely deep edges stay deep). Both the skirt vertex shader and
 the ocean fragment shader must apply it, or colour and geometry disagree.
 
+A gentle fade is **not enough on its own**. Fading a +2m boundary berm toward a
+−5m basin over 12 units still leaves several units of dry land pointing out to
+sea — a shorter spike, still a spike. There is a second, harder rule: above-sea-
+level edge values are pushed under within 2 units. Past the map there is only
+sea.
+
 *Verified by A/B:* with the fade disabled, a hard square shelf reappears around
-the footprint; with it on, the shelf fades and the break wanders. Note the
+the footprint; with it on, the shelf fades and the break wanders. The
 berm-placement path itself was **not** reproduced under scripted clicks — the
 mechanism is confirmed, the specific interaction that triggers it is not.
+
+*Pinned by tests:* `seabed.test.ts` asserts the seam stays exact, the seabed is
+never raised, everything outside the footprint ends up under water, and two
+different boundary cells converge. Mutation-tested — removing the submerge step
+fails exactly the test named for this bug. Original report:
+`evidence/bugs/2026-08-04-skirt-edge-extrusion-berm-spikes.webp`.
 
 ### The terrain Group is raycast recursively — new children become colliders
 

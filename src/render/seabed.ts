@@ -102,15 +102,39 @@ export function shelfStartWarp(x: number, z: number): number {
  * distance and only takes hold outside — and it never *raises* the seabed, so
  * genuinely deep edges stay deep.
  *
- * No TypeScript twin: unlike the other functions here, this is only ever
- * evaluated where the elevation texture is sampled, which is in shaders.
+ * The TypeScript twin below is not used at runtime — the elevation texture is
+ * only sampled in shaders — but it exists so this can be unit-tested. The
+ * guarantee "no land outside the footprint" is exactly the kind of invariant
+ * that is cheap to assert and expensive to rediscover from a screenshot.
  */
 const SEABED_EDGE_FORGET = 12;
 const SEABED_BASIN_DEPTH = 5;
 
+/**
+ * Second, harder guarantee: **nothing outside the map may break the surface.**
+ *
+ * The gentle fade above is enough to stop bathymetric *detail* streaking, but
+ * not enough on its own for a boundary cell that sits above water. Fading a
+ * +2m berm down to a −5m basin across 12 units still leaves several units of
+ * dry land pointing out to sea — a shorter spike than the reported one, but
+ * still a spike, and still obviously wrong. The owner's screenshot shows
+ * exactly this case: each ridge projects from a raised pale patch sitting *on*
+ * the boundary row.
+ *
+ * So above-sea-level edge values are pushed under within a couple of units,
+ * independent of the slower detail fade. Past the map there is only sea.
+ */
+const SEABED_SUBMERGE_FADE = 2;
+const SEABED_SUBMERGE_MARGIN = 0.25;
+
 /** GLSL twin of the functions above. Keep identical, line for line. */
 export const SEABED_GLSL = /* glsl */ `
 float seabedForget(float bed, float seaLevel, float boxDist) {
+  // Hard rule first: no land outside the footprint, whatever the edge holds.
+  float submerged = min(bed, seaLevel - ${SEABED_SUBMERGE_MARGIN.toFixed(4)});
+  bed = mix(bed, submerged,
+            smoothstep(0.0, ${SEABED_SUBMERGE_FADE.toFixed(4)}, boxDist));
+  // Then the slower fade that removes per-cell detail.
   float basin = seaLevel - ${SEABED_BASIN_DEPTH.toFixed(4)};
   return mix(bed, min(bed, basin),
              smoothstep(0.0, ${SEABED_EDGE_FORGET.toFixed(4)}, boxDist));
@@ -160,3 +184,32 @@ export function seabedOutside(x: number, z: number, boxDist: number): number {
 export function seabedDrop(x: number, z: number, outside: number): number {
   return outside * SKIRT_SLOPE * (1 + SKIRT_WARP_AMOUNT * skirtWarp(x, z));
 }
+
+/**
+ * TypeScript twin of the GLSL `seabedForget`. Kept for testing — see the note
+ * above. Change together with the GLSL or not at all.
+ */
+export function seabedForget(bed: number, seaLevel: number, boxDist: number): number {
+  const smoothstep = (edge0: number, edge1: number, x: number): number => {
+    const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+  };
+  const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
+
+  const submerged = Math.min(bed, seaLevel - SEABED_SUBMERGE_MARGIN);
+  const afterSubmerge = lerp(bed, submerged, smoothstep(0, SEABED_SUBMERGE_FADE, boxDist));
+  const basin = seaLevel - SEABED_BASIN_DEPTH;
+  return lerp(
+    afterSubmerge,
+    Math.min(afterSubmerge, basin),
+    smoothstep(0, SEABED_EDGE_FORGET, boxDist),
+  );
+}
+
+/** Exposed for the tests that pin the guarantees above. */
+export const SEABED_TUNING = {
+  EDGE_FORGET: SEABED_EDGE_FORGET,
+  BASIN_DEPTH: SEABED_BASIN_DEPTH,
+  SUBMERGE_FADE: SEABED_SUBMERGE_FADE,
+  SUBMERGE_MARGIN: SEABED_SUBMERGE_MARGIN,
+} as const;

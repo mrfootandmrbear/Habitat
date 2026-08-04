@@ -221,7 +221,11 @@
       "fix": "seabedForget() in seabed.ts, applied in BOTH the skirt vertex shader and the ocean fragment shader.",
       "alsoHardened": "skirtMesh.raycast disabled \u2014 ui/siting.ts raycasts the terrain Group recursively.",
       "verification": "A/B: with the fade disabled a hard square shelf reappears around the footprint; with it on the shelf fades and the break wanders. The berm-placement interaction itself was NOT reproduced under scripted clicks, so the mechanism is confirmed but the exact trigger path is not. Owner screenshot is the primary evidence and is NOT in the repo \u2014 it could not be saved from the conversation; drop it in docs/evidence/bugs/ to attach it.",
-      "status": "fixed-pending-owner-confirmation-on-deployed-build"
+      "status": "fixed-with-regression-test; wants confirming on the deployed build",
+      "screenshot": "docs/evidence/bugs/2026-08-04-skirt-edge-extrusion-berm-spikes.webp",
+      "confirmedFromScreenshot": "At full resolution each spike projects from a raised pale patch sitting ON the boundary row, at the matching column/row. That is the extrusion signature exactly.",
+      "fixWasInsufficientAtFirst": "The first fix faded the bed to a basin over 12 units, which stops detail streaking but still leaves several units of DRY LAND for an above-water boundary cell \u2014 a shorter spike, still a spike. Added a hard guarantee: above-sea-level edge values are pushed under within 2 units. Past the map there is only sea.",
+      "regressionTest": "src/render/seabed.test.ts, 11 invariants including \"puts everything outside the footprint under water\". Mutation-tested: removing the submerge step fails that test and only that test, so it has teeth."
     }
   ]
 }
