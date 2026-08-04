@@ -19,6 +19,7 @@ import {
   updateFieldTexture,
   FIELD_SAMPLE_GLSL,
 } from "./fieldTexture";
+import { SKIRT_REACH, seabedDrop } from "./seabed";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET_OVERLAY = new THREE.Color(0x4a5c3a);
@@ -79,10 +80,86 @@ vec2 tFieldUv = fieldUv(uv);
 objectNormal = fieldHeightNormal(uElevationTex, tFieldUv, uFieldSize, uTexelWorldSize);
 `;
 
+/**
+ * `+ position.y` is what lets the seabed skirt share this exact material.
+ *
+ * For the terrain plane itself this is a no-op: PlaneGeometry rotated flat has
+ * position.y === 0 at every vertex, so the vertex lands on the sampled field
+ * height as before. The skirt bakes a per-vertex drop into position.y and
+ * carries the *clamped* edge UV, so it samples the terrain's own boundary
+ * values and is coloured by the identical fragment path — the two surfaces
+ * cannot drift apart in colour, which is the whole reason the skirt is not its
+ * own material. See buildSkirtGeometry.
+ */
 const TERRAIN_DISPLACE_INJECT = /* glsl */ `
 vFieldElev = sampleFieldBilinear(uElevationTex, tFieldUv, uFieldSize);
-transformed.y = vFieldElev;
+transformed.y = vFieldElev + position.y;
 `;
+
+/** Roughly one vertex per world unit — it only has to read as a smooth slope. */
+const SKIRT_SEGMENTS = 168;
+
+/**
+ * The seabed continued past the map footprint.
+ *
+ * Why this exists: the terrain mesh stopped dead at the sim grid, so the water
+ * had nothing behind it out there. A cold critic scored the result as "a square
+ * tray dropped into an ocean" — the largest colour step in the whole frame was
+ * a straight map border, not bathymetry. Round 2 tried to fix it inside the
+ * ocean shader and proved it cannot be fixed there: it is the water's own
+ * *transparency* that reveals where the terrain ends, so the only shader-side
+ * remedy was forcing the water opaque, which destroys the owner's stated
+ * requirement of seeing the underwater world.
+ *
+ * Geometry, not shader. Every vertex carries:
+ *  - its own world XZ (out past the grid),
+ *  - the UV of the nearest point *on* the grid boundary, so field sampling
+ *    clamps to the terrain's real edge values, and
+ *  - a baked drop in `position.y`, applied on top of that sampled height by
+ *    TERRAIN_DISPLACE_INJECT.
+ *
+ * Vertices inside the grid are driven steeply downward so they sit well under
+ * the real terrain and never z-fight with it; the two surfaces meet exactly at
+ * the boundary, where the drop is zero and both sample the same texel.
+ */
+function buildSkirtGeometry(worldSize: number): THREE.BufferGeometry {
+  const half = worldSize / 2;
+  const reach = half + SKIRT_REACH;
+  const geo = new THREE.PlaneGeometry(reach * 2, reach * 2, SKIRT_SEGMENTS, SKIRT_SEGMENTS);
+  geo.rotateX(-Math.PI / 2);
+
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const uv = geo.attributes.uv as THREE.BufferAttribute;
+
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+
+    // Nearest point on (or inside) the grid square — this is what the vertex
+    // samples the terrain field at, so the skirt inherits the real edge.
+    const cx = Math.min(half, Math.max(-half, x));
+    const cz = Math.min(half, Math.max(-half, z));
+    // Same mapping the terrain plane produces: PlaneGeometry's +Y row runs to
+    // -Z after the rotate, hence the flipped V. fieldUv() flips it back.
+    uv.setXY(i, 0.5 + cx / worldSize, 0.5 - cz / worldSize);
+
+    const dx = Math.abs(x) - half;
+    const dz = Math.abs(z) - half;
+    const outside = Math.hypot(Math.max(dx, 0), Math.max(dz, 0));
+    const inside = Math.max(-Math.max(dx, dz), 0);
+
+    // Shared with the ocean shader so colour and geometry cannot disagree —
+    // see seabed.ts. Zero at outside === 0, so the seam is exact.
+    const fall = seabedDrop(x, z, outside);
+    // Inside the footprint, plunge fast — this part is scaffolding hidden
+    // beneath the real terrain, not something anyone should ever see.
+    pos.setY(i, -(fall + inside * 6));
+  }
+  pos.needsUpdate = true;
+  uv.needsUpdate = true;
+  // Normals come from the elevation field in the vertex shader, not from here.
+  return geo;
+}
 
 const TERRAIN_FRAGMENT_HEADER = /* glsl */ `
 uniform sampler2D uSoilMoistureTex;
@@ -362,6 +439,8 @@ export class TerrainMesh {
 
   // GPU default path.
   private readonly gpuMesh: THREE.Mesh;
+  /** Seabed continued past the sim grid — see buildSkirtGeometry. */
+  private readonly skirtMesh: THREE.Mesh;
   private readonly gpuMaterial: THREE.MeshStandardMaterial;
   private readonly elevationTex: THREE.DataTexture;
   private readonly soilMoistureTex: THREE.DataTexture;
@@ -509,9 +588,25 @@ export class TerrainMesh {
     this.gpuMesh.receiveShadow = true;
     this.gpuMesh.castShadow = true;
 
+    // Seabed skirt — shares gpuMaterial so it cannot drift in colour from the
+    // terrain edge it continues. Added to the group permanently rather than
+    // swapped with gpu/cpu: the inspector overlay modes swap the *terrain*
+    // surface, and the sea floor around it should not blink out when they do.
+    this.skirtMesh = new THREE.Mesh(buildSkirtGeometry(worldSize), this.gpuMaterial);
+    this.skirtMesh.name = "terrain-skirt";
+    this.skirtMesh.receiveShadow = true;
+    // Nothing casts onto it that isn't already underwater, and letting a
+    // 168-unit plane into the shadow camera would waste most of the map's
+    // shadow resolution on submerged geometry.
+    this.skirtMesh.castShadow = false;
+    // Drawn before the terrain so the overlap it deliberately keeps beneath
+    // the footprint resolves by depth, not by draw order.
+    this.skirtMesh.renderOrder = -1;
+
     this.mesh = new THREE.Group();
     this.mesh.name = "terrain";
     this.mesh.add(this.gpuMesh);
+    this.mesh.add(this.skirtMesh);
     this.activeChild = "gpu";
   }
 

@@ -7,6 +7,7 @@ import {
   type SkyLighting,
   type SkyLightingConsumer,
 } from "./lightingRig";
+import { SEABED_GLSL } from "./seabed";
 
 // Same panning-fbm ripple + sky-reflection + sun-specular treatment as
 // WaterMesh's shader (kept as a separate copy, not a shared import — the
@@ -42,9 +43,7 @@ uniform float uSeaLevel;
 uniform float uWorldSize;
 uniform float uShallowDepth;
 uniform float uMidDepth;
-uniform float uShelfSlope;
 uniform float uOpaqueMargin;
-uniform float uShelfWander;
 uniform vec3 uFoamColor;
 uniform float uFoamDepth;
 uniform float uDetailNear;
@@ -77,6 +76,8 @@ float fbm(vec2 p) {
   }
   return sum;
 }
+
+${SEABED_GLSL}
 
 float rippleHeight(vec2 p, float t) {
   vec2 p1 = p * 0.35 + vec2(t * 0.07, t * 0.045);
@@ -135,21 +136,17 @@ void main() {
   vec2 outsideXZ = abs(vWorldPos.xz) - uWorldSize * 0.5;
   float outside = length(max(outsideXZ, 0.0));
 
-  // Continue the seabed past the map footprint instead of switching to a
-  // constant. The previous version blended to a fixed deep value across 8% of
-  // the grid half-width, which drew a hard rectangle around the sim grid: a
-  // cold critic read the result as "a square tray dropped into an ocean" and
-  // measured that step as a bigger colour jump than any shore transition in
-  // the frame. Every reference in docs/reference/ has the shelf falling away
-  // on a ragged organic edge, so the distance is warped by fbm before it
-  // drives depth — the contours wander instead of tracing the footprint.
+  // Continue the seabed past the map footprint. This MUST be the same function
+  // TerrainMesh's skirt geometry uses, which is why it lives in seabed.ts and
+  // not here: when the two were written separately the water painted shallow
+  // turquoise over troughs the geometry had actually sunk, and dark ridges
+  // showed up where the ramp expected open blue. Colour and shape describing
+  // one surface have to come from one definition.
   //
   // Note this is the OPPOSITE of terracing (see the shape ruling in
   // reference/OBSERVATIONS.md): it turns the one hard geometric step in the
   // frame into a continuous slope.
-  float shelfNoise = (fbm(vWorldPos.xz * 0.035) - 0.5) * uShelfWander;
-  float shelfOut = max(outside + shelfNoise, 0.0);
-  float depth = gridDepth + shelfOut * uShelfSlope;
+  float depth = gridDepth + seabedDrop(vWorldPos.xz, outside);
 
   // Two-stage ramp: sand-lit shallow -> turquoise -> deep teal. Godus reads
   // as distinct depth bands rather than one plane colour, so the stages are
@@ -192,22 +189,18 @@ void main() {
   // cause of the old muddy near-neutral plane — the dark bed dominated the
   // blend everywhere, including where it should have been bright sand.
   float bedOpacity = mix(uShallowOpacity, uOpacity, smoothstep(0.0, uMidDepth, depth));
-  // The terrain mesh stops dead at the sim grid, so past that edge there is
-  // no seabed behind the water — only the sky dome, whose below-horizon band
-  // is a bright pale grey. Semi-transparent water over that reads as a bright
-  // halo tracing the map footprint, and bloom amplifies it.
+  // There IS a seabed past the sim grid now — TerrainMesh's skirt continues it
+  // (see buildSkirtGeometry). Before that existed, the water had only the
+  // bright below-horizon sky dome behind it out here, and staying transparent
+  // over that drew a glowing halo around the map footprint; the stopgap was to
+  // force the water opaque just inside the boundary, which worked but threw
+  // away the owner's stated requirement of seeing the underwater world.
   //
-  // So the water has to reach full opacity slightly *inside* the boundary,
-  // not at it: ramping outward still leaves a band of see-through water with
-  // nothing behind it. Signed box distance, negative inside, opaque by the
-  // time it reaches 0.
-  //
-  // This is a containment measure, not the fix. The real fix is a terrain
-  // skirt carrying the seabed past the footprint — the water can only hide
-  // the symptom, because it is the transparency itself that reveals where the
-  // terrain ends.
+  // With real geometry behind it the water can stay honest and simply go
+  // opaque with depth, like water does. uOpaqueMargin remains as a safety net
+  // for the far field, where the skirt eventually ends too.
   float signedOut = max(outsideXZ.x, outsideXZ.y);
-  bedOpacity = mix(bedOpacity, 1.0, smoothstep(-uOpaqueMargin, 0.0, signedOut));
+  bedOpacity = mix(bedOpacity, 1.0, smoothstep(uOpaqueMargin, uOpaqueMargin * 3.0, signedOut));
   // Let the specular sparkle read through the transparency instead of
   // being washed out flat by the fixed low opacity.
   float alpha = clamp(bedOpacity + spec * 0.35, 0.0, 1.0);
@@ -301,17 +294,11 @@ export class OceanMesh implements SkyLightingConsumer {
       uWorldSize: { value: worldSize },
       uShallowDepth: { value: 0.9 },
       uMidDepth: { value: 3.5 },
-      // How fast the seabed falls away once past the sim grid, in metres of
-      // depth per world unit. 0.35 reaches full deep-water colour about 20
-      // units out — far enough to read as a slope rather than an edge, close
-      // enough that the island still sits in its own shelf.
-      uShelfSlope: { value: 0.35 },
-      // World units of fbm warp applied to that distance, so the depth
-      // contours wander instead of tracing the grid's rectangle.
-      uShelfWander: { value: 9.0 },
-      // World units inside the grid boundary over which the water finishes
-      // going opaque, so no see-through band survives past the terrain edge.
-      uOpaqueMargin: { value: 5.0 },
+      // World units PAST the grid boundary at which the water starts closing
+      // up, reaching fully opaque at three times that. Sized to sit well
+      // inside SKIRT_REACH so there is always real seabed behind the water
+      // while it is still see-through.
+      uOpaqueMargin: { value: 14.0 },
       // Pale wet-sand band right at the waterline (bar v2 point 8).
       uFoamColor: { value: new THREE.Color(0xd9f2e4) },
       uFoamDepth: { value: 0.32 },
