@@ -128,6 +128,13 @@ void main() {
   vec2 gridUv = vWorldPos.xz / uWorldSize + 0.5;
   // fieldUv's V flip (see fieldTexture.ts) — fields upload row-major in +Z.
   float bed = texture2D(uElevationTex, vec2(gridUv.x, 1.0 - gridUv.y)).r;
+  // Same clamped-edge extrusion the terrain skirt has to defuse: without this
+  // the water paints a pale shallow streak straight out from any raised
+  // boundary cell. Must match the skirt or colour and geometry disagree again.
+  bed = seabedForget(
+    bed, uSeaLevel,
+    length(max(abs(vWorldPos.xz) - uWorldSize * 0.5, 0.0))
+  );
   float gridDepth = max(uSeaLevel - bed, 0.0);
 
   // How far outside the sim grid this fragment is, in world units — the

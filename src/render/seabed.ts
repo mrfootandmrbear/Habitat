@@ -82,8 +82,40 @@ export function shelfStartWarp(x: number, z: number): number {
   );
 }
 
+/**
+ * Distance over which the seabed forgets the grid's per-cell edge detail, and
+ * the depth it settles to.
+ *
+ * **This exists because of a shipped bug.** Both the skirt geometry and the
+ * water's depth lookup read the elevation field with ClampToEdge, so a sample
+ * taken past the grid returns the *boundary cell*. That is what lets the skirt
+ * meet the terrain exactly — but it also means any single raised cell on the
+ * boundary is **extruded outward for the skirt's entire reach**, as a ridge
+ * pointing straight out along an axis. Raise a berm near an edge and you get
+ * long tapered spikes radiating N/S/E/W, with matching pale streaks in the
+ * water where the same clamped sample tells the ocean shader "shallow here".
+ * The owner hit exactly this on the deployed build and described it as a
+ * mirror-image effect, which is a good name for it: the edge row smeared
+ * outward.
+ *
+ * The seam still has to be exact at the boundary, so the fade starts at zero
+ * distance and only takes hold outside — and it never *raises* the seabed, so
+ * genuinely deep edges stay deep.
+ *
+ * No TypeScript twin: unlike the other functions here, this is only ever
+ * evaluated where the elevation texture is sampled, which is in shaders.
+ */
+const SEABED_EDGE_FORGET = 12;
+const SEABED_BASIN_DEPTH = 5;
+
 /** GLSL twin of the functions above. Keep identical, line for line. */
 export const SEABED_GLSL = /* glsl */ `
+float seabedForget(float bed, float seaLevel, float boxDist) {
+  float basin = seaLevel - ${SEABED_BASIN_DEPTH.toFixed(4)};
+  return mix(bed, min(bed, basin),
+             smoothstep(0.0, ${SEABED_EDGE_FORGET.toFixed(4)}, boxDist));
+}
+
 float skirtWarp(vec2 p) {
   return 0.55 * sin(p.x * 0.11) * cos(p.y * 0.13)
        + 0.30 * sin(p.x * 0.071 + p.y * 0.053)

@@ -19,7 +19,7 @@ import {
   updateFieldTexture,
   FIELD_SAMPLE_GLSL,
 } from "./fieldTexture";
-import { SKIRT_REACH, seabedDrop, seabedOutside } from "./seabed";
+import { SKIRT_REACH, SEABED_GLSL, seabedDrop, seabedOutside } from "./seabed";
 
 const BASE = new THREE.Color(0x8b7355);
 const WET_OVERLAY = new THREE.Color(0x4a5c3a);
@@ -71,8 +71,11 @@ const TERRAIN_VERTEX_HEADER = /* glsl */ `
 uniform sampler2D uElevationTex;
 uniform vec2 uFieldSize;
 uniform float uTexelWorldSize;
+uniform float uWorldSize;
+uniform float uSeaLevel;
 varying float vFieldElev;
 ${FIELD_SAMPLE_GLSL}
+${SEABED_GLSL}
 `;
 
 const TERRAIN_NORMAL_INJECT = /* glsl */ `
@@ -93,6 +96,14 @@ objectNormal = fieldHeightNormal(uElevationTex, tFieldUv, uFieldSize, uTexelWorl
  */
 const TERRAIN_DISPLACE_INJECT = /* glsl */ `
 vFieldElev = sampleFieldBilinear(uElevationTex, tFieldUv, uFieldSize);
+// Past the grid the sample is ClampToEdge, i.e. the boundary cell repeated
+// outward — so without this a single raised edge cell becomes an axis-aligned
+// ridge running the skirt's whole length. Zero effect on the terrain plane,
+// where boxDist is always 0. See SEABED_EDGE_FORGET.
+vFieldElev = seabedForget(
+  vFieldElev, uSeaLevel,
+  length(max(abs(position.xz) - uWorldSize * 0.5, 0.0))
+);
 transformed.y = vFieldElev + position.y;
 `;
 
@@ -529,6 +540,7 @@ export class TerrainMesh {
       uErosionPulseTex: { value: this.erosionPulseTex },
       uFieldSize: { value: new THREE.Vector2(width, height) },
       uTexelWorldSize: { value: worldSize / (width - 1) },
+      uWorldSize: { value: worldSize },
       uSeaLevel: { value: 0 },
       uMeanHighWater: { value: 0 },
       uHasSea: { value: 0 },
@@ -605,6 +617,11 @@ export class TerrainMesh {
     // Drawn before the terrain so the overlap it deliberately keeps beneath
     // the footprint resolves by depth, not by draw order.
     this.skirtMesh.renderOrder = -1;
+    // Not pickable. ui/siting.ts raycasts the terrain Group recursively, and
+    // the skirt is a ~168-unit plane sharing that group — worldToGrid rejects
+    // off-grid hits so it is harmless today, but leaving a huge invisible
+    // collider in the edit path is a trap for the next tool that raycasts.
+    this.skirtMesh.raycast = () => {};
 
     this.mesh = new THREE.Group();
     this.mesh.name = "terrain";

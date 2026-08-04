@@ -211,5 +211,17 @@
       ],
       "realFix": "Terrain skirt. The water shader can only hide the footprint, because it is the TRANSPARENCY that reveals where the terrain mesh stops \u2014 semi-transparent water past the grid edge has only the bright below-horizon sky dome behind it. Carrying the seabed out as geometry is the fix the C0 critic asked for and it is now the top-ranked item."
     }
+  ],
+  "bugs": [
+    {
+      "id": "BUG-skirt-edge-extrusion",
+      "reportedBy": "owner, on the deployed GitHub Pages build, 2026-08-04",
+      "symptom": "Raise-berm produced long tapered spikes radiating N/S/E/W from the map edges, with pale streaks in the water aligned to them. Owner called it a \"mirror image effect\".",
+      "cause": "Mine. Both the skirt geometry and the ocean depth lookup sample the elevation field past the grid, where ClampToEdge repeats the boundary cell outward \u2014 so anything on the boundary row is extruded for the skirt's whole 60-unit reach.",
+      "fix": "seabedForget() in seabed.ts, applied in BOTH the skirt vertex shader and the ocean fragment shader.",
+      "alsoHardened": "skirtMesh.raycast disabled \u2014 ui/siting.ts raycasts the terrain Group recursively.",
+      "verification": "A/B: with the fade disabled a hard square shelf reappears around the footprint; with it on the shelf fades and the break wanders. The berm-placement interaction itself was NOT reproduced under scripted clicks, so the mechanism is confirmed but the exact trigger path is not. Owner screenshot is the primary evidence and is NOT in the repo \u2014 it could not be saved from the conversation; drop it in docs/evidence/bugs/ to attach it.",
+      "status": "fixed-pending-owner-confirmation-on-deployed-build"
+    }
   ]
 }

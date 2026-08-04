@@ -107,6 +107,45 @@ it.
 the edge row, which is what lets the seabed skirt inherit the terrain's real
 boundary values instead of wrapping to the far side of the map.
 
+### ClampToEdge extrudes the boundary row outward — defuse it
+
+The seabed skirt and the ocean's depth lookup both sample the elevation field
+past the grid, where `ClampToEdge` returns the **boundary cell repeated
+outward**. That is load-bearing (it is what lets the skirt meet the terrain
+exactly), and it is also a trap: whatever sits on the boundary row is smeared
+outward for the skirt's entire 60-unit reach.
+
+*The tell:* axis-aligned ridges radiating N/S/E/W from the middle of each map
+edge, with matching pale streaks in the water where the same clamped sample
+tells the ocean shader "shallow here". A uniform boundary row smears into a
+flat square shelf; a single raised cell — raise a berm near an edge — smears
+into a long tapered spike. Reported from the deployed build as a "mirror image
+effect", which is a fair description: the edge row mirrored outward.
+
+*The fix:* `seabedForget()` in `seabed.ts` fades the sampled bed toward a basin
+depth over 12 world units outside the grid, so per-cell edge detail is
+forgotten. It starts at zero distance (the seam stays exact) and never *raises*
+the seabed (genuinely deep edges stay deep). Both the skirt vertex shader and
+the ocean fragment shader must apply it, or colour and geometry disagree.
+
+*Verified by A/B:* with the fade disabled, a hard square shelf reappears around
+the footprint; with it on, the shelf fades and the break wanders. Note the
+berm-placement path itself was **not** reproduced under scripted clicks — the
+mechanism is confirmed, the specific interaction that triggers it is not.
+
+### The terrain Group is raycast recursively — new children become colliders
+
+`ui/siting.ts` does `raycaster.intersectObject(terrainMesh, true)` against the
+whole terrain **Group**. Anything added to that group joins the edit picking
+path. The skirt sets `raycast = () => {}` for this reason; `worldToGrid` would
+reject its off-grid hits anyway, but a ~168-unit invisible collider in the edit
+path is a trap for the next tool that raycasts.
+
+Also worth knowing: three's raycaster tests **geometry attributes, not
+vertex-shader displacement**. Terrain picking has always been against the flat
+plane at y=0, which is intentional — do not "fix" it by expecting the displaced
+surface.
+
 ### One definition per physical thing, consumed everywhere
 
 Two files exist purely because duplicating a constant produced a real,
