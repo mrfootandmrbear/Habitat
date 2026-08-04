@@ -306,6 +306,81 @@ now be tuned without dragging exposure with it.
 in the Round 1 critique section. It is shared foundation, not a piece — fix
 and confirm it before re-critiquing anything, per the skill's Step 2.
 
+## The bar, v2 — Godus-like stylized realism (2026-08-04, owner-supplied references)
+
+**Supersedes the 12-point rubric in "The bar (gauntlet loop)" above.** The
+owner supplied real Godus reference images and named the direction:
+*Godus-like stylized realism*. Lineage is in THESIS §1 — the seed was RCT3
+sandbox terrain editing, and Godus is the closest existing execution of the
+same idea. Reference images live in `docs/reference/`.
+
+This replaces a rubric that was written to describe **physically-blended
+naturalism**, and in three places that rubric asked for the *opposite* of the
+stated direction. Those points are retired, not merely reworded:
+
+| retired v1 point | why it contradicts the direction |
+|---|---|
+| 2 — "substrate materials read as physically distinct… not just flat-colour-different" | Godus is flat-colour-different *on purpose*. Crisp banded colour is the style. |
+| 1 — AO in every crease, "no flat uniformly-lit patches" | Godus lighting is soft and ambient-heavy; flat lit plateaus are correct. |
+| 8 — vegetation "shape/shading variation" as the goal | The goal is *type variety and clustering*, not per-instance noise on one cone. |
+
+**A Round 1 critic finding is void because of this.** Terrain's "biggest gap"
+was recorded as *"feather/blend the substrate-patch edges instead of the
+current hard cutoff."* Against the Godus bar that is backwards — hard-edged
+material boundaries following terrain contours are the target. Do not action
+it. The same applies to my own earlier read that the cone's stair-stepped
+silhouette is "the most prototype thing in frame": **stepping is the style**,
+it is simply the wrong *kind* of stepping (see point 1 below).
+
+### v2 — twelve checkable points
+
+**Terrain shape language**
+1. Terrain reads as stacked contour *terraces* — flat plateaus separated by
+   distinct vertical risers, following the landform's contours. Not smooth,
+   and not the current arbitrary polygon faceting: the steps must be
+   horizontal bands that trace elevation, not triangle edges.
+2. Terrace risers are visible as their own surface, catching light
+   differently from the plateau above and below.
+3. Substrate/material boundaries follow terrace contours with **crisp edges**.
+   No feathering, no triplanar blend.
+
+**Palette**
+4. Land palette is saturated and warm — yellow-greens, ochres, tans. Measured:
+   terrain bands must be clearly chromatic, not near-neutral.
+5. No large achromatic region anywhere in frame. Concretely: no major band
+   sitting at blue/red ≈ 1.0 with flat luminance (today's sky is 1.015 — fail).
+
+**Water**
+6. Water is **banded by depth**: pale sand → bright turquoise shallow → deep
+   blue-teal. At least three readable steps.
+7. Shallow water is high-saturation cyan and obviously distinct from deep
+   water. Today's water is rgb(42,48,52) — a dark near-neutral plane — fail.
+8. The shoreline shows a distinct pale band between land and shallow water.
+
+**Vegetation**
+9. Plants read as distinct *types* by silhouette — conifer vs palm vs shrub —
+   not one repeated cone with jittered scale.
+10. Placement is clustered and irregular. No visible lattice or row structure.
+
+**Light and sky**
+11. Lighting is soft and ambient-heavy: gentle shadowing, no harsh contrast,
+    no crushed blacks. Godus reads bright and open, not dramatic.
+12. Sky is a **minor background element** — the camera angle is high and
+    looks down. It must not be flat grey, but it is explicitly *not* where
+    effort should go. Clouds soft and simple.
+
+### Priority correction
+
+Point 12 changes the running order. I had queued the sky calibration as the
+next blocking fix; against these references that is **wrong priority** — in
+Godus the camera looks down and sky is barely in frame. The dominant visual
+signal is terraced terrain + saturated palette + depth-banded water. Sky
+still needs to stop being flat grey (point 5), but it is not the lever.
+
+Ranked by distance from the bar, worst first: **water colour/banding** (7),
+**terrace shape language** (1–3), **palette saturation** (4), **vegetation
+type variety** (9–10), then sky (5, 12).
+
 ## Resolved: the double-tonemapping hypothesis was wrong (2026-08-04, post-merge)
 
 Tested on resume, as the Round 1 section said to. **There is no double
