@@ -128,20 +128,13 @@ Summary only — do not reopen unless fixing regressions.
 | §4.57 | Geometric mold stamps | Cylinder / pyramid / terrace form stamps; depth with elev | `stampMold`, `moldProfileWeight`, Tool: mold | **Done** — agent ([geometric-mold-stamps-composition](slices/geometric-mold-stamps-composition.md)) |
 | §4.58 | Simple / Full control density | Simple keeps sculpt · primary forces · time; Full on demand | `chromeDensity.ts`, `#chrome-density` | **Done** — agent ([chrome-density-composition](slices/chrome-density-composition.md)) |
 | §4.59 | Duplicator stamp | Copy a sculpted form's relief (+material) and re-stamp it elsewhere; depth with elev | `copyForm`, `pasteForm`, Tool: duplicate | **Done** — agent ([duplicator-stamp-composition](slices/duplicator-stamp-composition.md)) |
+| §4.60 | Weather presentation (C-020 G6–G9) | Precip spawns under releasing clouds; rain/snow motion diverge; patchy terrain-weighted snow hold; weather-responsive fog | `releasingCloudCount`, `CloudMesh.getReleasingFootprints`, `snowAffinity.ts`, `weatherFogRange` | **Done** — agent ([weather-presentation-composition](slices/weather-presentation-composition.md)) |
 
-<<<<<<< HEAD
 **Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done; **C-028** framing Done (sculpt toolbox). **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.46** / **§4.47** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done; **§4.55 brush size** Done; **§4.56 flatten/trowel** Done; **§4.57 mold stamps** Done; **§4.58 Simple/Full chrome** Done; **§4.59 duplicator stamp** Done — C-028 structural kit now fully shipped. **Plant rendering** ([review](reviews/2026-08-03-plant-rendering-review.md)) owner-agreed 2026-08-03: **§4.60** per-guild silhouette geometry now queued and tip on the new **Track V**; **§4.61**/**§4.62** queued behind it; **§4.63** deferred pending profiling. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Track T (terrain tools) has no further machine slice — remaining C-028 work is owner taste, batched below; Track R's **§4.48** habitat/dispersal determinism hygiene (**§4.47** Done) and the new Track V's **§4.60** plant-rendering silhouette geometry are both executable now, in parallel; Living remainder blocked (L5 / L8). Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding), **C-028** (structural kit fully shipped through §4.59 — remaining question is taste: do molds/duplicator feel like shaping sand or placing architecture; do flags/banners earn a chrome slot). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip).
 
-**Next (executable tip):** two parallel executable tracks now. Track R — **§4.48** habitat/dispersal determinism hygiene (**§4.47** guild cover & light-competition correctness Done). Track V (new, 2026-08-03) — **§4.60** plant rendering: per-guild silhouette geometry ([plant rendering review](reviews/2026-08-03-plant-rendering-review.md), owner-agreed); **§4.61** clustering and **§4.62** composite runner-up guild queued behind it; **§4.63** distance LOD deferred pending profiling. **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.59** / **§4.58** / **§4.57** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** / **§4.47** Done. Track T (terrain tools) has no further machine slice — C-028 structural is fully shipped; remaining C-028 work is owner taste, batched with the owner Lock backlog. Keep nutrients / animals / SWE / wet-sand / freeze off the tip. Cloud succession: [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) (Track T parked on owner taste; Track R = §4.48; Track V = §4.60).
-=======
-**Current gate:** Slices **14** / **16** / **15** Tier-O **Pass**; **Slice F** / **17**–**21** Done. Maritime shore Tier-O **Pass** (C-016 / C-017). Salt / overseas Tier-O **Pass**. Stewardship: **C-004** / **C-005 tooling** / **C-013** / **C-002** / **U-006** / **C-020 Locked** (v2.0.13); **C-006 Locked** (CI); **C-014** Open (**hearable** after Wave 0 — owner silence question still outstanding). **Slice G** shipped (machine) — **C-021** / **C-022** wired, both Open pending owner Lock sitting; **C-010** framing Done; **C-028** framing Done (sculpt toolbox). **Slice E** Exner-lite Done. **Slice N8** / **N7** / **N9** / **N10** / **N11** Done. **Slice L1** / **L6** Done; **L2** Done; **L3** Done; **L7** Done; **L4** Done; **§4.44** / **§4.45** / **§4.46** / **§4.47** / **§4.49–§4.52** Done; **Wave 0 (§4.53)** Done; **§4.54 starting surface** Done; **§4.55 brush size** Done; **§4.56 flatten/trowel** Done; **§4.57 mold stamps** Done; **§4.58 Simple/Full chrome** Done; **§4.59 duplicator stamp** Done — C-028 structural kit now fully shipped. **§4.60 occupant sway direction correctness** Done — L4's downwind lean composed a per-cell `Object3D.rotateOnAxis` after a random yaw, so the wind axis was silently re-rotated by that yaw and every cone leaned a different way; fixed by composing yaw and lean as quaternions with the lean outermost (fixed in world space), and `swayTilt` rebalanced to a held lean plus minority flutter instead of a symmetric sine. Gap inventory: [reviews/2026-07-30-sim-gap-review.md](reviews/2026-07-30-sim-gap-review.md). **BUILD_GUIDE “Done” ≠ Lock.** **Queue tip:** Track T (terrain tools) has no further machine slice — remaining C-028 work is owner taste, batched below; sole executable queue is Track R's **§4.48** habitat/dispersal determinism hygiene (**§4.47** Done); Living remainder blocked (L5 / L8). Owner Lock backlog ([owner-lock-batch.md](candidates/owner-lock-batch.md)) — **C-014** now hearable. Nutrients / animals stay off tip.
-
-**Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding), **C-028** (structural kit fully shipped through §4.59 — remaining question is taste: do molds/duplicator feel like shaping sand or placing architecture; do flags/banners earn a chrome slot). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip).
-
-**Next (executable tip):** **§4.48** habitat/dispersal determinism hygiene (Track R — **§4.47** guild cover & light-competition correctness Done); **L5** blocked on **C-023**, **L8** on **C-024** / **C-025**. **§4.60** / **§4.59** / **§4.58** / **§4.57** / **§4.56** / **§4.55** / **§4.54** / **W0** / **L3** / **L7** / **L4** / **§4.45** / **§4.46** / **§4.47** Done. Track T (terrain tools) has no further machine slice — C-028 structural is fully shipped; remaining C-028 work is owner taste, batched with the owner Lock backlog. **§4.60** (occupant sway direction correctness) shipped as an owner-flagged legibility fix outside both tracks — a per-cell local-slope/erosion-angle lean is deferred as a candidate for a future plant-diversity slice. Keep nutrients / animals / SWE / wet-sand / freeze off the tip. Cloud succession: [CLOUD_AGENT_PIPELINE.md](CLOUD_AGENT_PIPELINE.md) (Track T parked on owner taste; Track R = §4.48).
->>>>>>> origin/claude/plant-swaying-direction-2118yl
+**Next (executable tip):** **Track V §4.61** plant clustering is the sole remaining executable machine slice. **§4.60** per-guild silhouettes, **§4.64** occupant sway direction correctness, and **§4.65** weather presentation (C-020 G6–G9) are all shipped, as are Track R **§4.48** and **§4.40 L5** (**C-023 Locked**). **§4.62** composite runner-up guild and **§4.63** distance LOD stay queued behind §4.61. Track T parked on owner taste. **L8** remains blocked on **C-024** / **C-025**. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -1389,8 +1382,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-<<<<<<< HEAD
-### 4.60 Slice — Plant rendering: per-guild silhouette geometry *(queued — Track V tip)*
+### 4.60 Slice — Plant rendering: per-guild silhouette geometry *(Done — shipped ahead of the Track V queue)*
 
 **Why this exists.** [Plant rendering review](reviews/2026-08-03-plant-rendering-review.md) §1–§3 item 1. `OccupantMesh` draws all six vegetation guilds (herb/strand/binder/marsh/shrub/crust) from one shared `ConeGeometry(0.12, 0.55, 4)` (`OccupantMesh.ts:50`), scaled and tinted per guild but never shaped per guild — the owner's read: "plants all read as thin pyramids." Three of the six guild doc-comments in `occupantEncoding.ts` already call the guild a "mat" (strand, binder, crust) while the geometry rendering them is a spike. Owner agreed with the review's recommendation to ship plant rendering now rather than wait on animal work, which is gated behind **F-001** undeferring and **L5**/**C-023** regardless (review §6).
 
@@ -1406,7 +1398,7 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.61 Slice — Plant rendering: per-cell clustering *(queued — Track V, after §4.60)*
+### 4.61 Slice — Plant rendering: per-cell clustering *(queued — Track V tip)*
 
 **Why this exists.** [Plant rendering review](reviews/2026-08-03-plant-rendering-review.md) §3 item 2. Even with distinct per-guild shapes (§4.60), one instance per occupied cell still reads as a lone figure rather than a stand — groundcover density reads as clusters to a human eye, not isolated points. The review names this the single biggest lever for the "alive" read the owner is chasing, ahead of any geometry-shape change.
 
@@ -1447,8 +1439,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [ ] Gate: §4.60–§4.62 shipped; step/frame timing measured at `config.gridSize` with clustering (§4.61) live
 - [ ] Only if that measurement shows a real cost: collapse far-cell clusters to a cheaper impostor below a measured distance threshold
 - [ ] **Next-but-one:** none — revisit only if profiling after §4.62 shows a real cost; do not invent this slice early
-=======
-### 4.60 Slice — Occupant sway direction correctness *(Done — agent)*
+
+### 4.64 Slice — Occupant sway direction correctness *(Done — agent)*
 
 **Why this exists.** Owner playtest screenshot: the shoreline meadow reads as a field of animated characters, each cone leaning a different way, rather than a stand of plants bent by one wind. **L4** (§4.39) already keyed sway to the global wind vector, but `OccupantMesh` applied the downwind lean with `Object3D.rotateOnAxis` *after* setting each cell's random facet-spin yaw — that method rotates about an axis in the object's own (already-yawed) local space, so the intended world-space wind axis was silently re-rotated by that same per-cell random yaw. One uniform wind vector was rendering as N different lean directions. Presentation-only correctness fix, not a new Process (T-006); D-007's clip verdict from §4.39 still holds, it just now matches what the code does.
 
@@ -1466,7 +1458,29 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 - [x] Tier-P: sway tilt never dips to or below zero once amplitude is nonzero, and peak still equals the L4 amplitude law exactly (`presentation.proxy.test.ts`)
 - [x] Composition + manifest: [occupant-sway-direction-composition.md](slices/occupant-sway-direction-composition.md), [occupant-sway-direction.json](slices/occupant-sway-direction.json)
 - [x] **Next-but-one:** Track R's **§4.48** habitat/dispersal determinism hygiene remains the sole executable queue item; a per-cell local-slope/erosion-angle lean (instead of the global wind vector) is deferred, floated as a candidate to fold into a future plant-diversity slice if the owner wants lean direction to vary with terrain rather than one uniform wind
->>>>>>> origin/claude/plant-swaying-direction-2118yl
+
+### 4.65 Slice — Weather presentation: cloud-sourced precip, phase motion, patchy snow, weather fog (C-020 G6–G9) *(Done — agent)*
+
+**Why this exists.** Owner ask (2026-08-03): rain/snow render still doesn't read as coming from clouds, rain and snow share one particle model only recolored, the snow ground-hold is a flat uniform sheet, and the scene's static fog (`Scene.ts:15`) is inert — it sits beyond the camera's normal working distance at `worldSize=48` and never responds to weather. C-020's own G1–G5 pass already closed the sky/spell-arming glitches (BUILD_GUIDE §4.21); these are the next four presentation glitches against the same Locked criterion, named G6–G9 in the C-020 dossier.
+
+**Loops.** Sim: none — pure observer (T-006); no WorldState field added, no cell targeting, no new Process; C-020's global `cloudWater`/`precipPhase` delivery model is unchanged. Game: heavier rain regimes visibly release from more/larger clouds at once (owner's framing — "how much rain" now reads as "how many clouds are working," not one wider faucet plane); rain reads as fast wind-sheared fall and snow as slow tumbling drift; snow collects unevenly — more on flat/low ground, less on exposed slopes; haze thickens during an active spell and clears on a dry day.
+
+**Register / candidates.** C-020 Locked (presentation-only follow-up — does not reopen the Lock); D-007 Locked (no new Process, clip gate does not apply); T-006 (observer-only, never writes WorldState); C-004 Locked (no cell-targeted rain — footprints come from `CloudMesh`'s own drifting bodies, never from siting/cursor input). SWE stays off the tip — ground snow remains the existing decaying presentation hold; only its texture changed.
+
+**Study.** [C-020-dossier.md](candidates/C-020-dossier.md) G1–G5 (this continues that ledger as G6–G9); `src/render/fieldTexture.ts` (the DataTexture upload pattern `TerrainMesh` already uses for six other fields, reused here for the snow-affinity mask via the built-in `alphaMap` path instead of a custom shader).
+
+**Bans.** Persistent SWE store / any snow field written to WorldState. Place-targeted rain (footprints derive from existing cloud drift only). Stochastic free weather (releasing-cloud selection is a deterministic function of regime + existing per-cloud opacity ranking — no new RNG, C-003 stays Open). Claiming C-020's Lock is reopened.
+
+**New Process?** no. D-007 clip gate does not apply.
+
+- [x] `releasingCloudCount(regime, totalClouds)` — pure; regime intensity maps to how many of the existing cloud bodies are actively releasing at once (G6)
+- [x] `CloudMesh.getReleasingFootprints()` — world-space (x, z, radius) for the top-N bodies by current opacity; `RainCueMesh.setCloudFootprints()` spawns/respawns particles under those footprints instead of a uniform world-wide veil, falling back to the old uniform scatter when nothing is releasing yet (G6)
+- [x] Rain vs snow motion diverge in `RainCueMesh.update()` — fall speed, wind response, and sway differ per `precipPhase` instead of sharing one kinematic model (G7)
+- [x] `computeSnowAffinity(elevation, width, height)` (`src/render/snowAffinity.ts`) — pure; flatter/lower ground biases higher, textured with deterministic patch noise; baked into the ground-cover plane's `alphaMap` so accumulation reads as patchy, not a flat sheet (G8) — still the same `groundOpacity` scalar, still melts on the existing schedule, no new store
+- [x] `weatherFogRange(base, veilStrength, cloudCover)` — pure; `scene.fog` near/far now tracks the storm veil + cloud cover each frame instead of sitting at a fixed 70–140 (G9)
+- [x] Tier-P: `src/ui/stormCue.test.ts` (G6/G7/G9 pure functions + footprint/spawn/fall-speed proxies), `src/render/snowAffinity.test.ts` (G8)
+- [x] Composition + manifest: [weather-presentation-composition.md](slices/weather-presentation-composition.md), [weather-presentation.json](slices/weather-presentation.json)
+- [x] **Next-but-one:** Track R's §4.48 habitat/dispersal determinism hygiene remains the sole open machine queue item; this slice ran in parallel (disjoint files, no dependency)
 
 ---
 
@@ -1495,13 +1509,8 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 | L1 | Time throughput defect (16× ran at 5×) | S-009, T-002, C-008 | §4.36 **Done** — shipped with L6; no baseline moved |
 | L2 | Local seed rain — established biomass seeds | C-007, C-019, C-011, C-003 | §4.37 **Done** |
 | L3 | Mortality as a rate, not a clamp | S-007, S-008, ES-006, ES-002 | §4.38 **Done** — agent (`dieback-lag`) |
-<<<<<<< HEAD
-| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass |
+| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass; direction/readability corrected in §4.64 |
 | L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Done** — agent ([composition](slices/succession-displace-composition.md)); C-023 Locked |
-=======
-| L4 | Biotic motion (wind sway; presentation) | D-007, T-006, ART-003 | §4.39 **Done** — D-007 clip Pass; direction/readability corrected in §4.60 |
-| L5 | Guild competition / displacement | C-023, ES-006, N-002, E-005 | §4.40 **Blocked** — C-023 Open, owner-judged |
->>>>>>> origin/claude/plant-swaying-direction-2118yl
 | L6 | Real-world time units (real time → weeks/s) | T-002, S-009, D-006, U-003 | §4.41 **Done** — shipped with L1; no candidate needed |
 | L7 | Activity-gated event band (SIM §6.2) | S-009, T-001, T-002, H-001 | §4.42 **Done** — hash-identity; skipFrac 0.3; baselines unmoved |
 | L8 | Deep-time ladder (centuries) | C-024, C-025, S-009, T-001, T-003 | §4.43 **Blocked** — both Open, owner-judged |

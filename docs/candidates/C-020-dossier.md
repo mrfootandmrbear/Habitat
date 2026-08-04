@@ -48,6 +48,21 @@
 
 **Tier-P:** `src/ui/stormCue.test.ts`.
 
+## Named glitches, round 2 (2026-08-03 — owner ask, agent)
+
+Owner: rain/snow render still doesn't read as coming from clouds, rain and snow share one particle model, the snow ground-hold is a flat sheet, and the scene haze (`Scene.ts` fixed `Fog(0xb8c9d4, 70, 140)`) is inert — it sits beyond the camera's normal working distance at `worldSize=48` and never reacts to weather. Presentation-only follow-up against the same Locked criterion — does not reopen the Lock; see [weather-presentation-composition.md](../slices/weather-presentation-composition.md).
+
+| # | Glitch | Status |
+|---|---|---|
+| G6 | Rain/snow reads as a world-wide veil, unconnected to any cloud ("spigot from nowhere") | **Fixed** — `releasingCloudCount` maps regime intensity onto how many of `CloudMesh`'s existing bodies release at once; `RainCueMesh` spawns/respawns under their footprints |
+| G7 | Rain and snow share identical fall kinematics, differing only in point color/size | **Fixed** — fall speed, wind response, and sway now diverge per `precipPhase` |
+| G8 | Snow ground-hold is one uniform translucent plane | **Fixed** — `computeSnowAffinity` (elevation + slope + patch noise) baked into the ground-cover plane's `alphaMap`; still the same `groundOpacity` scalar, still melts on the existing schedule — no SWE store |
+| G9 | Scene fog is a fixed constant, uncoupled from weather | **Fixed** — `weatherFogRange` pulls near/far in with storm veil + cloud cover, relaxes on a dry day |
+
+**Tier-P:** `src/ui/stormCue.test.ts` (G6/G7/G9), `src/render/snowAffinity.test.ts` (G8).
+
+**Bans held.** No cell-targeted rain — footprints come from `CloudMesh`'s own drifting bodies, never from siting/cursor input. No persistent SWE store — snow accumulation is still the same decaying presentation hold, only its texture changed. No new RNG — releasing-cloud selection is a deterministic function of regime + existing per-cloud opacity ranking (C-003 stays Open, untouched).
+
 ## Owner-only question (Lock) — discharged
 
 When a spell built in the sky and fell, did it feel like weather the atmosphere made — including cold spells reading as snow?

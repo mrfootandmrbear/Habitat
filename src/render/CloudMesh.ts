@@ -20,6 +20,21 @@ type CloudBody = {
   homeY: number;
   /** Last composite opacity applied (edge/windward-weighted) — Tier-P read. */
   currentOpacity: number;
+  /**
+   * Approximate horizontal footprint radius. These clouds are puff groups
+   * rather than single spheres, so this is the puff spread rather than a
+   * sphere radius × scale — same contract for `getReleasingFootprints`.
+   */
+  radius: number;
+  /** This frame's pick for "actively releasing" (G6) — top-N by opacity. */
+  releasing: boolean;
+};
+
+export type CloudFootprint = {
+  x: number;
+  z: number;
+  y: number;
+  radius: number;
 };
 
 // --- Procedural puff texture -------------------------------------------
@@ -123,6 +138,8 @@ export class CloudMesh {
   private readonly worldSize: number;
   private readonly wrapHalf: number;
   private readonly wrapPad: number;
+  /** How many clouds should read as actively releasing this frame (G6). */
+  private releasingCount = 0;
 
   constructor(worldSize: number, count = 7) {
     this.worldSize = worldSize;
@@ -137,6 +154,7 @@ export class CloudMesh {
     for (let i = 0; i < count; i++) {
       const rand = mulberry32(0x9e3779b9 ^ (i * 2654435761));
       const cloudGroup = new THREE.Group();
+
 
       const ang = (i / count) * Math.PI * 2;
       const r = half * (0.35 + (i % 4) * 0.12);
@@ -185,9 +203,49 @@ export class CloudMesh {
       }
 
       this.group.add(cloudGroup);
-      this.clouds.push({ group: cloudGroup, puffs, homeX, homeZ, homeY, currentOpacity: 0 });
+      // Footprint spans the puff spread, not one sphere — precip spawned under
+      // a releasing cloud has to cover what the player actually sees overhead.
+      this.clouds.push({
+        group: cloudGroup,
+        puffs,
+        homeX,
+        homeZ,
+        homeY,
+        currentOpacity: 0,
+        radius: Math.max(footprintX, footprintZ) + baseR,
+        releasing: false,
+      });
     }
     this.group.visible = false;
+  }
+
+  /**
+   * Arm the number of clouds that should read as releasing this frame (G6).
+   * Selection happens in `update()` against whichever bodies are currently
+   * densest (windward bias already ranks them) — no cell targeting, no new
+   * RNG, just picking among the same drifting pool.
+   */
+  setReleasingCount(count: number): void {
+    this.releasingCount = Math.max(0, count | 0);
+  }
+
+  /**
+   * World-space footprints of the clouds currently marked releasing (G6) —
+   * `RainCueMesh` spawns/respawns precip under these instead of a uniform
+   * world-wide veil. Empty when nothing is releasing this frame.
+   */
+  getReleasingFootprints(): CloudFootprint[] {
+    const out: CloudFootprint[] = [];
+    for (const body of this.clouds) {
+      if (!body.releasing) continue;
+      out.push({
+        x: body.group.position.x,
+        z: body.group.position.z,
+        y: body.group.position.y,
+        radius: body.radius,
+      });
+    }
+    return out;
   }
 
   /**
@@ -264,6 +322,38 @@ export class CloudMesh {
     if (this.opacity < 0.015 && this.targetOpacity <= 0) {
       this.group.visible = false;
     }
+    this.updateReleasingFlags();
+  }
+
+  /**
+   * Picks the `releasingCount` densest bodies as this frame's releasing set
+   * (G6) — reuses the windward-biased opacity ranking above rather than a
+   * second targeting mechanism, and never marks a body that's too faint to
+   * read as a cloud at all.
+   */
+  private updateReleasingFlags(): void {
+    const ranked = this.clouds
+      .map((body, idx) => ({
+        idx,
+        // Puff groups have no single material to read, and each body already
+        // records the composite opacity it was last given — same ranking, one
+        // less place for the two to drift apart.
+        opacity: body.currentOpacity,
+      }))
+      .sort((a, b) => b.opacity - a.opacity);
+    const releasingIdx = new Set<number>();
+    const n = Math.min(this.releasingCount, ranked.length);
+    for (let k = 0; k < n; k++) {
+      if (ranked[k]!.opacity > 0.05) releasingIdx.add(ranked[k]!.idx);
+    }
+    for (let i = 0; i < this.clouds.length; i++) {
+      this.clouds[i]!.releasing = releasingIdx.has(i);
+    }
+  }
+
+  /** Total cloud bodies in the pool — sizes `releasingCloudCount` (G6). */
+  get count(): number {
+    return this.clouds.length;
   }
 
   /** Mean opacity of cloud bodies — Tier-P / debug. */

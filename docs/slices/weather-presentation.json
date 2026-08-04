@@ -1,0 +1,13 @@
+{
+  "id": "weather-presentation",
+  "title": "Weather presentation — cloud-sourced precip, phase motion, patchy snow, weather fog (C-020 G6-G9)",
+  "simLoop": "None — pure observer (T-006). C-020's global cloudWater/precipPhase delivery model is unchanged; no WorldState field added, no cell targeting.",
+  "gameLoop": "Heavier rain regimes visibly release from more/larger clouds at once instead of one wider faucet plane; rain reads as fast wind-sheared fall and snow as slow tumbling drift; snow collects unevenly, more in flat/shaded hollows than on exposed slopes; haze thickens during an active spell and clears on a dry day.",
+  "registerIds": ["C-020", "D-007", "T-006", "C-004"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/ui/stormCue.test.ts", "src/render/snowAffinity.test.ts"],
+  "probes": [],
+  "fields": [],
+  "notebookSeed": "The clouds that carried the storm let it go directly beneath them; the drifts settled thickest where the ground stayed flat and shaded.",
+  "tierO": "no owner-only question this closeout — presentation-only follow-up to the already-Locked C-020 criterion; D-007 clip gate does not apply since no new Process was registered."
+}
