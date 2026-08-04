@@ -69,6 +69,37 @@ Described here so a critic has *something* concrete until the files land.
    landform plainly visible through the water. Distinct biome patches —
    yellow-green, olive, tan, brown upland.
 
+### Cold-island aerial photograph (owner-supplied 2026-08-04, not yet on disk)
+
+A real aerial photo of a snow-covered polar island group. Owner's words:
+*"this is how islands look when cold, the water seems to be pretty similar to
+tropical look just with more white."*
+
+This is a **ruling about biome colour**, and it is more specific than anything
+in bar v2. Habitat accumulates snow in-sim, and an earlier round measured the
+island going white in run-forward captures. The instinct would be to let a cold
+world go grey and desaturated. **That is wrong.** What the photo shows:
+
+- **Water keeps the full tropical depth ramp.** Vivid saturated turquoise over
+  the shallow shelf, grading to deep saturated navy-teal. It is *not* grey, not
+  desaturated, and not muted by being cold.
+- **The difference from tropical is white, not grey** — snow on the land and
+  pale ice-scoured shallows, sitting against water that is still highly
+  chromatic.
+- **Bathymetry reads clearly through the shallow water.** Submerged reefs and
+  the drowned continuation of the landform are plainly visible as shape, not
+  just as a colour tint. This is the clearest illustration yet of the owner's
+  transparency requirement.
+- **Depth boundaries are irregular and curving**, following the drowned
+  landform. Nothing in the frame is straight.
+- Land is dark rock plus white snow; the sky is a pale, low-contrast, minor
+  band at the very top.
+
+**It independently corroborates the C0 critic's two hardest findings** (see the
+Phase C section of `../VISUAL_UPGRADE_NOTE.md`): that shallow water must be the
+*most* saturated water in frame rather than the least, and that the shelf-to-deep
+transition must follow bathymetry rather than trace a rectangle.
+
 ## Getting the four attachments onto disk
 
 They arrived as chat attachments, which live in the conversation, not the

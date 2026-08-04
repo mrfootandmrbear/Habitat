@@ -9,7 +9,7 @@
     "onDisk": [
       "docs/reference/planet-coaster-terrain.png"
     ],
-    "missing": "4 owner references arrived as chat attachments; subagent critics cannot see those. Until saved into docs/reference/, critics grade against OBSERVATIONS.md prose + bar v2.",
+    "missing": "5 owner references arrived as chat attachments (4 stylized + 1 cold-island aerial photo); subagent critics cannot see those. Until saved into docs/reference/, critics grade against OBSERVATIONS.md prose + bar v2 + planet-coaster-terrain.png.",
     "governs": [
       "palette & biome readability",
       "water look & transparency",
@@ -63,9 +63,33 @@
         5,
         11
       ],
-      "status": "done-awaiting-critic",
+      "status": "done-awaiting-recritique",
       "round": 1,
-      "note": "ROOT CAUSE WAS NOT THE SKY. The grey band was the Preetham dome's below-horizon region showing past the edge of a sea plane too small to reach the frustum (half-extent 32.4 vs camera at radius 48). Probe measured that region at b/r 1.05 in LINEAR space, so no atmosphere/exposure/calibration tuning could ever have fixed it. Extended the sea to the horizon. Sky band b/r 1.015 -> 2.029. Also folds in most of C3's square-seam brief."
+      "note": "ROOT CAUSE WAS NOT THE SKY. The grey band was the Preetham dome's below-horizon region showing past the edge of a sea plane too small to reach the frustum (half-extent 32.4 vs camera at radius 48). Probe measured that region at b/r 1.05 in LINEAR space, so no atmosphere/exposure/calibration tuning could ever have fixed it. Extended the sea to the horizon. Sky band b/r 1.015 -> 2.029. Also folds in most of C3's square-seam brief.",
+      "critique": {
+        "pass": [
+          5,
+          12
+        ],
+        "fail": [
+          7,
+          8,
+          "transparency"
+        ],
+        "bare": [
+          6
+        ],
+        "biggestGap": "Reads as a square tray / diorama on a plinth \u2014 hard straight right-angled shelf boundary with lit rim, a 65-luminance-point step larger than any shore transition. Fix is the terrain skirt (C3), not more shader work here.",
+        "measured": {
+          "topBandBlueOverRed": 3.417,
+          "topBandRgb": [
+            34.3,
+            85.8,
+            117.2
+          ]
+        },
+        "antiTerracingGuardHeld": true
+      }
     },
     {
       "id": "C1",
@@ -95,9 +119,9 @@
         7,
         8
       ],
-      "status": "queued",
+      "status": "next",
       "round": 0,
-      "note": "Partly absorbed by C0 \u2014 the plane's own straight edge is gone. What REMAINS is a different seam: the sim grid's shallow shelf ends in a hard rectangle against open deep water, now much louder because the surrounding sea got darker. Still wants a terrain skirt."
+      "note": "PROMOTED to top rank by the C0 critic and independently corroborated by the owner's cold-island photo. The sim grid's shallow shelf ends in a hard rectangle against deep water. Needs the seabed carried past the map footprint on a continuous irregular slope, with deep-water colour driven off real depth so the band curves with bathymetry. Explicitly NOT terracing \u2014 the opposite."
     },
     {
       "id": "C4",
@@ -124,10 +148,10 @@
         6,
         7
       ],
-      "status": "done-but-uncritiqued",
+      "status": "critiqued-failing",
       "round": 1,
       "commit": "567ae8b",
-      "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it."
+      "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it. CRITIQUED as part of C0: point 7 FAIL \u2014 shallow water measures HSV sat 0.25 vs deep 0.61, i.e. the shallow band is the LEAST saturated water in frame, backwards from every reference. Point 8 FAIL \u2014 no pale shoreline band on the east shore."
     }
   ]
 }

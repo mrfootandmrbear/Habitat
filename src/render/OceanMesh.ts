@@ -169,6 +169,15 @@ void main() {
   // Let the specular sparkle read through the transparency instead of
   // being washed out flat by the fixed low opacity.
   float alpha = clamp(bedOpacity + spec * 0.35, 0.0, 1.0);
+  // Far open water goes fully opaque. There is no bed to read through out
+  // there, and leaving it transparent means it blends against whatever the
+  // backdrop happens to be, which is how the distant sea lost its colour.
+  // This is NOT the "forced opaque at the grid edge" idea rejected below —
+  // that one fired right beside the island and turned the sun glint into hard
+  // streaks off the plane's corners. This fires only past uDetailFar (300
+  // units, an order of magnitude beyond the grid), where the same detail
+  // term has already faded the specular out entirely.
+  alpha = mix(1.0, alpha, detail);
   // NOT forced opaque at the grid edge. Tried mix(1.0, alpha, gridFalloff)
   // to hide the terrain mesh's boundary showing through; it traded the
   // rectangle for worse — fully opaque water made the sun glint read as hard

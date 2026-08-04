@@ -588,6 +588,79 @@ it is done-but-uncritiqued, not done. It also now carries a requirement it was
 not built against (see-through to the submerged landform), so it needs a critic
 pass against the references rather than a pass by assertion.
 
+### C0 built and critiqued (2026-08-04)
+
+**The grey band was never the sky.** Three rounds tried to fix it by tuning the
+atmosphere — rayleigh crushed to 0.15, then the radiance-calibration rig, then
+the double-tonemapping hypothesis — and the measured b/r never moved off 1.015.
+
+The sea plane was `worldSize * 1.35`, a half-extent of **32.4**, while the
+camera sits at a horizontal radius of **~48**. The camera was outside the water.
+What filled the top of frame was the Preetham dome showing past the plane's
+edge, and because the camera pitches down 27.4° with a 50° vertical FOV, the top
+of frame is 2.4° *below* horizontal — so that was the dome's **below-horizon**
+band. Re-anchoring the rig's own probe there measured **b/r 1.05 in linear
+space**: near-achromatic before tone mapping is involved at all. No exposure,
+rayleigh or calibration change could ever have made it blue.
+
+That also closes the "second contributor" question left open above: ACES
+accounts for 1.59 → ~1.17, the anchor mismatch accounts for the rest. Both
+halves are now measured, neither is a hypothesis.
+
+A second bug surfaced while fixing it, worth writing down because the API
+invites it: **three's `Sky` is a `BoxGeometry(1,1,1)` rendered BackSide**, so
+`sky.scale.setScalar(380)` is a box *380 across* — half-extent 190, not 380.
+(three's own example passes 10000.) Fine while the sea stopped at 32.4; once the
+sea ran to 900 it extended far outside the sky box, so distant water had no
+backdrop and, being partly transparent, blended toward the clear colour. The
+tell was the far sea going dark and losing saturation.
+
+| measurement | before C0 | sea to horizon | + sky box sized |
+|---|---|---|---|
+| top-of-frame b/r | 1.015 | 2.029 | **3.417** |
+| top-of-frame rgb | (181, 183, 184) | (62, 98, 125) | **(34, 86, 117)** |
+
+Sky box, sea extent and the frustum are now a documented set in `Scene.ts` with
+the containment arithmetic written out, since changing one alone re-breaks it.
+Camera near/far moved together to hold `far/near` at exactly the 5000 the
+shoreline z-fight polygonOffset was tuned against.
+
+#### Cold critic verdict on C0
+
+Fresh-context agent, no project history, scored against bar v2 and
+`reference/OBSERVATIONS.md`:
+
+| point | verdict |
+|---|---|
+| 5 — no large achromatic region | **PASS** |
+| 6 — three readable depth steps | PASS (bare) — steps of *value* in one dull teal, not the pale-sand → turquoise → blue-teal hue journey |
+| 7 — shallow is high-saturation cyan | **FAIL** — shallow measures HSV sat 0.25 while deep measures 0.61. The shallow band is the *least* saturated water in frame, exactly backwards |
+| 8 — pale shoreline band | **FAIL** — east shore steps from land to teal in a single pixel |
+| 12 — sky a minor element | **PASS** — no sky in frame at all, which OBSERVATIONS sanctions |
+| owner's transparency requirement | **FAIL (partial)** — submerged skirt readable ~40px from shore, nothing beyond; outer sea fully opaque |
+
+**Biggest remaining gap, in the critic's words:** the world reads as *"a square
+tray dropped into an ocean" / "diorama on a plinth."* There is a hard straight
+right-angled boundary where the pale shelf stops dead against open sea, with a
+bright specular rim along it and a dark trapezoid below — a 65-luminance-point
+step, larger than any shore transition in the frame. *"So the single largest
+colour step anywhere in the water treatment is a straight man-made map border
+with a lit bevel and a shadowed cliff face, not bathymetry."*
+
+The critic explicitly flagged that this is **not** a request for terraces — it
+asks for the one hard geometric step in the frame to become a smooth slope,
+which is the opposite. Good: the anti-terracing guard in the brief held.
+
+**Corroborated independently.** The owner supplied a cold-island aerial
+photograph the same hour, which shows exactly the two things the critic asked
+for — shallow water as the most saturated water in frame, and depth boundaries
+curving with the drowned landform. Two unrelated sources agreeing is stronger
+evidence than either alone.
+
+**C0 status: done-awaiting-recritique.** Points 5 and 12 pass. Points 7, 8 and
+transparency belong to the water piece and the terrain skirt, which is now the
+top-ranked item.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.

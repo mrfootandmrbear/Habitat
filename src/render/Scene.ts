@@ -48,6 +48,31 @@ export type SceneHandles = {
   dispose: () => void;
 };
 
+/**
+ * Backdrop and frustum sizing — these three are a set, and changing one
+ * without the others produces a specific, easy-to-miss bug.
+ *
+ * three's `Sky` is a **BoxGeometry(1,1,1) rendered BackSide**, so
+ * `sky.scale.setScalar(n)` gives a box `n` across — a half-extent of `n/2`,
+ * not `n`. (three's own example uses 10000 for this reason.) It was 380, i.e.
+ * a half-extent of 190, which was fine while the sea plane stopped at 32.4.
+ * Once the sea ran out to the horizon it extended far *outside* the sky box,
+ * so the distant sea had no backdrop behind it at all and — being partly
+ * transparent — blended toward the clear colour instead of toward sky. The
+ * tell is the far water going dark and losing saturation with distance.
+ *
+ * So: the sky box must enclose the sea plane's far corner, and the far plane
+ * must enclose the sky box's far corner.
+ *   sea corner       = SEA_HORIZON_HALF_EXTENT * sqrt(2)  ~= 1273
+ *   sky half-extent  = 1500                                > 1273  OK
+ *   sky corner       = 1500 * sqrt(3) + camera radius     ~= 2646
+ *   CAMERA_FAR       = 3000                                > 2646  OK
+ */
+const SKY_BOX_SCALE = 3000;
+const CAMERA_FAR = 3000;
+/** Chosen to hold CAMERA_FAR / CAMERA_NEAR at 5000 — see the camera comment. */
+const CAMERA_NEAR = CAMERA_FAR / 5000;
+
 export function createScene(container: HTMLElement): SceneHandles {
   const qualityTier = detectQualityTier();
 
@@ -63,19 +88,18 @@ export function createScene(container: HTMLElement): SceneHandles {
   // which is the exact defect SEA_HORIZON_HALF_EXTENT exists to remove. That
   // corner sits ~1270 units out, so 2400 leaves room to orbit.
   //
-  // Near moves 0.1 -> 0.5 in the same breath, deliberately. Depth precision
-  // goes as far/near, and pushing far out 4.8x while leaving near alone would
-  // have made the buffer 4.8x coarser — a live regression risk, because the
-  // shoreline z-fight that showed up as a per-frame flash in playtest is held
-  // off by a tuned polygonOffset in OceanMesh. Moving near by the same factor
-  // keeps the ratio at 4800, marginally *better* than the 5000 that fix was
-  // tuned against, so this change cannot reintroduce it. 0.5 is still far
-  // closer than the camera can orbit.
+  // Near moves with it, deliberately. Depth precision goes as far/near, and
+  // pushing far out while leaving near alone would make the buffer coarser by
+  // the same factor — a live regression risk, because the shoreline z-fight
+  // that showed up as a per-frame flash in playtest is held off by a tuned
+  // polygonOffset in OceanMesh. These two are picked together to hold the
+  // ratio at exactly the 5000 that fix was tuned against, so this cannot
+  // reintroduce it. 0.6 is still far closer than the camera can orbit.
   const camera = new THREE.PerspectiveCamera(
     50,
     container.clientWidth / Math.max(container.clientHeight, 1),
-    0.5,
-    2400,
+    CAMERA_NEAR,
+    CAMERA_FAR,
   );
   const cameraHome = new THREE.Vector3(32, 28, 36);
   const cameraTarget = new THREE.Vector3(0, 3, 0);
@@ -102,7 +126,7 @@ export function createScene(container: HTMLElement): SceneHandles {
   const sunDirection = sunDirectionFromSky();
 
   const sky = new Sky();
-  sky.scale.setScalar(380);
+  sky.scale.setScalar(SKY_BOX_SCALE);
   const skyUniforms = sky.material.uniforms;
   skyUniforms.turbidity.value = SKY_TURBIDITY;
   skyUniforms.rayleigh.value = SKY_RAYLEIGH;
