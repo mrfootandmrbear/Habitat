@@ -134,21 +134,70 @@ failing to. Nothing in the register covers it. There is unlanded work on the
 branch `claude/evolution-simulation-phases-woku8v` (§4.40 L5 guild
 competition and related) that is the nearest existing foothold.
 
-#### Tensions this creates, flagged not resolved
+#### Owner rulings on the three tensions (2026-08-04)
+
+**1. "Creative" means each session produces something unique.** Not that the
+player is set a goal. The game is creative because a world allowed to run
+becomes *this* world and no other. The worked example is Darwin's finches: a
+small herbivore may fill the same functional role on two different islands and
+still *look* different on each. **Diversity means filling ecosystem niches** —
+land, sea, and air — not hitting a diversity number. This resolves the G-001
+tension cleanly: the goal is player-set and the uniqueness is the payoff, so
+nothing declares the world finished or sufficient.
+
+**2. Animal classes, evolving on Habitat's own engine.** Animals should mimic
+the real world and evolve out of the simulation rather than being authored.
+This is already architected — **C-027** (Open, framing at
+[candidates/C-027-framing.md](candidates/C-027-framing.md), 2026-07-31) came
+out of an earlier owner design chat on exactly this and specifies animal trait
+expression as **population trait-mean fields** with procedural morph and
+threshold swap. Unlanded work exists on three branches:
+`claude/animal-life-planning-slices-ury6vd` (Track A: A1 herbivore, A2 seed
+disperser), `claude/animal-addition-reconciliation-19zg1l` (separates
+adaptation from acclimation), `claude/evolution-simulation-phases-woku8v`
+(food-web backbone, L5 guild competition).
+
+**3. Niches couple across land, sea and air.** The stated test case: *how does
+a coral reef affect the way land animals gather their food?* The engine should
+answer that on its own, because survival sends an animal to the food. Foraging
+is the coupling, and it must cross the land/sea/air boundary rather than three
+domains running side by side.
+
+#### Determinism: intent recorded, T-001 not amended
+
+The owner's stated position is that the engine need only be **predictable, not
+perfectly deterministic** — *"I do not care if running the simulation twice
+with the exact same settings produces slightly different animals."*
+
+**T-001 is Locked and explicitly rejects this** — its rejected-alternatives
+list names "statistical replay as the default" and "deterministic where
+feasible." It is also load-bearing well beyond hygiene: P-006 commit-and-
+compare, branch-and-compare (§7), the probe baselines and `GOLDEN_*` tests the
+whole verification gate rests on, and §7's shareable seed — *"a short string
+that regenerates the exact landscape and the exact storm that took it"*, which
+§7 calls the artifact. C-027 already reconciled an earlier version of this same
+idea (individual creatures with lifetime mutation) into population fields
+*specifically* to keep T-001 intact.
+
+**Recommendation: keep T-001, because the creative goal does not need it
+relaxed.** The finches vary between islands because the *islands* differ, not
+because one island run twice differs. Under a fully deterministic engine, a
+new seed still yields a new world and new creatures — per-session uniqueness
+is delivered by the world varying, not by the RNG being irreproducible. The
+ruling above says the owner *does not care* whether identical settings diverge;
+it does not say uniqueness *requires* divergence. Determinism therefore costs
+the creative goal nothing and buys prediction, comparison and shareability.
+
+Recorded here as an open question rather than actioned. Amending a Locked
+register entry is a register decision, not a thesis edit — **no build should
+treat determinism as relaxed until T-001 itself changes.**
+
+#### Tension still open
 
 - **"Diverse and well-supported" vs. G-001 / N-002 (no score, thriving is
-  observed and not tallied).** If diversity is what the player is aiming at,
-  something must make it legible — and the moment it becomes a number on
-  screen it is a score, which the register rejects. Legible without being
-  tallied is the needle to thread.
-- **"Creative goal" vs. G-001 (sandbox has no win condition).** These are
-  compatible only if the goal is *player-set*, never game-set: Habitat must
-  not declare the world finished or sufficient. Worth stating explicitly
-  before anything builds toward it.
-- **Evolution vs. D-001 / N-004 (surprises must be informative, never
-  arbitrary).** Evolution is the easiest place in this design to produce
-  changes a player cannot trace back to a cause. Whatever form it takes has
-  to survive §2.2's contract.
+  observed and not tallied).** Ruling 1 helps — niches filled, not a number
+  hit — but something must still make niche occupancy *legible* without
+  becoming a tally on screen. Unresolved.
 
 ---
 
