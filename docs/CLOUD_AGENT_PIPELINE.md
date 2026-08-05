@@ -52,7 +52,7 @@ Valid non-idle exits that still allow the chain to continue after merge:
 
 ## 3. Parallel tracks
 
-Three automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
+Four automations share the merge trigger but claim **disjoint** tip items. Rebase onto latest `main` before editing. When touching the shared tip paragraph in BUILD_GUIDE, change **only this track’s clause**.
 
 ### Track T — Terrain tools (C-028 structural) — **parked**
 
@@ -74,18 +74,35 @@ Three automations share the merge trigger but claim **disjoint** tip items. Reba
 
 | Order | Slice | Notes |
 |---|---|---|
-| V1 | **§4.60** per-guild silhouette geometry | Tip today — new track, owner agreed 2026-08-03 to ship plant rendering now over animals |
-| V2 | **§4.61** per-cell clustering | Queued after V1 |
-| V3 | **§4.62** composite runner-up guild | Queued after V2 |
+| V1 | **§4.60** per-guild silhouette geometry | **Done** |
+| V2 | **§4.61** per-cell clustering | **Done** |
+| V3 | **§4.62** composite runner-up guild | Tip today |
 | Vn | **§4.63** distance silhouette LOD | Deferred — not agent-executable until V1–V3 are shipped and frame-timing profiled |
 
-**Never in any track until owner Unblocks / Locks:** L5 (**C-023**), L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, animals, SWE, wet-sand, freeze, figurines.
+### Track A — Animal life (C-027 population fields) — **opened 2026-08-05**
+
+**F-001** (advanced ecosystem-engineer behaviors) undeferred by owner decision ([DECISION_REGISTER §15](DECISION_REGISTER.md)); **C-027** promoted Open → **Locked** the same session ([DECISION_REGISTER §16.5](DECISION_REGISTER.md), [C-027-framing.md](candidates/C-027-framing.md)). Scope stays split: mesopredator/apex-predator roles (food-web coupling — specifiability gap named in C-027-framing.md §4.6.1) and ecosystem-engineer roles (write-back role-selection gap, §5) remain off this track. Do not implement either here.
+
+| Order | Slice | Notes |
+|---|---|---|
+| A1 | **§4.66** Herbivore population/trait fields | Tip today — registers the first `populations` Process; **D-007 clip gate applies**, record the clip verdict in the §4.66 entry before claiming any further new-Process slice on any track. Carries a grazing delta-inbox contribution into `veg.biomass.*` (C-027-framing.md §4.6.3) — a herbivore that never eats is decorative wildlife (**N-005**) |
+| A2 | **§4.67** Seed disperser fields | Next-but-one — extends A1's Process, no new clip gate; first fauna dispersal-reach concept, a dependency of **C-029** |
+| An | **§4.68** Adaptive radiation stub | Not agent-executable — gated on owner Lock of **C-029** ([framing](candidates/C-029-framing.md)), which itself needs A1+A2 shipped first |
+| — | Pollinators, then owner choice among remaining non-competitive roles | Never mesopredator / apex-predator / ecosystem-engineer under this track |
+
+**Foxel silhouette/variant design is not a fifth track.** It is a cheap, parallel, advisory lane (not merge-gated, no CI obligation) that feeds Track A's render-side checklist items — see §3.5 below.
+
+**Never in any track until owner Unblocks / Locks:** L8 (**C-024** / **C-025**), C-026 palette redesign, nutrients, SWE, wet-sand, freeze, figurines, animal competition/predation (mesopredator/apex-predator roles), ecosystem-engineer write-back, adaptive radiation ahead of a C-029 Lock.
+
+### 3.5 Animal-design lane (Foxel, low-cost, parallel — not a track)
+
+Where Foxel silhouette/variant-ladder design work happens, per owner direction to hand this off to a low-cost agent routine. Full protocol: [docs/animal-design/PROTOCOL.md](../animal-design/PROTOCOL.md) — modeled directly on the existing [nature-study protocol](nature-study/PROTOCOL.md)'s proven shape (3–5 parallel low-token Task agents per wave, a pasted ban-block, one small structured "morph card" per agent, a parent that merges without re-synthesizing). Cards are design artifacts, not shipped assets: an accepted card names rungs and a real-world referent; a separate, higher-cost step authors the actual `.fxl` file and runs `fxl2gltf.py`. A Track A slice (A1, A2, …) consumes accepted cards as an input — see each slice's render-side checklist — it does not itself run this lane.
 
 ---
 
 ## 4. Cursor Automation setup (owner paste)
 
-Create **three** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
+Create **four** Automations in the Cursor dashboard (Cloud Agents → Automations). Start **disabled**; enable each track after its first manual seed PR has merged once (or enable after this pipeline doc lands and you merge the seed agents below).
 
 ### Shared settings
 
@@ -173,6 +190,33 @@ Rules:
 Handoff: leave "Next (executable tip)" accurate for the next Track V agent.
 ```
 
+### Prompt — Track A (animal life)
+
+```
+You are a Habitat cloud succession agent on Track A (animal life — C-027 population fields).
+
+Cold start:
+1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md, docs/candidates/C-027-framing.md (Locked).
+2. Read "Next (executable tip)" and the Track A table in CLOUD_AGENT_PIPELINE.md.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track A slice (today: §4.66 Herbivore). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+
+Rules:
+- One slice per run. Do not start the next slice in the same run.
+- §4.66 registers the first `populations` Process — D-007 clip gate applies: record the clip verdict in the BUILD_GUIDE entry before this or any later slice on any track claims to register another new Process.
+- Every trait/pressure mapping needs a real-world referent (C-011, N-004) — do not invent one; if none exists, ship the field without that trait rather than guessing. Base render assets come from an accepted card in docs/animal-design/cards/ (see docs/animal-design/PROTOCOL.md) — if no card exists yet for a trait, that trait's render half waits, the sim-field half does not.
+- No individual entity/identity store (T-001, T-006) — field-simulated, individually-rendered only. No stochastic trait drift while C-003 is Open. No fixed carrying-capacity constant or hand-tuned traitRate (ES-006) — rate derives from `pop.<role>.stage[k]` turnover. Trait mismatch must enter the role's mortality/capacity term (no free adaptation) and clamp to a per-species envelope (decline, don't exceed it). Discrete swaps latch on two values, never a bare threshold. No player-authored creature bodies — species stays resolved through W-003's fixed pool.
+- Foxel (`.fxl` → `fxl2gltf.py` → `.glb`) runs offline, at build time only, gitignored — never a runtime dependency (T-006/T-007). Continuous traits ride glTF skeleton bone-scale at runtime; discrete traits pick a rung from a pre-baked `.glb` ladder.
+- Never implement mesopredator/apex-predator roles (C-027-framing.md §4.6.1 — unspecifiable until a second, prey-linked role exists), ecosystem-engineer write-back (§5 — role-selection undesigned), animal competition/predation dynamics, or adaptive radiation (**C-029** — Open, not Locked) under this track.
+- Follow BUILD_GUIDE checklist for that §4.6x entry. Green bar before done: npm run gate (skill /run-gate).
+- Update docs/BUILD_GUIDE.md, docs/MVP_SCOPE.md, README.md Current slice, slice manifest + composition in the same commit set (update-build-plan-on-commit). When editing the shared tip paragraph, change only the Track A clause.
+- C-027 is Locked — build directly against it; no self-promotion dance. If a slice's own scope decision needs an owner call (e.g. §4.67's trait-referent search coming up empty), say so in the PR body rather than guessing.
+- On block: /blocked-note, name next queue item, stop.
+- Never invent Locked policy from Open candidates.
+- Open a draft PR. Summarize gate results in the PR body. Do not ask the owner to confirm numbers.
+
+Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track A's following item (today: §4.67 Seed disperser).
+```
+
 ---
 
 ## 5. Manual seed (first succession)
@@ -180,9 +224,9 @@ Handoff: leave "Next (executable tip)" accurate for the next Track V agent.
 Before enabling Automations:
 
 1. Land this doc on `main`.
-2. Launch **T1** (§4.57), **R1** (§4.47), and **V1** (§4.60) as separate cloud agents (disjoint branches).
+2. Launch **T1** (§4.57), **R1** (§4.47), **V1** (§4.60), and **A1** (§4.66) as separate cloud agents (disjoint branches). (T1/R1/V1 already merged historically; **A1** is the new seed as of this doc.)
 3. Merge each when CI green (rebase the others if tip-paragraph conflicts).
-4. Enable the matching Automation so the *next* merge starts T2 / R2 / V2.
+4. Enable the matching Automation so the *next* merge starts T2 / R2 / V2 / A2.
 
 Owner still owns: merge clicks, Lock sittings (C-014 / C-021 / C-022 / …), Tier-O batches.
 

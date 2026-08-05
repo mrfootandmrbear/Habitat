@@ -1,8 +1,8 @@
 # C-027 — Animal trait expression: population fields, procedural morph + threshold swap (framing)
 
-**Status:** Framing only (Open — do not implement as Locked)
-**Date:** 2026-07-31 · **Updated 2026-08-03** (§4 food-web backbone added; owner direction in session)
-**Gate:** **F-001** remains Deferred — the sole remaining gate. **L2** (local seed rain), **L3** (mortality as a rate), **L4** (biotic motion), and **L5** (guild competition, **C-023 Locked**) have all landed for the plant substrate. This is architecture for when animal work is unblocked, not a request to start it. AGENTS.md: *"Keep nutrients / animals / SWE off the tip."*
+**Status:** **Locked** (2026-08-05, owner)
+**Date:** 2026-07-31 · **Updated 2026-08-03** (§4 food-web backbone added; owner direction in session) · **Updated 2026-08-05** (Locked; plasticity/adaptation split, turnover-derived rate, trait envelope, hysteretic swap latch, §5 engineer write-back gap, Foxel render mechanism)
+**Gate:** Clear. **F-001** undeferred 2026-08-05. **L2**–**L5** (plant substrate, including guild competition, **C-023 Locked**) all landed. This document is now buildable architecture, not a hypothesis — see [BUILD_GUIDE §4.66](../BUILD_GUIDE.md) (A1 Herbivore, tip) / [§4.67](../BUILD_GUIDE.md) (A2 Seed disperser), [CLOUD_AGENT_PIPELINE.md](../CLOUD_AGENT_PIPELINE.md) §3 Track A.
 
 Authority: register **E-004**, **E-005**, **E-006**, **E-007**, **E-008**, **E-009**, **ES-006**, **ES-007**, **W-003**, **N-003**, **N-004**, **N-005**, **D-001**, **T-001**, **T-002**, **T-006**, **F-001**; [SIMULATION_MODEL.md](../SIMULATION_MODEL.md) §3.7 (Populations); [DESIGN_WIKI.md](../DESIGN_WIKI.md) §4 (Species and Functional Groups); **C-007** Locked (arrival), **C-011** (real-world intuition), **C-019** Locked (island biogeography), **C-003** Open (stochastic vs. authored forcing), **C-023** Locked (guild competition, 2026-08-03).
 
@@ -14,7 +14,7 @@ The owner shared an informal design chat (Gemini, 2026-07-31) exploring how anim
 
 Two facts the chat didn't have: Habitat has **zero animals today** — "life" is six plant-guild biomass fields on a 96×96 grid (`WorldState.ts`), rendered as static colored cones through one `InstancedMesh` (`OccupantMesh.ts`); and animal work is **explicitly deferred and off the build tip** (**F-001** Deferred; the 2026-07-31 living-world review names "the instinct is animals" as the wrong next move; AGENTS.md keeps it off tip). This document reconciles the chat's genuinely useful ideas against what the register already decided, so the architecture is ready the moment **F-001** is undeferred — without proposing to start it now.
 
-This is not a Lock. It does not weaken any cited entry, and it implements nothing.
+**2026-08-05 update.** This document is now Locked (header above) — the reconciliation below was written while it was still framing-only, and the text is left as the historical record of that reconciliation. It does not weaken any cited entry.
 
 ---
 
@@ -60,6 +60,7 @@ Extends [SIMULATION_MODEL.md](../SIMULATION_MODEL.md) §3.7 — does not replace
 - `pop.<role>.density` (individuals·km⁻², annual band, legacy) — already spec'd.
 - `pop.<role>.stage[k]` (staged demographic structure, annual band, legacy) — already spec'd.
 - **New:** `pop.<role>.trait.<name>` — one population trait-mean field per morphable trait the role has, same band/legacy status as density, so trait state survives a save exactly as population structure already does.
+- **New:** `pop.<role>.swap.<name>` — the latch state for each threshold trait (§3.4), per cell, legacy. A hysteretic threshold has to remember which side it is on, and that memory is population state on the grid — not per-animal state, which stays banned.
 - Carrying capacity stays derived each annual step from habitat, resources, competition, and predation — **never a stored constant** (**ES-006**: "a constant `K` anywhere in the codebase is a direct ES-006 violation, including 'just for now'").
 
 ### 3.3 Trait update law
@@ -72,15 +73,28 @@ traitMean += traitRate · (pressureOptimum(habitatState) − traitMean) · dt
 
 `pressureOptimum` is a deterministic function of the same factor fields HSI composition already computes (moisture, temperature, salinity, exposure, inundation, light) — reused, not duplicated, the same reuse argument **L5**'s own leading direction makes for `lightCompetition.ts`. No RNG anywhere in the update; per-instance visual variety is a render-time concern (§3.4), not a sim-time one.
 
+**What this law is, and what it is not.** Written as above it is *acclimation*, not evolution: the mean relaxes toward whatever the place currently rewards, at a speed nothing constrains. Trait change in the world has three things this form omits — a generation to happen in, a differential that causes it, and a finite supply of variation to draw on. Each is cheap to add, and each closes a hole that would otherwise ship as an animal that morphs its way out of every pressure and never pays for it.
+
+**Rate is demographic turnover, not a tuned constant.** A population's trait mean cannot move faster than its individuals are replaced, so `traitRate` is derived from the role's own turnover — which is what `pop.<role>.stage[k]` (§3.2, already spec'd) exists to expose, on the same `annual` band [SIMULATION_MODEL §6](../SIMULATION_MODEL.md) already runs population dynamics in. A hand-set `traitRate` is the trait-side equivalent of a stored `K` and is banned for the same reason (**ES-006**): it makes the speed of adaptation an authored constant rather than a consequence of the place.
+
+**The mean moves because the distribution is trimmed.** Selection is a mortality differential, not an attraction. Mismatch — the distance between `traitMean` and `pressureOptimum` — must therefore enter the role's own mortality / capacity term, the same term **L3** ships for plant biomass, and move the mean as a consequence of that term rather than beside it. Without this, a role always establishes because it can always morph, which contradicts **E-006** (survival determines introduction success) and **E-009** (readiness inferred from simulation state) directly: an animal immune to habitat quality makes both unreadable.
+
+**Adaptive room is finite, and it comes from the species.** An unbounded mean drifts forever — limbs lengthen without limit as long as the ground stays rugged. The real bound is standing variation, and the form of it that fits **W-003**'s Locked fixed pool is a per-species trait envelope carried in preserve data: `pressureOptimum` may sit anywhere, but `traitMean` clamps to the envelope of the species the role resolved to. This is not an **ES-006** violation — an envelope is a species property from curated data, not a capacity — and it is what makes the load-bearing case expressible at all. When a place demands more than the species has, the population declines and eventually fails locally *instead of* morphing into something else. That failure is the earned, legible outcome **C-011** asks for; unbounded morph is the arbitrary game effect the same entry forbids.
+
+**Plasticity and adaptation are different processes on different bands.** The worked example's traits are not the same kind of thing and must not share one law. Insulation is a within-lifetime response — `seasonal` band, **reversible**, the coat thickening each winter and thinning each summer. Webbing is a multi-generational morphological change — `annual` at the fastest, slow, and not undone by one mild season. Collapsing both into a single first-order law with a single rate guarantees one of them reads wrong whatever rate is chosen: a coat that takes decades, or webbing that appears in a season. Splitting them costs nothing structurally — two derived rates on two bands — and is what makes each read as an adaptation story the player already holds.
+
+**Adaptation is spatial, because the trait mean is a field.** Neighbouring cells under different pressure carry different means, so the same role reads visibly differently across the island — thicker-coated upslope, longer-limbed on the rugged ground. That gradient is the readout that makes the whole mechanism legible from the world rather than from a panel (**U-003**), and it falls out of the field representation for free. (**C-029**, filed alongside this Lock, asks whether sustained isolation between such gradients should be allowed to read as distinct regional morphs rather than a smooth ramp — a separate, still-Open question this document does not resolve.)
+
 ### 3.4 Render-side
 
-Extends `OccupantMesh`'s existing `InstancedMesh` pattern rather than replacing it:
+Extends `OccupantMesh`'s existing `InstancedMesh` pattern rather than replacing it — and settles the mechanism only framed hypothetically before (2026-08-04 Foxel research, [VISUAL_UPGRADE_NOTE.md](../VISUAL_UPGRADE_NOTE.md)):
 
 - One `InstancedMesh` per archetype (or a shared pool), same instancing approach already shipped for the plant guilds.
 - Per cell: instance count = `density × cellAreaKm2`, capped at a render budget. This is the literal-readout decision from §2 — fewer visible animals always means genuinely lower simulated density.
 - Each instance is a deterministic sample seeded from `(cellIndex, instanceIndex[, tick])` (**T-001**) — no instance persists identity between frames; it's a fresh draw from the field every time, the same non-authority guarantee **T-006** already requires of `OccupantMesh` today.
-- Continuous trait → procedural morph (morph-target influence or bone scale on a rigged base mesh).
-- Threshold-crossing trait → discrete socket-mesh swap: attach/detach a mesh at a named bone socket when the sampled trait crosses a fixed value. Binary, legible, matches the "a person already knows this happens" test in **C-011**.
+- **Continuous trait → skeleton bone-scale.** Base meshes are Foxel-authored (`.fxl` → `fxl2gltf.py` → `.glb`, offline, gitignored toolchain — an asset pipeline, not a runtime dependency, T-006/T-007 clean: no sim state ever lives in the asset). Foxel has no blend shapes/morph targets, so continuous vertex-morphing between two generated variants is off the table — but a `.glb`'s skeleton is an ordinary rigged skeleton, and scaling one of its bones at runtime is standard Three.js `SkinnedMesh` behavior, independent of anything Foxel does or doesn't support. `limbLength`, `insulation` ride bone-scale.
+- **Threshold-crossing trait → discrete rung swap.** Foxel supplies a pre-generated ladder of variant `.glb` assets per discrete trait (parametric Python generator, vary the parameter, regenerate); the sampled trait-mean and its latch state (§3.2) pick which rung's asset renders — selected, never blended, matching Foxel's own topology limits rather than fighting them. `webbing` swaps rungs.
+- **The threshold latches; it is never bare.** A single fixed value flickers whenever the pressure sits near it — feet webbing and un-webbing as inundation wobbles across the line, which reads as a rendering glitch rather than as a threshold being crossed. The swap therefore uses two values (attach above, detach below) with the latch held in `pop.<role>.swap.<name>` (§3.2), so the state is hysteretic, deterministic on replay, and cheap to assert in a test. The detach threshold sitting well below the attach threshold is also the honest ecology: a morphological change acquired over generations does not come off the moment one wet decade ends.
 
 ### 3.5 Worked example — Herbivore
 
@@ -143,6 +157,34 @@ preyDensity += -predationRate · predatorDensity · dt   (bounded, same clamp fa
 
 §3.4 already generalizes without modification: one `InstancedMesh` per role, sampling that role's own density and trait-mean fields. Nothing in §4.1–§4.4 changes the render contract — a mesopredator's instances read `pop.mesopredator.density` / `.trait.*` exactly as a herbivore's do; the trophic coupling above only changes what feeds those fields, never how they get drawn.
 
+### 4.6 What §4's mechanism doesn't yet make buildable
+
+§4.1–§4.5 specify the *shape* of the food web. They do not, by themselves, make every role in §3.1 sliceable today — naming the remaining gaps now is what keeps a later slice from discovering them as a rewrite.
+
+**4.6.1 Only abiotically-keyed roles are actually specifiable today.** `pressureOptimum` (§3.3) reads HSI factor fields, all of which are physical. That is sufficient for the herbivore worked example, and for pollinators and seed dispersers, whose pressure keys to flowering-vegetation cover — a field that exists. It is *not* sufficient for mesopredators or apex predators, whose density and trait targets depend on prey (§4.2), a field that does not exist until another animal role does. The seven-role table in §3.1 therefore overstates readiness: four roles are specifiable against today's state; three cannot be specified at all until a second, prey-linked role exists to eat — this is a *sequencing* constraint (build the primary consumer first), not a missing mechanism.
+
+**4.6.2 Trophic simultaneity resolves as a one-band lag, and that is a decision.** **ES-007**'s "predator and prey readiness cannot be assessed independently" meets [SIMULATION_MODEL §5.2](../SIMULATION_MODEL.md)'s read-then-write rule: within the `annual` band a predator reads the prey density its own step began with, so §4.3's coupled system is solved with a one-band lag rather than simultaneously. A predator responds to *last year's* prey. That is well-defined, deterministic, and almost certainly right — but it is a modelling choice with a visible signature (predator–prey cycles get their period partly from the lag, not only from the ecology), and it should be recorded as chosen rather than discovered.
+
+**4.6.3 Herbivory is a write-back, and the worked example is the role that forces it.** A herbivore that eats changes `veg.biomass.*`, which `vegetation` owns — so under [§11.2](../SIMULATION_MODEL.md) it contributes to a delta inbox rather than writing the field, exactly as `fire` already does for `veg.cover` and `veg.biomass.herb`. This is the point where "trait expression in isolation" stops being sustainable: a herbivore whose population is simulated but which never consumes anything is decorative wildlife, which **N-005** forbids outright. **A1** (herbivore, [BUILD_GUIDE §4.66](../BUILD_GUIDE.md)) therefore carries a biomass-consumption inbox — the smallest possible piece of **ES-007**, not the food web — as part of its own scope, not a later addition.
+
+**4.6.4 Apex readiness has nothing to read.** §3.1 notes that **E-009** ("often signals a relatively mature ecosystem") implies an apex predator's density target should read a longer habitat history than the other roles. No habitat-history field exists — every HSI factor is instantaneous. Either a slow integrated habitat-quality field is introduced (a new field with its own band and legacy status) or apex readiness collapses to "conditions are good right now," which is precisely the readiness-as-a-checkbox reading **E-009** was written against. Unresolved; blocks apex predator specifically, not mesopredator.
+
+**4.6.5 Decomposers are the cheapest role and the most blocked.** They need no visible instancing (DESIGN_WIKI: "rarely observed directly by the player"), and their substrate — soil organic matter, [§3.4](../SIMULATION_MODEL.md) — already exists, which makes them arguably a better architectural case than the herbivore. They are also the role that most directly touches nutrients, which AGENTS.md keeps off the tip. Noted, not resolved.
+
+---
+
+## 5. Ecosystem-engineer write-back — the gap, stated accurately
+
+**F-001** is undeferred but preserves the requirement it always carried: "at least one representative engineer and an extensible write-back path must survive the architecture." Worth being precise about which half is missing, because the framing is easy to get backwards.
+
+**The path is built and enforced, not pending.** [SIMULATION_MODEL §11.2](../SIMULATION_MODEL.md)'s delta inbox exists in code: `Process.contributes` ([`src/sim/process/Process.ts`](../../src/sim/process/Process.ts)) declares non-owner inbox writes, the scheduler treats them as ordering edges, and [`src/sim/ownership.test.ts`](../../src/sim/ownership.test.ts) asserts the discipline directly — `fire` contributes `veg.cover` and `veg.biomass.herb` rather than owning them; `vegetation` contributes `soil.infiltrationCapacity` rather than owning it. **E-005**'s feedback path therefore already survives the architecture, proved twice, before any animal exists. What is missing is an animal *using* it.
+
+**What an engineer role would still have to declare** — three things, none of them new machinery: which physical field it contributes to, in which unit the inbox is denominated, and on which band it contributes. The third is the one with teeth. Biology runs `annual`; `terrain.elevation`'s owner runs `decadal`, and §11.2 has the owner drain the inbox during its own band step. A beaver's trapped sediment therefore accumulates for up to ten sim-years before it appears in the terrain — correct under the protocol, band-separation intact, but it means an engineer's physical signature lands in decadal jumps rather than continuously. Whether that reads as "the dam did that" or as a delayed unexplained step is a **C-011** question this document does not answer.
+
+**One shape is already settled and worth not re-deriving.** §11.1 explicitly rules `structure.obstructionHeight` out of biological ownership because player siting writes the same field — so an animal engineer's dam contributes to the field the player's own structures write, both origins summing in declared contributor order. That is the intended arrangement, not a collision to design around.
+
+**Still not designed here.** Which roles are engineers, what each one contributes, and what the resulting physical effect is worth to the player. This document specs trait expression; the engineer path is named, its one real constraint (band-crossing latency) is recorded, and the design is left to the slice that takes it on — explicitly not A1 or A2 ([BUILD_GUIDE §4.66](../BUILD_GUIDE.md)/[§4.67](../BUILD_GUIDE.md)), neither of which is an engineer role.
+
 ---
 
 ## Hard bans
@@ -151,8 +193,12 @@ preyDensity += -predationRate · predatorDensity · dt   (bounded, same clamp fa
 - **No stochastic trait drift** while **C-003** is Open — the target must be a deterministic function of pressure fields only.
 - **No player-authored or freely-generated creature bodies.** Species identity stays resolved through **W-003**'s fixed, curated pool; only trait *expression* is free-running (**N-003** no species collection game, **N-005** no decorative wildlife, **D-001** no player-authored finished ecosystems).
 - **No trait or morph without a real-world referent** a player could already reason about (**C-011**) — a morph must read as a known adaptation story, never an invented "because the game says so" transformation.
-- **No fixed carrying-capacity constant** anywhere in the trait or population model (**ES-006**).
+- **No fixed carrying-capacity constant** anywhere in the trait or population model (**ES-006**) — and no hand-tuned `traitRate` either, for the same reason (§3.3): the speed of adaptation is derived from demographic turnover, never authored.
+- **No adaptation without a survival cost.** Trait mismatch enters the role's mortality / capacity term; a population may not morph its way out of a pressure while its density is untouched (**E-006**, **E-009**).
+- **No unbounded trait drift.** Every trait carries a per-species envelope from **W-003** preserve data, and a population that hits the envelope declines rather than continuing to morph.
+- **No bare threshold for a discrete swap** — two-value latch with per-cell state (§3.4), so a morph cannot flicker on a pressure field sitting near the line.
 - **No GPU-only or render-only authoritative state** — the trait-mean field is the only place a trait exists in truth; the instanced render is always downstream of it (**T-006**).
+- **No Foxel output as a runtime dependency.** The toolchain (`.fxl` → `.glb`) runs offline, at build time, gitignored; the shipped app only ever loads static `.glb` files, never generates them at runtime (T-006/T-007).
 - **Does not reopen or duplicate L5 / C-023's scope.** L5 governs *plant* guild competition (light budget); §4's predation term governs cross-*role* animal density coupling. Same mortality-as-a-rate shape, different populations — §4 does not reimplement or re-tune L5's own mechanism.
 - **No trophic shortcut.** §4.3's predation term may not skip a level (apex predators do not directly suppress herbivores) — the cascade must run through the chain §4.1 states, or it stops being the food web ES-007 requires and becomes an authored effect.
 
@@ -162,25 +208,26 @@ preyDensity += -predationRate · predatorDensity · dt   (bounded, same clamp fa
 
 | Entry | Relationship |
 |---|---|
-| **F-001** (Deferred) | This document is the "extensible write-back path" F-001 asks be preserved for engineers — but the actual SIMULATION_MODEL §11 owned-property / delta-inbox mechanism for ecosystem engineers is **not** designed here; flagged as the next framing gap (§3.1) |
-| **L2 / L3 / L4** (queued, plants) | Sequencing precedent this document follows: the plant substrate (local seeding, mortality-as-a-rate, motion) ships first. This document does not ask to jump that queue |
+| **F-001** (Current, undeferred 2026-08-05) | The write-back path F-001 asks be preserved already exists and is test-enforced (§5) — `Process.contributes` plus the §11.2 delta inbox, proved by `fire` and `vegetation`. What is undesigned is which animal roles are engineers and what each contributes; §5 records the one constraint that answer inherits (annual biology vs. decadal terrain owner) |
+| **L2 / L3 / L4** (shipped, plants) | Sequencing precedent this document followed: the plant substrate (local seeding, mortality-as-a-rate, motion) shipped first |
 | **L5 / C-023** (guild competition, Locked, shipped) | Landed 2026-08-03. §4.3's predation term reuses its mortality-as-a-rate shape directly; §4.1's cascade closes through L5's producer-level competition rather than around it |
-| **C-019** (island biogeography, Locked) | Animal dispersal (seed dispersers, and eventually any colonizing role) should follow the same Locked MacArthur–Wilson pool-eligibility / overseas-pressure shape already shipped for plants, once a dispersal mechanism exists for fauna |
-| **ES-007** (food webs, Locked) | No longer out of scope — §4 is this document's ES-007 backbone: bottom-up capacity, top-down predation-as-mortality-rate, the trophic chain in §4.1. Still framing, not an implement slice |
+| **C-019** (island biogeography, Locked) | Animal dispersal (seed dispersers, and eventually any colonizing role) should follow the same Locked MacArthur–Wilson pool-eligibility / overseas-pressure shape already shipped for plants — **A2** ([BUILD_GUIDE §4.67](../BUILD_GUIDE.md)) is where a dispersal mechanism first exists for fauna |
+| **ES-007** (food webs, Locked) | §4 is this document's ES-007 backbone: bottom-up capacity, top-down predation-as-mortality-rate, the trophic chain in §4.1. §4.6 names what it still doesn't make buildable (prey-dependent roles, apex readiness) |
+| **C-029** (adaptive radiation, Open, framing) | Extends §3.3's per-cell trait-mean field spatially — regional ecomorph divergence under sustained isolation. Gated behind this entry (now Locked) and **A1**+**A2** shipping; not designed here |
 
 ---
 
-## Owner half (later)
+## Owner half
 
-Not a playtest ask now — this is framing, not an implement slice. When the tip actually reaches this work:
+The machine half of this entry (determinism, no-fixed-K/no-tuned-rate, envelope-bound-and-decline, literal density mapping) is CI-judged (DECISION_CONFORMANCE C-027). The owner half stays legibility, judged once there is a real trait field to look at — same posture BUILD_GUIDE's D-007 clip gate already uses elsewhere:
 
-1. Confirm the seven-role list (§3.1) is the right starting set, or narrow it further.
-2. Confirm herbivore is the right first worked example, given **E-005**'s ecosystem-engineer write-back requirement is Locked but still architecturally unbuilt — an engineer might be the more load-bearing first case despite being harder.
-3. Confirm §4.1's trophic backbone (which roles eat which) and §4.4's ambush-vs-pursuit terrain referent read as correct before any mesopredator/apex slice starts — cheaper to correct in this document than after a species-specific asset exists.
-4. **L2**–**L5** have landed. Once **F-001** is undeferred: walk the worked scenario (a herbivore population's limb-length / insulation / webbing trait-means visibly drifting after a force-dial change, and — once §4 ships — visibly receding under real predation pressure) and judge whether it reads as legible, earned adaptation, or as an arbitrary game effect — the same clip-test spirit **D-007** already applies elsewhere.
+1. Confirm the seven-role list (§3.1) is the right starting set, or narrow it further — noting §4.6.1: only four of the seven are specifiable against today's state at all, the rest wait on a prey-linked role existing first.
+2. Confirm herbivore was the right first worked example, now that §4.6.3 has made the case concrete: a herbivore that doesn't eat is decorative wildlife (**N-005**), so **A1** carries a biomass-consumption inbox from the start rather than deferring it.
+3. Once **A1** ships: walk the worked scenario (a herbivore population's limb-length / insulation / webbing trait-means visibly drifting after a force-dial change, and a population failing against its envelope in a place that has stopped suiting it) and judge whether it reads as legible, earned adaptation, or as an arbitrary game effect — the **D-007** clip verdict this entry's Lock note requires before any later Track A slice claims a new Process.
+4. Once **A2** ships and **C-029** is reviewable: confirm §4.1's trophic backbone (which roles eat which) and §4.4's ambush-vs-pursuit terrain referent read as correct before any mesopredator/apex slice starts — cheaper to correct in this document than after a species-specific asset exists.
 
 ---
 
 ## Tip placement
 
-Framing only — **do not implement**. Stays off tip per AGENTS.md ("Keep nutrients / animals / SWE off the tip") until **F-001** is undeferred. **L2**–**L5** have already landed for the plant substrate; **F-001** is the sole remaining gate.
+**Locked — buildable.** Opens Track A: [BUILD_GUIDE §4.66](../BUILD_GUIDE.md) (A1 Herbivore, tip) / [§4.67](../BUILD_GUIDE.md) (A2 Seed disperser, next-but-one). Mesopredator, apex-predator, and ecosystem-engineer roles stay off Track A until §4.6 and §5's respective gaps get their own framing pass — this Lock does not, by itself, unblock them.
