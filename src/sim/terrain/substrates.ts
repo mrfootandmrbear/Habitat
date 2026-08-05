@@ -52,7 +52,12 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     erosionK: 0.003,
     // Warm saturated ochre-brown (gauntlet-loop C1, bar v2 point 4) — was a
     // muted 39%-saturation tan that read grey-brown against the reference set.
-    dryRgb: [0x9c / 255, 0x6f / 255, 0x3f / 255],
+    // Round 2: a critic measured the rendered (lit, tonemapped) frame at
+    // roughly half the reference's on-screen saturation/value despite this
+    // already-boosted raw albedo — lighting + ACES eats a large fraction of
+    // input chroma (RENDER_NOTES.md), so raw values run hotter than the
+    // target look to compensate.
+    dryRgb: [0xa6 / 255, 0x6d / 255, 0x35 / 255],
   },
   {
     id: SUBSTRATE_SAND,
@@ -69,9 +74,12 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     porosity: 0.52,
     infiltrationRate: 0.025,
     erosionK: 0.0012,
-    // Rust-red, holds and darkens dry — pushed more saturated (C1) to read
-    // as the ochre-rust cliff face the reference set shows, not brown-grey.
-    dryRgb: [0x8a / 255, 0x4a / 255, 0x30 / 255],
+    // Rust-red, holds and darkens dry — pushed more saturated (C1 round 2) to
+    // read as the ochre-rust cliff face the reference set shows. A critic
+    // measured the summit patch at ~42% sat/34% value on screen against the
+    // reference's ~54%/52% — raw pushed further to compensate for lighting's
+    // chroma loss, per the same measured-not-assumed reasoning as loam above.
+    dryRgb: [0x9e / 255, 0x45 / 255, 0x18 / 255],
   },
   {
     id: SUBSTRATE_ROCK,

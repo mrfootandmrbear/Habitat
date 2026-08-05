@@ -18,17 +18,27 @@ export type TerrainRgb = readonly [number, number, number];
 // Exported so the GPU default-view path (render/TerrainMesh.ts) can pass
 // these as shader uniforms instead of duplicating the hex values — one
 // palette definition, sourced by both the CPU and GPU coloring paths.
-export const WET: TerrainRgb = [0x3f / 255, 0x5a / 255, 0x30 / 255];
+// Round 2 (C1): richened alongside VEG below so a wet, vegetated cell's
+// blend target doesn't stay muted even as VEG gets more vivid.
+export const WET: TerrainRgb = [0x50 / 255, 0x73 / 255, 0x2e / 255];
 /**
  * Saturated yellow-green (gauntlet-loop C1, bar v2 point 4) — was a near-pure
  * mid-green (hue ~120) that read as flat "grass" green rather than the
  * chartreuse meadow hue the Godus/biome reference set shows. Hue picked at
- * ~90 rather than more yellow-shifted (~120+ toward LOAM's own hue): a wider
- * gap from both the dry-ochre and wet-olive blend targets keeps the
- * wet-vs-dry-under-vegetation floor (presentation.proxy.test.ts) clear
- * rather than merely passing.
+ * ~85-90 rather than more yellow-shifted (~120+ toward LOAM's own hue): a
+ * wider gap from both the dry-ochre and wet-olive blend targets keeps the
+ * wet-vs-dry-under-vegetation floor (presentation.proxy.test.ts) clear with
+ * margin rather than merely passing.
+ *
+ * Round 2: a fresh critic measured the rendered mid-slope green at ~29%
+ * saturation / 60% value against the reference's ~58%/77% — lighting and
+ * ACES tonemapping eat a large fraction of input chroma (RENDER_NOTES.md
+ * documents this for the sky; it applies here too), so round 1's already-
+ * boosted raw value still rendered at roughly half the target vividness.
+ * Pushed further; re-screenshot and re-critique before assuming this closes
+ * the gap rather than overshoots it.
  */
-export const VEG: TerrainRgb = [0x7d / 255, 0xb3 / 255, 0x32 / 255];
+export const VEG: TerrainRgb = [0x61 / 255, 0xd1 / 255, 0x1f / 255];
 export const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
 /**
  * Wet sand / mud foreshore — readable against dry land (Slice 17). Darker
