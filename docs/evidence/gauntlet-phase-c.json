@@ -239,10 +239,16 @@
     {
       "id": "C5",
       "name": "camera framing",
-      "points": [],
-      "status": "queued",
-      "round": 0,
-      "note": "New this round. Owner ruled framing in-scope; every reference looks down steeply and fills frame with world, ours wastes ~25% of frame on empty sky at -27.4 deg pitch."
+      "points": [12],
+      "status": "round-1-built, awaiting-critic",
+      "round": 1,
+      "note": "Scene.ts cameraHome moved (32,28,36)->(18,27,20): distance from target ~54->~36, pitch ~27.4deg->~42deg, same azimuth. Sky-lighting calibration needed no code change (derives view direction from cameraHome/cameraTarget dynamically).",
+      "sideEffectFixed": "scripts/shot.ts DEFAULT_PROBES were tuned to the old framing and went stale (shelf-shallow measured land, not water, after the move) -- re-scanned and re-aimed all four.",
+      "regressionCheck": "Checked C3's already-confirmed water depth-banding for regression under the new framing, per the skill's Step 6. A naive fixed-scan-line probe reading suggested a flatter gradient, but that was an artifact of scanning perpendicular to the depth gradient's actual orientation at the new angle -- a shore-to-horizon crop (docs/evidence/shots/c5/detail-water-gradient.png, gitignored) shows the expected pale-foam -> turquoise -> teal -> deep-blue progression clearly. Also hit RENDER_NOTES.md's documented ACES red-clip trap at a couple of near-corner probe candidates while re-aiming -- not a new bug, moved the probes to avoid it.",
+      "verifiedBy": "546/546 tests, clean typecheck/build, full probe suite green -- none reference camera position.",
+      "commits": ["671add6"],
+      "compositionDoc": "docs/slices/camera-framing-composition.md",
+      "critique": "not yet run -- critic should score both the new framing itself and re-check water banding (points 6-8) for regression"
     },
     {
       "id": "C-water",
