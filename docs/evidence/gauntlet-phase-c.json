@@ -79,8 +79,8 @@
         5,
         11
       ],
-      "status": "done-awaiting-recritique",
-      "round": 1,
+      "status": "done, critic-confirmed",
+      "round": 2,
       "note": "ROOT CAUSE WAS NOT THE SKY. The grey band was the Preetham dome's below-horizon region showing past the edge of a sea plane too small to reach the frustum (half-extent 32.4 vs camera at radius 48). Probe measured that region at b/r 1.05 in LINEAR space, so no atmosphere/exposure/calibration tuning could ever have fixed it. Extended the sea to the horizon. Sky band b/r 1.015 -> 2.029. Also folds in most of C3's square-seam brief.",
       "critique": {
         "pass": [
@@ -105,6 +105,15 @@
           ]
         },
         "antiTerracingGuardHeld": true
+      },
+      "round2Fix": {
+        "date": "2026-08-05",
+        "trigger": "C3 round-3 critic's point-11 finding: \"low-tier's top-of-frame band goes noticeably darker than high-tier's; flagged as postFX-dependent, not yet isolated.\"",
+        "isolation": "Bisected by holding every tier-varying setting fixed at low-tier values and toggling one at a time: SSAO, bloom, SMAA, envMapSize, pixelRatioCap, shadowMapSize, renderer antialias flag -- none reproduced the gap. Only toggling the render mechanism itself (direct renderer.render() vs EffectComposer->OutputPass) did, every time, ~1.8-2.1x per channel.",
+        "fix": "Every quality tier now routes through the composer (low tier gets a minimal RenderPass->OutputPass, no SSAO/bloom/SMAA) instead of ever calling renderer.render() directly. Structural fix, not a compensating exposure hack -- same 'one definition, not two' lesson seabed.ts/lightingRig.ts already enforce.",
+        "verification": "All three tiers now measure bit-identical sky/mid/ground bands (were up to 2.1x apart). 546/546 tests, clean typecheck/build, full probe suite green.",
+        "commit": "db14d4a",
+        "openCaveat": "Added composer cost on low tier not verified on real touch/iPad hardware -- reasoned as strictly less than medium tier's already-accepted cost (composer + bloom + SMAA vs this tier's composer with neither), not measured on comparable hardware."
       }
     },
     {
