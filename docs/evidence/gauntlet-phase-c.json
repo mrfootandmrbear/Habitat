@@ -115,7 +115,7 @@
         2,
         3
       ],
-      "status": "round-3-built, awaiting-recritique",
+      "status": "done, critic-confirmed",
       "round": 3,
       "note": "Recoloured the single source of truth both CPU tests and the GPU shader read: sim/terrain/substrates.ts dryRgb (loam/sand/clay/rock) and ui/terrainEncoding.ts WET/VEG. Rock was 5%-saturation near-grey (bar v2 point 5 risk) -> warm pale stone. Points 2 (material follows landform) and 3 (clean boundaries) PASSED in round 1 and untouched since — only point 4 (saturation) has iterated.",
       "commits": ["b3dc4cd", "299d7a5", "(round 3, this commit)"],
@@ -138,7 +138,17 @@
       },
       "round3Fix": "Clay/rock/sand/loam left untouched (critic confirmed clay on-target, didn't flag the others). VEG and WET pushed to near-ceiling raw saturation/value (VEG #65f200 = H85 S99% V95%, up from S85%/V82%) since the critic explicitly ruled out overshoot risk — no signal to stop short of the ceiling. Verified floor after the push: wet-vs-dry-under-vegetation delta 0.300 against the 0.12 floor (was 0.224 after round 2) — the widest margin yet, so there was room to push this hard without approaching the legibility floor.",
       "verifiedBy": "npm run shot against a bare-substrate cone and a vegetation-seeded one (temp debug seed in main.ts, reverted before each commit). 542/542 tests, clean typecheck/build, full probe suite green all three rounds. tidal-envelope baseline regenerated each round (encodingDelta moves with the palette by design; its own 0.08 floor clears with wide margin every time).",
-      "critique": "round 3 screenshots ready in docs/evidence/shots/c1/ (gitignored); re-critique pending — third pass at the same VEG gap, watch for diminishing returns per the skill's guidance if this doesn't close it"
+      "critiqueR3": {
+        "verdicts": {
+          "veg": "PASS — 45.4% sat / 55.8% val, up from 37.1%/54.9% in round 2, vs Godus reference 57.6%/77.4%.",
+          "ceilingEffect": "Confirmed, not assumed: shadowed-crevice pixels (closest read on raw albedo) jumped ~65-69%->84-86% sat when raw went to S99, but the dominant LIT surface only gained +8.3 saturation points for the same input change — the lighting/tonemapping pipeline itself caps how saturated/bright a lit material can read, independent of how saturated the source color is.",
+          "overshoot": "None, even at S99 raw input. Rendered result tops out ~85% only in tiny shadow flecks; the visible fill reads lush, not neon."
+        },
+        "verbatimQuote": "45% saturation is unambiguously chromatic/warm, well clear of muted grey-brown, and the remaining ~20% shortfall vs. Godus is now a lighting/exposure pipeline ceiling, not a color-choice defect — flag that to the team as the next lever, not another albedo tweak."
+      },
+      "closedAt": "2026-08-04",
+      "deferredFollowUp": "The lit-surface saturation ceiling is a lighting/tonemapping-pipeline property (verified by the round-3 critic's shadow-vs-lit pixel comparison), not a C1 palette defect. Out of scope for this piece — if more vividness is wanted later, the next lever is exposure/tonemapping tuning, not another color edit. See RENDER_NOTES.md's new entry.",
+      "critique": "closed — 3 rounds, points 2/3 passed round 1 and untouched since, point 4 passed round 3 after the critic confirmed the residual gap is a rendering-pipeline ceiling rather than a color choice"
     },
     {
       "id": "C2",

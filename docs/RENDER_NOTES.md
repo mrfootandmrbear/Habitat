@@ -74,6 +74,34 @@ Reach for it instead of tuning colours by eye.
 *Verified:* mirrors the upstream GLSL exactly; used to diagnose a deep-water
 colour whose red measured exactly 0 on screen.
 
+### Lit-surface saturation has a ceiling independent of albedo saturation
+
+Pushing a diffuse material's raw albedo saturation higher has sharply
+diminishing returns on a **directly-lit** surface — the lighting +
+tonemapping pipeline caps how saturated/bright the result reads, regardless
+of how saturated the source colour is.
+
+*Why it bites:* it looks exactly like "the colour isn't saturated enough,"
+inviting another albedo tweak, when the actual lever is exposure/tonemapping.
+
+*Verified:* C1 (gauntlet-loop, 2026-08-04) pushed a vegetation-green albedo's
+raw HSV saturation from 72% to 85% to 99% across two rounds. **Shadowed
+crevice pixels** (the part of the frame closest to seeing raw albedo) moved
+almost proportionally with the input (~65% → ~85% measured saturation
+between the last two steps). The **dominant lit surface**, same material,
+same input change, gained only ~8 saturation points. Two different regions
+of the same material, same albedo, wildly different sensitivity to the same
+input push — the lit region is being compressed by something downstream of
+the material colour itself (direct light intensity interacting with ACES),
+not failing to receive the saturation change.
+
+*Consequence for tuning:* if a critic reports a material still reads
+under-saturated after a substantial albedo push, check whether shadowed vs.
+lit regions of the *same* material are responding differently before pushing
+albedo a third time. If they are, the remaining gap is a lighting/exposure
+question, not a colour-choice one, and no further hex-value change will
+close it.
+
 ### `PlaneGeometry` rotated flat: the UV↔world mapping
 
 `new THREE.PlaneGeometry(w, h)` then `.rotateX(-Math.PI / 2)` maps local

@@ -869,6 +869,46 @@ piece done. **Status: awaiting recritique**, sent back to the same critic
 agent with the new screenshots so the comparison is apples-to-apples against
 its own round-1 measurements.
 
+### C1 round 3: closed (2026-08-04)
+
+Round 2's critic confirmed clay/rust fixed (59.0%/46.8% measured vs. Godus's
+54.3%/51.8%) but found vegetation green under-corrected relative to it
+(37.1%/54.9% vs. a 57.6%/77.4% target, only ~64%/71% of reference) despite a
+comparable-looking raw push, and explicitly ruled out overshoot risk: *"no
+neon risk... if anything the opposite problem remains."*
+
+With no signal to hold back, round 3 pushed VEG/WET to near-ceiling raw
+saturation and value (`#65f200`, H85 S99% V95%) rather than a fourth
+incremental guess. Wet-vs-dry-under-vegetation floor re-verified at 0.300
+against the 0.12 minimum — the widest margin of any round.
+
+**The critic's third pass surfaced the actual mechanism, tested rather than
+assumed:** shadowed-crevice pixels (closest to seeing raw albedo directly)
+jumped from ~65-69% to ~84-86% measured saturation when the raw input went to
+99% — confirming the change reached the renderer. But the dominant **lit**
+surface, same material, same input change, gained only ~8 saturation points.
+Two regions of the same albedo responding completely differently to the same
+push means the lighting/tonemapping pipeline itself caps how saturated a
+directly-lit surface can read — independent of source colour saturation.
+This is now recorded in `RENDER_NOTES.md` as a durable fact, not just a note
+here, since it will bite the next round that tries to "just saturate it
+more."
+
+**Final verdict, verbatim:** *"45% saturation is unambiguously chromatic/
+warm, well clear of muted grey-brown, and the remaining ~20% shortfall vs.
+Godus is now a lighting/exposure pipeline ceiling, not a color-choice defect
+— flag that to the team as the next lever, not another albedo tweak."*
+**PASS.**
+
+**C1 is closed.** Three rounds: points 2 (material follows landform) and 3
+(clean boundaries) passed round 1 and were never touched again; point 4
+(saturated warm palette) took three rounds to separate a real color-choice
+gap (clay, fixed round 2) from a rendering-pipeline ceiling (vegetation
+green, round 3) that no further palette edit can close. The residual ~20%
+gap on lit vegetation is deferred, explicitly out of this piece's scope — the
+next lever is exposure/tonemapping tuning, a different piece entirely, not
+another `terrainEncoding.ts` edit. Commits `b3dc4cd`, `299d7a5`, `07df1b7`.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
