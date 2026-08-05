@@ -12,6 +12,8 @@ import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
 import { vegetationSeasonalProcess } from "./process/vegetationSeasonalProcess";
 import { atmosphereProcess } from "./process/atmosphereProcess";
+import { populationsProcess } from "./process/populationsProcess";
+import { populationsSeasonalProcess } from "./process/populationsSeasonalProcess";
 import type { Process } from "./process/Process";
 
 const PROCESSES: Process[] = [
@@ -23,6 +25,8 @@ const PROCESSES: Process[] = [
   vegetationProcess,
   vegetationSeasonalProcess,
   dispersalProcess,
+  populationsProcess,
+  populationsSeasonalProcess,
   geomorphologyProcess,
   fuelProcess,
   fireProcess,
@@ -65,6 +69,19 @@ describe("process ownership (§4 / §5 / §11)", () => {
     expect(fireProcess.contributes).toContain("veg.biomass.herb");
     expect(fireProcess.writes).not.toContain("veg.biomass.herb");
     expect(vegetationProcess.writes).toContain("veg.cover");
+  });
+
+  it("populations contributes grazing into veg.biomass.herb instead of owning it (C-027 §4.6.3)", () => {
+    expect(populationsProcess.writes).not.toContain("veg.biomass.herb");
+    expect(populationsProcess.contributes).toContain("veg.biomass.herb");
+    expect(vegetationSeasonalProcess.writes).toContain("veg.biomass.herb");
+  });
+
+  it("populations owns herbivore fields across both its bands", () => {
+    expect(populationsProcess.writes).toContain("pop.herbivore.density");
+    expect(populationsSeasonalProcess.writes).toContain(
+      "pop.herbivore.trait.insulation",
+    );
   });
 });
 

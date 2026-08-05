@@ -405,6 +405,60 @@ export const config = {
   salinityOceanMixPerDay: 0.2,
   /** Seawater-equivalent concentration on the [0,1] salinity field. */
   salinitySeawater: 1,
+
+  /**
+   * Herbivore population/trait fields (A1 / C-027, BUILD_GUIDE §4.66).
+   * Referent: a modest temperate grazer (e.g. white-tailed deer, ~10-25
+   * individuals·km⁻² typical range) — not a fixed capacity (ES-006), only the
+   * species envelope the computed capacity is clamped against.
+   */
+  herbivoreDensityMax: 25,
+  /** Juvenile→adult transition per annual band — ordinary demographic rate,
+   * same category as herbMortalityRate etc.; traitRate derives *from* the
+   * resulting turnover, is never itself the traitRate (C-027 §3.3). */
+  herbivoreJuvenileMaturationRate: 0.7,
+  /** Juveniles produced per adult per annual band at full capacity headroom. */
+  herbivoreBirthRatePerAdult: 0.6,
+  /** Baseline adult mortality per annual band absent any trait-mismatch cost. */
+  herbivoreAdultMortalityBaseRate: 0.15,
+  /** Home-range forage read radius (cells) — no new resource field; reuses
+   * veg.biomass.herb averaged over this neighborhood (C-027 §3.5). */
+  herbivoreHomeRangeRadiusCells: 3,
+  /** Forage density (kg DM·m⁻²) at which capacity saturates — a fraction of
+   * herbBiomassMax, not a second copy of it. */
+  herbivoreForageReferenceKgM2: 1,
+  /** Grazing mortality-rate coefficient on veg.biomass.herb per unit density
+   * (individual·km⁻²) per annual band — the ES-007 §4.6.3 write-back term.
+   * Zero density is a multiplicative no-op by construction. */
+  herbivoreGrazingRatePerDensity: 0.012,
+  /**
+   * limbLength bone-scale envelope (AD-001 card): mountain goats/chamois carry
+   * proportionally longer limbs on rugged terrain than plains grazers on flat
+   * ground. 0.85x-1.25x of the (eventual) Foxel base rig's rest scale.
+   */
+  herbivoreLimbLengthMin: 0.85,
+  herbivoreLimbLengthMax: 1.25,
+  /** rise/run slope at which the limbLength ruggedness pressure saturates. */
+  herbivoreSlopeReferenceRiseRun: 0.5,
+  /** insulation trait-mean envelope — fraction of maximum coat thickness. */
+  herbivoreInsulationMin: 0,
+  herbivoreInsulationMax: 1,
+  /** climate.airTemperature (°C) at/above which insulation optimum is 0, and
+   * at/below which it is 1 — same driving field vegetation's own temperature
+   * gate reads (temperatureComposition.ts), not a duplicated climate input. */
+  herbivoreInsulationWarmRefC: 20,
+  herbivoreInsulationColdRefC: -10,
+  /** webbing trait-mean envelope — fraction tracking inundation pressure. */
+  herbivoreWebbingMin: 0,
+  herbivoreWebbingMax: 1,
+  /** Two-value hysteresis latch on the webbing trait-mean (C-027 §3.4) — a
+   * single fixed threshold flickers as inundation wobbles across the line. */
+  herbivoreWebbingAttachThreshold: 0.5,
+  herbivoreWebbingDetachThreshold: 0.3,
+  /** Scales normalized |pressureOptimum - traitMean| (as a fraction of the
+   * trait's own envelope span) into an added mortality-rate term — adaptation
+   * is never free (E-006/E-009, C-027 §3.3). */
+  herbivoreTraitMismatchMortalityScale: 0.5,
 } as const;
 
 export type InspectorLayer =

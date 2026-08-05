@@ -34,7 +34,7 @@
       "abs": 0.0001
     },
     "mid.stepMsMean": {
-      "value": 0.8741164869791667,
+      "value": 0.3742683385416667,
       "abs": 1000000000
     },
     "mid.replayMatch": {
@@ -42,7 +42,7 @@
       "abs": 0
     },
     "mid.hashN": {
-      "value": 656292248,
+      "value": 481867121,
       "abs": 0
     },
     "high.oceanCells": {
@@ -70,7 +70,7 @@
       "abs": 0
     },
     "delta.stepMs64": {
-      "value": 1.1856894583333333,
+      "value": 0.5316874999999991,
       "abs": 1000000000
     }
   }

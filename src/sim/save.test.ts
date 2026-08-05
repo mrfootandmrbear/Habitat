@@ -11,8 +11,8 @@ import {
 } from "./save";
 
 describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
-  it("uses schema version 11 after C-016 marsh seed bank registration", () => {
-    expect(SCHEMA_VERSION).toBe(11);
+  it("uses schema version 12 after A1 herbivore population field registration", () => {
+    expect(SCHEMA_VERSION).toBe(12);
   });
 
   it("round-trips registered state including soil.depth", () => {
@@ -21,7 +21,7 @@ describe("save / load scaffold (Slice 8, T-003 / T-004 / S-007)", () => {
     world.addRain(0.02);
     const before = world.stateHash();
     const doc = serializeRegistry(world.registry);
-    expect(doc.schemaVersion).toBe(11);
+    expect(doc.schemaVersion).toBe(12);
     expect(doc.fields.some((f) => f.id === "soil.depth" && f.legacy)).toBe(
       true,
     );

@@ -7,7 +7,7 @@ import type { FieldRegistry } from "./registry/FieldRegistry";
 import type { RegisteredField } from "./registry/types";
 
 /** Bump when the registered field set or serialization layout changes. */
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 /** Content / preserve data version — independent of schema (T-004). */
 export const CONTENT_VERSION = 1;

@@ -14,6 +14,8 @@ import { fuelProcess } from "./process/fuelProcess";
 import { fireProcess } from "./process/fireProcess";
 import { dispersalProcess } from "./process/dispersalProcess";
 import { atmosphereProcess } from "./process/atmosphereProcess";
+import { populationsProcess } from "./process/populationsProcess";
+import { populationsSeasonalProcess } from "./process/populationsSeasonalProcess";
 import { fluxStep, computeOceanCells, computeShorelineCells } from "./hydrology/fluxStep";
 import { spreadFireRings } from "./fire/spreadRings";
 import { nextFireScar, nextFuelLoad } from "./fire/fuelScarUpdate";
@@ -41,6 +43,19 @@ import {
   leeDepositWeight,
 } from "./climate/longshoreTendency";
 import { evaluateHsi, LIMITING_LIGHT } from "./habitat/hsiComposition";
+import { tidalHydroperiod } from "./habitat/inundationComposition";
+import {
+  nextHerbivoreStage,
+} from "./population/herbivoreDemography";
+import {
+  limbLengthOptimum,
+  insulationOptimum,
+  webbingOptimum,
+  nextTraitMean,
+  traitMismatchMortalityRate,
+  webbingLatch,
+} from "./population/herbivoreTraits";
+import { turnoverFraction } from "./population/herbivoreTurnover";
 import { evaluateStrandHsi } from "./habitat/strandHsiComposition";
 import {
   evaluateBinderHsi,
@@ -259,6 +274,21 @@ export class WorldState {
   readonly marshHsi: Grid2D;
   readonly shrubHsi: Grid2D;
   readonly crustHsi: Grid2D;
+  /**
+   * A1 / C-027 (BUILD_GUIDE §4.66) — first `populations` fields (SIMULATION_MODEL
+   * §3.7). Owner: populations, band: annual unless noted. Field-simulated,
+   * individually-rendered only — no per-animal identity (T-001, T-006).
+   */
+  readonly herbivoreDensity: Grid2D;
+  readonly herbivoreStageJuvenile: Grid2D;
+  readonly herbivoreStageAdult: Grid2D;
+  readonly herbivoreOccupancy: Grid2D;
+  readonly herbivoreLimbLength: Grid2D;
+  /** Owner: populations, band: seasonal (plasticity, reversible — C-027 §3.3). */
+  readonly herbivoreInsulation: Grid2D;
+  readonly herbivoreWebbing: Grid2D;
+  /** Two-value hysteresis latch state {0,1} (C-027 §3.4). */
+  readonly herbivoreWebbingSwap: Grid2D;
   readonly registry: FieldRegistry;
   readonly scheduler: SimScheduler;
 
@@ -485,6 +515,29 @@ export class WorldState {
     this.marshHsi = new Grid2D(this.width, this.height);
     this.shrubHsi = new Grid2D(this.width, this.height);
     this.crustHsi = new Grid2D(this.width, this.height);
+    this.herbivoreDensity = new Grid2D(this.width, this.height);
+    this.herbivoreStageJuvenile = new Grid2D(this.width, this.height);
+    this.herbivoreStageAdult = new Grid2D(this.width, this.height);
+    this.herbivoreOccupancy = new Grid2D(this.width, this.height);
+    // limbLength/insulation/webbing trait-means start at the envelope
+    // midpoint — a population with no history yet, not zero (zero would sit
+    // outside limbLength's [0.85, 1.25] envelope and fail bounds on tick 0).
+    this.herbivoreLimbLength = new Grid2D(
+      this.width,
+      this.height,
+      (config.herbivoreLimbLengthMin + config.herbivoreLimbLengthMax) / 2,
+    );
+    this.herbivoreInsulation = new Grid2D(
+      this.width,
+      this.height,
+      (config.herbivoreInsulationMin + config.herbivoreInsulationMax) / 2,
+    );
+    this.herbivoreWebbing = new Grid2D(
+      this.width,
+      this.height,
+      (config.herbivoreWebbingMin + config.herbivoreWebbingMax) / 2,
+    );
+    this.herbivoreWebbingSwap = new Grid2D(this.width, this.height);
     this.depressionDepth = new Grid2D(this.width, this.height);
     this.intertidal = new Grid2D(this.width, this.height);
     this.shoreExposure = new Grid2D(this.width, this.height);
@@ -550,6 +603,8 @@ export class WorldState {
       vegetationProcess,
       vegetationSeasonalProcess,
       dispersalProcess,
+      populationsProcess,
+      populationsSeasonalProcess,
       geomorphologyProcess,
       fuelProcess,
       fireProcess,
@@ -1994,6 +2049,204 @@ export class WorldState {
   }
 
   /**
+   * A1 / C-027 §3.3-§3.4, §4.6.3 (BUILD_GUIDE §4.66) — annual herbivore
+   * population step. Stage-structured demography toward a habitat/forage
+   * derived capacity (recomputed every step, never stored — ES-006);
+   * turnover-derived trait-rate movement toward pressure optima for
+   * limbLength (terrain ruggedness) and webbing (tidal hydroperiod, NS-008);
+   * the webbing hysteresis latch (§3.4); and the grazing write-back into
+   * veg.biomass.herb (§4.6.3 — a herbivore that never eats is decorative
+   * wildlife, N-005). insulation moves on the seasonal band instead —
+   * runPopulationsSeasonalStep — because plasticity and adaptation are
+   * different processes that must not share one law (§3.3).
+   */
+  runPopulationsAnnualStep(dt: number): void {
+    const scale = Math.max(0, dt);
+    const juvenile = this.herbivoreStageJuvenile.data;
+    const adult = this.herbivoreStageAdult.data;
+    const density = this.herbivoreDensity.data;
+    const occupancy = this.herbivoreOccupancy.data;
+    const limbLength = this.herbivoreLimbLength.data;
+    const webbing = this.herbivoreWebbing.data;
+    const webbingSwap = this.herbivoreWebbingSwap.data;
+    const herbBio = this.herbBiomass.data;
+    const hsi = this.habitatSuitability.data;
+    const elev = this.terrain.data;
+
+    const densityMax = config.herbivoreDensityMax;
+    const maturationRate = config.herbivoreJuvenileMaturationRate;
+    const birthRate = config.herbivoreBirthRatePerAdult;
+    const adultMortalityRate = config.herbivoreAdultMortalityBaseRate;
+    const homeRangeRadius = config.herbivoreHomeRangeRadiusCells;
+    const forageRef = config.herbivoreForageReferenceKgM2;
+    const grazingRate = config.herbivoreGrazingRatePerDensity;
+    const limbMin = config.herbivoreLimbLengthMin;
+    const limbMax = config.herbivoreLimbLengthMax;
+    const slopeRef = config.herbivoreSlopeReferenceRiseRun;
+    const webMin = config.herbivoreWebbingMin;
+    const webMax = config.herbivoreWebbingMax;
+    const attach = config.herbivoreWebbingAttachThreshold;
+    const detach = config.herbivoreWebbingDetachThreshold;
+    const mismatchScale = config.herbivoreTraitMismatchMortalityScale;
+    const dx = config.cellSizeMeters;
+
+    const hasTide =
+      this.seaLevelMeters !== undefined && this.tidalAmplitudeMeters > 0;
+    const mlw = hasTide
+      ? meanLowWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
+      : undefined;
+    const mhw = hasTide
+      ? meanHighWater(this.seaLevelMeters!, this.tidalAmplitudeMeters)
+      : undefined;
+
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+
+        // Density target reads existing vegetation-biomass fields within a
+        // home-range neighborhood — no new resource field invented (C-027 §3.5).
+        const avgForage = neighborhoodAverage(
+          herbBio,
+          this.width,
+          this.height,
+          x,
+          z,
+          homeRangeRadius,
+        );
+        const forageAdequacy = clamp01(avgForage / Math.max(1e-6, forageRef));
+        const capacity = densityMax * hsi[i]! * forageAdequacy;
+
+        const slope = neighborSlope(elev, this.width, this.height, x, z, dx);
+        const limbOptimum = limbLengthOptimum(slope, slopeRef, limbMin, limbMax);
+
+        const hydroperiod = hasTide
+          ? tidalHydroperiod(elev[i]!, mlw!, mhw!)
+          : 0;
+        const webOptimum = webbingOptimum(hydroperiod, webMin, webMax);
+
+        // No adaptation without a survival cost (E-006/E-009) — standing
+        // mismatch between each trait's current mean and its pressure
+        // optimum feeds this step's mortality, same as L3's mortality-as-a-
+        // rate term, not a second free channel beside it.
+        const limbMismatch = traitMismatchMortalityRate(
+          limbOptimum,
+          limbLength[i]!,
+          limbMin,
+          limbMax,
+          mismatchScale,
+        );
+        const webMismatch = traitMismatchMortalityRate(
+          webOptimum,
+          webbing[i]!,
+          webMin,
+          webMax,
+          mismatchScale,
+        );
+
+        const preDensity = juvenile[i]! + adult[i]!;
+        const stageResult = nextHerbivoreStage({
+          juvenile: juvenile[i]!,
+          adult: adult[i]!,
+          capacity,
+          maturationRate,
+          birthRatePerAdult: birthRate,
+          adultMortalityRate,
+          mismatchMortalityRate: limbMismatch + webMismatch,
+          dt: scale,
+        });
+        juvenile[i] = stageResult.juvenile;
+        adult[i] = stageResult.adult;
+        const newDensity = stageResult.juvenile + stageResult.adult;
+        density[i] = newDensity;
+        occupancy[i] = capacity > 0 ? clamp01(newDensity / capacity) : 0;
+
+        // traitRate derives from this step's own turnover (§3.3) — the
+        // fraction of the standing population freshly matured this band —
+        // never a hand-tuned constant (ES-006's traitRate-side twin).
+        const traitRate = turnoverFraction(stageResult.matured, preDensity);
+
+        limbLength[i] = nextTraitMean({
+          traitMean: limbLength[i]!,
+          pressureOptimum: limbOptimum,
+          traitRate,
+          envelopeMin: limbMin,
+          envelopeMax: limbMax,
+          dt: scale,
+        });
+        webbing[i] = nextTraitMean({
+          traitMean: webbing[i]!,
+          pressureOptimum: webOptimum,
+          traitRate,
+          envelopeMin: webMin,
+          envelopeMax: webMax,
+          dt: scale,
+        });
+        webbingSwap[i] = webbingLatch({
+          current: webbingSwap[i]! >= 0.5 ? 1 : 0,
+          traitMean: webbing[i]!,
+          attachThreshold: attach,
+          detachThreshold: detach,
+        });
+
+        // Grazing write-back (§4.6.3, SIM §11.2): contributes into
+        // veg.biomass.herb, does not own it — same direct-mutation-under-
+        // `contributes` pattern runFireStep already uses for the same
+        // field. Multiplicative in density: zero herbivores is an exact
+        // no-op against the pre-A1 baseline (same discipline L2 proved).
+        const grazed = grazingRate * newDensity * herbBio[i]! * scale;
+        herbBio[i] = Math.max(0, herbBio[i]! - grazed);
+      }
+    }
+  }
+
+  /**
+   * A1 / C-027 §3.3 — seasonal herbivore insulation step. insulation is
+   * reversible plasticity (thicker coat each winter, thinner each summer),
+   * not adaptation — a different process from the annual-band traits above,
+   * on its own band, so a coat that takes decades or webbing that appears in
+   * a season cannot happen (§3.3). Same first-order law, same turnover-
+   * derived rate; only the band and the pressure axis differ.
+   */
+  runPopulationsSeasonalStep(dt: number): void {
+    const scale = Math.max(0, dt);
+    const insulation = this.herbivoreInsulation.data;
+    const juvenile = this.herbivoreStageJuvenile.data;
+    const adult = this.herbivoreStageAdult.data;
+    const airTempC = this.airTemperature;
+    const warmRef = config.herbivoreInsulationWarmRefC;
+    const coldRef = config.herbivoreInsulationColdRefC;
+    const min = config.herbivoreInsulationMin;
+    const max = config.herbivoreInsulationMax;
+    const maturationRate = config.herbivoreJuvenileMaturationRate;
+
+    // insulation's own pressure — climate.airTemperature — is a single
+    // global scalar (SIMULATION_MODEL §3.8), the same driving field
+    // vegetation's own temperature gate reads; the optimum is therefore
+    // spatially uniform this band, same as that gate.
+    const optimum = insulationOptimum(airTempC, warmRef, coldRef, min, max);
+
+    for (let z = 0; z < this.height; z++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = z * this.width + x;
+        const density = juvenile[i]! + adult[i]!;
+        // Seasonal-band turnover proxy: the maturation rate itself, scaled
+        // to this band's own cadence — plasticity moves within a lifetime,
+        // so its rate is not gated on a fresh cohort maturing the way the
+        // annual-band adaptation traits are.
+        const traitRate = density > 1e-9 ? maturationRate : 0;
+        insulation[i] = nextTraitMean({
+          traitMean: insulation[i]!,
+          pressureOptimum: optimum,
+          traitRate,
+          envelopeMin: min,
+          envelopeMax: max,
+          dt: scale,
+        });
+      }
+    }
+  }
+
+  /**
    * Olson litter model (NATURAL_PROCESS_MATH §3.5): dL/dt = I − k·L.
    * Analytic step (§4.45) — equilibrium is I/k, not a function of tick size.
    * Input I proportional to veg.cover; runs on decadal band.
@@ -2411,6 +2664,36 @@ export class WorldState {
   getHerbBiomass(x: number, z: number): number {
     if (!this.herbBiomass.inBounds(x, z)) return 0;
     return this.herbBiomass.get(x, z);
+  }
+
+  getHerbivoreDensity(x: number, z: number): number {
+    if (!this.herbivoreDensity.inBounds(x, z)) return 0;
+    return this.herbivoreDensity.get(x, z);
+  }
+
+  getHerbivoreOccupancy(x: number, z: number): number {
+    if (!this.herbivoreOccupancy.inBounds(x, z)) return 0;
+    return this.herbivoreOccupancy.get(x, z);
+  }
+
+  getHerbivoreLimbLength(x: number, z: number): number {
+    if (!this.herbivoreLimbLength.inBounds(x, z)) return 0;
+    return this.herbivoreLimbLength.get(x, z);
+  }
+
+  getHerbivoreInsulation(x: number, z: number): number {
+    if (!this.herbivoreInsulation.inBounds(x, z)) return 0;
+    return this.herbivoreInsulation.get(x, z);
+  }
+
+  getHerbivoreWebbing(x: number, z: number): number {
+    if (!this.herbivoreWebbing.inBounds(x, z)) return 0;
+    return this.herbivoreWebbing.get(x, z);
+  }
+
+  getHerbivoreWebbingSwap(x: number, z: number): number {
+    if (!this.herbivoreWebbingSwap.inBounds(x, z)) return 0;
+    return this.herbivoreWebbingSwap.get(x, z);
   }
 
   getHerbSeedBank(x: number, z: number): number {
@@ -3431,6 +3714,97 @@ export class WorldState {
         data: this.crustBiomass.data,
         range: [0, config.crustBiomassMax] as const,
       },
+      // A1 / C-027 (BUILD_GUIDE §4.66) — first `populations` fields
+      // (SIMULATION_MODEL §3.7). Owner: populations.
+      {
+        id: "pop.herbivore.density",
+        units: "individuals/km²",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreDensity.data,
+        range: [0, config.herbivoreDensityMax] as const,
+      },
+      {
+        id: "pop.herbivore.stage.juvenile",
+        units: "individuals/km²",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreStageJuvenile.data,
+        range: [0, config.herbivoreDensityMax] as const,
+      },
+      {
+        id: "pop.herbivore.stage.adult",
+        units: "individuals/km²",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreStageAdult.data,
+        range: [0, config.herbivoreDensityMax] as const,
+      },
+      {
+        id: "pop.herbivore.occupancy",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreOccupancy.data,
+        range: [0, 1] as const,
+      },
+      {
+        id: "pop.herbivore.trait.limbLength",
+        units: "bone-scale ×base",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreLimbLength.data,
+        range: [
+          config.herbivoreLimbLengthMin,
+          config.herbivoreLimbLengthMax,
+        ] as const,
+      },
+      {
+        id: "pop.herbivore.trait.insulation",
+        units: "fraction of max coat",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "seasonal" as const,
+        legacy: true,
+        data: this.herbivoreInsulation.data,
+        range: [
+          config.herbivoreInsulationMin,
+          config.herbivoreInsulationMax,
+        ] as const,
+      },
+      {
+        id: "pop.herbivore.trait.webbing",
+        units: "fraction",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreWebbing.data,
+        range: [
+          config.herbivoreWebbingMin,
+          config.herbivoreWebbingMax,
+        ] as const,
+      },
+      {
+        id: "pop.herbivore.swap.webbing",
+        units: "latch {0,1}",
+        shape: "cell" as const,
+        owner: "populations",
+        band: "annual" as const,
+        legacy: true,
+        data: this.herbivoreWebbingSwap.data,
+        range: [0, 1] as const,
+      },
       // §4.48: strand/binder/marsh/shrub/crust HSI, cached by dispersal
       // (annual) so establishment (seasonal) reads instead of recomputing.
       {
@@ -3763,4 +4137,37 @@ function neighborSlope(
   if (z > 0) maxS = Math.max(maxS, Math.abs(c - elev[i - width]!) / dx);
   if (z + 1 < height) maxS = Math.max(maxS, Math.abs(c - elev[i + width]!) / dx);
   return maxS;
+}
+
+function clamp01(x: number): number {
+  if (Number.isNaN(x)) return 0;
+  return Math.min(1, Math.max(0, x));
+}
+
+/**
+ * Box-average of a cell field over a `radius`-cell neighborhood, clamped to
+ * grid bounds (A1 / C-027 §3.5 — the home-range forage read; no new
+ * resource field, just a wider read of an existing one).
+ */
+function neighborhoodAverage(
+  data: Float32Array,
+  width: number,
+  height: number,
+  x: number,
+  z: number,
+  radius: number,
+): number {
+  const x0 = Math.max(0, x - radius);
+  const x1 = Math.min(width - 1, x + radius);
+  const z0 = Math.max(0, z - radius);
+  const z1 = Math.min(height - 1, z + radius);
+  let sum = 0;
+  let count = 0;
+  for (let zz = z0; zz <= z1; zz++) {
+    for (let xx = x0; xx <= x1; xx++) {
+      sum += data[zz * width + xx]!;
+      count++;
+    }
+  }
+  return count > 0 ? sum / count : 0;
 }
