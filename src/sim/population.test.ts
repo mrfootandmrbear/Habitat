@@ -13,6 +13,10 @@ import {
 } from "./population/herbivoreTraits";
 import { turnoverFraction } from "./population/herbivoreTurnover";
 
+// Envelope-exhaustion below is the E-006/E-009 survival-cost test (no
+// adaptation without a mortality cost); grazing below is the N-005 test
+// (a herbivore that never eats is decorative wildlife, C-027 §4.6.3).
+
 /** Seed uniform good habitat/forage so density can actually grow (Grid2D fields default to 0). */
 function seedHerbivoreHabitat(
   world: WorldState,

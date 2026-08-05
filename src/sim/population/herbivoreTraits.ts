@@ -29,7 +29,7 @@ function clamp(x: number, lo: number, hi: number): number {
  * *trait*, not the *demand* — the gap between the two is what
  * `traitMismatchMortalityRate` prices (a population that exhausts its
  * envelope declines rather than continuing to morph, §3.3).
- * Referent (AD-001): mountain goats/chamois carry proportionally longer,
+ * Referent (C-027 §3.5): mountain goats/chamois carry proportionally longer,
  * stockier limbs on rugged terrain than plains grazers on flat ground.
  */
 export function limbLengthOptimum(
@@ -67,7 +67,7 @@ export function insulationOptimum(
 
 /**
  * webbing pressure axis: fraction of time inundated (tidal hydroperiod,
- * NS-008) — the pressure axis IS the fraction itself, already normalized
+ * C-016) — the pressure axis IS the fraction itself, already normalized
  * [0,1] by `tidalHydroperiod`, no further shaping law needed.
  */
 export function webbingOptimum(

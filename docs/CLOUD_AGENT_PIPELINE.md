@@ -85,8 +85,8 @@ Four automations share the merge trigger but claim **disjoint** tip items. Rebas
 
 | Order | Slice | Notes |
 |---|---|---|
-| A1 | **§4.66** Herbivore population/trait fields | Tip today — registers the first `populations` Process; **D-007 clip gate applies**, record the clip verdict in the §4.66 entry before claiming any further new-Process slice on any track. Carries a grazing delta-inbox contribution into `veg.biomass.*` (C-027-framing.md §4.6.3) — a herbivore that never eats is decorative wildlife (**N-005**) |
-| A2 | **§4.67** Seed disperser fields | Next-but-one — extends A1's Process, no new clip gate; first fauna dispersal-reach concept, a dependency of **C-029** |
+| A1 | **§4.66** Herbivore population/trait fields | **Machine half shipped 2026-08-05** — registered the first `populations` Process. **D-007 clip verdict outstanding**: [docs/playtests/A1-herbivore.md](playtests/A1-herbivore.md); record it before claiming any *other* new-Process slice on any track. Carries a grazing write-back into `veg.biomass.herb` (C-027-framing.md §4.6.3) — a herbivore that never eats is decorative wildlife (**N-005**). Render is a documented placeholder (no Foxel dependency; only `limbLength` has an accepted animal-design card) |
+| A2 | **§4.67** Seed disperser fields | Tip today — extends A1's Process, no new clip gate (explicitly not blocked by A1's outstanding D-007 verdict, C-027-framing.md); first fauna dispersal-reach concept, a dependency of **C-029** |
 | An | **§4.68** Adaptive radiation stub | Not agent-executable — gated on owner Lock of **C-029** ([framing](candidates/C-029-framing.md)), which itself needs A1+A2 shipped first |
 | — | Pollinators, then owner choice among remaining non-competitive roles | Never mesopredator / apex-predator / ecosystem-engineer under this track |
 
@@ -198,7 +198,7 @@ You are a Habitat cloud succession agent on Track A (animal life — C-027 popul
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md, docs/candidates/C-027-framing.md (Locked).
 2. Read "Next (executable tip)" and the Track A table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track A slice (today: §4.66 Herbivore). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track A slice (today: §4.67 Seed disperser — §4.66 Herbivore's machine half shipped 2026-08-05, D-007 clip verdict outstanding). If that tip item is already Done, blocked, or not tip, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.
@@ -214,7 +214,7 @@ Rules:
 - Never invent Locked policy from Open candidates.
 - Open a draft PR. Summarize gate results in the PR body. Do not ask the owner to confirm numbers.
 
-Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track A's following item (today: §4.67 Seed disperser).
+Handoff: leave "Next (executable tip)" accurate so the next merge-triggered agent can claim Track A's following item (today: §4.68 adaptive radiation stub — not agent-executable until owner Locks C-029, so most likely a pollinator/other non-competitive-role slice instead once A2 ships).
 ```
 
 ---

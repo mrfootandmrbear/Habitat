@@ -9,6 +9,9 @@ const base = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
   base,
+  server: {
+    port: process.env.PORT ? Number(process.env.PORT) : 5173,
+  },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],

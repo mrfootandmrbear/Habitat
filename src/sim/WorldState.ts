@@ -2053,7 +2053,7 @@ export class WorldState {
    * population step. Stage-structured demography toward a habitat/forage
    * derived capacity (recomputed every step, never stored — ES-006);
    * turnover-derived trait-rate movement toward pressure optima for
-   * limbLength (terrain ruggedness) and webbing (tidal hydroperiod, NS-008);
+   * limbLength (terrain ruggedness) and webbing (tidal hydroperiod, C-016);
    * the webbing hysteresis latch (§3.4); and the grazing write-back into
    * veg.biomass.herb (§4.6.3 — a herbivore that never eats is decorative
    * wildlife, N-005). insulation moves on the seasonal band instead —

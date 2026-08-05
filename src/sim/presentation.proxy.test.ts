@@ -42,6 +42,7 @@ import {
   swayTilt,
 } from "../ui/occupantSway";
 import { OccupantMesh } from "../render/OccupantMesh";
+import { HerbivoreMesh } from "../render/HerbivoreMesh";
 import * as THREE from "three";
 import { rgbDistance } from "../ui/colorDistance";
 import { briefChromePresent } from "../ui/briefChrome";
@@ -698,6 +699,56 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     // 2-4 sub-instances per cell -> total strictly between 1x and 4x occupied cells.
     expect(herb!.count).toBeGreaterThan(occupiedCells);
     expect(herb!.count).toBeLessThanOrEqual(occupiedCells * 4);
+  });
+
+  it("HerbivoreMesh (A1 / C-027) instance count tracks the true density total via a fixed-order accumulator, not lossy per-cell rounding", () => {
+    // config.herbivoreDensityMax (25 ind/km²) x this map's cell area
+    // (1e-4 km²) never reaches 0.5 per cell -- an independent per-cell
+    // Math.round would round every cell to 0 and the population would
+    // never render at all regardless of density. The fixed-order carry
+    // accumulator must instead preserve the *sum*.
+    const w = 32;
+    const world = new WorldState(new Grid2D(w, w, 1));
+    const density = 20; // within [0, herbivoreDensityMax], well under 0.5/cell
+    world.herbivoreDensity.fill(density);
+    const mesh = new HerbivoreMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+
+    const cellAreaKm2 = (config.cellSizeMeters / 1000) ** 2;
+    const expectedTotal = density * cellAreaKm2 * w * w;
+    expect(mesh.object.count).toBeGreaterThan(0);
+    // Within one unit of the true expected total (accumulator's own
+    // rounding/carry boundary), not silently zero.
+    expect(Math.abs(mesh.object.count - expectedTotal)).toBeLessThanOrEqual(1);
+  });
+
+  it("HerbivoreMesh renders nothing at exactly zero density everywhere (literal readout, not a tuned floor)", () => {
+    const w = 16;
+    const world = new WorldState(new Grid2D(w, w, 1));
+    const mesh = new HerbivoreMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+    expect(mesh.object.count).toBe(0);
+  });
+
+  it("HerbivoreMesh instance placement is deterministic across two renders of the same state (T-001)", () => {
+    const w = 30;
+    const world = new WorldState(new Grid2D(w, w, 1));
+    world.herbivoreDensity.fill(config.herbivoreDensityMax);
+    world.herbivoreLimbLength.fill(1.1);
+    const meshA = new HerbivoreMesh(w, w, w * 2);
+    meshA.updateFrom(world.hydrologyModel, world);
+    const meshB = new HerbivoreMesh(w, w, w * 2);
+    meshB.updateFrom(world.hydrologyModel, world);
+
+    expect(meshA.object.count).toBe(meshB.object.count);
+    expect(meshA.object.count).toBeGreaterThan(0);
+    const m = new THREE.Matrix4();
+    const mB = new THREE.Matrix4();
+    for (let i = 0; i < meshA.object.count; i++) {
+      meshA.object.getMatrixAt(i, m);
+      meshB.object.getMatrixAt(i, mB);
+      expect(m.toArray()).toEqual(mB.toArray());
+    }
   });
 
   it("clustering is hash-identical across two renders of the same seed/tick (T-001)", () => {

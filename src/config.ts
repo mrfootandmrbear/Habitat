@@ -432,7 +432,7 @@ export const config = {
    * Zero density is a multiplicative no-op by construction. */
   herbivoreGrazingRatePerDensity: 0.012,
   /**
-   * limbLength bone-scale envelope (AD-001 card): mountain goats/chamois carry
+   * limbLength bone-scale envelope (C-027 §3.5 worked example): mountain goats/chamois carry
    * proportionally longer limbs on rugged terrain than plains grazers on flat
    * ground. 0.85x-1.25x of the (eventual) Foxel base rig's rest scale.
    */

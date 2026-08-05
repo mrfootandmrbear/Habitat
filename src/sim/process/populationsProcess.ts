@@ -5,7 +5,7 @@ import type { Process } from "./Process";
  * (SIMULATION_MODEL §3.7). Annual band: stage-structured demography toward
  * a habitat/forage-derived capacity (never stored — ES-006), turnover-
  * derived trait-rate movement for limbLength (terrain ruggedness) and
- * webbing (tidal hydroperiod, NS-008) plus its hysteresis latch, and the
+ * webbing (tidal hydroperiod, C-016) plus its hysteresis latch, and the
  * grazing write-back into veg.biomass.herb (§4.6.3 — a herbivore that never
  * eats is decorative wildlife, N-005). insulation moves on the seasonal
  * band instead (populationsSeasonalProcess) — same id, second band, same

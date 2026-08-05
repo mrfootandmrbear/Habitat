@@ -106,6 +106,17 @@ let world = new WorldState(terrain, {
   windUx: windById("west").ux,
   windUz: windById("west").uz,
 });
+if (import.meta.env.DEV) {
+  // Dev-only console access for manual verification (e.g. seeding a founder
+  // herbivore population before A1's own arrival tool exists — the D-007
+  // clip ask, docs/playtests/A1-herbivore.md). Never present in a prod
+  // build; a getter so it tracks `world` across island regeneration (T-006
+  // — a debugging aid, not a second renderer-side authority over sim state).
+  Object.defineProperty(window, "__habitatDebugWorld", {
+    get: () => world,
+    configurable: true,
+  });
+}
 paintIslandSoilDepth(
   world.soilDepth.data,
   world.terrain.data,

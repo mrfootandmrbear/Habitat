@@ -1,0 +1,51 @@
+{
+  "id": "A1",
+  "title": "Herbivore population/trait fields (C-027, Track A)",
+  "simLoop": "First `populations` Process (SIMULATION_MODEL §3.7), registered across two bands like vegetation/vegetationSeasonal: pop.herbivore.density/stage.juvenile/stage.adult/occupancy/trait.limbLength/trait.webbing/swap.webbing on annual, pop.herbivore.trait.insulation on seasonal. Capacity is recomputed every annual step from a home-range-averaged read of veg.biomass.herb x habitat.suitability (never stored, ES-006). traitMean += traitRate*(pressureOptimum-traitMean)*dt, envelope-clamped; traitRate derives from this step's own stage turnover, never a hand-tuned constant. limbLength <- terrain slope, insulation <- climate.airTemperature, webbing <- tidal hydroperiod (NS-008) -- three real-world referents. Mismatch between the raw (unclamped) pressureOptimum and the envelope-clamped trait mean feeds an added mortality term, so a population that cannot meet a place's demand declines instead of morphing past its envelope. Grazing contributes a density-proportional mortality-rate term into veg.biomass.herb (C-027 §4.6.3) -- zero density is an exact no-op.",
+  "gameLoop": "A herbivore population appears wherever there is forage and suitable habitat, its limb-length and coat visibly drifting to match the terrain and climate you carved -- leggier on rugged ground, shaggier after a cold snap -- and a population that has outgrown what the place can give it declines rather than cheating its way past the species' own limits.",
+  "registerIds": [
+    "C-027",
+    "F-001",
+    "E-004",
+    "E-005",
+    "E-006",
+    "E-009",
+    "ES-006",
+    "ES-007",
+    "W-003",
+    "N-003",
+    "N-004",
+    "N-005",
+    "D-001",
+    "T-001",
+    "T-006",
+    "T-007",
+    "C-011",
+    "C-003",
+    "C-019",
+    "D-007"
+  ],
+  "invariantClass": "Bounds",
+  "tests": [
+    "src/sim/population.test.ts",
+    "src/sim/ownership.test.ts",
+    "src/sim/probes/baseline.test.ts"
+  ],
+  "probes": [
+    "herbivore-drift",
+    "deep-time"
+  ],
+  "fields": [
+    "pop.herbivore.density",
+    "pop.herbivore.stage.juvenile",
+    "pop.herbivore.stage.adult",
+    "pop.herbivore.occupancy",
+    "pop.herbivore.trait.limbLength",
+    "pop.herbivore.trait.insulation",
+    "pop.herbivore.trait.webbing",
+    "pop.herbivore.swap.webbing",
+    "veg.biomass.herb"
+  ],
+  "notebookSeed": "The herd here has gone shaggy since the cold set in.",
+  "tierO": "D-007 clip verdict outstanding -- owner judges whether a herbivore population's limb-length/insulation/webbing trait-means visibly drifting after a force-dial change, and a population failing against its envelope in a place that has stopped suiting it, reads as legible earned adaptation or an arbitrary game effect. Ask filed: docs/playtests/A1-herbivore.md. This is the D-007 gate for every later Track A slice registering a new Process -- not a batchable Tier-O question."
+}

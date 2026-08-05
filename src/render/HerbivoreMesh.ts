@@ -11,8 +11,8 @@ import { hash01 } from "./OccupantMesh";
  * already holds for the plant guilds.
  *
  * PLACEHOLDER GEOMETRY. This is a stand-in silhouette (body + four legs from
- * primitive Three.js geometry), not the real Foxel-authored asset — only
- * `AD-001` (limbLength) has an accepted animal-design card as of this slice
+ * primitive Three.js geometry), not the real Foxel-authored asset — as of
+ * this slice, only the limbLength trait has an accepted animal-design card
  * ([docs/animal-design/cards/](../../docs/animal-design/PROTOCOL.md));
  * `insulation`/`webbing` have none yet, so this mesh reads density and
  * limbLength only and does not vary by either. A static merged-geometry
@@ -125,18 +125,26 @@ export class HerbivoreMesh {
     // same number and must never be conflated).
     const cellAreaKm2 = (config.cellSizeMeters / 1000) ** 2;
     let idx = 0;
+    // Realistic densities (config.herbivoreDensityMax = 25 ind/km²) times
+    // this map's cell area (1e-4 km²) never reach 0.5 — an independent
+    // per-cell Math.round would therefore round every cell to 0 and the
+    // population would never render at all, silently failing the literal-
+    // readout contract (C-027 §2/§3.4) rather than honoring it. Instead,
+    // carry the fractional remainder across cells in a single fixed
+    // (row-major) traversal — a deterministic 1D accumulator (T-001, same
+    // "fixed order, no RNG" discipline as the rest of the sim), not a random
+    // dither — so the *sum* of rendered instances tracks the *sum* of
+    // density × area exactly (up to the final cell's leftover fraction),
+    // while any single cell still usually shows nothing.
+    let carry = 0;
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
         const density = world.getHerbivoreDensity(x, z);
-        // Literal density readout (C-027 §2/§3.4) — fewer visible animals
-        // always means genuinely lower simulated density, never a tuned
-        // "always show a few" floor.
-        const instanceCount = Math.min(
-          HERBIVORE_MAX_PER_CELL,
-          Math.round(density * cellAreaKm2),
-        );
+        carry += density * cellAreaKm2;
+        const instanceCount = Math.min(HERBIVORE_MAX_PER_CELL, Math.floor(carry));
         if (instanceCount <= 0) continue;
+        carry -= instanceCount;
 
         const limbLength = world.getHerbivoreLimbLength(x, z);
         const cellCx = ox + x * cellW;
