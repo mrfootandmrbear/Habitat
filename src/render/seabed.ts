@@ -71,14 +71,26 @@ export function skirtWarp(x: number, z: number): number {
 }
 
 /**
- * Lower-frequency companion to `skirtWarp`, driving *where* the shelf breaks
- * rather than how steeply it falls. Deliberately long-wavelength (~140–220
- * world units) so the break reads as coastline-scale, not as noise.
+ * Companion to `skirtWarp`, driving *where* the shelf breaks rather than how
+ * steeply it falls. Coastline-scale, not noise — but scaled to `SKIRT_REACH`
+ * (60 world units), not to the world as a whole.
+ *
+ * Originally ~140–220 world units, which was a real bug, not just a taste
+ * call: a critic (2026-08-04) traced the shelf reading as "a glow radius
+ * around the island" — near-constant width rather than true bathymetry — to
+ * this exact mismatch. At that wavelength, less than half a cycle fits
+ * inside the ~60-unit visible skirt, so the delay barely changes across any
+ * span of coastline actually on screen; the wander is real but too slow to
+ * see. Retuned to ~45–75 units so a full cycle (bulge to narrows and back)
+ * completes within a stretch of coastline comparable to the skirt's own
+ * reach, and 2-3 cycles complete around the full island perimeter
+ * (~150 units at this world's scale) — bulges and narrows a few times, not
+ * once slowly or not at all.
  */
 export function shelfStartWarp(x: number, z: number): number {
   return (
-    0.6 * Math.sin(x * 0.045 + 1.7) * Math.cos(z * 0.038 - 0.9) +
-    0.4 * Math.sin((x + z) * 0.028 + 2.3)
+    0.6 * Math.sin(x * 0.135 + 1.7) * Math.cos(z * 0.114 - 0.9) +
+    0.4 * Math.sin((x + z) * 0.084 + 2.3)
   );
 }
 
@@ -147,8 +159,8 @@ float skirtWarp(vec2 p) {
 }
 
 float shelfStartWarp(vec2 p) {
-  return 0.6 * sin(p.x * 0.045 + 1.7) * cos(p.y * 0.038 - 0.9)
-       + 0.4 * sin((p.x + p.y) * 0.028 + 2.3);
+  return 0.6 * sin(p.x * 0.135 + 1.7) * cos(p.y * 0.114 - 0.9)
+       + 0.4 * sin((p.x + p.y) * 0.084 + 2.3);
 }
 
 float seabedOutside(vec2 p, float boxDist) {
