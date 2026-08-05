@@ -240,15 +240,20 @@
       "id": "C5",
       "name": "camera framing",
       "points": [12],
-      "status": "round-1-built, awaiting-critic",
-      "round": 1,
-      "note": "Scene.ts cameraHome moved (32,28,36)->(18,27,20): distance from target ~54->~36, pitch ~27.4deg->~42deg, same azimuth. Sky-lighting calibration needed no code change (derives view direction from cameraHome/cameraTarget dynamically).",
-      "sideEffectFixed": "scripts/shot.ts DEFAULT_PROBES were tuned to the old framing and went stale (shelf-shallow measured land, not water, after the move) -- re-scanned and re-aimed all four.",
-      "regressionCheck": "Checked C3's already-confirmed water depth-banding for regression under the new framing, per the skill's Step 6. A naive fixed-scan-line probe reading suggested a flatter gradient, but that was an artifact of scanning perpendicular to the depth gradient's actual orientation at the new angle -- a shore-to-horizon crop (docs/evidence/shots/c5/detail-water-gradient.png, gitignored) shows the expected pale-foam -> turquoise -> teal -> deep-blue progression clearly. Also hit RENDER_NOTES.md's documented ACES red-clip trap at a couple of near-corner probe candidates while re-aiming -- not a new bug, moved the probes to avoid it.",
+      "status": "round-2-built, awaiting-critic",
+      "round": 2,
+      "note": "Scene.ts cameraHome moved (32,28,36)->(18,27,20)->(15,23,16.6) across two rounds: distance from target ~54->~36->~30, pitch ~27.4deg->~42deg (held), same azimuth. Sky-lighting calibration needed no code change (derives view direction from cameraHome/cameraTarget dynamically).",
+      "sideEffectFixed": "scripts/shot.ts DEFAULT_PROBES were tuned to the old framing and went stale after EACH round's move (shelf-shallow/shoreline landed on land, not water) -- re-scanned and re-aimed twice.",
+      "critiqueR1": {
+        "framing": "BARE-PASS -- pitch confirmed correct (\"steep aerial view consistent with the 40-50%+ range in the references... frame is 100% world\"), but \"roughly 40% of the frame's width is still open sea flanking the island\" against references that push the landform to the frame edges.",
+        "waterBandingRegressionCheck": "PASS, no regression -- \"4 legible steps... shallow water near shore is the most saturated/vivid thing in the crop, getting darker and more muted toward the horizon.\""
+      },
+      "round2Fix": "Same pitch/azimuth, distance tightened further (~36 -> ~30) to close the measured margin gap.",
+      "toolingBugFoundAndFixed": "sips --cropOffset takes (Y, X), not (X, Y). Round 1's detail-shore-close.png crop had the arguments swapped and landed almost entirely inside the dev UI overlay panel -- exactly what the round-1 critic reported (\"almost entirely occluded... contributes nothing to this check\"). That report was the tell. Fixed the crop commands for round 2 and verified the new crops by eye before sending.",
       "verifiedBy": "546/546 tests, clean typecheck/build, full probe suite green -- none reference camera position.",
-      "commits": ["671add6"],
+      "commits": ["671add6", "082c1f7"],
       "compositionDoc": "docs/slices/camera-framing-composition.md",
-      "critique": "not yet run -- critic should score both the new framing itself and re-check water banding (points 6-8) for regression"
+      "critique": "round 2 screenshots ready in docs/evidence/shots/c5/ (gitignored); re-critique pending"
     },
     {
       "id": "C-water",
