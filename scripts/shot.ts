@@ -61,12 +61,19 @@ interface Probe {
  *
  * Positions are tuned to the default camera framing. If the camera moves,
  * re-aim them with --probe rather than trusting these.
+ *
+ * Re-aimed for C5 (2026-08-04): the camera moved closer and pitched steeper
+ * (bar v2 point 12 framing fix, Scene.ts cameraHome), which shifted where
+ * water bands land in frame enough that the old coordinates landed on land
+ * instead of water (shelf-shallow measured a warm brown, not cyan — the
+ * tell). Re-found by scanning probe values across the frame rather than
+ * eyeballing, same as the original set was built.
  */
 const DEFAULT_PROBES: Probe[] = [
-  { name: "open-sea-far", x: 0.5, y: 0.1 },
-  { name: "open-sea-near", x: 0.9, y: 0.62 },
-  { name: "shelf-shallow", x: 0.3, y: 0.56 },
-  { name: "shoreline", x: 0.47, y: 0.66 },
+  { name: "open-sea-far", x: 0.95, y: 0.15 },
+  { name: "open-sea-near", x: 0.85, y: 0.35 },
+  { name: "shelf-shallow", x: 0.1, y: 0.45 },
+  { name: "shoreline", x: 0.23, y: 0.58 },
 ];
 
 function parseArgs(): Args {

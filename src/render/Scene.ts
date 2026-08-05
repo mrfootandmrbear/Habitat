@@ -101,7 +101,13 @@ export function createScene(container: HTMLElement): SceneHandles {
     CAMERA_NEAR,
     CAMERA_FAR,
   );
-  const cameraHome = new THREE.Vector3(32, 28, 36);
+  // C5 (gauntlet-loop bar v2 point 12 / owner-ruled framing): every reference
+  // (godus-wide-island, planet-coaster-terrain) looks down steeply and fills
+  // the frame with world, camera close to the island. The old home (32, 28,
+  // 36) sat at pitch ~27.4 deg and distance ~54 from cameraTarget — closer to
+  // an overview shot than the references' close, steep framing. Closer
+  // distance (~36) and steeper pitch (~42 deg) at the same azimuth.
+  const cameraHome = new THREE.Vector3(18, 27, 20);
   const cameraTarget = new THREE.Vector3(0, 3, 0);
   camera.position.copy(cameraHome);
 
