@@ -793,6 +793,82 @@ Critic's own words: "not worth another iteration on its own."
 Verified every round: 542/542 tests, clean typecheck. Commits `c578888`,
 `6462b78`.
 
+### C1: palette saturation & biome readability — round 2, awaiting recritique (2026-08-04)
+
+Resumed via the gauntlet-loop skill's restart procedure (session interruption,
+not a defect). State reconstruction confirmed Stream A of the non-animal build
+plan had already fully landed since it was written — every non-animal branch
+merged or resolved, leaving only the two animal branches deferred by design —
+and Stream B down to §4.61 plant clustering as the sole executable machine
+slice. Moved to Stream C's next-ranked visual piece instead: C1, palette
+saturation, next after water (done) and de-facet (done) in bar v2's
+worst-first ranking.
+
+**Root cause, by inspection:** `defaultTerrainRgb`'s base colors
+(`sim/terrain/substrates.ts` dryRgb per substrate, `ui/terrainEncoding.ts`'s
+WET/VEG overlay constants) are the single source of truth for both the CPU
+encoding tests and the GPU shader uniforms (`TerrainMesh.ts`'s
+`defaultTerrainPalette()`) — confirmed by reading the wiring, not assumed, so
+recoloring here updates both paths together. Rock measured 5% saturation
+(functionally grey); loam/sand/clay sat in the 40-47% range but at hues and
+values that read muted next to the reference set; vegetation green was a
+near-pure mid-green (hue ~120) rather than the yellow-green chartreuse the
+Godus/biome references show.
+
+**Round 1:** recolored all four substrates plus WET/VEG. Rock -> warm pale
+stone (bar v2 point 5's "no large achromatic region" was already failing
+here, independent of the sky). Loam/clay pushed toward ochre-rust/gold. VEG
+re-hued to yellow-green, but the first candidate (hue 90, matching the
+reference hue closely) collapsed the wet-vs-dry-under-vegetation legibility
+floor (`presentation.proxy.test.ts`) to 0.1198 against a 0.12 minimum —
+caught by the test suite, not missed. Scanned a small hue/saturation/value
+grid instead of hand-picking a second guess, and chose a hue-85 candidate
+with real margin (0.135) rather than one that barely cleared. Commit
+`b3dc4cd`.
+
+**Round 1 critique (fresh agent, no prior context, measured pixels rather
+than eyeballing):**
+
+| point | verdict | evidence |
+|---|---|---|
+| 2 — material follows landform | **PASS** | rust patch sits at the summit (steepest point), fades to green on gentler flanks, none stranded on the flat apron |
+| 3 — clean material boundaries | **PASS** | transects show a genuine single-pixel hard edge, zero blended pixels; critic explicitly flagged not to feather this |
+| 4 — saturated warm palette | **BARE-PASS** | hue family correct (65.6% yellow / 17.2% green / 6.6% orange land pixels) but saturation ~half the reference: mid-slope green measured 29% sat / 60% val vs. Godus's ~58%/77%; summit rust 42%/34% vs. ~54%/52% |
+
+Critic's words: *"It has cleared 'muted grey-brown' but lands as a soft
+sage-and-clay palette, not the punchy saturated one the bar and references
+show."*
+
+**Round 2:** rather than re-guess, pushed raw albedo saturation/value further
+specifically on the two flagged regions' source colors (loam, clay, wet-soil
+blend, veg) — left rock and sand alone since the critic didn't flag them.
+This is the same phenomenon `RENDER_NOTES.md` already documents for the sky
+(rig probe 1.59 -> screen 1.015): lighting and ACES tonemapping eat a large
+fraction of input chroma before a pixel reaches the screen, so raw albedo has
+to run hotter than the target look to compensate. VEG: raw saturation 72% ->
+85%, value 70% -> 82% (`#61d11f`). Clay: raw saturation 65% -> 85%, value 54%
+-> 62% (`#9e4518`).
+
+Floors re-verified with real margin after the push, not just re-clearing
+them: wet-vs-dry-under-vegetation delta **0.224** against the 0.12 floor
+(was 0.135 after round 1), substrate pairwise minimum **0.177** against the
+same floor. 542/542 tests, clean typecheck/build, full probe suite green;
+`tidal-envelope`'s committed baseline regenerated again (its own
+`encodingDelta` metric moves with the palette by design — the functional
+0.08 floor it also checks clears with wide margin both times). Commit
+`299d7a5`.
+
+Screenshots (bare-substrate cone and a vegetation-seeded one, via a temporary
+debug hook in `main.ts` reverted before each commit — the same pattern prior
+rounds used, since vegetation cannot grow to a visible density in a headless
+run) confirm the fix by eye: the summit patch reads as a vivid ochre-rust,
+the flanks a saturated chartreuse, without the render tipping into a flat
+neon look in the one frame inspected so far — but that overshoot risk is
+exactly what round 2's critique is being asked to check before calling this
+piece done. **Status: awaiting recritique**, sent back to the same critic
+agent with the new screenshots so the comparison is apples-to-apples against
+its own round-1 measurements.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
