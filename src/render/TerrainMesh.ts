@@ -270,16 +270,24 @@ vec2 terrainWorldXZ(vec2 planeUv) {
  * lightingRig.ts each exist to prevent. */
 vec2 terrainMaterialUv(vec2 fUv, vec2 worldXZ) {
   vec2 invSize = 1.0 / uFieldSize;
-  // Two octaves, not one: a single frequency stays locally coherent along a
-  // boundary that runs near-parallel to one of its ridges, which is exactly
-  // a shore line at a shallow grazing angle — measured leaving long straight
-  // "staircase" runs intact even with the single-octave version live. The
-  // second, higher-frequency tap breaks that local coherence up.
-  float jx = (terrainValueNoise(worldXZ * 0.9 + vec2(19.1, 4.7)) - 0.5) * 1.4
-           + (terrainValueNoise(worldXZ * 2.3 + vec2(71.0, -12.4)) - 0.5) * 0.6;
-  float jy = (terrainValueNoise(worldXZ * 0.9 + vec2(-8.3, 27.6)) - 0.5) * 1.4
-           + (terrainValueNoise(worldXZ * 2.3 + vec2(-40.7, 63.2)) - 0.5) * 0.6;
-  return fUv + vec2(jx, jy) * invSize;
+  // terrainFbm gives the broad wobble its sweeping-bulge character (a first,
+  // single-tap version produced near-constant-size teeth — a cold critic
+  // called it "a sawblade, not organic variation"). But an always-on fine
+  // octave on top of that still read as a second sawblade riding the curve —
+  // a second cold critic: "a dense, evenly-spaced, near-uniform row of
+  // small triangular teeth running almost the entire width... this still
+  // reads exactly like a sawblade — just relocated onto a curve." Real
+  // organic/stylized edges (godus-biome-cliffs.webp) have long calm
+  // stretches between occasional disturbances, not continuous fine noise.
+  // disturb masks the fine octave off across roughly a third of space so
+  // the nicks cluster sparsely instead of running edge to edge.
+  float macroX = terrainFbm(worldXZ * 0.35 + vec2(19.1, 4.7)) - 0.5;
+  float macroY = terrainFbm(worldXZ * 0.35 + vec2(-8.3, 27.6)) - 0.5;
+  float disturb = smoothstep(0.35, 0.75, terrainValueNoise(worldXZ * 0.22 + vec2(101.3, -55.6)));
+  float fineX = (terrainValueNoise(worldXZ * 1.8 + vec2(71.0, -12.4)) - 0.5) * disturb;
+  float fineY = (terrainValueNoise(worldXZ * 1.8 + vec2(-40.7, 63.2)) - 0.5) * disturb;
+  vec2 jitter = vec2(macroX, macroY) * 2.4 + vec2(fineX, fineY) * 2.0;
+  return fUv + jitter * invSize;
 }
 
 /** Per-substrate procedural bump height: sand reads as soft low-frequency
