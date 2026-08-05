@@ -43,6 +43,7 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
+varying float vEdgeT;
 ${FIELD_SAMPLE_GLSL}
 
 void main() {
@@ -69,17 +70,28 @@ void main() {
   // Analytic normal via central difference on the combined (elev + depth)
   // surface — replaces the CPU geometry.computeVertexNormals() pass.
   vec2 invSize = 1.0 / uFieldSize;
-  float hL = sampleFieldBilinear(uElevationTex, fUv - vec2(invSize.x, 0.0), uFieldSize)
-    + max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(invSize.x, 0.0), uFieldSize));
-  float hR = sampleFieldBilinear(uElevationTex, fUv + vec2(invSize.x, 0.0), uFieldSize)
-    + max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(invSize.x, 0.0), uFieldSize));
-  float hD = sampleFieldBilinear(uElevationTex, fUv - vec2(0.0, invSize.y), uFieldSize)
-    + max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(0.0, invSize.y), uFieldSize));
-  float hU = sampleFieldBilinear(uElevationTex, fUv + vec2(0.0, invSize.y), uFieldSize)
-    + max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(0.0, invSize.y), uFieldSize));
+  float dL = max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(invSize.x, 0.0), uFieldSize));
+  float dR = max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(invSize.x, 0.0), uFieldSize));
+  float dD = max(0.0, sampleFieldBilinear(uDepthTex, fUv - vec2(0.0, invSize.y), uFieldSize));
+  float dU = max(0.0, sampleFieldBilinear(uDepthTex, fUv + vec2(0.0, invSize.y), uFieldSize));
+  float hL = sampleFieldBilinear(uElevationTex, fUv - vec2(invSize.x, 0.0), uFieldSize) + dL;
+  float hR = sampleFieldBilinear(uElevationTex, fUv + vec2(invSize.x, 0.0), uFieldSize) + dR;
+  float hD = sampleFieldBilinear(uElevationTex, fUv - vec2(0.0, invSize.y), uFieldSize) + dD;
+  float hU = sampleFieldBilinear(uElevationTex, fUv + vec2(0.0, invSize.y), uFieldSize) + dU;
   float dHdx = (hR - hL) / (2.0 * uTexelWorldSize);
   float dHdz = (hU - hD) / (2.0 * uTexelWorldSize);
   vec3 localNormal = normalize(vec3(-dHdx, 1.0, -dHdz));
+
+  // Shoreline-foam gate: foam should only read where the wet area actually
+  // borders dry ground (a real bank), not wherever depth happens to be
+  // shallow. Sheet-flow runoff from rain sits at near-uniform shallow depth
+  // over a wide area — same low depth-fraction as a true shore — so gating
+  // on depth alone painted the whole flooded field white (looked like snow).
+  // Compare this texel's depth to its shallowest neighbor instead: uniform
+  // sheets score ~0 (no nearby drop-off), a real bank scores ~1 (neighbor
+  // is dry).
+  float minNeighborDepth = min(min(dL, dR), min(dD, dU));
+  vEdgeT = wet ? clamp(1.0 - minNeighborDepth / max(depth, 0.02), 0.0, 1.0) : 0.0;
 
   vec3 displaced = vec3(position.x, y, position.z);
   vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
@@ -94,6 +106,7 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
+varying float vEdgeT;
 uniform vec3 uShallowColor;
 uniform vec3 uDeepColor;
 uniform float uTime;
@@ -194,7 +207,10 @@ void main() {
   // of a hard cutoff (bar item 5).
   float foamNoiseV = fbm(p * 2.2 + uTime * vec2(0.15, 0.1));
   float edge = vDepthT + (foamNoiseV - 0.5) * 0.45;
-  float foam = 1.0 - smoothstep(0.05, 0.34, edge);
+  float shoreFoam = 1.0 - smoothstep(0.05, 0.34, edge);
+  // Gated by vEdgeT (see vertex shader) so only a real bank foams, not a
+  // uniformly shallow rain sheet with nowhere to shore against.
+  float foam = shoreFoam * vEdgeT;
   col = mix(col, uFoamColor, foam * 0.85);
   float alpha = mix(vAlpha, max(vAlpha, 0.75), foam);
 
