@@ -105,9 +105,12 @@ export function createScene(container: HTMLElement): SceneHandles {
   // (godus-wide-island, planet-coaster-terrain) looks down steeply and fills
   // the frame with world, camera close to the island. The old home (32, 28,
   // 36) sat at pitch ~27.4 deg and distance ~54 from cameraTarget — closer to
-  // an overview shot than the references' close, steep framing. Closer
-  // distance (~36) and steeper pitch (~42 deg) at the same azimuth.
-  const cameraHome = new THREE.Vector3(18, 27, 20);
+  // an overview shot than the references' close, steep framing. Round 1
+  // brought distance to ~36 / pitch to ~42 deg; a critic confirmed the pitch
+  // reads right but still measured ~40% of frame width as open-water margin
+  // flanking the island (references push the landform to the frame edges).
+  // Round 2: same pitch/azimuth, distance tightened further to ~30.
+  const cameraHome = new THREE.Vector3(15, 23, 16.6);
   const cameraTarget = new THREE.Vector3(0, 3, 0);
   camera.position.copy(cameraHome);
 

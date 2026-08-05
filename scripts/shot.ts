@@ -67,13 +67,16 @@ interface Probe {
  * water bands land in frame enough that the old coordinates landed on land
  * instead of water (shelf-shallow measured a warm brown, not cyan — the
  * tell). Re-found by scanning probe values across the frame rather than
- * eyeballing, same as the original set was built.
+ * eyeballing, same as the original set was built. Re-aimed a second time
+ * after C5 round 2 tightened the framing further (island fills more of
+ * frame width) — same drill: the round-1 coordinates had drifted onto land
+ * again by round 2.
  */
 const DEFAULT_PROBES: Probe[] = [
-  { name: "open-sea-far", x: 0.95, y: 0.15 },
-  { name: "open-sea-near", x: 0.85, y: 0.35 },
-  { name: "shelf-shallow", x: 0.1, y: 0.45 },
-  { name: "shoreline", x: 0.23, y: 0.58 },
+  { name: "open-sea-far", x: 0.95, y: 0.1 },
+  { name: "open-sea-near", x: 0.85, y: 0.25 },
+  { name: "shelf-shallow", x: 0.05, y: 0.35 },
+  { name: "shoreline", x: 0.185, y: 0.56 },
 ];
 
 function parseArgs(): Args {
