@@ -978,7 +978,20 @@ function conservationLine(): string {
 }
 
 function frame(now: number): void {
-  const wallDt = Math.min((now - lastFrame) / 1000, 0.05);
+  // `wallDt` is clamped for the sim clock (SimClock.tick already bounds
+  // stepsRun/frame independently and carries the rest as time debt — the
+  // clamp here just keeps one huge frame from stuffing an enormous amount
+  // into that accumulator at once). Presentation-only wall-clock fades
+  // (storm cues, snow ground-cover melt, water display smoothing) must NOT
+  // share that clamp: under a real backlog (e.g. "7 days/s" left running
+  // unattended for a long stretch — visible as a large "dropped" count),
+  // real frames render rarely, and a fade that only ever sees 0.05s of
+  // credit per frame effectively freezes in wall-clock terms even while
+  // sim-time keeps roaring forward — the RainCueMesh snow-cover hold
+  // getting stuck fully visible for in-game years was exactly this bug.
+  // `trueWallDt` carries the actual elapsed real time, uncapped, for those.
+  const trueWallDt = Math.max(0, (now - lastFrame) / 1000);
+  const wallDt = Math.min(trueWallDt, 0.05);
   lastFrame = now;
 
   const { stepsRun } = clock.tick(wallDt);
@@ -1028,7 +1041,7 @@ function frame(now: number): void {
       stormReleaseHold = STORM_RELEASE_HOLD_S;
       stormDisplayActive = true;
     } else if (stormReleaseHold > 0) {
-      stormReleaseHold = Math.max(0, stormReleaseHold - wallDt);
+      stormReleaseHold = Math.max(0, stormReleaseHold - trueWallDt);
       stormDisplayActive = true;
     } else {
       stormDisplayActive = false;
@@ -1045,9 +1058,9 @@ function frame(now: number): void {
   cloudMesh.setReleasingCount(
     stormDisplayActive ? releasingCloudCount(rainRegime, cloudMesh.count) : 0,
   );
-  cloudMesh.update(wallDt, wind.ux, wind.uz);
+  cloudMesh.update(trueWallDt, wind.ux, wind.uz);
   rainCue.setCloudFootprints(cloudMesh.getReleasingFootprints());
-  rainCue.update(wallDt, wind.ux, wind.uz);
+  rainCue.update(trueWallDt, wind.ux, wind.uz);
 
   // Weather-responsive haze (G9) — thickens with the storm veil / cloud
   // cover instead of sitting at a fixed distance no matter the weather.
@@ -1066,7 +1079,7 @@ function frame(now: number): void {
   // relevant so it stays honest against mid-play sculpting, without paying
   // the terrain-scan cost every frame.
   if (phaseThisTick >= 2 || rainCue.getGroundCoverOpacity() > 0.02) {
-    snowAffinityRefreshTimer -= wallDt;
+    snowAffinityRefreshTimer -= trueWallDt;
     if (snowAffinityRefreshTimer <= 0) {
       rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
       snowAffinityRefreshTimer = SNOW_AFFINITY_REFRESH_S;
@@ -1082,7 +1095,9 @@ function frame(now: number): void {
     }
   }
   // Water display catches up every wall frame — not every event step.
-  syncWaterDisplay(wallDt);
+  // Uncapped: this is the same class of presentation-only wall-clock fade
+  // as the storm cues above (waterDisplayTauSeconds), not the sim clock.
+  syncWaterDisplay(trueWallDt);
 
   const timeDebt = clock.getTimeDebt();
   const droppedSteps = clock.getDroppedSteps();
