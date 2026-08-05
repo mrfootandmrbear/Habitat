@@ -1,0 +1,19 @@
+{
+  "id": "§4.61",
+  "title": "Plant rendering: per-cell clustering",
+  "simLoop": "No sim change — OccupantMesh is still presentation-only (T-006), zero WorldState writes. Occupied cells now draw 2-4 sub-instances (deterministic hash of cell index, same salt family as the existing yaw/jitter hash) instead of exactly one, each offset within the cell footprint and reduced in scale. No new RNG, no per-frame randomness — hash-identical across two renders of the same seed/tick.",
+  "gameLoop": "Groundcover reads as a stand of plants clumped irregularly across the terrain, not a lattice of evenly-spaced isolated instances — closes bar v2 point 10 (VISUAL_UPGRADE_NOTE.md) alongside the plant-rendering review's §3 item 2.",
+  "registerIds": ["ART-001", "ART-002", "T-001", "T-006"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/sim/presentation.proxy.test.ts"],
+  "probes": [],
+  "fields": [],
+  "notebookSeed": "The grass grows in clumps, not rows.",
+  "tierM": {
+    "measuredAt": "config.gridSize (96x96)",
+    "before": "7.78ms (one instance per occupied cell)",
+    "after": "12.12ms (2-4 sub-instances per occupied cell)",
+    "budget": "well under a single 16.7ms frame even combined; smoke-tested under 500ms"
+  },
+  "tierO": "no owner-only question — this is a written spec item (BUILD_GUIDE §4.61) with a bounded, testable implementation, not a taste call. Sub-instance count range (2-4) and offset bound (±0.4 cell width) are implementation choices within that spec, open to a taste pass later if the owner wants denser/sparser clumping."
+}

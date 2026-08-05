@@ -210,6 +210,20 @@ function hash01(x: number, z: number, salt: number): number {
   return s - Math.floor(s);
 }
 
+/**
+ * §4.61 per-cell clustering — 2 to 4 sub-instances per occupied cell instead
+ * of exactly one, so groundcover reads as a stand rather than isolated
+ * lattice points (bar v2 point 10). Bounds the instance-count ceiling at
+ * exactly this factor (BUILD_GUIDE §4.61: "≤4× the current ≤9,216-per-guild
+ * ceiling").
+ */
+const MAX_SUB_INSTANCES = 4;
+
+/** Deterministic 2-4 sub-instance count for a cell — same hash family as yaw/jitter, no new RNG. */
+function subInstanceCount(x: number, z: number): number {
+  return 2 + Math.floor(hash01(x, z, 9) * 3);
+}
+
 export class OccupantMesh {
   /** Group of one InstancedMesh per guild — presentation only, same public shape as a single Object3D. */
   readonly object: THREE.Group;
@@ -238,7 +252,7 @@ export class OccupantMesh {
     this.width = width;
     this.height = height;
     this.worldSize = worldSize;
-    this.maxInstances = width * height;
+    this.maxInstances = width * height * MAX_SUB_INSTANCES;
 
     const mat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
@@ -378,7 +392,6 @@ export class OccupantMesh {
           guild === "shrub" ? 1.35 : guild === "crust" ? 0.45 : 1;
         const scaleY = (0.35 + vis * 1.4) * heightBoost;
         const scaleXZ = 0.45 + vis * 0.9;
-        const yaw = ((x * 17 + z * 31) % 360) * (Math.PI / 180);
         // Cell HSI proxies living tissue — standing excess under L3 barely leans.
         const vitality = livingVitality(
           tintBiomass,
@@ -387,63 +400,9 @@ export class OccupantMesh {
         );
         const amp = swayAmplitude(windMag, guildFlex(guild), vitality);
         const tilt = swayTilt(amp, swayPhase(x, z), timeSec);
-
-        // Presentation-only per-instance jitter so the field doesn't read as
-        // a stamped grid — deterministic per cell, does not touch the
-        // biomass-driven magnitude of scaleXZ/scaleY above.
-        const jitterXZ1 = 0.82 + hash01(x, z, 1) * 0.36;
-        const jitterXZ2 = 0.82 + hash01(x, z, 2) * 0.36;
-        const jitterY = 0.88 + hash01(x, z, 3) * 0.24;
-        const restLeanX = (hash01(x, z, 4) - 0.5) * 0.14;
-        const restLeanZ = (hash01(x, z, 5) - 0.5) * 0.14;
-
-        this.dummy.position.set(ox + x * cellW, y, oz + z * cellW);
-        this.dummy.scale.set(
-          scaleXZ * jitterXZ1,
-          scaleY * jitterY,
-          scaleXZ * jitterXZ2,
-        );
-        // Composition order matters, and getting it wrong was the bug this
-        // replaced. The wind lean below must stay on a fixed *world* axis so
-        // every instance leans the same way; Object3D.rotateOnAxis and Euler
-        // composition both rotate in local (post-yaw) space, which silently
-        // re-rotated the lean axis by each instance's own random yaw and made
-        // every cone lean a different direction instead of uniformly downwind.
-        // So the quaternions are composed explicitly, innermost first:
-        //   rest tilt (local, per-instance random - variety, yaw-relative is
-        //   fine because it is random anyway)
-        //   -> yaw (spins the cone's own facets)
-        //   -> wind lean (world axis, outermost, identical for every instance).
-        this.restEuler.set(restLeanX, 0, restLeanZ);
-        this.restQuat.setFromEuler(this.restEuler);
-        this.yawQuat.setFromAxisAngle(this.upAxis, yaw);
-        if (tilt !== 0 && windMag > 0) {
-          // Lean downwind: axis = up × windDir in XZ, fixed in world space.
-          // Per-instance variety rides the lean's *magnitude*, never its axis.
-          // Applying the random rest tilt here instead (as a local rotation
-          // composed under the lean) would tilt each instance's axis and
-          // scatter the lean direction by several degrees — the same class of
-          // bug this fix exists to remove, just smaller.
-          const tiltVaried = tilt * (0.86 + hash01(x, z, 4) * 0.28);
-          this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
-          this.leanQuat.setFromAxisAngle(this.leanAxis, tiltVaried);
-          this.dummy.quaternion.multiplyQuaternions(
-            this.leanQuat,
-            this.yawQuat,
-          );
-        } else {
-          // Calm: no wind direction to stay coherent with, so the random rest
-          // tilt is free to apply — it is what keeps a still field from
-          // reading as a grid of perfectly vertical cones.
-          this.dummy.quaternion.multiplyQuaternions(
-            this.yawQuat,
-            this.restQuat,
-          );
-        }
-        this.dummy.updateMatrix();
+        const cellCx = ox + x * cellW;
+        const cellCz = oz + z * cellW;
         const mesh = this.meshes[guild];
-        const idx = this.counts[guild]++;
-        mesh.setMatrixAt(idx, this.dummy.matrix);
         const [r, g, b] =
           guild === "shrub"
             ? shrubBiomassRgb(tintBiomass, tintMax)
@@ -457,7 +416,79 @@ export class OccupantMesh {
                     ? crustBiomassRgb(tintBiomass, tintMax)
                     : herbBiomassRgb(tintBiomass, tintMax);
         this.color.setRGB(r, g, b);
-        mesh.setColorAt(idx, this.color);
+
+        // §4.61 clustering: 2-4 sub-instances per occupied cell instead of
+        // exactly one, each offset within the cell footprint and reduced in
+        // scale, so groundcover reads as a stand rather than isolated
+        // lattice points (bar v2 point 10). Every value below derives from
+        // the same deterministic (x, z, salt) hash family as the existing
+        // yaw/jitter — no per-frame RNG, so a given seed/tick renders
+        // identically every time (T-001).
+        const subCount = subInstanceCount(x, z);
+        for (let s = 0; s < subCount; s++) {
+          const base = 10 * (s + 1);
+          // Reduced per-sub scale so 2-4 instances read as a clump sharing
+          // one cell's worth of biomass, not four full-size plants stacked.
+          const subScale = 0.55 + hash01(x, z, base + 8) * 0.25;
+          const jitterXZ1 = (0.82 + hash01(x, z, base + 1) * 0.36) * subScale;
+          const jitterXZ2 = (0.82 + hash01(x, z, base + 2) * 0.36) * subScale;
+          const jitterY = (0.88 + hash01(x, z, base + 3) * 0.24) * subScale;
+          const restLeanX = (hash01(x, z, base + 4) - 0.5) * 0.14;
+          const restLeanZ = (hash01(x, z, base + 5) - 0.5) * 0.14;
+          // Offset within the cell footprint, bounded to ±0.4 cellW so
+          // sub-instances stay attributable to their own cell.
+          const offX = (hash01(x, z, base + 6) - 0.5) * 0.8 * cellW;
+          const offZ = (hash01(x, z, base + 7) - 0.5) * 0.8 * cellW;
+          const yawSub = hash01(x, z, base + 9) * Math.PI * 2;
+
+          this.dummy.position.set(cellCx + offX, y, cellCz + offZ);
+          this.dummy.scale.set(
+            scaleXZ * jitterXZ1,
+            scaleY * jitterY,
+            scaleXZ * jitterXZ2,
+          );
+          // Composition order matters, and getting it wrong was the bug this
+          // replaced. The wind lean below must stay on a fixed *world* axis so
+          // every instance leans the same way; Object3D.rotateOnAxis and Euler
+          // composition both rotate in local (post-yaw) space, which silently
+          // re-rotated the lean axis by each instance's own random yaw and made
+          // every cone lean a different direction instead of uniformly downwind.
+          // So the quaternions are composed explicitly, innermost first:
+          //   rest tilt (local, per-instance random - variety, yaw-relative is
+          //   fine because it is random anyway)
+          //   -> yaw (spins the cone's own facets)
+          //   -> wind lean (world axis, outermost, identical for every instance).
+          this.restEuler.set(restLeanX, 0, restLeanZ);
+          this.restQuat.setFromEuler(this.restEuler);
+          this.yawQuat.setFromAxisAngle(this.upAxis, yawSub);
+          if (tilt !== 0 && windMag > 0) {
+            // Lean downwind: axis = up × windDir in XZ, fixed in world space.
+            // Per-instance variety rides the lean's *magnitude*, never its axis.
+            // Applying the random rest tilt here instead (as a local rotation
+            // composed under the lean) would tilt each instance's axis and
+            // scatter the lean direction by several degrees — the same class of
+            // bug this fix exists to remove, just smaller.
+            const tiltVaried = tilt * (0.86 + hash01(x, z, base + 4) * 0.28);
+            this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
+            this.leanQuat.setFromAxisAngle(this.leanAxis, tiltVaried);
+            this.dummy.quaternion.multiplyQuaternions(
+              this.leanQuat,
+              this.yawQuat,
+            );
+          } else {
+            // Calm: no wind direction to stay coherent with, so the random rest
+            // tilt is free to apply — it is what keeps a still field from
+            // reading as a grid of perfectly vertical cones.
+            this.dummy.quaternion.multiplyQuaternions(
+              this.yawQuat,
+              this.restQuat,
+            );
+          }
+          this.dummy.updateMatrix();
+          const idx = this.counts[guild]++;
+          mesh.setMatrixAt(idx, this.dummy.matrix);
+          mesh.setColorAt(idx, this.color);
+        }
       }
     }
     for (const guild of GUILDS) {

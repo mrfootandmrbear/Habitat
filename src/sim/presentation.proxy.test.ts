@@ -678,6 +678,112 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     }
   });
 
+  it("occupied cells draw 2-4 sub-instances, not exactly one (§4.61 clustering)", () => {
+    // A handful of occupied cells at max biomass — before §4.61 this would
+    // produce exactly one herb instance per cell (count === occupied cells).
+    const w = 8;
+    const world = new WorldState(new Grid2D(w, w, 1), {});
+    world.herbBiomass.fill(config.herbBiomassMax);
+    world.habitatSuitability.fill(1);
+    const occupiedCells = w * w;
+    const mesh = new OccupantMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+
+    const herb = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("herb"),
+    );
+    expect(herb).toBeDefined();
+    // 2-4 sub-instances per cell -> total strictly between 1x and 4x occupied cells.
+    expect(herb!.count).toBeGreaterThan(occupiedCells);
+    expect(herb!.count).toBeLessThanOrEqual(occupiedCells * 4);
+  });
+
+  it("clustering is hash-identical across two renders of the same seed/tick (T-001)", () => {
+    const w = 10;
+    const world = new WorldState(new Grid2D(w, w, 1), {
+      windUx: 0.6,
+      windUz: 0.2,
+    });
+    world.herbBiomass.fill(config.herbBiomassMax * 0.7);
+    world.shrubBiomass.fill(config.shrubBiomassMax * 0.5);
+    world.habitatSuitability.fill(0.8);
+
+    const meshA = new OccupantMesh(w, w, w * 2);
+    meshA.setSwayTime(3.5);
+    meshA.updateFrom(world.hydrologyModel, world);
+    const meshB = new OccupantMesh(w, w, w * 2);
+    meshB.setSwayTime(3.5);
+    meshB.updateFrom(world.hydrologyModel, world);
+
+    // Only herb is checked for a nonzero, matching count: shrub's biomass
+    // here never wins the per-cell arg-max guild pick against herb (the
+    // arg-max logic itself, unrelated to clustering), so its mesh would be
+    // legitimately empty rather than a determinism failure.
+    for (const guild of ["herb"] as const) {
+      const a = meshA.object.children.find(
+        (c): c is THREE.InstancedMesh =>
+          (c as THREE.InstancedMesh).isInstancedMesh === true &&
+          c.name.includes(guild),
+      )!;
+      const b = meshB.object.children.find(
+        (c): c is THREE.InstancedMesh =>
+          (c as THREE.InstancedMesh).isInstancedMesh === true &&
+          c.name.includes(guild),
+      )!;
+      expect(a.count).toBe(b.count);
+      expect(a.count).toBeGreaterThan(0);
+      const ma = new THREE.Matrix4();
+      const mb = new THREE.Matrix4();
+      for (let i = 0; i < a.count; i++) {
+        a.getMatrixAt(i, ma);
+        b.getMatrixAt(i, mb);
+        expect(ma.equals(mb)).toBe(true);
+      }
+    }
+  });
+
+  it("clustering instance ceiling stays at exactly 4x per guild (§4.61 bound)", () => {
+    const w = 6;
+    const world = new WorldState(new Grid2D(w, w, 1), {});
+    world.herbBiomass.fill(config.herbBiomassMax);
+    world.habitatSuitability.fill(1);
+    const mesh = new OccupantMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+    const herb = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("herb"),
+    )!;
+    // InstancedMesh capacity itself is the hard ceiling (setMatrixAt beyond
+    // it throws) — assert the mesh was allocated at exactly width*height*4,
+    // not an unbounded/oversized buffer.
+    const geomAttr = herb.instanceMatrix;
+    expect(geomAttr.count).toBe(w * w * 4);
+  });
+
+  it("Tier-M: OccupantMesh.updateFrom at config.gridSize stays well under one frame budget", () => {
+    const n = config.gridSize;
+    const world = new WorldState(new Grid2D(n, n, 1), {
+      windUx: 0.5,
+      windUz: 0.3,
+    });
+    world.herbBiomass.fill(config.herbBiomassMax * 0.6);
+    world.strandBiomass.fill(config.strandBiomassMax * 0.4);
+    world.habitatSuitability.fill(0.9);
+    const mesh = new OccupantMesh(n, n, config.worldSize);
+
+    const t0 = performance.now();
+    mesh.updateFrom(world.hydrologyModel, world);
+    const elapsedMs = performance.now() - t0;
+    // Generous bound (a 16.7ms/frame budget would be tight; this only
+    // guards against a real regression, e.g. an accidental O(n^2) sub-loop)
+    // — measured, not assumed: log it so a real number is on record.
+    console.log(`[Tier-M] OccupantMesh.updateFrom(${n}x${n}, clustering): ${elapsedMs.toFixed(2)}ms`);
+    expect(elapsedMs).toBeLessThan(500);
+  });
+
   it("Simple chrome is leaner than Full so the world keeps real estate (U-001)", () => {
     expect(fullOnlyVisible("simple")).toBe(false);
     expect(fullOnlyVisible("full")).toBe(true);

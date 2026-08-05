@@ -134,7 +134,7 @@ Summary only — do not reopen unless fixing regressions.
 
 **Owner Lock backlog:** ~~A~~ / ~~B~~ / ~~**C-004**~~ / ~~**C-005**~~ / ~~**C-013**~~ / ~~**C-002**~~ / ~~**U-006**~~ / ~~**C-020**~~ **Locked**; **W-001 Superseded**; remaining Open: **C-014** (audio env — beds live, sitting outstanding), **C-021** / **C-022** (Slice G machine half done, taste sitting outstanding), **C-028** (structural kit fully shipped through §4.59 — remaining question is taste: do molds/duplicator feel like shaping sand or placing architecture; do flags/banners earn a chrome slot). Filed Open and owner-judged, none on tip: **C-023** (guild competition), **C-024** / **C-025** (band calendar / deep time), **C-026** (CVD-safe palette), **C-027** (animal traits — off tip).
 
-**Next (executable tip):** **Track V §4.61** plant clustering is the sole remaining executable machine slice. **§4.60** per-guild silhouettes, **§4.64** occupant sway direction correctness, and **§4.65** weather presentation (C-020 G6–G9) are all shipped, as are Track R **§4.48** and **§4.40 L5** (**C-023 Locked**). **§4.62** composite runner-up guild and **§4.63** distance LOD stay queued behind §4.61. Track T parked on owner taste. **L8** remains blocked on **C-024** / **C-025**. Keep nutrients / animals / SWE off the tip.
+**Next (executable tip):** **Track V §4.62** composite runner-up guild is the sole remaining executable machine slice. **§4.60** per-guild silhouettes, **§4.61** per-cell clustering, **§4.64** occupant sway direction correctness, and **§4.65** weather presentation (C-020 G6–G9) are all shipped, as are Track R **§4.48** and **§4.40 L5** (**C-023 Locked**). **§4.63** distance LOD stays queued behind §4.62, gated on profiling. Track T parked on owner taste. **L8** remains blocked on **C-024** / **C-025**. Keep nutrients / animals / SWE off the tip.
 
 **Thesis holes (not tip):** **C-012** Δx / mosaic (only if place-reading still fails); **C-021** / **C-022** season + erosion dials (machine half shipped as Slice G §4.35; owner taste sitting outstanding); **C-010** implement after framing (not tip); optional SWE only if a later snow defect appears. Scenario campaign (G-002 / C-010) after implement.
 
@@ -1398,19 +1398,19 @@ Study origin: falling-sand peers + snowflow — catalogued in [EXTERNAL_REFERENC
 
 ---
 
-### 4.61 Slice — Plant rendering: per-cell clustering *(queued — Track V tip)*
+### 4.61 Slice — Plant rendering: per-cell clustering *(Done — agent)*
 
-**Why this exists.** [Plant rendering review](reviews/2026-08-03-plant-rendering-review.md) §3 item 2. Even with distinct per-guild shapes (§4.60), one instance per occupied cell still reads as a lone figure rather than a stand — groundcover density reads as clusters to a human eye, not isolated points. The review names this the single biggest lever for the "alive" read the owner is chasing, ahead of any geometry-shape change.
+**Why this exists.** [Plant rendering review](reviews/2026-08-03-plant-rendering-review.md) §3 item 2. Even with distinct per-guild shapes (§4.60), one instance per occupied cell still reads as a lone figure rather than a stand — groundcover density reads as clusters to a human eye, not isolated points. The review names this the single biggest lever for the "alive" read the owner is chasing, ahead of any geometry-shape change. Also closes bar v2 point 10 (gauntlet-loop Stream C piece C4) — tracked here, not duplicated.
 
 **Register / candidates.** ART-001 Current; ART-002 Locked; T-001 Locked (jitter must be a stable hash of cell index, not per-frame RNG, or the same seed renders differently run to run); T-006 Locked.
 **Bans.** No new `WorldState` field. No per-frame randomness — jitter offset derives from the same `(x*17+z*31)`-style salt already used for yaw. No unbounded instance count.
 **New Process?** no. D-007 clip gate does not apply.
 
-- [ ] Occupied cells draw 2–4 sub-instances instead of exactly one, each at reduced scale and offset within the cell footprint by a hash of cell index — same deterministic-salt family as the existing yaw hash, no new RNG
-- [ ] Instance count per guild-mesh stays bounded (≤4× the current ≤9,216-per-guild ceiling at `config.gridSize`) and is hash-identical across two renders of the same seed/tick
-- [ ] Tier-M: step/frame timing at `config.gridSize` (96×96) measured before/after — "Performance is acceptable" catalog row (VERIFICATION_POLICY §3)
-- [ ] Composition + manifest: [plant-render-clustering-composition.md](slices/plant-render-clustering-composition.md), [plant-render-clustering.json](slices/plant-render-clustering.json)
-- [ ] **Next-but-one:** §4.62 composite runner-up guild
+- [x] Occupied cells draw 2–4 sub-instances instead of exactly one, each at reduced scale and offset within the cell footprint by a hash of cell index — same deterministic-salt family as the existing yaw hash, no new RNG
+- [x] Instance count per guild-mesh stays bounded (≤4× the current ≤9,216-per-guild ceiling at `config.gridSize`) and is hash-identical across two renders of the same seed/tick
+- [x] Tier-M: step/frame timing at `config.gridSize` (96×96) measured before/after — 7.78ms → 12.12ms, both well under a frame budget (VERIFICATION_POLICY §3)
+- [x] Composition + manifest: [plant-render-clustering-composition.md](slices/plant-render-clustering-composition.md), [plant-render-clustering.json](slices/plant-render-clustering.json)
+- [x] **Next-but-one:** §4.62 composite runner-up guild is now Track V's tip
 
 ---
 
