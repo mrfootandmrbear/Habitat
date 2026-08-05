@@ -157,7 +157,15 @@
       },
       "closedAt": "2026-08-04",
       "deferredFollowUp": "The lit-surface saturation ceiling is a lighting/tonemapping-pipeline property (verified by the round-3 critic's shadow-vs-lit pixel comparison), not a C1 palette defect. Out of scope for this piece — if more vividness is wanted later, the next lever is exposure/tonemapping tuning, not another color edit. See RENDER_NOTES.md's new entry.",
-      "critique": "closed — 3 rounds, points 2/3 passed round 1 and untouched since, point 4 passed round 3 after the critic confirmed the residual gap is a rendering-pipeline ceiling rather than a color choice"
+      "critique": "closed — 3 rounds, points 2/3 passed round 1 and untouched since, point 4 passed round 3 after the critic confirmed the residual gap is a rendering-pipeline ceiling rather than a color choice",
+      "leverInvestigated": {
+        "date": "2026-08-05",
+        "experiment": "Tested the critic's own suggested lever directly: rebalanced SUN_INTENSITY 1.4->1.05 (-25%) and ENVIRONMENT_INTENSITY 0.28->0.42 (+50%) in lightingRig.ts, keeping total illumination roughly comparable.",
+        "result": "Lit-vegetation saturation barely moved (0.664->0.656 and 0.566->0.589 at two measured slope points -- within noise, not a real gain). Shadows visibly softened (a genuine, separate win toward bar v2 point 11's 'no harsh contrast'), but that wasn't the question being tested.",
+        "conclusion": "Sun/ambient light-mix rebalancing is NOT an effective lever for the saturation ceiling, even at a fairly large swing -- the effect is dominated by ACES's own highlight-desaturation curve (the same mechanism RENDER_NOTES.md already documents pulling a linear 1.59 down to ~1.17), not by which light source contributes the illumination. Closing this gap for real would need a tonemapping-operator or exposure-curve change, which is materially riskier: every other Phase C piece (C0's sky calibration, C2/C3's terrain/water, C4/C5) was tuned and critic-confirmed against the CURRENT tonemapping settings, so changing them means re-validating all of it, not just this one piece.",
+        "decision": "Reverted the experiment, did not adopt. This is genuinely a different, larger piece than C1's own scope, exactly as the round-3 critic framed it -- not chased further this round.",
+        "verifiedClean": "git status clean after revert; 546/546 tests still green."
+      }
     },
     {
       "id": "C2",

@@ -104,6 +104,36 @@ bloom + SMAA, no SSAO). Re-measure if `"low"`-tier frame timing on an actual
 touch/iPad device is ever in question; not verified on real hardware, only
 reasoned about relative to `"medium"`'s already-accepted cost.
 
+### Sun/ambient light-mix rebalancing does not move ACES's highlight desaturation
+
+A lit material's saturation ceiling (the C1 finding: raw albedo pushed to
+99% saturation still only rendered at ~45% on a directly-lit surface) is
+**not** meaningfully affected by shifting the ratio of direct (`sun`,
+`DirectionalLight`) to ambient (`ENVIRONMENT_INTENSITY`, the baked sky IBL)
+light. A real, fairly large rebalance — `SUN_INTENSITY` 1.4→1.05 (-25%),
+`ENVIRONMENT_INTENSITY` 0.28→0.42 (+50%), i.e. materially less directional,
+materially more ambient — moved measured lit-vegetation saturation by less
+than 0.02 (well inside noise) at two sampled slope points.
+
+*Why:* the ceiling comes from ACES's own highlight-compression curve acting
+on the *total* linear radiance reaching a lit pixel, not from which light
+source supplied that radiance. Swapping direct for ambient light on an
+already brightly-lit, sun-facing surface leaves the total roughly where it
+was — the surface is still bright, still gets compressed the same way.
+
+*What the rebalance DID change, as a side effect:* shadows read visibly
+softer (less contrast between lit and shadowed faces) — a real, separate win
+toward bar v2 point 11 ("no harsh contrast"), just not the thing being
+tested. Not adopted on its own (2026-08-05): a global lighting-constant
+change means re-validating every other already-tuned piece against it
+(sky calibration, terrain/water color, everything), which is a materially
+bigger, riskier change than the saturation question justified on its own.
+
+*If the ceiling needs closing for real:* the next thing to try is a
+tonemapping-operator or exposure-curve change (e.g. a different
+`THREE.ToneMapping` value, or a custom curve), not another light-mix or
+albedo tweak — both of those levers are now tested and ruled out.
+
 ### ACES desaturates hard, and clamps saturated cyan's red to zero
 
 three's `ACESFilmicToneMapping` pulls a linear blue/red of 1.59 down to about
