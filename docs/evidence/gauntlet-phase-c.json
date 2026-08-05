@@ -224,8 +224,13 @@
         9,
         10
       ],
-      "status": "queued",
-      "round": 0
+      "status": "round-1-built, awaiting-critic",
+      "round": 1,
+      "note": "Both points shipped via BUILD_GUIDE machine slices rather than fresh gauntlet-loop builds — the underlying fix is the same either way, tracked once. Point 9 (distinct silhouettes: herb blade cluster, strand mat, binder tufted dome, marsh reeds, shrub rounded canopy, crust flat mat) shipped earlier via §4.60, before this session resumed. Point 10 (clustered, non-lattice placement) shipped this round via §4.61: OccupantMesh.ts now draws 2-4 hash-jittered sub-instances per occupied cell instead of exactly one at the grid-cell center.",
+      "verifiedBy": "546/546 tests (4 new: sub-instance count bounds, cross-render determinism, instance-buffer ceiling, Tier-M timing 7.78ms->12.12ms at config.gridSize), clean typecheck/build, full probe suite green. Visual check caught and ruled out a false lead: a periodic sin/cos debug-seed density pattern produced a diagonal-stripe artifact; confirmed via a bare-terrain-zero-vegetation screenshot that the same faint stripe is a pre-existing terrain-shading characteristic (the C1 critic's already-flagged, non-blocking 'radial streaks'), not a clustering defect, before switching the seed to non-periodic hash noise and re-checking. Native-resolution before/after crops (docs/evidence/shots/c4/detail-native-{before,after}.png, gitignored) show individual one-per-cell instances collapsing into irregular clumps, no countable grid.",
+      "commits": ["67aeead"],
+      "compositionDoc": "docs/slices/plant-render-clustering-composition.md",
+      "critique": "not yet run"
     },
     {
       "id": "C5",
