@@ -59,6 +59,51 @@ sky at blue/red 1.59 while the frame rendered 1.015.
 `RenderPass` renders to a target (so materials do not tonemap), and `OutputPass`
 applies ACES exactly once. Both paths tonemap once. Do not re-derive this.
 
+### A direct render and a composer render are not interchangeable, even with "the same" tonemapping settings
+
+Rendering the *identical* scene through `renderer.render(scene, camera)`
+(direct) versus `EffectComposer` → `OutputPass` (composer) produced a
+measured **~1.8-2.1x brightness difference per channel**, even with identical
+`toneMapping`/`toneMappingExposure`/`outputColorSpace` on the renderer in
+both cases.
+
+*Verified by bisection (2026-08-05):* the quality-tier system used to send
+`"low"` through the direct path and `"medium"`/`"high"` through the composer,
+as a performance optimisation (skip SSAO/bloom/SMAA). A critic flagged
+`"low"`'s output as suspiciously darker. Toggled only the render mechanism
+(direct vs composer) while holding every other tier-varying setting —
+SSAO, bloom, SMAA, `envMapSize`, `pixelRatioCap`, `shadowMapSize`, the
+renderer's `antialias` construction flag — fixed at `"low"`'s values, one at
+a time. None of those reproduced the gap in isolation; only the
+direct-vs-composer switch did, every time.
+
+*What was checked and is NOT the cause* (read three's source, not assumed):
+materials correctly skip in-shader tonemap+encode when `currentRenderTarget
+!== null` (`WebGLPrograms.js`); `OutputPass` correctly reads
+`renderer.toneMapping`/`toneMappingExposure`/`outputColorSpace` at render
+time and defines the matching shader flags; `EffectComposer`'s intermediate
+target is `HalfFloatType` with no explicit `colorSpace` (i.e. linear,
+correct); `OutputShader`'s ACES implementation is the literal same
+`#include <tonemapping_pars_fragment>` chunk materials use, not a second
+copy that could drift. The exact WebGL/browser-level mechanism producing the
+gap despite all of that being correct on paper was **not** identified — this
+is a real, precisely-isolated symptom, not a fully-explained root cause.
+
+*The fix, not a workaround:* route every quality tier through the composer —
+even `"low"` now gets a minimal one (`RenderPass` → `OutputPass`, no
+SSAO/bloom/SMAA). This is the same lesson `seabed.ts` and `lightingRig.ts`
+already exist to enforce for other quantities, applied to the render-output
+boundary: two code paths computing "the final displayed pixel" will diverge,
+so there must be exactly one. `qualityTier.postFx` now means "gets SSAO/
+bloom/SMAA," not "goes through a composer at all" — every tier does.
+
+*Cost:* one extra render-to-texture + a full-screen blit versus a true direct
+render — small and bounded relative to the scene render every tier already
+pays for, and strictly less than what `"medium"` already runs (composer +
+bloom + SMAA, no SSAO). Re-measure if `"low"`-tier frame timing on an actual
+touch/iPad device is ever in question; not verified on real hardware, only
+reasoned about relative to `"medium"`'s already-accepted cost.
+
 ### ACES desaturates hard, and clamps saturated cyan's red to zero
 
 three's `ACESFilmicToneMapping` pulls a linear blue/red of 1.59 down to about

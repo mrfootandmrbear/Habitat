@@ -43,7 +43,7 @@ export type SceneHandles = {
    */
   skyLighting: SkyLighting;
   qualityTier: QualityTier;
-  /** Draws one frame — routes through the post-fx composer on tiers that have one. */
+  /** Draws one frame — always through the composer (minimal on low tier), never a direct render. */
   render: () => void;
   dispose: () => void;
 };
@@ -209,31 +209,48 @@ export function createScene(container: HTMLElement): SceneHandles {
 
   scene.fog.color.copy(skyLighting.skyHorizon);
 
-  // --- Post-processing (skipped on the low tier — direct render instead) -
-  let composer: EffectComposer | null = null;
-  if (qualityTier.postFx) {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    if (qualityTier.ssao) {
-      const ssao = new SSAOPass(scene, camera, container.clientWidth, container.clientHeight);
-      ssao.kernelRadius = 0.55;
-      ssao.minDistance = 0.0006;
-      ssao.maxDistance = 0.12;
-      ssao.output = SSAOPass.OUTPUT.Default;
-      composer.addPass(ssao);
-    }
-    if (qualityTier.bloom) {
-      const bloom = new UnrealBloomPass(
-        new THREE.Vector2(container.clientWidth, container.clientHeight),
-        0.32,
-        0.55,
-        0.88,
-      );
-      composer.addPass(bloom);
-    }
-    composer.addPass(new SMAAPass());
-    composer.addPass(new OutputPass());
+  // --- Post-processing --------------------------------------------------
+  // Every tier routes through the composer now, even "low" (SSAO/bloom/SMAA
+  // skipped there, not the composer itself). A cold critic (2026-08-05)
+  // measured the low tier's direct-render path (`renderer.render()`, no
+  // composer) as ~1.8-2.1x darker per channel than the composer path for an
+  // *identical* scene — isolated by bisection to the render mechanism
+  // itself, not any of SSAO/bloom/SMAA/envMapSize/pixelRatio/shadowMapSize
+  // (each tested independently, holding the others at low-tier values; only
+  // the composer-vs-direct switch reproduced the gap). Materials skip
+  // in-shader tonemap+encode when rendering into a target (verified against
+  // three's source, `WebGLPrograms.js`) specifically so `OutputPass` can be
+  // the one place that happens — that contract only holds if everything
+  // actually goes through `OutputPass`. Two render paths computing the same
+  // "final pixel color" is the exact bug class `seabed.ts` and
+  // `lightingRig.ts` already exist to prevent for other quantities; this is
+  // the same lesson applied to the composer boundary. A minimal composer
+  // (RenderPass + OutputPass, no SSAO/bloom/SMAA) is cheap relative to a
+  // full scene render, which every tier already pays for regardless.
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  if (qualityTier.ssao) {
+    const ssao = new SSAOPass(scene, camera, container.clientWidth, container.clientHeight);
+    ssao.kernelRadius = 0.55;
+    ssao.minDistance = 0.0006;
+    ssao.maxDistance = 0.12;
+    ssao.output = SSAOPass.OUTPUT.Default;
+    composer.addPass(ssao);
   }
+  if (qualityTier.bloom) {
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(container.clientWidth, container.clientHeight),
+      0.32,
+      0.55,
+      0.88,
+    );
+    composer.addPass(bloom);
+  }
+  // SMAA stays tied to the same "full post-fx" flag as before — tiers
+  // without it keep native MSAA (`antialias: !qualityTier.postFx` above) for
+  // edge quality instead of paying for both.
+  if (qualityTier.postFx) composer.addPass(new SMAAPass());
+  composer.addPass(new OutputPass());
 
   const onResize = (): void => {
     const w = container.clientWidth;
@@ -241,13 +258,12 @@ export function createScene(container: HTMLElement): SceneHandles {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
-    composer?.setSize(w, h);
+    composer.setSize(w, h);
   };
   window.addEventListener("resize", onResize);
 
   const render = (): void => {
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    composer.render();
   };
 
   return {
