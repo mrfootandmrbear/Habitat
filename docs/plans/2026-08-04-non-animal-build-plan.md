@@ -47,18 +47,25 @@ Remaining non-animal branches, each independent:
 **Exit condition:** one §4.48 landed, every other branch either merged or
 deleted, `git branch -r --no-merged origin/main` down to animal work only.
 
+**Stream A is closed** (confirmed on resume 2026-08-05): `git branch -r
+--no-merged origin/main` returns only the two animal branches
+(`claude/animal-addition-reconciliation-19zg1l`,
+`claude/animal-life-planning-slices-ury6vd`), which stay off the tip by
+design per this plan. Exit condition met exactly.
+
 ---
 
 ## Stream B — Machine queue (BUILD_GUIDE tip)
 
 Runs after Stream A, in order. These are the only executable machine slices.
 
-1. **§4.48** habitat/dispersal determinism hygiene — Track R tip. Arrives via
-   Stream A rather than being written fresh.
-2. **L5** guild competition — currently blocked on **C-023**. Unblocked *if*
-   the Lock on the evolution branch holds. If it does not, L5 stays blocked and
-   this stream ends here.
-3. **L8** — blocked on **C-024** / **C-025** (band calendar / deep time), both
+1. ~~**§4.48** habitat/dispersal determinism hygiene~~ — **Done**, arrived via
+   Stream A.
+2. ~~**L5** guild competition~~ — **Done**, C-023 Lock held.
+3. §4.60–§4.61 (Track V, plant rendering — see Stream C, tracked once there):
+   **Done**. Tip moved to **§4.62** (composite runner-up guild), then §4.63
+   (distance LOD, gated on profiling §4.60-4.62's measured cost).
+4. **L8** — blocked on **C-024** / **C-025** (band calendar / deep time), both
    Open and owner-judged. Not startable without Stream D.
 
 Track T (terrain tools) has **no further machine slice** — the C-028 structural
@@ -72,23 +79,32 @@ Governed by [VISUAL_UPGRADE_NOTE.md](../VISUAL_UPGRADE_NOTE.md) bar v2
 (Godus clarity, RCT3 shape). Ranked worst-first; independent of Streams A/B, so
 it can run whenever the machine queue is blocked.
 
-1. ~~**Water colour / depth banding**~~ — **Done** 2026-08-04. b/r 1.11 → 1.71.
-2. **Palette saturation** (points 4–5). Terrain reads muted grey-brown against a
-   bar asking for saturated warm greens and ochres.
-3. **De-facet terrain** (point 1). Smooth the cone's polygon faceting and the
-   stair-stepped shoreline. Explicitly *not* terracing.
-4. **Terrain skirt** — the residual square ocean seam is the terrain mesh's own
-   edge showing through translucent water. Geometry fix, not shader; see the
-   reverted attempt recorded in `OceanMesh.ts`.
-5. **Vegetation type variety** (points 9–10). One repeated cone today; needs
-   distinct silhouettes and clustered, non-lattice placement. Overlaps the
-   plant-rendering branches in Stream A — land those first.
-6. **Sky** (points 5, 12). Renders achromatic, b/r 1.015, no gradient. Real but
-   *last*: the camera looks down and sky is barely in frame.
+1. ~~**Water colour / depth banding**~~ — **Done** 2026-08-04. b/r 1.11 → 1.71;
+   critic-confirmed together with the terrain skirt (C3), 2026-08-04.
+2. ~~**Palette saturation**~~ (points 4–5, tracked as C1) — **Done**
+   2026-08-04, 3 critic rounds. Residual lit-vegetation saturation gap is a
+   lighting-pipeline ceiling, not a colour choice — see RENDER_NOTES.md.
+3. ~~**De-facet terrain**~~ (point 1, tracked as C2) — **Done** 2026-08-04,
+   critic-confirmed after 3 rounds.
+4. ~~**Terrain skirt**~~ (tracked as C3) — **Done** 2026-08-04, critic-confirmed
+   after 3 rounds ("diorama on a plinth" defect closed).
+5. ~~**Vegetation type variety**~~ (points 9–10, tracked as C4) — **Done**
+   2026-08-04/05. Point 9 shipped via §4.60 (Stream A); point 10 shipped via
+   §4.61 (Stream B) — the same fix closes both the machine-queue slice and
+   this bar-v2 point, tracked once.
+6. ~~**Sky**~~ (points 5, 12, tracked as C0 + C5) — **Done**. C0 found the grey
+   band was never the sky (a too-small sea plane, not an atmosphere problem);
+   C5 (owner-ruled in scope mid-round) closed the camera-framing half of
+   point 12 across 2 critic rounds.
 
-**Prerequisite for critics:** reference images in `docs/reference/`. The folder
-and its README exist; the images do not. Until they land, critics score against
-prose rather than a side-by-side.
+**Stream C is closed** (2026-08-05) — every piece on this list has a
+fresh-context critic verdict, most after 2-3 rounds. See
+[VISUAL_UPGRADE_NOTE.md](../VISUAL_UPGRADE_NOTE.md)'s "Phase C status"
+section for the full per-piece record and the short list of explicitly
+non-blocking residuals left for a future round.
+
+**Prerequisite for critics:** reference images in `docs/reference/`. Landed
+2026-08-04 (owner-supplied, gitignored — see `docs/reference/OBSERVATIONS.md`).
 
 ---
 

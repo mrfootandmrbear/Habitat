@@ -240,7 +240,7 @@
       "id": "C5",
       "name": "camera framing",
       "points": [12],
-      "status": "round-2-built, awaiting-critic",
+      "status": "done, critic-confirmed",
       "round": 2,
       "note": "Scene.ts cameraHome moved (32,28,36)->(18,27,20)->(15,23,16.6) across two rounds: distance from target ~54->~36->~30, pitch ~27.4deg->~42deg (held), same azimuth. Sky-lighting calibration needed no code change (derives view direction from cameraHome/cameraTarget dynamically).",
       "sideEffectFixed": "scripts/shot.ts DEFAULT_PROBES were tuned to the old framing and went stale after EACH round's move (shelf-shallow/shoreline landed on land, not water) -- re-scanned and re-aimed twice.",
@@ -253,7 +253,11 @@
       "verifiedBy": "546/546 tests, clean typecheck/build, full probe suite green -- none reference camera position.",
       "commits": ["671add6", "082c1f7"],
       "compositionDoc": "docs/slices/camera-framing-composition.md",
-      "critique": "round 2 screenshots ready in docs/evidence/shots/c5/ (gitignored); re-critique pending"
+      "critiqueR2": {
+        "framing": "PASS -- island width grew ~57%->~67% of frame, \"reads as the dominant subject rather than a small object in open water,\" no overshoot/clipping/context-loss. Minor non-blocking residual: flanking water still ~15-17% per side, somewhat more generous than the references.",
+        "waterBandingRegressionCheck": "PASS, still holding -- same correct-direction multi-step gradient, corroborated by the now-fixed detail-shore-close.png showing saturated cyan right at the waterline."
+      },
+      "critique": "closed -- 2 rounds, framing PASS with an explicitly non-blocking minor residual (further tightening would be marginal polish per the skill's diminishing-returns guidance), water-banding regression check PASS both rounds"
     },
     {
       "id": "C-water",

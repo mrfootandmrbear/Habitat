@@ -972,6 +972,73 @@ green. Composition + manifest:
 Commit `67aeead`. BUILD_GUIDE §4.61 marked Done; Track V's tip moves to
 §4.62 (composite runner-up guild).
 
+### C5: camera framing — done (2026-08-04/05)
+
+Last queued Stream C piece. Bar: OBSERVATIONS.md's camera-framing ruling —
+"every reference looks down steeply and fills the frame with world" — plus
+bar v2 point 12. The old default (`Scene.ts`'s `cameraHome`, distance ~54,
+pitch ~27.4° from `cameraTarget`) read as an overview shot: a lot of open
+water around a comparatively small island.
+
+**Round 1:** moved the camera closer (~36) and steeper (~42°), same azimuth.
+Sky-lighting calibration needed no code change — it already derives its view
+direction from `cameraHome`/`cameraTarget` dynamically, so it re-anchored
+itself automatically. **Caught a real side effect before it became a
+regression:** a camera reframe changes what's visible in frame, which put
+C3's already-critic-confirmed water depth-banding at risk — per the skill's
+Step 6, checked it directly rather than assuming. A naive fixed-scan-line
+probe reading briefly suggested the gradient had flattened; turned out to be
+an artifact of scanning perpendicular to the gradient's actual orientation at
+the new angle, not a real regression — a proper crop showed the expected
+4-step progression clearly.
+
+**Round 1 critique:** water-banding regression check **PASS**. Framing
+**BARE-PASS** — pitch confirmed correct, but the critic measured "~40% of
+frame width is still open sea flanking the island" against references that
+push the landform to the frame edges.
+
+**Round 2:** same pitch/azimuth, distance tightened again (~36 → ~30).
+**Found and fixed a real tooling bug in the process of re-shooting:** `sips
+--cropOffset` takes `(Y, X)`, not `(X, Y)`. Round 1's `detail-shore-close.png`
+crop had the arguments swapped and landed almost entirely inside the dev UI
+overlay panel — which is exactly what the round-1 critic reported ("almost
+entirely occluded... contributes nothing to this check"). The critic's own
+report was the tell that exposed the bug, not a self-check — worth noting as
+a small illustration of why an independent critic catches things a builder
+grading its own screenshots would miss entirely.
+
+**Round 2 critique, final:**
+
+| | verdict |
+|---|---|
+| framing | **PASS** — island grew from ~57% to ~67% of frame width, "reads as the dominant subject rather than a small object in open water," no overshoot/clipping/context loss |
+| water-banding regression | **PASS** — still holding, corroborated by the now-fixed shore-close crop showing saturated cyan right at the waterline |
+
+One minor, explicitly non-blocking residual: flanking water still ~15-17%
+per side, somewhat more generous than the references. Further tightening
+from here is marginal polish, not a real gap — stopped per the skill's
+diminishing-returns guidance rather than chasing a third round on it.
+
+**C5 is closed.** 546/546 tests, clean typecheck/build, full probe suite
+green both rounds (camera position isn't referenced by any test). Composition
+doc: [camera-framing-composition.md](slices/camera-framing-composition.md).
+Commits `671add6`, `082c1f7`.
+
+## Phase C status (2026-08-05)
+
+All six pieces on the original piece list are closed: water colour/banding,
+C0 (sky/lighting foundation), C1 (palette), C2 (de-facet terrain), C3
+(terrain skirt), C4 (vegetation), C5 (camera framing). Each went through at
+least one fresh-context critic pass scored against bar v2 and the reference
+set; several needed 2-3 rounds before the critic was genuinely won over
+rather than just not-yet-failing. Remaining open items are explicitly
+non-blocking polish, logged where each piece's entry already records them
+(C0's tier-dependent lighting softness, C1's lighting-pipeline saturation
+ceiling on lit vegetation, C3's shallow-water halo-width, C4's
+single-guild-seed test-coverage gap, C5's residual flanking-water margin) —
+none of them block calling Phase C done, and each has enough written context
+for a future round to pick up without re-deriving it.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
