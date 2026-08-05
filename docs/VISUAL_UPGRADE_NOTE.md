@@ -1031,13 +1031,51 @@ C0 (sky/lighting foundation), C1 (palette), C2 (de-facet terrain), C3
 (terrain skirt), C4 (vegetation), C5 (camera framing). Each went through at
 least one fresh-context critic pass scored against bar v2 and the reference
 set; several needed 2-3 rounds before the critic was genuinely won over
-rather than just not-yet-failing. Remaining open items are explicitly
-non-blocking polish, logged where each piece's entry already records them
-(C0's tier-dependent lighting softness, C1's lighting-pipeline saturation
-ceiling on lit vegetation, C3's shallow-water halo-width, C4's
-single-guild-seed test-coverage gap, C5's residual flanking-water margin) —
-none of them block calling Phase C done, and each has enough written context
-for a future round to pick up without re-deriving it.
+rather than just not-yet-failing.
+
+### Residual sweep (2026-08-05)
+
+The five non-blocking items logged when Phase C first closed were worked
+through explicitly rather than left to rot:
+
+- **C4's single-guild-seed gap** — closed. A six-wedge mixed-guild seed put
+  all six vegetation silhouettes in one frame; a fresh critic passed 4 of 6
+  as unambiguously distinct (shrub, herb, binder, marsh) and flagged the
+  other two (strand/crust) as too similar — a real, specific, still-open
+  finding, left documented in `gauntlet-phase-c.json` for whoever next
+  touches vegetation geometry rather than chased this round.
+- **C3's shelf-halo width** — closed. Root cause was a wavelength mismatch
+  (`shelfStartWarp`'s ~140-220-unit period barely completing half a cycle
+  within the ~60-unit visible skirt); retuned ~3x. A critic confirmed
+  *quantitatively* (pixel-tracked the boundary against a linear fit): real
+  width variation, not ripple texture, replacing the prior near-constant
+  offset.
+- **C0's tier-dependent lighting** — closed, and it turned out to be a real
+  bug, not a taste question. Bisection isolated a ~1.8-2.1x per-channel
+  brightness gap to the render mechanism itself (direct `renderer.render()`
+  vs `EffectComposer`→`OutputPass`), not to any of the tier-varying
+  settings it was flagged alongside. Fixed structurally: every quality tier
+  now routes through the composer. All three tiers now measure
+  bit-identical.
+- **C1's lighting-pipeline saturation ceiling** — investigated, not fixed.
+  Tested the suggested lever (sun/ambient rebalance) directly; it doesn't
+  touch the actual mechanism (ACES's highlight compression acts on total
+  radiance, not light-source mix), so closing this for real needs a
+  tonemapping-operator change — a materially bigger, riskier piece that
+  would require re-validating every other already-tuned piece against it.
+  Ruled out and documented rather than left as an untested guess.
+- **C5's flanking-water margin** — not pursued. Explicitly called marginal
+  polish by its own critic on a piece that already passed; chasing it after
+  the other four residuals were substantively resolved would be the
+  diminishing-returns pattern the gauntlet-loop skill itself warns against.
+
+Net: two real bugs found and fixed (C3's warp scale, C0's render-path
+divergence — the second one a genuine correctness fix that improves every
+low-tier/touch-device player's actual experience, not just a critic-pleasing
+tweak), one investigated and honestly ruled out rather than guessed at, one
+gap closed with a new specific finding to hand off, one left alone on
+purpose. That is what "finishing the residuals" means here — not zero open
+items, but zero *unexamined* ones.
 
 ## Honest scope note
 
