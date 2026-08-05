@@ -736,6 +736,63 @@ than the halo-width polish item. Moving to C2 next; the halo-width gap stays
 logged in `gauntlet-phase-c.json` under C3's `critiqueR3` for whoever picks it
 back up.
 
+### C2: de-facet terrain — done, critic-confirmed (2026-08-04)
+
+Moved to this piece per the deferral note above. Direct screenshot inspection
+had already shown a very visible stair-stepped shoreline and blocky
+material-patch edges — worth checking with real evidence before assuming the
+plan's original priority order (palette before de-facet) still held; it
+looked like the more severe defect on sight, so it went first.
+
+**Root cause work, tested rather than assumed (skill Step 4.5):** three
+hypotheses, two disproven before writing any fix.
+
+- Tripling the render mesh's `upsample` factor (2 → 6, ~9x more triangles):
+  **zero visible change.** Rules out mesh/geometry resolution.
+- Zeroing `generateIsland.ts`'s micro-relief noise term (its wavelength
+  coincidentally matched the observed tooth spacing — tempting to blame
+  without checking): **zero visible change.** Rules out a coastal-elevation
+  ripple.
+- Hiding both water meshes entirely: the sawtooth stayed **fully visible on
+  raw terrain.** Rules out water/foam shading.
+
+That elimination pointed at two real, source-confirmed bugs:
+
+1. **`OceanMesh.ts` read `uElevationTex` with a raw `texture2D()` call** — a
+   nearest tap — while every other consumer of that texture (`TerrainMesh`'s
+   own displacement, `WaterMesh`) goes through the codebase's shared
+   `sampleFieldBilinear` helper. Same "two descriptions of one thing
+   disagree" bug class `seabed.ts` and `lightingRig.ts` each already exist to
+   prevent — just not caught before because nothing compares the two paths.
+2. **`TerrainMesh`'s categorical `materialId` lookup snapped exactly to the
+   sim's 96×96 grid.** It's correctly nearest-sampled (indices can't
+   interpolate without inventing a phantom substrate — `RENDER_NOTES.md`
+   already establishes hard material edges as the art direction, not a bug),
+   but the *shape* of that hard edge was grid-aligned rather than organic.
+
+**Fix:** bug 1 was a one-line swap to the existing helper. Bug 2 got
+`terrainMaterialUv()` — wobbles the lookup coordinate before the nearest tap,
+applied identically to all three `materialId` call sites (color, roughness,
+normal-detail) so they can't disagree at the boundary. Never blends two
+materials; every pixel still picks exactly one nearest texel, so it does not
+reopen the "feather the hard edges" finding already retired.
+
+**Three iteration rounds, each driven by a fresh critic finding a specific,
+concrete gap:**
+
+| round | change | critic verdict |
+|---|---|---|
+| 1 | single value-noise tap, ~0.6 texel | real improvement, but "a sawblade, not organic variation" — every tooth the same size |
+| 2 | `terrainFbm` multi-octave, ~1.6 texel | 2 of 3 crops fixed; third (south shore) still "a dense, evenly-spaced... row of teeth... relocated onto a curve" — fine octave always-on |
+| 3 | added a slow `disturb` field gating the fine octave off across ~1/3 of space | confirmed: nicks now cluster with real calm gaps on all three crops, matching `godus-biome-cliffs.webp`'s sparse-disturbance character. **"Good enough to call done."** |
+
+One minor, explicitly non-blocking note survives: one tooth cluster in the
+south-shore crop leans toward smaller/more-similar sizes than its neighbors.
+Critic's own words: "not worth another iteration on its own."
+
+Verified every round: 542/542 tests, clean typecheck. Commits `c578888`,
+`6462b78`.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.

@@ -124,8 +124,17 @@
       "points": [
         1
       ],
-      "status": "queued",
-      "round": 0
+      "status": "done, critic-confirmed",
+      "round": 3,
+      "rootCause": "NOT mesh/geometry resolution and NOT a coastal-elevation noise ripple — both tested and disproven (tripling render upsample 2->6 changed nothing; zeroing generateIsland.ts's micro-relief term changed nothing; hiding both water meshes left the sawtooth fully visible on raw terrain, ruling out water/foam shading too). Two real, source-confirmed bugs: (1) OceanMesh.ts read uElevationTex with a raw texture2D() nearest tap while every other consumer (TerrainMesh displacement, WaterMesh) uses the shared sampleFieldBilinear helper — same 'two descriptions disagree' bug class as seabed.ts/lightingRig.ts. (2) TerrainMesh's categorical materialId lookup (correctly nearest-sampled, since indices can't blend) snapped exactly to the sim's 96x96 grid, giving material-zone edges a visible staircase independent of render resolution.",
+      "fix": "(1) OceanMesh.ts now uses sampleFieldBilinear for the elevation/depth read, matching the rest of the codebase. (2) terrainMaterialUv() in TerrainMesh.ts wobbles the materialId lookup coordinate before the nearest tap, applied identically to all three materialId call sites (color, roughness, normal-detail) so they can't disagree at the boundary. Never blends two materials — every pixel still picks exactly one nearest texel — so it does not reopen the 'feather the hard edges' finding RENDER_NOTES.md already retired.",
+      "iterationHistory": [
+        "Round 1 (single value-noise tap, ~0.6 texel amplitude): critic found real improvement but 'a sawblade, not organic variation' — every tooth roughly the same size, just repositioned.",
+        "Round 2 (terrainFbm multi-octave, ~1.6 texel amplitude): fixed 2 of 3 test crops to genuine multi-scale variation; a third (south shore) still showed 'a dense, evenly-spaced, near-uniform row of small triangular teeth running almost the entire width... relocated onto a curve' — the fine octave was always-on.",
+        "Round 3 (added a slow 'disturb' noise field gating the fine octave's amplitude via smoothstep, masking it off across ~1/3 of space): critic confirmed the south-shore defect gone, nicks now cluster with real calm gaps between them on all three crops, matching godus-biome-cliffs.webp's sparse-disturbance character. Verdict: 'good enough to call done.'"
+      ],
+      "openMinorNote": "One cluster in the south-shore crop leans toward smaller/more-similar tooth sizes than its neighbors — critic explicitly called this non-blocking, 'not worth another iteration on its own.'",
+      "commits": ["c578888", "6462b78"]
     },
     {
       "id": "C3",
