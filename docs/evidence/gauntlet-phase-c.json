@@ -176,8 +176,8 @@
         7,
         8
       ],
-      "status": "round-3-critiqued: 5/6 pass, 1 bare, tray defect closed; halo-width gap deferred",
-      "round": 3,
+      "status": "done, critic-confirmed (round 4 closed the halo-width residual)",
+      "round": 4,
       "note": "Seabed skirt built as GEOMETRY (TerrainMesh.buildSkirtGeometry), reusing the terrain's own material with clamped edge UVs so its colour cannot drift from the terrain edge it continues. Shape shared with the ocean shader via src/render/seabed.ts.",
       "landed": [
         "skirt carries the seabed SKIRT_REACH=60 units past the grid on a warped slope",
@@ -215,7 +215,21 @@
         },
         "biggestGap": "The shallow-water halo is close to a constant-width radial offset from the coastline rather than true independent bathymetry \u2014 it doesn't bulge, narrow or break the way the Palau/barrier-reef reef lines do. Diorama/tray defect is confirmed GONE (\"It's no longer a rectangular tray\u2014that defect is fixed\u2014but it now reads as a glow radius around the island\").",
         "verdict": "Diorama defect (3 rounds, C0->C3 round1->C3 round2->bug hardening) is CLOSED. Remaining gap is real but secondary polish, not blocking. Deferred rather than chased immediately \u2014 C1/C2 are untouched and larger absolute gaps."
-      }
+      },
+      "round4Fix": {
+        "date": "2026-08-05",
+        "rootCause": "shelfStartWarp's ~140-220-unit wavelength barely completed half a cycle within the ~60-unit visible SKIRT_REACH, so the wander was real but too slow to see in any single frame.",
+        "fix": "Retuned frequencies ~3x (wavelength ~140-220 -> ~45-75 units) in both the TS and GLSL twins, identically. No amplitude/delay-range change.",
+        "verificationNote": "The C5-tightened default camera crops out most of the shelf (depth-based colour saturates ~10 world units past the break, well inside the visible skirt), so the effect needed a temporary wider debug camera to judge at all -- not what players see by default, but the same underlying water/terrain code. docs/evidence/shots/c3-halo/ (gitignored).",
+        "commit": "202fabb"
+      },
+      "critiqueR4": {
+        "date": "2026-08-05",
+        "verdict": "PASS \u2014 quantitative, not eyeballed: critic pixel-tracked the shelf/deep-water boundary against a linear fit and measured genuine width variation (~20-40% of local band width, two full oscillation cycles around the visible arc), versus the round-3 monotonic/near-constant offset.",
+        "verbatimQuote": "That's a genuine, non-trivial width change... confirmed quantitatively, not an optical illusion from ripple texture... previously less than half a wavelength was visible (monotonic drift, no reversal); now there's clearly more than one reversal visible.",
+        "residualNote": "Critic's own caveat: still a smooth one-or-two-lobe sinusoid, not the multi-scale fractal raggedness (isolated shallow patches, fine branching) of the Palau/barrier-reef photos -- \"a harsher critic focused on matching the reference photos' texture could reasonably still call it BARE-PASS.\" Left as-is: this is now genuine bathymetry-scale irregularity, and chasing fractal multi-octave detail on an already-passing piece is diminishing returns, not a real gap in the bar."
+      },
+      "critique": "closed \u2014 4 rounds total. Diorama/tray defect closed round 3; halo-width residual closed round 4 with a quantitatively-confirmed fix."
     },
     {
       "id": "C4",
