@@ -2,6 +2,8 @@
 
 Habitat is a living sand castle: sculpt substrates, set forces, run time, watch nature and life take what you built. Thesis: [docs/THESIS.md](docs/THESIS.md). Decisions: [docs/DECISION_REGISTER.md](docs/DECISION_REGISTER.md). Execution: [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md). Who verifies what: [docs/VERIFICATION_POLICY.md](docs/VERIFICATION_POLICY.md). Gated cloud succession (one slice per agent, merge starts the next): [docs/CLOUD_AGENT_PIPELINE.md](docs/CLOUD_AGENT_PIPELINE.md).
 
+**Touching rendering code?** Read [docs/RENDER_SIM_INTERFACE.md](docs/RENDER_SIM_INTERFACE.md) first — the map of which sim field feeds which render file, and the per-frame call sequence — before editing by screenshot. [docs/RENDER_NOTES.md](docs/RENDER_NOTES.md) has the engine traps once you know which file is involved.
+
 ## Green bar (session gate)
 
 ```bash

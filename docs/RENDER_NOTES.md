@@ -15,7 +15,11 @@ isn't.
 look like. Status goes in `VISUAL_UPGRADE_NOTE.md` and
 `evidence/gauntlet-phase-c.json`; the visual bar goes in `reference/OBSERVATIONS.md`;
 simulation model reasoning goes in `SIMULATION_MODEL.md` and
-`NATURAL_PROCESS_MATH.md`.
+`NATURAL_PROCESS_MATH.md`. **Which sim field feeds which render file** — the
+actual wiring, not the traps in using it — is a different kind of knowledge
+and lives in [RENDER_SIM_INTERFACE.md](RENDER_SIM_INTERFACE.md); read that
+first when a bug looks like a sim-data-reaching-the-shader problem, and come
+here for what to watch out for once you know which file is involved.
 
 **Rules.** Every entry states how it was *verified*. If you have not tested it,
 either test it or label it untested in the same sentence — a plausible mechanism

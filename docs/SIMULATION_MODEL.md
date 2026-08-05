@@ -35,7 +35,7 @@ Three documents feed this one and none of them govern it:
 - The **process-math survey** is advisory. It catalogs candidates; this document selects, and the selections are recorded as candidate register entries in §14 rather than presented as decided.
 - The two **2026-07-27 reviews** are advisory findings. This model is written so that the defects they identify cannot be re-expressed: the scaffold's private terrain clone (review §1.4), its map-edge drain at absolute elevation zero (review §1.3), its mutable "read-only" view (review §1.5), and its determinism test that passed over broken physics (review §1.6) each have a structural answer here.
 
-This document does not specify the equations of individual processes. It specifies what a process is allowed to be. Per-process mathematics belongs in `HYDROLOGY_SPEC.md` and its siblings. Which loops belong in the first playable product — and how they pair with player verbs — belongs in [MVP_SCOPE.md](MVP_SCOPE.md).
+This document does not specify the equations of individual processes. It specifies what a process is allowed to be. Per-process mathematics belongs in `HYDROLOGY_SPEC.md` and its siblings. Which loops belong in the first playable product — and how they pair with player verbs — belongs in [MVP_SCOPE.md](MVP_SCOPE.md). This document also does not specify how the renderer consumes any of the state below — §4 item 3 states the read-only-views principle, but the concrete crossing (which field, read by which `render/*.ts` file, uploaded how) is [RENDER_SIM_INTERFACE.md](RENDER_SIM_INTERFACE.md).
 
 ---
 

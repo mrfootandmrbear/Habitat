@@ -225,6 +225,19 @@ Rules that make it worth reading:
 - Point critics and builders at it in their briefs, so they inherit the
   knowledge instead of rebuilding it.
 
+**On a project with a simulation/render split, the facts file is not enough
+by itself.** "Engine traps" (what surprised you about the library) and "the
+wiring" (which authoritative field actually feeds which render file, and in
+what order per frame) are different kinds of knowledge, and conflating them
+produces a facts file nobody can navigate — traps are pointless context
+without knowing which file they apply to, and the wiring is too structural to
+bury inside a list of gotchas. Keep them in two files. `docs/RENDER_NOTES.md`
+(traps) and `docs/RENDER_SIM_INTERFACE.md` (wiring: the field-by-field map,
+the per-frame call sequence, a "want to change X, start here" table) in this
+repo are the worked example — read `RENDER_SIM_INTERFACE.md` before editing
+rendering code for a bug that might actually be a sim-data problem, not just
+before hunting for a known trap.
+
 ## Step 5 — Keep a live progress record
 
 Two layers, both cheap:
