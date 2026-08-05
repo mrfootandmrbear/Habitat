@@ -50,7 +50,9 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     porosity: 0.45,
     infiltrationRate: 0.08,
     erosionK: 0.003,
-    dryRgb: [0x8b / 255, 0x73 / 255, 0x55 / 255],
+    // Warm saturated ochre-brown (gauntlet-loop C1, bar v2 point 4) — was a
+    // muted 39%-saturation tan that read grey-brown against the reference set.
+    dryRgb: [0x9c / 255, 0x6f / 255, 0x3f / 255],
   },
   {
     id: SUBSTRATE_SAND,
@@ -58,8 +60,8 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     porosity: 0.35,
     infiltrationRate: 0.22,
     erosionK: 0.007,
-    // Warm pale — drains and bleaches dry.
-    dryRgb: [0xc4 / 255, 0xa8 / 255, 0x6e / 255],
+    // Warm pale — drains and bleaches dry. Richened toward gold (C1).
+    dryRgb: [0xd9 / 255, 0xb2 / 255, 0x73 / 255],
   },
   {
     id: SUBSTRATE_CLAY,
@@ -67,8 +69,9 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     porosity: 0.52,
     infiltrationRate: 0.025,
     erosionK: 0.0012,
-    // Cooler red-brown — holds and darkens dry.
-    dryRgb: [0x6e / 255, 0x4a / 255, 0x3a / 255],
+    // Rust-red, holds and darkens dry — pushed more saturated (C1) to read
+    // as the ochre-rust cliff face the reference set shows, not brown-grey.
+    dryRgb: [0x8a / 255, 0x4a / 255, 0x30 / 255],
   },
   {
     id: SUBSTRATE_ROCK,
@@ -76,8 +79,11 @@ export const SUBSTRATES: readonly SubstrateProps[] = [
     porosity: 0.08,
     infiltrationRate: 0.002,
     erosionK: 0.00015,
-    // Cool gray — sheds and resists.
-    dryRgb: [0x7a / 255, 0x78 / 255, 0x74 / 255],
+    // Warm pale stone, not neutral grey (gauntlet-loop C1 / bar v2 point 5:
+    // "no large achromatic region" — the old 5%-saturation grey was exactly
+    // that). Sheds and resists; still the palest, coolest-in-relative-terms
+    // substrate, just no longer colourless.
+    dryRgb: [0xa6 / 255, 0x95 / 255, 0x72 / 255],
   },
 ] as const;
 
