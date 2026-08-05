@@ -5152,6 +5152,66 @@ export function probeSuccessionDisplace(): ProbeResult {
   };
 }
 
+/**
+ * A1 / C-027 §3.3 (BUILD_GUIDE §4.66) — a forced Heat dial swing (the same
+ * Force-panel regime the arrival-family probes already use) moves
+ * `pop.herbivore.trait.insulation` toward the new pressure optimum,
+ * deterministically. This is the Tier-P proxy the slice checklist asks
+ * for — "instance count and morph/swap amount visibly track a forced
+ * pressure change" — measured without an inspector, before any owner
+ * playtest question is asked (VERIFICATION_POLICY §4).
+ */
+export function probeHerbivoreDrift(): ProbeResult {
+  const world = new WorldState(new Grid2D(8, 8, 3));
+  const cx = 4;
+  const cz = 4;
+  world.habitatSuitability.fill(1);
+  world.herbBiomass.fill(2);
+  // Founder population — A1 has no arrival/dispersal mechanism of its own;
+  // trait movement needs a standing population to derive a turnover rate.
+  world.herbivoreStageAdult.fill(5);
+
+  world.setAirTemperature(heatById("warm").airTempC);
+  for (let i = 0; i < 30; i++) world.runPopulationsSeasonalStep(1);
+  const warmInsulation = world.getHerbivoreInsulation(cx, cz);
+
+  world.setAirTemperature(heatById("cold").airTempC);
+  for (let i = 0; i < 30; i++) world.runPopulationsSeasonalStep(1);
+  const coldInsulation = world.getHerbivoreInsulation(cx, cz);
+
+  // Determinism check (T-001): replaying from the same seed/state reaches
+  // the identical trait-mean sample, not merely a directionally similar one.
+  const replay = new WorldState(new Grid2D(8, 8, 3));
+  replay.habitatSuitability.fill(1);
+  replay.herbBiomass.fill(2);
+  replay.herbivoreStageAdult.fill(5);
+  replay.setAirTemperature(heatById("warm").airTempC);
+  for (let i = 0; i < 30; i++) replay.runPopulationsSeasonalStep(1);
+  replay.setAirTemperature(heatById("cold").airTempC);
+  for (let i = 0; i < 30; i++) replay.runPopulationsSeasonalStep(1);
+  const replayMatch = replay.getHerbivoreInsulation(cx, cz) === coldInsulation ? 1 : 0;
+
+  if (!(coldInsulation > warmInsulation)) {
+    throw new Error(
+      `herbivore-drift: expected insulation to rise after a cold Heat-dial swing (warm=${warmInsulation}, cold=${coldInsulation})`,
+    );
+  }
+
+  return {
+    scenario: "herbivore-drift",
+    records: [
+      { label: "warm", insulation: warmInsulation },
+      { label: "cold", insulation: coldInsulation },
+      {
+        label: "drift",
+        delta: coldInsulation - warmInsulation,
+        rises: coldInsulation > warmInsulation ? 1 : 0,
+        replayMatch,
+      },
+    ],
+  };
+}
+
 const SCENARIOS: Record<string, () => ProbeResult> = {
   "paired-storm": probePairedStorm,
   "berm-reroute": probeBermReroute,
@@ -5195,6 +5255,7 @@ const SCENARIOS: Record<string, () => ProbeResult> = {
   "season-regime": probeSeasonRegime,
   "erosion-intensity": probeErosionIntensity,
   "succession-displace": probeSuccessionDisplace,
+  "herbivore-drift": probeHerbivoreDrift,
 };
 
 export function runProbe(name: string): ProbeResult {

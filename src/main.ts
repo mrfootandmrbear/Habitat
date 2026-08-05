@@ -24,6 +24,7 @@ import { OceanMesh } from "./render/OceanMesh";
 import { SitingCursor } from "./render/SitingCursor";
 import { FlowCueMesh } from "./render/FlowCueMesh";
 import { OccupantMesh } from "./render/OccupantMesh";
+import { HerbivoreMesh } from "./render/HerbivoreMesh";
 import { WindArrowMesh } from "./render/WindArrowMesh";
 import { RainCueMesh } from "./render/RainCueMesh";
 import { CloudMesh } from "./render/CloudMesh";
@@ -218,6 +219,7 @@ oceanMesh.setSkyLighting(skyLighting);
 const sitingCursor = new SitingCursor(n, n, config.worldSize);
 const flowCue = new FlowCueMesh(n, n, config.worldSize);
 const occupantMesh = new OccupantMesh(n, n, config.worldSize);
+const herbivoreMesh = new HerbivoreMesh(n, n, config.worldSize);
 const windArrow = new WindArrowMesh(config.worldSize);
 windArrow.setWind("west");
 const rainCue = new RainCueMesh(config.worldSize);
@@ -296,9 +298,11 @@ notebookChrome.onQuestion((id) => {
 scene.add(sitingCursor.group);
 scene.add(flowCue.object);
 scene.add(occupantMesh.object);
+scene.add(herbivoreMesh.object);
 terrainMesh.updateFrom(model, world, "none", null);
 waterMesh.snapFrom(world);
 occupantMesh.updateFrom(model, world);
+herbivoreMesh.updateFrom(model, world);
 rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
 
 let rainRegime: RainRegimeId = "dry";
@@ -890,6 +894,7 @@ function syncMeshes(nowWall?: number): void {
     nowWall !== undefined ? nowWall : performance.now() * 0.001,
   );
   occupantMesh.updateFrom(model, world);
+  herbivoreMesh.updateFrom(model, world);
   syncAudio();
 }
 

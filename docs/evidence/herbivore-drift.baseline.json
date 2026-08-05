@@ -1,0 +1,25 @@
+{
+  "scenario": "herbivore-drift",
+  "metrics": {
+    "warm.insulation": {
+      "value": 0.13333334028720856,
+      "abs": 0.000001
+    },
+    "cold.insulation": {
+      "value": 0.9333333373069763,
+      "abs": 0.000001
+    },
+    "drift.delta": {
+      "value": 0.7999999970197678,
+      "abs": 0.000001
+    },
+    "drift.rises": {
+      "value": 1,
+      "abs": 0
+    },
+    "drift.replayMatch": {
+      "value": 1,
+      "abs": 0
+    }
+  }
+}

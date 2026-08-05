@@ -731,6 +731,13 @@ const BASELINE_TOLERANCES: Record<string, Record<string, MetricTolerance>> = {
     "delta.replayMatch": { abs: 0 },
     "delta.hashN": { abs: 0 },
   },
+  "herbivore-drift": {
+    "warm.insulation": { abs: 1e-6 },
+    "cold.insulation": { abs: 1e-6 },
+    "drift.delta": { abs: 1e-6 },
+    "drift.rises": { abs: 0 },
+    "drift.replayMatch": { abs: 0 },
+  },
 };
 
 const args = process.argv.slice(2);

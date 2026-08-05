@@ -981,6 +981,17 @@ export class TerrainMesh {
         col.setRGB(r, g, b);
         break;
       }
+      case "herbivoreDensity": {
+        // A1 / C-027 (BUILD_GUIDE §4.66) — literal occupancy readout, same
+        // shape as the guild biomass layers above.
+        const t = Math.min(
+          1,
+          world.getHerbivoreDensity(x, z) /
+            Math.max(config.herbivoreDensityMax, 1e-6),
+        );
+        col.setRGB(0.3 + 0.5 * t, 0.22 + 0.3 * t, 0.12 + 0.1 * t);
+        break;
+      }
       case "intertidal": {
         const t = world.intertidal.data[idx] ?? 0;
         if (t > 0) col.setRGB(0.72, 0.58, 0.38);

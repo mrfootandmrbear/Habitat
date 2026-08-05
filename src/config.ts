@@ -487,7 +487,8 @@ export type InspectorLayer =
   | "intertidal"
   | "shoreExposure"
   | "shoreLongshore"
-  | "salinity";
+  | "salinity"
+  | "herbivoreDensity";
 
 /** Player land tools — causes (A-005). */
 export type SitingTool =

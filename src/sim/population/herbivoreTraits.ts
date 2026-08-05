@@ -22,7 +22,13 @@ function clamp(x: number, lo: number, hi: number): number {
 }
 
 /**
- * limbLength pressure axis: terrain ruggedness (rise/run slope, saturating).
+ * limbLength pressure axis: terrain ruggedness (rise/run slope). Deliberately
+ * NOT clamped to the trait envelope — "pressureOptimum may sit anywhere"
+ * (§3.3): on terrain rugged enough, the place can demand a limb ratio no
+ * real animal in the species envelope has. `nextTraitMean` clamps the
+ * *trait*, not the *demand* — the gap between the two is what
+ * `traitMismatchMortalityRate` prices (a population that exhausts its
+ * envelope declines rather than continuing to morph, §3.3).
  * Referent (AD-001): mountain goats/chamois carry proportionally longer,
  * stockier limbs on rugged terrain than plains grazers on flat ground.
  */
@@ -32,7 +38,7 @@ export function limbLengthOptimum(
   min: number,
   max: number,
 ): number {
-  const ruggedness = clamp01(Math.max(0, slopeRiseRun) / Math.max(1e-6, referenceSlope));
+  const ruggedness = Math.max(0, slopeRiseRun) / Math.max(1e-6, referenceSlope);
   return min + ruggedness * (max - min);
 }
 
@@ -41,7 +47,11 @@ export function limbLengthOptimum(
  * vegetation's own kill-threshold term reads (temperatureComposition.ts).
  * Colder → higher insulation optimum; a linear coat-thickness response, not
  * vegetation's unimodal survival-gate curve (a different law for a different
- * kind of trait — plasticity, not a kill threshold).
+ * kind of trait — plasticity, not a kill threshold). Floored at 0 (there is
+ * no such thing as "wanting" negative insulation once heat already favors
+ * the envelope minimum) but deliberately not capped above 1 — severe cold
+ * can demand more coat than the species envelope has, same "may sit
+ * anywhere" reasoning as limbLength above.
  */
 export function insulationOptimum(
   airTempC: number,
@@ -51,7 +61,7 @@ export function insulationOptimum(
   max: number,
 ): number {
   if (!(warmRefC > coldRefC)) return min;
-  const cold = clamp01((warmRefC - airTempC) / (warmRefC - coldRefC));
+  const cold = Math.max(0, (warmRefC - airTempC) / (warmRefC - coldRefC));
   return min + cold * (max - min);
 }
 
@@ -96,6 +106,12 @@ export function nextTraitMean(input: NextTraitMeanInput): number {
  * Mismatch mortality/capacity cost (E-006/E-009): normalized as a fraction
  * of the trait's own envelope span so traits with different natural ranges
  * (limbLength ~0.4 span, insulation/webbing 1.0 span) contribute comparably.
+ * Uses the *raw* pressureOptimum, not envelope-clamped — a demand that
+ * genuinely exceeds the species envelope must keep costing something even
+ * after the trait mean pins at the envelope edge (§3.3's "population
+ * declines rather than continuing to morph"); clamping the demand here too
+ * would zero the mismatch the moment the trait hit the edge and silently
+ * turn a real ecological failure into a free ride.
  */
 export function traitMismatchMortalityRate(
   pressureOptimum: number,
@@ -105,8 +121,7 @@ export function traitMismatchMortalityRate(
   mismatchScale: number,
 ): number {
   const span = Math.max(1e-6, envelopeMax - envelopeMin);
-  const clampedOptimum = clamp(pressureOptimum, envelopeMin, envelopeMax);
-  const normalizedMismatch = Math.abs(clampedOptimum - traitMean) / span;
+  const normalizedMismatch = Math.abs(pressureOptimum - traitMean) / span;
   return Math.max(0, mismatchScale) * normalizedMismatch;
 }
 

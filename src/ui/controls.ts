@@ -89,6 +89,7 @@ const LAYERS: { id: InspectorLayer; label: string }[] = [
   { id: "shoreExposure", label: "Inspect: shore exposure" },
   { id: "shoreLongshore", label: "Inspect: shore longshore" },
   { id: "salinity", label: "Inspect: soil salinity" },
+  { id: "herbivoreDensity", label: "Inspect: herbivore density" },
 ];
 
 /**

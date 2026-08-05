@@ -204,8 +204,8 @@ function buildGeometry(guild: SwayGuild): THREE.BufferGeometry {
   }
 }
 
-/** Deterministic pseudo-random unit value from a cell index, stable per cell (no Math.random — no stamped-grid look, but reproducible). */
-function hash01(x: number, z: number, salt: number): number {
+/** Deterministic pseudo-random unit value from a cell index, stable per cell (no Math.random — no stamped-grid look, but reproducible). Exported for HerbivoreMesh (A1) to reuse the same hash family rather than a second one. */
+export function hash01(x: number, z: number, salt: number): number {
   const s = Math.sin(x * 127.1 + z * 311.7 + salt * 74.7) * 43758.5453;
   return s - Math.floor(s);
 }
