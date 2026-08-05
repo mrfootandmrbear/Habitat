@@ -688,6 +688,54 @@ The gauntlet-loop skill gained a Step 4.6 requiring it, so this does not depend
 on anyone remembering. Status and knowledge are deliberately separate files:
 status ages and gets superseded, knowledge accumulates.
 
+### C3 round 3 critique: the diorama defect is closed (2026-08-04)
+
+Resumed via the gauntlet-loop skill's restart procedure. State reconstruction:
+542/542 tests green, clean typecheck, working tree clean, one unpushed local
+commit (`2e0df07`, docs only). C3 (terrain skirt) had landed round 2 (wandering
+shelf break) plus an owner-reported edge-extrusion bug fix hardened with 11
+regression tests (`aec9f6c`) — both post-dating the last critique. Per the
+skill's resume guidance ("critique pieces waiting on a critic"), that was the
+next action, not starting a new piece.
+
+Re-shot `npm run shot` at HEAD, plus two hand-cropped detail views (a 3x
+zoomed shoreline segment, and a wide open-water strip for judging whether any
+straight seam survives at a distance). A fresh critic — no prior context,
+shown only the screenshots, the six-point water/bathymetry rubric, and the
+skirt-piece + water-piece reference set from `OBSERVATIONS.md` — scored:
+
+| point | verdict |
+|---|---|
+| depth banding, ≥3 steps | **PASS** — four readable steps |
+| shallow more saturated than deep | **PASS** — correct direction |
+| pale shoreline band | **PASS** |
+| no hard rectangular seam | **PASS** — "a smooth, irregular wavy curve... no straight run traceable across the frame" |
+| no achromatic region | **PASS** |
+| soft/bright lighting | **BARE**, tier-dependent — low-tier's horizon band goes darker than high-tier's |
+
+**The "diorama on a plinth" defect — three rounds running (C0's original
+finding, C3 round 1's confirmation it was still the map footprint exactly,
+round 2's wander fix, then an owner-reported regression that needed hardening
+— is now closed.** Critic's words: *"It's no longer a rectangular tray—that
+defect is fixed."*
+
+**Real remaining gap, not blocking:** the shallow-water band reads as a
+near-constant-width radial offset from the coastline rather than independent
+bathymetry — it doesn't bulge, narrow, or break the way the Palau/barrier-reef
+reference aerials show. Critic's phrase: *"a glow radius around the island"*
+rather than *"a shelf with its own irregular geometry."* Traced to
+`seabed.ts`: `shelfStartWarp`'s ~140–220-unit wavelength is long relative to
+the visible skirt extent (`SKIRT_REACH=60`), so little of its variation shows
+up within frame — a real, understood cause, not touched this round.
+
+**Deliberately deferred rather than chased immediately.** Per the skill's
+diminishing-returns guidance: C1 (palette) and C2 (de-facet terrain) are both
+still untouched (round 0) and, on direct inspection of this round's own
+screenshots, C2's stair-stepped shoreline is a more visually severe defect
+than the halo-width polish item. Moving to C2 next; the halo-width gap stays
+logged in `gauntlet-phase-c.json` under C3's `critiqueR3` for whoever picks it
+back up.
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.

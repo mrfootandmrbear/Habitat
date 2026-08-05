@@ -135,8 +135,8 @@
         7,
         8
       ],
-      "status": "round-2-done-awaiting-recritique",
-      "round": 2,
+      "status": "round-3-critiqued: 5/6 pass, 1 bare, tray defect closed; halo-width gap deferred",
+      "round": 3,
       "note": "Seabed skirt built as GEOMETRY (TerrainMesh.buildSkirtGeometry), reusing the terrain's own material with clamped edge UVs so its colour cannot drift from the terrain edge it continues. Shape shared with the ocean shader via src/render/seabed.ts.",
       "landed": [
         "skirt carries the seabed SKIRT_REACH=60 units past the grid on a warped slope",
@@ -160,7 +160,21 @@
       },
       "round2Fix": "Shelf break now wanders OUTWARD by a long-wavelength warp (seabed.ts shelfStartWarp, delay 4-26 world units, never zero), so it crosses irregularly instead of paralleling the footprint, and reads as a broad flat shelf breaking on an organic line \u2014 which is what the Palau and barrier-reef aerials actually show. Outward-only by necessity: inside the grid the seabed is simulation state, and warping the water depth there would put colour back out of agreement with terrain.",
       "alsoResolved": "The critic's unconfirmed suspicion was right and is now confirmed by construction: depth was flat inside the grid and started climbing the instant boxDist went positive, so the footprint carried a gradient crease no amount of fall-off warping could remove. The delay moves that crease onto the wandering break line.",
-      "deferred": "Critic noted the seabed inside the footprint shows blocky per-cell stair-steps while the skirt outside is smooth \u2014 two surface characters meeting at the boundary. That is the C2 de-facet piece, not this one."
+      "deferred": "Critic noted the seabed inside the footprint shows blocky per-cell stair-steps while the skirt outside is smooth \u2014 two surface characters meeting at the boundary. That is the C2 de-facet piece, not this one.",
+      "critiqueR3": {
+        "date": "2026-08-04",
+        "context": "Re-shot after the edge-extrusion bug fix (aec9f6c) hardened the round-2 wander fix. Fresh cold critic, no prior-round context, given high.png/low.png plus zoomed shoreline and wide-water crops.",
+        "verdicts": {
+          "depthBanding3Steps": "PASS \u2014 four readable steps: pale sand -> turquoise shallow -> mid teal -> deep blue-teal",
+          "shallowMoreSaturatedThanDeep": "PASS \u2014 correct direction, no inversion",
+          "paleShorelineBand": "PASS",
+          "noHardRectangularSeam": "PASS \u2014 \"a smooth, irregular wavy curve with no straight run traceable across the frame\"",
+          "noAchromaticRegion": "PASS",
+          "softBrightLighting": "BARE, tier-dependent \u2014 low-tier's top-of-frame band goes noticeably darker than high-tier's; flagged as postFX-dependent, not yet isolated"
+        },
+        "biggestGap": "The shallow-water halo is close to a constant-width radial offset from the coastline rather than true independent bathymetry \u2014 it doesn't bulge, narrow or break the way the Palau/barrier-reef reef lines do. Diorama/tray defect is confirmed GONE (\"It's no longer a rectangular tray\u2014that defect is fixed\u2014but it now reads as a glow radius around the island\").",
+        "verdict": "Diorama defect (3 rounds, C0->C3 round1->C3 round2->bug hardening) is CLOSED. Remaining gap is real but secondary polish, not blocking. Deferred rather than chased immediately \u2014 C1/C2 are untouched and larger absolute gaps."
+      }
     },
     {
       "id": "C4",
@@ -187,8 +201,8 @@
         6,
         7
       ],
-      "status": "improved-awaiting-critic",
-      "round": 2,
+      "status": "critiqued-in-C3-round-3: 5/6 pass, closed together with the skirt",
+      "round": 3,
       "commit": "567ae8b",
       "note": "Landed before Phase C opened, never critiqued. Also now carries a requirement it was not built against: transparent enough to read the submerged landform through it. CRITIQUED as part of C0: point 7 FAIL \u2014 shallow water measures HSV sat 0.25 vs deep 0.61, i.e. the shallow band is the LEAST saturated water in frame, backwards from every reference. Point 8 FAIL \u2014 no pale shoreline band on the east shore.",
       "measured": {
