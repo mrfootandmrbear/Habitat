@@ -251,6 +251,37 @@ vec2 terrainWorldXZ(vec2 planeUv) {
   return planeUv * uFieldSize * uTexelWorldSize;
 }
 
+/** Wobbles a material-lookup UV by up to ~0.6 texel using the same value
+ * noise as the bump detail, so sampleFieldNearest's hard categorical edge
+ * (materialId can't be interpolated — see fieldTexture.ts) traces an organic
+ * line instead of snapping to the sim grid exactly. Confirmed by testing,
+ * not assumed: bar v2's "stair-stepped shoreline" finding did not move at
+ * all when the render mesh's upsample factor was tripled (2 -> 6), which
+ * only makes sense if the boundary is texture-resolution-bound rather than
+ * geometry-bound — it is bounded by paintSubstrateMosaic's real 96x96
+ * shore/interior substrate assignment (sim/terrain/substrates.ts), which is
+ * simulation data (T-004 infiltration/erosion depend on it) and out of
+ * rendering-only scope to reshape. This still never blends two materials —
+ * every pixel picks exactly one nearest texel, just not always the
+ * geometrically-nearest one — so it does not reopen the "feather the hard
+ * edges" finding RENDER_NOTES.md already retired. Same jitter must feed
+ * every materialId lookup (color, roughness, normal detail) or those three
+ * disagree at the boundary, the same class of bug seabed.ts and
+ * lightingRig.ts each exist to prevent. */
+vec2 terrainMaterialUv(vec2 fUv, vec2 worldXZ) {
+  vec2 invSize = 1.0 / uFieldSize;
+  // Two octaves, not one: a single frequency stays locally coherent along a
+  // boundary that runs near-parallel to one of its ridges, which is exactly
+  // a shore line at a shallow grazing angle — measured leaving long straight
+  // "staircase" runs intact even with the single-octave version live. The
+  // second, higher-frequency tap breaks that local coherence up.
+  float jx = (terrainValueNoise(worldXZ * 0.9 + vec2(19.1, 4.7)) - 0.5) * 1.4
+           + (terrainValueNoise(worldXZ * 2.3 + vec2(71.0, -12.4)) - 0.5) * 0.6;
+  float jy = (terrainValueNoise(worldXZ * 0.9 + vec2(-8.3, 27.6)) - 0.5) * 1.4
+           + (terrainValueNoise(worldXZ * 2.3 + vec2(-40.7, 63.2)) - 0.5) * 0.6;
+  return fUv + vec2(jx, jy) * invSize;
+}
+
 /** Per-substrate procedural bump height: sand reads as soft low-frequency
  * ripple, rock as sharp fine grain, loam/clay in between. Substrate ids
  * match sim/terrain/substrates.ts (0 loam, 1 sand, 2 clay, 3 rock). */
@@ -322,7 +353,7 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
   float cover = clamp(sampleFieldBilinear(uVegCoverTex, fUv, uFieldSize), 0.0, 1.0);
   float scar = clamp(sampleFieldBilinear(uFireScarTex, fUv, uFieldSize), 0.0, 1.0);
   float salinity = clamp(sampleFieldBilinear(uSalinityTex, fUv, uFieldSize), 0.0, 1.0);
-  int materialId = int(sampleFieldNearest(uMaterialTex, fUv, uFieldSize) + 0.5);
+  int materialId = int(sampleFieldNearest(uMaterialTex, terrainMaterialUv(fUv, terrainWorldXZ(vUv)), uFieldSize) + 0.5);
   float porosity = max(materialPorosity(materialId), 1e-6);
   vec3 base = materialDryRgb(materialId);
 
@@ -362,7 +393,7 @@ const TERRAIN_COLOR_INJECT = /* glsl */ `
 const TERRAIN_ROUGHNESS_INJECT = /* glsl */ `
 {
   vec2 rFieldUv = fieldUv(vUv);
-  int rMatId = int(sampleFieldNearest(uMaterialTex, rFieldUv, uFieldSize) + 0.5);
+  int rMatId = int(sampleFieldNearest(uMaterialTex, terrainMaterialUv(rFieldUv, terrainWorldXZ(vUv)), uFieldSize) + 0.5);
   float rMoisture = sampleFieldBilinear(uSoilMoistureTex, rFieldUv, uFieldSize);
   float rPorosity = max(materialPorosity(rMatId), 1e-6);
   float rSoilT = clamp(rMoisture / rPorosity, 0.0, 1.0);
@@ -388,8 +419,8 @@ const TERRAIN_ROUGHNESS_INJECT = /* glsl */ `
 const TERRAIN_NORMAL_DETAIL_INJECT = /* glsl */ `
 {
   vec2 nFieldUv = fieldUv(vUv);
-  int nMatId = int(sampleFieldNearest(uMaterialTex, nFieldUv, uFieldSize) + 0.5);
   vec2 nWorldXZ = terrainWorldXZ(vUv);
+  int nMatId = int(sampleFieldNearest(uMaterialTex, terrainMaterialUv(nFieldUv, nWorldXZ), uFieldSize) + 0.5);
   vec2 dHdxy = terrainBumpGradient(nWorldXZ, nMatId) * 0.14;
   normal = terrainPerturbNormal(-vViewPosition, normal, dHdxy, faceDirection);
 }

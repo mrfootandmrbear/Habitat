@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { config } from "../config";
-import { createFieldTexture, updateFieldTexture } from "./fieldTexture";
+import { createFieldTexture, updateFieldTexture, FIELD_SAMPLE_GLSL } from "./fieldTexture";
 import {
   SUN_COLOR,
   sunDirectionFromSky,
@@ -39,6 +39,7 @@ uniform vec3 uSunColor;
 uniform vec3 uSkyZenith;
 uniform vec3 uSkyHorizon;
 uniform sampler2D uElevationTex;
+uniform vec2 uFieldSize;
 uniform float uSeaLevel;
 uniform float uWorldSize;
 uniform float uShallowDepth;
@@ -77,6 +78,7 @@ float fbm(vec2 p) {
   return sum;
 }
 
+${FIELD_SAMPLE_GLSL}
 ${SEABED_GLSL}
 
 float rippleHeight(vec2 p, float t) {
@@ -127,7 +129,12 @@ void main() {
   // the edge row rather than wrapping.
   vec2 gridUv = vWorldPos.xz / uWorldSize + 0.5;
   // fieldUv's V flip (see fieldTexture.ts) — fields upload row-major in +Z.
-  float bed = texture2D(uElevationTex, vec2(gridUv.x, 1.0 - gridUv.y)).r;
+  // Bilinear, not a raw texel tap: the terrain mesh's own displacement reads
+  // this same texture through sampleFieldBilinear, so a nearest tap here
+  // disagreed with it and stair-stepped the water's depth read at the coast
+  // at the sim grid's native per-texel resolution — visible as a blocky
+  // shoreline even though the terrain geometry underneath is smooth.
+  float bed = sampleFieldBilinear(uElevationTex, vec2(gridUv.x, 1.0 - gridUv.y), uFieldSize);
   // Same clamped-edge extrusion the terrain skirt has to defuse: without this
   // the water paints a pale shallow streak straight out from any raised
   // boundary cell. Must match the skirt or colour and geometry disagree again.
@@ -297,6 +304,7 @@ export class OceanMesh implements SkyLightingConsumer {
       uOpacity: { value: 0.88 },
       uShallowOpacity: { value: 0.58 },
       uElevationTex: { value: this.elevationTex },
+      uFieldSize: { value: new THREE.Vector2(gridWidth, gridHeight) },
       uSeaLevel: { value: 0 },
       uWorldSize: { value: worldSize },
       uShallowDepth: { value: 0.9 },
