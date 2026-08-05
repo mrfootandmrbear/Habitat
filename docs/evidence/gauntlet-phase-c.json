@@ -234,6 +234,12 @@
         "point9DistinctSilhouettes": "PASS — the visible herb guild reads as a genuine thin fanning multi-blade tuft, not a cone/dome primitive with jittered scale.",
         "point10ClusteredIrregular": "PASS — before/after native-resolution crops show a real fix: before was an unmistakable diagonal lattice (identical spacing/scale), after is tight multi-blade clumps of varying size with genuine gaps, no repeating row/column spacing, holding at multiple locations on the island (shoreline and slope both checked). Correctly did not re-flag the terrain-shading diagonal artifact, per the brief.",
         "openNote": "Not blocking: this single-guild test screenshot can't visually confirm the other five guild silhouettes read as distinct from each other when co-present in one scene — geometry is source-confirmed already built (§4.60), but a mixed-guild seed test would close this out visually if wanted later."
+      },
+      "mixedGuildFollowUp": {
+        "date": "2026-08-05",
+        "method": "Temp debug seed (main.ts, reverted) split the island into six angular wedges, one guild each, all visible in one frame. docs/evidence/shots/c4-mixed/ (gitignored).",
+        "verdict": "PASS — 4 of 6 guilds unambiguously distinct from each other at a glance: a voluminous rounded/branchy mass (shrub), thin pale splayed blades (herb), tight cobblestone-like domes (binder), tall thin cyan reed spikes (marsh). Closes the open note above.",
+        "newFinding": "Two wedges (critic's guess: strand and crust) read as similar small upright spiky clumps rather than one reading as a genuinely flat ground-hugging disc vs a spreading mat — differ mainly in colour/density, not silhouette logic. Not re-chased this round: overall point 9 verdict is still PASS, the finding's guild attribution is uncertain (the critic wasn't told the wedge-to-guild mapping, only guessed), and it reads as a real but minor polish item, not a piece-closing gap. Left here for whoever next touches vegetation geometry (§4.62/§4.63 or a future Track V pass) — worth checking crust's width-vs-height ratio specifically (OccupantMesh.ts's heightBoost gives crust 0.45x height but no compensating width boost)."
       }
     },
     {
