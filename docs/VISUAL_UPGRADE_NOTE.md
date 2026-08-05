@@ -909,6 +909,69 @@ gap on lit vegetation is deferred, explicitly out of this piece's scope — the
 next lever is exposure/tonemapping tuning, a different piece entirely, not
 another `terrainEncoding.ts` edit. Commits `b3dc4cd`, `299d7a5`, `07df1b7`.
 
+### C4: vegetation type variety & clustering — done (2026-08-04)
+
+Moved to C4 (bar v2 points 9, 10) next per the ranking. Checking BUILD_GUIDE
+before building anything turned up a real overlap: **point 9 was already
+shipped** via §4.60 (per-guild silhouette geometry — six distinct shapes: a
+blade cluster, a spreading mat, a tufted dome, reed-like spikes, a rounded
+shrub, a flat crust mat), landed via Stream A's merged branches before this
+session resumed. **Point 10 had a matching written spec waiting** — BUILD_GUIDE
+§4.61, "the sole remaining executable machine slice" — so rather than invent a
+gauntlet-loop-only fix, implemented §4.61 itself: it closes both the machine
+queue and this piece with one change, tracked once in BUILD_GUIDE rather than
+duplicated.
+
+**What shipped:** `OccupantMesh.ts` drew exactly one instance per occupied
+cell, positioned at the exact grid-cell center — any real coverage density
+read as a perfect lattice no matter how much the existing per-instance
+scale/yaw jitter varied. Now each occupied cell draws 2-4 sub-instances
+(deterministic hash of cell index, same salt family as the existing
+yaw/jitter hash — no new RNG, T-001-safe), each at reduced scale and offset
+within the cell footprint.
+
+**A methodology check that nearly produced a wrong diagnosis, caught before
+it was written down as fact:** the first debug seed used a `sin(x)·cos(z)`
+density pattern for testing, and the resulting screenshot showed a visible
+diagonal-stripe pattern — which could easily have been read as "the
+clustering fix didn't work, placement is still patterned." Before concluding
+that, checked the same crop with **zero vegetation** at all
+(`detail-native-bare-terrain-only.png`) — the same faint diagonal shading was
+already there, on bare terrain. It's the C1 critic's already-flagged,
+already-non-blocking "radial streaks" (terrain lighting, not placement), not
+a new defect. Switched the debug seed to non-periodic hash noise to remove
+the confound entirely and re-verified: before/after native-resolution crops
+(no crop-upscale interpolation, to rule out a second possible confound) show
+individual one-per-cell instances collapsing into genuinely irregular clumps
+of varying size, no countable grid.
+
+**Critique (fresh agent, no prior context):**
+
+| point | verdict | evidence |
+|---|---|---|
+| 9 — distinct silhouettes | **PASS** | the visible herb guild reads as "a genuine thin, fanning multi-blade tuft... not a cone or dome primitive with jittered scale" |
+| 10 — clustered, irregular placement | **PASS** | before: "an unmistakable diagonal lattice — identical spacing, identical scale, machine-regular rows"; after: "tight multi-blade clumps of varying group size separated by genuine gaps, with no repeating row/column spacing left," holding at multiple locations on the island |
+
+Critic explicitly did not re-flag the terrain-shading diagonal artifact, per
+the brief — corroborating that it reads as unrelated to vegetation once named.
+
+**One open, non-blocking note:** the test screenshot only seeded one guild
+(herb) at visible density, so a critic can confirm that guild's own
+silhouette but can't visually confirm all six guilds read as distinct *from
+each other* in one scene — that's stipulated from source (§4.60 already
+built six different geometries) rather than freshly re-verified. A
+mixed-guild seed test would close this out visually if it matters later; not
+worth a round on its own.
+
+**C4 is closed.** Both assigned points pass. Tests: 4 new regression tests
+(sub-instance count bounds, cross-render determinism, instance-buffer
+ceiling, Tier-M timing 7.78ms → 12.12ms at `config.gridSize` — both well
+under a frame budget). 546/546 tests, clean typecheck/build, full probe suite
+green. Composition + manifest:
+[plant-render-clustering-composition.md](slices/plant-render-clustering-composition.md).
+Commit `67aeead`. BUILD_GUIDE §4.61 marked Done; Track V's tip moves to
+§4.62 (composite runner-up guild).
+
 ## Honest scope note
 
 "AAA quality" here means: real shadow mapping, PBR materials with image-based lighting, a proper water shader, post-processing (tone mapping, bloom, ambient occlusion, anti-aliasing), richer instanced vegetation, and an adaptive quality tier so it still runs on iPad Safari. It does not mean verified parity with, or a blind win against, any specific shipped commercial title — that isn't a claim this note or the accompanying work makes.
