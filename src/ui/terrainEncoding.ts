@@ -18,9 +18,9 @@ export type TerrainRgb = readonly [number, number, number];
 // Exported so the GPU default-view path (render/TerrainMesh.ts) can pass
 // these as shader uniforms instead of duplicating the hex values — one
 // palette definition, sourced by both the CPU and GPU coloring paths.
-// Round 2 (C1): richened alongside VEG below so a wet, vegetated cell's
+// Round 2/3 (C1): richened alongside VEG below so a wet, vegetated cell's
 // blend target doesn't stay muted even as VEG gets more vivid.
-export const WET: TerrainRgb = [0x50 / 255, 0x73 / 255, 0x2e / 255];
+export const WET: TerrainRgb = [0x5b / 255, 0x8c / 255, 0x2a / 255];
 /**
  * Saturated yellow-green (gauntlet-loop C1, bar v2 point 4) — was a near-pure
  * mid-green (hue ~120) that read as flat "grass" green rather than the
@@ -35,10 +35,17 @@ export const WET: TerrainRgb = [0x50 / 255, 0x73 / 255, 0x2e / 255];
  * ACES tonemapping eat a large fraction of input chroma (RENDER_NOTES.md
  * documents this for the sky; it applies here too), so round 1's already-
  * boosted raw value still rendered at roughly half the target vividness.
- * Pushed further; re-screenshot and re-critique before assuming this closes
- * the gap rather than overshoots it.
+ *
+ * Round 3: same critic re-measured round 2's push (raw sat 72%->85%, val
+ * 70%->82%) and found green only moved 29%->37% sat, 60%->55% val — a much
+ * smaller gain than clay got from a comparable-looking push, and still only
+ * ~64%/71% of the reference. Clay was confirmed on-target in round 2 and is
+ * untouched here; only the green/wet colors move. Pushed to near-maximum
+ * raw saturation/value (99%/95%) since the critic explicitly ruled out
+ * overshoot risk ("no neon risk... if anything the opposite problem
+ * remains") — there was no signal to stop short of the ceiling.
  */
-export const VEG: TerrainRgb = [0x61 / 255, 0xd1 / 255, 0x1f / 255];
+export const VEG: TerrainRgb = [0x65 / 255, 0xf2 / 255, 0x00 / 255];
 export const SCAR: TerrainRgb = [0x2a / 255, 0x22 / 255, 0x1c / 255];
 /**
  * Wet sand / mud foreshore — readable against dry land (Slice 17). Darker
