@@ -186,6 +186,15 @@ export function mountControls(
     onEndBranch: () => void;
     onToggleBrief: () => void;
     onToggleNotebook: () => void;
+    /** Dev-only (A1 / D-007 clip ask) — A1 has no arrival tool of its own
+     * yet; this seeds a demo founder herbivore population so the trait-drift
+     * mechanism can be judged without DevTools. Never present in a prod
+     * build. */
+    onSeedHerbivoreHerd?: () => void;
+    /** Dev-only (A1 / D-007 clip ask) — advances ~31 sim-days instantly.
+     * Real-time playback at the fastest rate measures too slow to cross
+     * even one seasonal band inside a playtest window; this replaces it. */
+    onFastForwardMonth?: () => void;
   },
 ): {
   setRainRegime: (id: RainRegimeId) => void;
@@ -413,6 +422,34 @@ export function mountControls(
   resetBtn.textContent = "Reset water";
   resetBtn.addEventListener("click", handlers.onReset);
   markFullOnly(resetBtn);
+
+  // Dev-only (A1 / D-007 clip ask, BUILD_GUIDE §4.66) — A1 registers the
+  // trait-drift mechanism but no player-facing arrival tool yet (that is
+  // A2's scope); this button is the demo stand-in so the clip ask is
+  // testable without opening DevTools. import.meta.env.DEV means it never
+  // renders in a shipped build.
+  let seedHerdBtn: HTMLButtonElement | null = null;
+  if (import.meta.env.DEV && handlers.onSeedHerbivoreHerd) {
+    seedHerdBtn = document.createElement("button");
+    seedHerdBtn.type = "button";
+    seedHerdBtn.id = "debug-seed-herd";
+    seedHerdBtn.textContent = "Debug: seed herbivore herd";
+    seedHerdBtn.title =
+      "A1 has no arrival tool yet (A2's scope) — seeds a demo founder population instantly, no DevTools needed";
+    seedHerdBtn.addEventListener("click", handlers.onSeedHerbivoreHerd);
+    markFullOnly(seedHerdBtn);
+  }
+  let fastForwardBtn: HTMLButtonElement | null = null;
+  if (import.meta.env.DEV && handlers.onFastForwardMonth) {
+    fastForwardBtn = document.createElement("button");
+    fastForwardBtn.type = "button";
+    fastForwardBtn.id = "debug-fast-forward";
+    fastForwardBtn.textContent = "Debug: fast-forward ~1 month";
+    fastForwardBtn.title =
+      "Runs many sim steps instantly — the tab may pause briefly, that is expected, not a freeze";
+    fastForwardBtn.addEventListener("click", handlers.onFastForwardMonth);
+    markFullOnly(fastForwardBtn);
+  }
 
   const seedGroup = document.createElement("div");
   seedGroup.id = "seed-actions";
@@ -744,6 +781,8 @@ export function mountControls(
     loadBtn,
     inspectorSelect,
   );
+  if (seedHerdBtn) sessionRow.append(seedHerdBtn);
+  if (fastForwardBtn) sessionRow.append(fastForwardBtn);
 
   const readRow = makeRow("chrome-row-read", "Status and cutaway");
   readRow.append(hint, cutaway, status);

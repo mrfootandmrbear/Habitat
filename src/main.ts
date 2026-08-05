@@ -545,6 +545,30 @@ const ui = mountControls(
       syncWaterDisplay(0, true);
       tryUnlockAudio();
     },
+    onSeedHerbivoreHerd: () => {
+      // Dev-only demo stand-in for A1's not-yet-built arrival tool (A2's
+      // scope) — instantly seeds a founder population + forage so the
+      // D-007 clip ask is testable without DevTools. herbivoreDensity is
+      // set directly (not only stage.adult) so it renders immediately,
+      // without waiting for an annual band commit to derive it.
+      world.herbivoreStageAdult.fill(20);
+      world.herbivoreDensity.fill(20);
+      world.herbBiomass.fill(2);
+      world.habitatSuitability.fill(1);
+      syncMeshes();
+      tryUnlockAudio();
+    },
+    onFastForwardMonth: () => {
+      // Dev-only (A1 / D-007 clip ask) — ~31 sim-days of direct stepEvent()
+      // calls, well under one 36-day annual band so a repeated click stays
+      // legible (no surprise annual mortality mid-demo). Bypasses real-time
+      // playback, measured too slow on typical hardware to cross even one
+      // 10-day seasonal band inside a playtest window.
+      for (let i = 0; i < 3000; i++) world.stepEvent();
+      steps += 3000;
+      syncMeshes();
+      syncWaterDisplay(0, true);
+    },
     onNewIsland: (seed) => {
       tryUnlockAudio();
       regenerateIsland(seed);
