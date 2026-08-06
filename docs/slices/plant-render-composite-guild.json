@@ -1,0 +1,18 @@
+{
+  "id": "§4.62",
+  "title": "Plant rendering: composite runner-up guild",
+  "simLoop": "No sim change — OccupantMesh still presentation-only (T-006), zero WorldState writes. Per cell, the second-highest shootVisibility guild now draws at reduced scale (RUNNER_UP_SCALE=0.42, 1–2 sub-instances) when it clears the same visibility floor the winner already uses. No new field, no new Process, no competition law change (does not reopen C-023).",
+  "gameLoop": "Mixed stands become visible — a shrub canopy with real herb understory shows both silhouettes instead of only the arg-max guild. Layered structure the HSI/dispersal model already produces is no longer discarded at the render boundary.",
+  "registerIds": ["ART-003", "T-006"],
+  "invariantClass": "Write isolation",
+  "tests": ["src/sim/presentation.proxy.test.ts"],
+  "probes": [],
+  "fields": [],
+  "notebookSeed": "Under the shrubs, the meadow is still there.",
+  "tierM": {
+    "measuredAt": "config.gridSize (96x96), worst-case dual-guild fill",
+    "after": "58.17ms under full suite load / 32.23ms isolated (clustering + composite runner-up, worst-case dual-guild fill)",
+    "budget": "under 500ms smoke bound; §4.63 LOD still deferred pending a real-landscape profile, not invented from this worst-case number"
+  },
+  "tierO": "no owner-only question — written BUILD_GUIDE §4.62 checklist item with a bounded, testable implementation. Runner-up scale (0.42) and sub-count (1–2) are implementation choices within that spec."
+}

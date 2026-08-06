@@ -76,8 +76,8 @@ Four automations share the merge trigger but claim **disjoint** tip items. Rebas
 |---|---|---|
 | V1 | **§4.60** per-guild silhouette geometry | **Done** |
 | V2 | **§4.61** per-cell clustering | **Done** |
-| V3 | **§4.62** composite runner-up guild | Tip today |
-| Vn | **§4.63** distance silhouette LOD | Deferred — not agent-executable until V1–V3 are shipped and frame-timing profiled |
+| V3 | **§4.62** composite runner-up guild | **Done** |
+| Vn | **§4.63** distance silhouette LOD | Deferred — first post-§4.62 dual-fill timing 32.23ms at `config.gridSize`; not agent-executable until a real-landscape profile shows a real cost |
 
 ### Track A — Animal life (C-027 population fields) — **opened 2026-08-05**
 
@@ -174,7 +174,7 @@ You are a Habitat cloud succession agent on Track V (plant rendering — present
 Cold start:
 1. Read AGENTS.md, docs/BUILD_GUIDE.md §4.0 + §4.0.1, docs/CLOUD_AGENT_PIPELINE.md, docs/VERIFICATION_POLICY.md, docs/reviews/2026-08-03-plant-rendering-review.md.
 2. Read "Next (executable tip)" and the Track V table in CLOUD_AGENT_PIPELINE.md.
-3. git pull / rebase onto latest main. Claim exactly ONE open Track V slice (today: §4.60; §4.61/§4.62 come after, in order; §4.63 is deferred — do not claim it before §4.60–§4.62 ship and are profiled). If the named tip item is already Done or not yet unblocked, write a one-line status and STOP — do not invent work.
+3. git pull / rebase onto latest main. Claim exactly ONE open Track V slice. **§4.60–§4.62 are Done**; **§4.63 is deferred** — do not claim it before a real-landscape profile shows a real cost (worst-case dual-fill smoke is 32.23ms, not a license to start). If the named tip item is already Done or not yet unblocked, write a one-line status and STOP — do not invent work.
 
 Rules:
 - One slice per run. Do not start the next slice in the same run.

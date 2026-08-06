@@ -768,11 +768,9 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     meshB.setSwayTime(3.5);
     meshB.updateFrom(world.hydrologyModel, world);
 
-    // Only herb is checked for a nonzero, matching count: shrub's biomass
-    // here never wins the per-cell arg-max guild pick against herb (the
-    // arg-max logic itself, unrelated to clustering), so its mesh would be
-    // legitimately empty rather than a determinism failure.
-    for (const guild of ["herb"] as const) {
+    // §4.62: herb (winner) and shrub (runner-up) both contribute instances
+    // when both clear the visibility floor — both must be hash-identical.
+    for (const guild of ["herb", "shrub"] as const) {
       const a = meshA.object.children.find(
         (c): c is THREE.InstancedMesh =>
           (c as THREE.InstancedMesh).isInstancedMesh === true &&
@@ -793,6 +791,79 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
         expect(ma.equals(mb)).toBe(true);
       }
     }
+  });
+
+  it("mixed stand: runner-up guild contributes instances when both clear visibility floor (§4.62)", () => {
+    // Synthetic single cell with shrub canopy + herb understory, both well
+    // above shootVisibility's floor. Before §4.62 only the arg-max (shrub)
+    // drew; after, herb must also contribute a non-zero instance count
+    // attributable to that same cell.
+    const w = 4;
+    const world = new WorldState(new Grid2D(w, w, 1), {});
+    const cx = 2;
+    const cz = 2;
+    world.shrubBiomass.set(cx, cz, config.shrubBiomassMax * 0.9);
+    world.herbBiomass.set(cx, cz, config.herbBiomassMax * 0.55);
+    world.habitatSuitability.fill(1);
+
+    const worldSize = w * 2;
+    const mesh = new OccupantMesh(w, w, worldSize);
+    mesh.updateFrom(world.hydrologyModel, world);
+
+    const shrub = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("shrub"),
+    )!;
+    const herb = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("herb"),
+    )!;
+    expect(shrub.count).toBeGreaterThan(0);
+    expect(herb.count).toBeGreaterThan(0);
+
+    // Both guilds' instances sit inside the same cell footprint (±0.4 cellW
+    // offset from center, matching OccupantMesh's placement bound).
+    const cellW = worldSize / (w - 1);
+    const ox = -worldSize / 2;
+    const cellCx = ox + cx * cellW;
+    const cellCz = ox + cz * cellW;
+    const half = 0.45 * cellW; // slightly loose vs the 0.4 bound
+    const m = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    for (const inst of [shrub, herb]) {
+      for (let i = 0; i < inst.count; i++) {
+        inst.getMatrixAt(i, m);
+        pos.setFromMatrixPosition(m);
+        expect(Math.abs(pos.x - cellCx)).toBeLessThanOrEqual(half);
+        expect(Math.abs(pos.z - cellCz)).toBeLessThanOrEqual(half);
+      }
+    }
+  });
+
+  it("mixed stand: runner-up below visibility floor contributes nothing (§4.62)", () => {
+    const w = 4;
+    const world = new WorldState(new Grid2D(w, w, 1), {});
+    // Winner well above floor; second guild below shootVisibility's 0.008
+    // normalized threshold so it must not draw.
+    world.herbBiomass.set(1, 1, config.herbBiomassMax);
+    world.shrubBiomass.set(1, 1, config.shrubBiomassMax * 0.001);
+    world.habitatSuitability.fill(1);
+    const mesh = new OccupantMesh(w, w, w * 2);
+    mesh.updateFrom(world.hydrologyModel, world);
+    const herb = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("herb"),
+    )!;
+    const shrub = mesh.object.children.find(
+      (c): c is THREE.InstancedMesh =>
+        (c as THREE.InstancedMesh).isInstancedMesh === true &&
+        c.name.includes("shrub"),
+    )!;
+    expect(herb.count).toBeGreaterThan(0);
+    expect(shrub.count).toBe(0);
   });
 
   it("clustering instance ceiling stays at exactly 4x per guild (§4.61 bound)", () => {
@@ -831,7 +902,9 @@ describe("presentation proxies (BUILD_GUIDE §4.2, Tier-P)", () => {
     // Generous bound (a 16.7ms/frame budget would be tight; this only
     // guards against a real regression, e.g. an accidental O(n^2) sub-loop)
     // — measured, not assumed: log it so a real number is on record.
-    console.log(`[Tier-M] OccupantMesh.updateFrom(${n}x${n}, clustering): ${elapsedMs.toFixed(2)}ms`);
+    console.log(
+      `[Tier-M] OccupantMesh.updateFrom(${n}x${n}, clustering+composite): ${elapsedMs.toFixed(2)}ms`,
+    );
     expect(elapsedMs).toBeLessThan(500);
   });
 

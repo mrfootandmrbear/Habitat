@@ -10,6 +10,7 @@ import {
   shootVisibility,
   shrubBiomassRgb,
   strandBiomassRgb,
+  type OccupantRgb,
 } from "../ui/occupantEncoding";
 import {
   guildFlex,
@@ -24,6 +25,8 @@ import {
  * First-occupant shoots — presentation only (T-006).
  * Reads herb + strand + binder + marsh + shrub + crust biomass; does not create population state.
  * Dominant guild tints the cell (herb / strand olive / binder khaki / marsh teal / shrub forest / crust sage).
+ * §4.62: runner-up guild also draws at reduced scale when its shootVisibility clears the floor —
+ * mixed stands (canopy over understory) become visible without a new WorldState field.
  * L4: per-instance wind sway (forcing readout — calm is still; standing dead barely leans).
  *
  * Each guild renders through its own InstancedMesh so the silhouette differs
@@ -39,6 +42,23 @@ const GUILDS: readonly SwayGuild[] = [
   "shrub",
   "crust",
 ];
+
+/**
+ * Tie-break order matching the pre-§4.62 arg-max chain (shrub > marsh > strand >
+ * binder > crust > herb). Iterating this list and replacing only on strict `>`
+ * keeps earlier entries on equal visibility.
+ */
+const GUILD_PRIORITY: readonly SwayGuild[] = [
+  "shrub",
+  "marsh",
+  "strand",
+  "binder",
+  "crust",
+  "herb",
+];
+
+/** §4.62 — runner-up draws at this fraction of the scale its own visibility would give as winner. */
+const RUNNER_UP_SCALE = 0.42;
 
 /** Merge several transformed BufferGeometries into one indexed geometry (build-time only). */
 function mergeParts(parts: THREE.BufferGeometry[]): THREE.BufferGeometry {
@@ -289,6 +309,154 @@ export class OccupantMesh {
     this.swayTimeSec = Number.isFinite(timeSec) ? timeSec : 0;
   }
 
+  /**
+   * Pick the highest-visibility guild, then the second-highest (runner-up),
+   * using the same priority tie-break the pre-§4.62 arg-max chain used.
+   * Returns null runner-up when only one guild clears the visibility floor.
+   */
+  private pickWinnerAndRunnerUp(
+    vis: Record<SwayGuild, number>,
+  ): { winner: SwayGuild; runnerUp: SwayGuild | null } {
+    let winner: SwayGuild | null = null;
+    let winnerVis = 0;
+    for (const g of GUILD_PRIORITY) {
+      const v = vis[g];
+      if (v > winnerVis) {
+        winnerVis = v;
+        winner = g;
+      }
+    }
+    if (winner === null) {
+      // Caller already skipped vis<=0 cells; herb is a safe unreachable fallback.
+      return { winner: "herb", runnerUp: null };
+    }
+    let runnerUp: SwayGuild | null = null;
+    let runnerVis = 0;
+    for (const g of GUILD_PRIORITY) {
+      if (g === winner) continue;
+      const v = vis[g];
+      if (v > runnerVis) {
+        runnerVis = v;
+        runnerUp = g;
+      }
+    }
+    return { winner, runnerUp };
+  }
+
+  private guildTint(
+    guild: SwayGuild,
+    biomass: number,
+    biomassMax: number,
+  ): OccupantRgb {
+    switch (guild) {
+      case "shrub":
+        return shrubBiomassRgb(biomass, biomassMax);
+      case "marsh":
+        return marshBiomassRgb(biomass, biomassMax);
+      case "strand":
+        return strandBiomassRgb(biomass, biomassMax);
+      case "binder":
+        return binderBiomassRgb(biomass, biomassMax);
+      case "crust":
+        return crustBiomassRgb(biomass, biomassMax);
+      default:
+        return herbBiomassRgb(biomass, biomassMax);
+    }
+  }
+
+  /**
+   * Place a guild's sub-instances for one cell. `scaleMul` is 1 for the winner
+   * and RUNNER_UP_SCALE for the composite understory; `saltBias` keeps winner
+   * and runner-up hash streams disjoint so their offsets never coincide.
+   */
+  private placeGuildCluster(args: {
+    guild: SwayGuild;
+    vis: number;
+    biomass: number;
+    biomassMax: number;
+    x: number;
+    z: number;
+    cellCx: number;
+    cellCz: number;
+    cellW: number;
+    y: number;
+    hsi: number;
+    windUx: number;
+    windUz: number;
+    windMag: number;
+    timeSec: number;
+    scaleMul: number;
+    saltBias: number;
+    /** Winner keeps full 2–4 clustering; runner-up draws fewer so understory reads subordinate. */
+    subCount: number;
+  }): void {
+    const {
+      guild,
+      vis,
+      biomass,
+      biomassMax,
+      x,
+      z,
+      cellCx,
+      cellCz,
+      cellW,
+      y,
+      hsi,
+      windUx,
+      windUz,
+      windMag,
+      timeSec,
+      scaleMul,
+      saltBias,
+      subCount,
+    } = args;
+    const heightBoost =
+      guild === "shrub" ? 1.35 : guild === "crust" ? 0.45 : 1;
+    const scaleY = (0.35 + vis * 1.4) * heightBoost * scaleMul;
+    const scaleXZ = (0.45 + vis * 0.9) * scaleMul;
+    const vitality = livingVitality(biomass, biomassMax, hsi);
+    const amp = swayAmplitude(windMag, guildFlex(guild), vitality);
+    const tilt = swayTilt(amp, swayPhase(x, z), timeSec);
+    const mesh = this.meshes[guild];
+    const [r, g, b] = this.guildTint(guild, biomass, biomassMax);
+    this.color.setRGB(r, g, b);
+
+    for (let s = 0; s < subCount; s++) {
+      const base = saltBias + 10 * (s + 1);
+      const subScale = 0.55 + hash01(x, z, base + 8) * 0.25;
+      const jitterXZ1 = (0.82 + hash01(x, z, base + 1) * 0.36) * subScale;
+      const jitterXZ2 = (0.82 + hash01(x, z, base + 2) * 0.36) * subScale;
+      const jitterY = (0.88 + hash01(x, z, base + 3) * 0.24) * subScale;
+      const restLeanX = (hash01(x, z, base + 4) - 0.5) * 0.14;
+      const restLeanZ = (hash01(x, z, base + 5) - 0.5) * 0.14;
+      const offX = (hash01(x, z, base + 6) - 0.5) * 0.8 * cellW;
+      const offZ = (hash01(x, z, base + 7) - 0.5) * 0.8 * cellW;
+      const yawSub = hash01(x, z, base + 9) * Math.PI * 2;
+
+      this.dummy.position.set(cellCx + offX, y, cellCz + offZ);
+      this.dummy.scale.set(
+        scaleXZ * jitterXZ1,
+        scaleY * jitterY,
+        scaleXZ * jitterXZ2,
+      );
+      this.restEuler.set(restLeanX, 0, restLeanZ);
+      this.restQuat.setFromEuler(this.restEuler);
+      this.yawQuat.setFromAxisAngle(this.upAxis, yawSub);
+      if (tilt !== 0 && windMag > 0) {
+        const tiltVaried = tilt * (0.86 + hash01(x, z, base + 4) * 0.28);
+        this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
+        this.leanQuat.setFromAxisAngle(this.leanAxis, tiltVaried);
+        this.dummy.quaternion.multiplyQuaternions(this.leanQuat, this.yawQuat);
+      } else {
+        this.dummy.quaternion.multiplyQuaternions(this.yawQuat, this.restQuat);
+      }
+      this.dummy.updateMatrix();
+      const idx = this.counts[guild]++;
+      mesh.setMatrixAt(idx, this.dummy.matrix);
+      mesh.setColorAt(idx, this.color);
+    }
+  }
+
   updateFrom(model: WaterStateView, world: WorldState): void {
     const cellW = this.worldSize / (this.width - 1);
     const ox = -this.worldSize / 2;
@@ -299,6 +467,14 @@ export class OccupantMesh {
     const marshMax = config.marshBiomassMax;
     const shrubMax = config.shrubBiomassMax;
     const crustMax = config.crustBiomassMax;
+    const biomassMax: Record<SwayGuild, number> = {
+      herb: herbMax,
+      strand: strandMax,
+      binder: binderMax,
+      marsh: marshMax,
+      shrub: shrubMax,
+      crust: crustMax,
+    };
     const { ux: windUx, uz: windUz } = world.wind;
     const windMag = Math.hypot(windUx, windUz);
     const timeSec = this.swayTimeSec;
@@ -306,188 +482,86 @@ export class OccupantMesh {
 
     for (let z = 0; z < this.height; z++) {
       for (let x = 0; x < this.width; x++) {
-        const herb = world.getHerbBiomass(x, z);
-        const strand = world.getStrandBiomass(x, z);
-        const binder = world.getBinderBiomass(x, z);
-        const marsh = world.getMarshBiomass(x, z);
-        const shrub = world.getShrubBiomass(x, z);
-        const crust = world.getCrustBiomass(x, z);
-        const herbVis = shootVisibility(herb, herbMax);
-        const strandVis = shootVisibility(strand, strandMax);
-        const binderVis = shootVisibility(binder, binderMax);
-        const marshVis = shootVisibility(marsh, marshMax);
-        const shrubVis = shootVisibility(shrub, shrubMax);
-        const crustVis = shootVisibility(crust, crustMax);
-        const vis = Math.max(
-          herbVis,
-          strandVis,
-          binderVis,
-          marshVis,
-          shrubVis,
-          crustVis,
+        const biomass: Record<SwayGuild, number> = {
+          herb: world.getHerbBiomass(x, z),
+          strand: world.getStrandBiomass(x, z),
+          binder: world.getBinderBiomass(x, z),
+          marsh: world.getMarshBiomass(x, z),
+          shrub: world.getShrubBiomass(x, z),
+          crust: world.getCrustBiomass(x, z),
+        };
+        const vis: Record<SwayGuild, number> = {
+          herb: shootVisibility(biomass.herb, herbMax),
+          strand: shootVisibility(biomass.strand, strandMax),
+          binder: shootVisibility(biomass.binder, binderMax),
+          marsh: shootVisibility(biomass.marsh, marshMax),
+          shrub: shootVisibility(biomass.shrub, shrubMax),
+          crust: shootVisibility(biomass.crust, crustMax),
+        };
+        const maxVis = Math.max(
+          vis.herb,
+          vis.strand,
+          vis.binder,
+          vis.marsh,
+          vis.shrub,
+          vis.crust,
         );
-        if (vis <= 0) continue;
-        let guild: SwayGuild = "herb";
-        let tintBiomass = herb;
-        let tintMax: number = herbMax;
-        if (
-          shrubVis >= herbVis &&
-          shrubVis >= strandVis &&
-          shrubVis >= binderVis &&
-          shrubVis >= marshVis &&
-          shrubVis >= crustVis &&
-          shrubVis > 0
-        ) {
-          guild = "shrub";
-          tintBiomass = shrub;
-          tintMax = shrubMax;
-        } else if (
-          marshVis >= herbVis &&
-          marshVis >= strandVis &&
-          marshVis >= binderVis &&
-          marshVis >= shrubVis &&
-          marshVis >= crustVis &&
-          marshVis > 0
-        ) {
-          guild = "marsh";
-          tintBiomass = marsh;
-          tintMax = marshMax;
-        } else if (
-          strandVis >= herbVis &&
-          strandVis >= binderVis &&
-          strandVis >= marshVis &&
-          strandVis >= shrubVis &&
-          strandVis >= crustVis &&
-          strandVis > 0
-        ) {
-          guild = "strand";
-          tintBiomass = strand;
-          tintMax = strandMax;
-        } else if (
-          binderVis >= herbVis &&
-          binderVis >= strandVis &&
-          binderVis >= marshVis &&
-          binderVis >= shrubVis &&
-          binderVis >= crustVis &&
-          binderVis > 0
-        ) {
-          guild = "binder";
-          tintBiomass = binder;
-          tintMax = binderMax;
-        } else if (
-          crustVis >= herbVis &&
-          crustVis >= strandVis &&
-          crustVis >= binderVis &&
-          crustVis >= marshVis &&
-          crustVis >= shrubVis &&
-          crustVis > 0
-        ) {
-          guild = "crust";
-          tintBiomass = crust;
-          tintMax = crustMax;
-        }
+        if (maxVis <= 0) continue;
+
+        const { winner, runnerUp } = this.pickWinnerAndRunnerUp(vis);
         const y = model.getTerrainHeight(x, z);
-        // Woody reads taller; crust stays low mat (presentation only — T-006).
-        const heightBoost =
-          guild === "shrub" ? 1.35 : guild === "crust" ? 0.45 : 1;
-        const scaleY = (0.35 + vis * 1.4) * heightBoost;
-        const scaleXZ = 0.45 + vis * 0.9;
-        // Cell HSI proxies living tissue — standing excess under L3 barely leans.
-        const vitality = livingVitality(
-          tintBiomass,
-          tintMax,
-          world.getHabitatSuitability(x, z),
-        );
-        const amp = swayAmplitude(windMag, guildFlex(guild), vitality);
-        const tilt = swayTilt(amp, swayPhase(x, z), timeSec);
+        const hsi = world.getHabitatSuitability(x, z);
         const cellCx = ox + x * cellW;
         const cellCz = oz + z * cellW;
-        const mesh = this.meshes[guild];
-        const [r, g, b] =
-          guild === "shrub"
-            ? shrubBiomassRgb(tintBiomass, tintMax)
-            : guild === "marsh"
-              ? marshBiomassRgb(tintBiomass, tintMax)
-              : guild === "strand"
-                ? strandBiomassRgb(tintBiomass, tintMax)
-                : guild === "binder"
-                  ? binderBiomassRgb(tintBiomass, tintMax)
-                  : guild === "crust"
-                    ? crustBiomassRgb(tintBiomass, tintMax)
-                    : herbBiomassRgb(tintBiomass, tintMax);
-        this.color.setRGB(r, g, b);
+        const winnerSubs = subInstanceCount(x, z);
 
-        // §4.61 clustering: 2-4 sub-instances per occupied cell instead of
-        // exactly one, each offset within the cell footprint and reduced in
-        // scale, so groundcover reads as a stand rather than isolated
-        // lattice points (bar v2 point 10). Every value below derives from
-        // the same deterministic (x, z, salt) hash family as the existing
-        // yaw/jitter — no per-frame RNG, so a given seed/tick renders
-        // identically every time (T-001).
-        const subCount = subInstanceCount(x, z);
-        for (let s = 0; s < subCount; s++) {
-          const base = 10 * (s + 1);
-          // Reduced per-sub scale so 2-4 instances read as a clump sharing
-          // one cell's worth of biomass, not four full-size plants stacked.
-          const subScale = 0.55 + hash01(x, z, base + 8) * 0.25;
-          const jitterXZ1 = (0.82 + hash01(x, z, base + 1) * 0.36) * subScale;
-          const jitterXZ2 = (0.82 + hash01(x, z, base + 2) * 0.36) * subScale;
-          const jitterY = (0.88 + hash01(x, z, base + 3) * 0.24) * subScale;
-          const restLeanX = (hash01(x, z, base + 4) - 0.5) * 0.14;
-          const restLeanZ = (hash01(x, z, base + 5) - 0.5) * 0.14;
-          // Offset within the cell footprint, bounded to ±0.4 cellW so
-          // sub-instances stay attributable to their own cell.
-          const offX = (hash01(x, z, base + 6) - 0.5) * 0.8 * cellW;
-          const offZ = (hash01(x, z, base + 7) - 0.5) * 0.8 * cellW;
-          const yawSub = hash01(x, z, base + 9) * Math.PI * 2;
+        // §4.61 clustering: 2–4 sub-instances for the winner.
+        this.placeGuildCluster({
+          guild: winner,
+          vis: vis[winner],
+          biomass: biomass[winner],
+          biomassMax: biomassMax[winner],
+          x,
+          z,
+          cellCx,
+          cellCz,
+          cellW,
+          y,
+          hsi,
+          windUx,
+          windUz,
+          windMag,
+          timeSec,
+          scaleMul: 1,
+          saltBias: 0,
+          subCount: winnerSubs,
+        });
 
-          this.dummy.position.set(cellCx + offX, y, cellCz + offZ);
-          this.dummy.scale.set(
-            scaleXZ * jitterXZ1,
-            scaleY * jitterY,
-            scaleXZ * jitterXZ2,
-          );
-          // Composition order matters, and getting it wrong was the bug this
-          // replaced. The wind lean below must stay on a fixed *world* axis so
-          // every instance leans the same way; Object3D.rotateOnAxis and Euler
-          // composition both rotate in local (post-yaw) space, which silently
-          // re-rotated the lean axis by each instance's own random yaw and made
-          // every cone lean a different direction instead of uniformly downwind.
-          // So the quaternions are composed explicitly, innermost first:
-          //   rest tilt (local, per-instance random - variety, yaw-relative is
-          //   fine because it is random anyway)
-          //   -> yaw (spins the cone's own facets)
-          //   -> wind lean (world axis, outermost, identical for every instance).
-          this.restEuler.set(restLeanX, 0, restLeanZ);
-          this.restQuat.setFromEuler(this.restEuler);
-          this.yawQuat.setFromAxisAngle(this.upAxis, yawSub);
-          if (tilt !== 0 && windMag > 0) {
-            // Lean downwind: axis = up × windDir in XZ, fixed in world space.
-            // Per-instance variety rides the lean's *magnitude*, never its axis.
-            // Applying the random rest tilt here instead (as a local rotation
-            // composed under the lean) would tilt each instance's axis and
-            // scatter the lean direction by several degrees — the same class of
-            // bug this fix exists to remove, just smaller.
-            const tiltVaried = tilt * (0.86 + hash01(x, z, base + 4) * 0.28);
-            this.leanAxis.set(-windUz / windMag, 0, windUx / windMag);
-            this.leanQuat.setFromAxisAngle(this.leanAxis, tiltVaried);
-            this.dummy.quaternion.multiplyQuaternions(
-              this.leanQuat,
-              this.yawQuat,
-            );
-          } else {
-            // Calm: no wind direction to stay coherent with, so the random rest
-            // tilt is free to apply — it is what keeps a still field from
-            // reading as a grid of perfectly vertical cones.
-            this.dummy.quaternion.multiplyQuaternions(
-              this.yawQuat,
-              this.restQuat,
-            );
-          }
-          this.dummy.updateMatrix();
-          const idx = this.counts[guild]++;
-          mesh.setMatrixAt(idx, this.dummy.matrix);
-          mesh.setColorAt(idx, this.color);
+        // §4.62 composite: second-highest guild at reduced scale when it
+        // clears the same shootVisibility floor the winner already uses.
+        if (runnerUp !== null && vis[runnerUp] > 0) {
+          // 1–2 sub-instances — enough to read as understory, not a second stand.
+          const runnerSubs = 1 + Math.floor(hash01(x, z, 40) * 2);
+          this.placeGuildCluster({
+            guild: runnerUp,
+            vis: vis[runnerUp],
+            biomass: biomass[runnerUp],
+            biomassMax: biomassMax[runnerUp],
+            x,
+            z,
+            cellCx,
+            cellCz,
+            cellW,
+            y,
+            hsi,
+            windUx,
+            windUz,
+            windMag,
+            timeSec,
+            scaleMul: RUNNER_UP_SCALE,
+            saltBias: 100,
+            subCount: runnerSubs,
+          });
         }
       }
     }
