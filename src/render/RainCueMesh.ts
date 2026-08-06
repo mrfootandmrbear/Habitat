@@ -243,10 +243,21 @@ export class RainCueMesh {
   }
 
   /**
+   * Ceiling on particle motion per `update` call, in wall seconds.
+   * Fade / melt use the full (possibly hitch-sized) `dt` so the 2026-08-05
+   * snow-hold clear still progresses under a sim backlog; kinematics must
+   * not — a day/s hitch integrating a full second of fall in one paint is
+   * what turned rain into laser streaks (2026-08-06 evidence).
+   */
+  static readonly MOTION_DT_CAP_S = 1 / 30;
+
+  /**
    * Advance streaks and fade veil. `dt` wall seconds.
    */
   update(dt: number, windUx: number, windUz: number): void {
-    const fade = 1 - Math.exp(-3.2 * Math.max(0, dt));
+    const fadeDt = Math.max(0, dt);
+    const motionDt = Math.min(fadeDt, RainCueMesh.MOTION_DT_CAP_S);
+    const fade = 1 - Math.exp(-3.2 * fadeDt);
     this.streakOpacity += (this.targetOpacity * 0.7 - this.streakOpacity) * fade;
     this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
 
@@ -258,8 +269,8 @@ export class RainCueMesh {
     const building = this.targetGround > this.groundOpacity;
     const meltRate = !building && this.phase < 2 ? 3.5 : 0.4;
     const groundRate = building
-      ? 1 - Math.exp(-2.2 * Math.max(0, dt))
-      : 1 - Math.exp(-meltRate * Math.max(0, dt));
+      ? 1 - Math.exp(-2.2 * fadeDt)
+      : 1 - Math.exp(-meltRate * fadeDt);
     this.groundOpacity += (this.targetGround - this.groundOpacity) * groundRate;
     if (this.groundOpacity < 0.01 && this.targetGround <= 0) {
       this.groundOpacity = 0;
@@ -282,7 +293,7 @@ export class RainCueMesh {
       return;
     }
 
-    this.time += dt;
+    this.time += motionDt;
     const pos = this.points.geometry.getAttribute(
       "position",
     ) as THREE.BufferAttribute;
@@ -295,8 +306,8 @@ export class RainCueMesh {
     const windResponseMul = this.phase >= 2 ? 1.6 : this.phase >= 1 ? 1.2 : 1;
     const swayAmp = this.phase >= 2 ? 0.55 : this.phase >= 1 ? 0.15 : 0;
 
-    const driftX = windUx * 5 * dt * windResponseMul;
-    const driftZ = windUz * 5 * dt * windResponseMul;
+    const driftX = windUx * 5 * motionDt * windResponseMul;
+    const driftZ = windUz * 5 * motionDt * windResponseMul;
     const speed = (0.55 + this.targetOpacity * 0.9) * fallSpeedMul;
     const footprints = this.footprints;
     for (let i = 0; i < pos.count; i++) {
@@ -304,9 +315,9 @@ export class RainCueMesh {
         swayAmp > 0 ? Math.sin(this.time * 1.3 + i * 0.7) * swayAmp : 0;
       const swayZ =
         swayAmp > 0 ? Math.cos(this.time * 1.04 + i * 0.9) * swayAmp : 0;
-      let x = pos.getX(i) + driftX + swayX * dt;
-      let y = pos.getY(i) - this.velocities[i]! * dt * speed;
-      let z = pos.getZ(i) + driftZ + swayZ * dt;
+      let x = pos.getX(i) + driftX + swayX * motionDt;
+      let y = pos.getY(i) - this.velocities[i]! * motionDt * speed;
+      let z = pos.getZ(i) + driftZ + swayZ * motionDt;
       if (y < 0) {
         if (footprints.length > 0) {
           // Spawn under a cloud footprint (G6) — precip reads as coming

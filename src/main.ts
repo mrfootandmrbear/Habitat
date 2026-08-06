@@ -990,6 +990,9 @@ function frame(now: number): void {
   // sim-time keeps roaring forward — the RainCueMesh snow-cover hold
   // getting stuck fully visible for in-game years was exactly this bug.
   // `trueWallDt` carries the actual elapsed real time, uncapped, for those.
+  // RainCueMesh splits internally: fades take the full credit, particle
+  // kinematics cap at MOTION_DT_CAP_S so a day/s hitch cannot stretch
+  // precip into laser streaks (2026-08-06 evidence).
   const trueWallDt = Math.max(0, (now - lastFrame) / 1000);
   const wallDt = Math.min(trueWallDt, 0.05);
   lastFrame = now;

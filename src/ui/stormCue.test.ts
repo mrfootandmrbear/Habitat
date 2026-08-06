@@ -95,6 +95,33 @@ describe("storm cue presentation (C-020 G1–G5)", () => {
     cue.dispose();
   });
 
+  it("G3: hitch-sized wall dt still melts cover (fade uses full dt)", () => {
+    const cue = new RainCueMesh(48, 40);
+    cue.setStorm(true, 1, 2);
+    for (let i = 0; i < 30; i++) cue.update(0.05, 0, 0);
+    expect(cue.getGroundCoverOpacity()).toBeGreaterThan(0.25);
+    cue.setStorm(false, 1, 0);
+    // One backlog-sized frame — the 2026-08-05 contract: melt must take the
+    // full wall credit, not a 1/30 kinematics cap.
+    cue.update(1.0, 0, 0);
+    expect(cue.getGroundCoverOpacity()).toBeLessThan(0.02);
+    cue.dispose();
+  });
+
+  it("hitch-sized wall dt does not stretch precip into laser streaks", () => {
+    const hitch = new RainCueMesh(48, 400);
+    hitch.setStorm(true, 1, 0);
+    const h0 = hitch.meanHeight();
+    hitch.update(1.0, 0, 0);
+    const drop = h0 - hitch.meanHeight();
+    expect(drop).toBeGreaterThan(0);
+    // Cap is 1/30 s; max particle speed ≈ 24 × 1.45 ≈ 35 u/s → ≤ ~1.2 u
+    // in one update. Uncapped, a 1.0 s hitch would drop ~20+ u and read as
+    // laser streaks (2026-08-06 evidence).
+    expect(drop).toBeLessThan(3);
+    hitch.dispose();
+  });
+
   it("G8: setTerrainAffinity drapes ground cover onto elevation", () => {
     const cue = new RainCueMesh(48, 40);
     const width = 8;
