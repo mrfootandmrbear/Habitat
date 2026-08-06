@@ -27,6 +27,9 @@ export class RainCueMesh {
   /** Cloud footprints to spawn precip under (G6) — empty falls back to a uniform veil. */
   private footprints: CloudFootprint[] = [];
   private groundAffinityTex: THREE.DataTexture | null = null;
+  /** Grid dims last draped onto the ground-cover mesh (0 = flat placeholder). */
+  private groundGridW = 0;
+  private groundGridH = 0;
 
   constructor(worldSize: number, count = 1400) {
     this.worldSize = worldSize;
@@ -70,6 +73,10 @@ export class RainCueMesh {
     this.group.add(this.veil);
 
     // Snow ground hold — pale sheet that lingers after flakes (G3).
+    // Starts as a single quad; `setTerrainAffinity` rebuilds it to the sim
+    // grid and drapes vertices onto elevation so it cannot clip through the
+    // mountain as a flat y=const plane (the jagged white shards in the
+    // 2026-08-05 bug screenshots).
     const groundGeo = new THREE.PlaneGeometry(worldSize * 1.02, worldSize * 1.02);
     groundGeo.rotateX(-Math.PI / 2);
     const groundMat = new THREE.MeshBasicMaterial({
@@ -77,10 +84,14 @@ export class RainCueMesh {
       transparent: true,
       opacity: 0,
       depthWrite: false,
-      side: THREE.DoubleSide,
+      depthTest: true,
+      side: THREE.FrontSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
     });
     this.groundCover = new THREE.Mesh(groundGeo, groundMat);
-    this.groundCover.position.y = 0.35;
+    this.groundCover.position.y = 0;
     this.group.add(this.groundCover);
 
     this.group.visible = false;
@@ -163,6 +174,9 @@ export class RainCueMesh {
    * ground collects more, exposed slopes shed. Still the same
    * `groundOpacity` scalar driving build/melt; this only reshapes its
    * texture, so it stays a presentation hold, not a snowpack store.
+   *
+   * Also drapes the cover mesh onto `elevation` so the hold sits on the
+   * landform instead of a flat y-plane cutting through peaks.
    */
   setTerrainAffinity(elevation: Float32Array, width: number, height: number): void {
     const tex = buildSnowAffinityTexture(elevation, width, height);
@@ -171,6 +185,61 @@ export class RainCueMesh {
     const mat = this.groundCover.material as THREE.MeshBasicMaterial;
     mat.alphaMap = tex;
     mat.needsUpdate = true;
+    this.drapeGroundCover(elevation, width, height);
+  }
+
+  /**
+   * Rebuild (if needed) and displace ground-cover vertices onto the terrain
+   * surface + a small lift. Presentation-only; does not write WorldState.
+   */
+  private drapeGroundCover(
+    elevation: Float32Array,
+    width: number,
+    height: number,
+  ): void {
+    if (width < 2 || height < 2) return;
+    if (width !== this.groundGridW || height !== this.groundGridH) {
+      this.groundCover.geometry.dispose();
+      const geo = new THREE.PlaneGeometry(
+        this.worldSize,
+        this.worldSize,
+        width - 1,
+        height - 1,
+      );
+      geo.rotateX(-Math.PI / 2);
+      this.groundCover.geometry = geo;
+      this.groundGridW = width;
+      this.groundGridH = height;
+    }
+    const pos = this.groundCover.geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+    const half = this.worldSize * 0.5;
+    const lift = 0.06;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      const u = (x + half) / this.worldSize;
+      const v = (z + half) / this.worldSize;
+      const fx = Math.min(width - 1, Math.max(0, u * (width - 1)));
+      const fz = Math.min(height - 1, Math.max(0, v * (height - 1)));
+      const x0 = Math.floor(fx);
+      const z0 = Math.floor(fz);
+      const x1 = Math.min(width - 1, x0 + 1);
+      const z1 = Math.min(height - 1, z0 + 1);
+      const tx = fx - x0;
+      const tz = fz - z0;
+      const e00 = elevation[z0 * width + x0]!;
+      const e10 = elevation[z0 * width + x1]!;
+      const e01 = elevation[z1 * width + x0]!;
+      const e11 = elevation[z1 * width + x1]!;
+      const e0 = e00 + (e10 - e00) * tx;
+      const e1 = e01 + (e11 - e01) * tx;
+      const e = e0 + (e1 - e0) * tz;
+      pos.setY(i, e + lift);
+    }
+    pos.needsUpdate = true;
+    this.groundCover.geometry.computeVertexNormals();
   }
 
   /**
@@ -181,12 +250,20 @@ export class RainCueMesh {
     this.streakOpacity += (this.targetOpacity * 0.7 - this.streakOpacity) * fade;
     this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
 
-    // Snow cover builds with the spell; melts slowly after (presentation hold).
-    const groundRate =
-      this.targetGround > this.groundOpacity
-        ? 1 - Math.exp(-2.2 * Math.max(0, dt))
-        : 1 - Math.exp(-0.4 * Math.max(0, dt));
+    // Snow cover builds with the spell; melts after. When the phase is no
+    // longer snow (rain/sleet / spell cleared), melt at the build rate so a
+    // warm world cannot keep a pale sheet around — the slow post-flake hold
+    // only applies while we are still in snow phase with target 0 (spell
+    // just ended, flakes stopped, brief linger).
+    const building = this.targetGround > this.groundOpacity;
+    const meltRate = !building && this.phase < 2 ? 3.5 : 0.4;
+    const groundRate = building
+      ? 1 - Math.exp(-2.2 * Math.max(0, dt))
+      : 1 - Math.exp(-meltRate * Math.max(0, dt));
     this.groundOpacity += (this.targetGround - this.groundOpacity) * groundRate;
+    if (this.groundOpacity < 0.01 && this.targetGround <= 0) {
+      this.groundOpacity = 0;
+    }
 
     const streakMat = this.points.material as THREE.PointsMaterial;
     const veilMat = this.veil.material as THREE.MeshBasicMaterial;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import * as THREE from "three";
 import { CloudMesh } from "../render/CloudMesh";
 import { RainCueMesh } from "../render/RainCueMesh";
 import {
@@ -76,8 +77,48 @@ describe("storm cue presentation (C-020 G1–G5)", () => {
     expect(peak).toBeGreaterThan(0.25);
     cue.setStorm(false, 1, 2);
     cue.update(0.05, 0, 0);
-    // Still holding — slow melt presentation.
+    // Still holding — slow melt presentation while phase stays snow.
     expect(cue.getGroundCoverOpacity()).toBeGreaterThan(peak * 0.85);
+    cue.dispose();
+  });
+
+  it("G3: non-snow phase clears ground cover fast (no warm-world linger)", () => {
+    const cue = new RainCueMesh(48, 40);
+    cue.setStorm(true, 1, 2);
+    for (let i = 0; i < 30; i++) cue.update(0.05, 0, 0);
+    const peak = cue.getGroundCoverOpacity();
+    expect(peak).toBeGreaterThan(0.25);
+    // Switch to rain phase — warm/rain must not keep a pale sheet around.
+    cue.setStorm(false, 1, 0);
+    for (let i = 0; i < 40; i++) cue.update(0.05, 0, 0); // ~2s wall — was a 10–15s linger
+    expect(cue.getGroundCoverOpacity()).toBeLessThan(0.02);
+    cue.dispose();
+  });
+
+  it("G8: setTerrainAffinity drapes ground cover onto elevation", () => {
+    const cue = new RainCueMesh(48, 40);
+    const width = 8;
+    const height = 8;
+    const elevation = new Float32Array(width * height);
+    for (let z = 0; z < height; z++) {
+      for (let x = 0; x < width; x++) {
+        elevation[z * width + x] = 1 + x * 0.5;
+      }
+    }
+    cue.setTerrainAffinity(elevation, width, height);
+    const pos = (
+      cue as unknown as { groundCover: THREE.Mesh }
+    ).groundCover.geometry.getAttribute("position") as THREE.BufferAttribute;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i);
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    // Draped: spans terrain range (+ lift), not a flat y=0.35 plane.
+    expect(maxY - minY).toBeGreaterThan(2);
+    expect(minY).toBeGreaterThan(0.5);
     cue.dispose();
   });
 
