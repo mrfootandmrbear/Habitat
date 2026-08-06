@@ -95,7 +95,8 @@ body,
   cursor: default;
 }
 
-#time-rates {
+#time-rates,
+#time-skips {
   display: flex;
   gap: 0.2rem;
   flex-wrap: wrap;
@@ -104,6 +105,11 @@ body,
 #time-rates button.active {
   background: #3a6b52;
   border-color: #6fa888;
+}
+
+#time-skips button {
+  font-size: 0.72rem;
+  opacity: 0.92;
 }
 
 #controls select,

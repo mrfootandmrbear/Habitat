@@ -13,11 +13,14 @@ import {
 export const LOCAL_SAVE_KEY = "habitat.world.v3";
 
 export function captureWorld(world: WorldState): SaveDocument {
-  return serializeRegistry(world.registry);
+  return serializeRegistry(world.registry, {
+    skipSchedule: world.getSkipSchedule(),
+  });
 }
 
 export function restoreWorld(world: WorldState, doc: SaveDocument): void {
   applySave(world.registry, doc);
+  world.setSkipSchedule(doc.skipSchedule ?? []);
   world.markStructureDirty();
 }
 

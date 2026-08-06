@@ -273,11 +273,37 @@ export class CloudMesh {
 
   /**
    * Drift gently with wind; soft-attract toward windward home (G4);
-   * fade at wrap (G2).
+   * fade at wrap (G2). `animate === false` updates opacity only (LOD).
    */
-  update(dt: number, windUx: number, windUz: number): void {
+  update(
+    dt: number,
+    windUx: number,
+    windUz: number,
+    options?: { animate?: boolean },
+  ): void {
     const fade = 1 - Math.exp(-2.4 * Math.max(0, dt));
     this.opacity += (this.targetOpacity - this.opacity) * fade;
+
+    if (options?.animate === false) {
+      for (const body of this.clouds) {
+        const edge = wrapEdgeFade(
+          body.group.position.x,
+          body.group.position.z,
+          this.wrapHalf,
+          this.wrapPad,
+        );
+        const composite = this.opacity * edge;
+        body.currentOpacity = composite;
+        for (const puff of body.puffs) {
+          puff.sprite.material.opacity = Math.min(1, composite * puff.density);
+        }
+      }
+      if (this.opacity < 0.015 && this.targetOpacity <= 0) {
+        this.group.visible = false;
+      }
+      this.updateReleasingFlags();
+      return;
+    }
 
     // Windward bias: clouds prefer the side the wind arrives from (delivery).
     const biasX = -windUx * this.worldSize * 0.28;

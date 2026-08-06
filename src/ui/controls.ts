@@ -44,6 +44,7 @@ import {
   resolveChromeDensity,
 } from "./chromeDensity";
 import { sustainableRates, rateDescription, type TimeRateId } from "./timeRates";
+import { SKIP_PRESETS, type SkipPresetId } from "../sim/timeSkip";
 
 function markFullOnly(el: HTMLElement): void {
   el.classList.add("chrome-full");
@@ -170,6 +171,8 @@ export function mountControls(
     onReset: () => void;
     onNewIsland: (seed: number) => void;
     onTimeRate: (rate: TimeRate) => void;
+    /** L8 discrete deep-time skip (C-025) — separate from the L6 rate dial. */
+    onTimeSkip: (presetId: SkipPresetId) => void;
     onInspector: (layer: InspectorLayer) => void;
     onSitingTool: (tool: SitingTool) => void;
     onSitingBrushSize: (size: SitingBrushSize) => void;
@@ -608,10 +611,7 @@ export function mountControls(
     "aria-label",
     "Simulation time rate — simulated time per second (L6)",
   );
-
-  // Only rates this machine can actually deliver are offered (L6 / L1).
   const rateButtons = new Map<TimeRate, HTMLButtonElement>();
-
   for (const rate of sustainableRates()) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -624,9 +624,29 @@ export function mountControls(
     rateButtons.set(rate.id, btn);
   }
 
+  const skipGroup = document.createElement("div");
+  skipGroup.id = "time-skips";
+  skipGroup.setAttribute("role", "group");
+  skipGroup.setAttribute(
+    "aria-label",
+    "Deep-time skip — advance by a fixed duration at a coarser floor (L8 / C-025)",
+  );
+  for (const preset of SKIP_PRESETS) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = preset.label;
+    btn.title = `Skip ${preset.label} at ${preset.floorLabel} floor, then resume the current rate`;
+    btn.setAttribute(
+      "aria-label",
+      `Skip ${preset.label} using ${preset.floorLabel} integration floor`,
+    );
+    btn.addEventListener("click", () => handlers.onTimeSkip(preset.id));
+    skipGroup.appendChild(btn);
+  }
+
   const syncTimeRate = (rate: TimeRate): void => {
-    for (const [key, btn] of rateButtons) {
-      btn.classList.toggle("active", key === rate);
+    for (const [id, btn] of rateButtons) {
+      btn.classList.toggle("active", id === rate);
     }
   };
   syncTimeRate(initial.timeRate);
@@ -757,6 +777,7 @@ export function mountControls(
     densityGroup,
     forcePanel,
     timeGroup,
+    skipGroup,
     sitingSelect,
     brushSelect,
     materialSelect,

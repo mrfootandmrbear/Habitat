@@ -253,13 +253,32 @@ export class RainCueMesh {
 
   /**
    * Advance streaks and fade veil. `dt` wall seconds.
+   * `options.showStreaks === false` (presentation LOD P1+) skips particle
+   * kinematics and hides the Points while fades / snow-hold still advance —
+   * the hitch that stretched flakes into lasers must not reappear as a
+   * rate-coupled drawing style (T-002 / U-002).
    */
-  update(dt: number, windUx: number, windUz: number): void {
+  update(
+    dt: number,
+    windUx: number,
+    windUz: number,
+    options?: { showStreaks?: boolean; freezeTheatre?: boolean },
+  ): void {
     const fadeDt = Math.max(0, dt);
-    const motionDt = Math.min(fadeDt, RainCueMesh.MOTION_DT_CAP_S);
+    const showStreaks = options?.showStreaks !== false;
+    const freezeTheatre = options?.freezeTheatre === true;
+    const motionDt = showStreaks
+      ? Math.min(fadeDt, RainCueMesh.MOTION_DT_CAP_S)
+      : 0;
     const fade = 1 - Math.exp(-3.2 * fadeDt);
-    this.streakOpacity += (this.targetOpacity * 0.7 - this.streakOpacity) * fade;
-    this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
+
+    if (freezeTheatre) {
+      // Skip in flight (L8 P4): hold veil/streaks, still credit snow-hold
+      // melt so a warm world cannot keep a pale sheet after the jump.
+    } else {
+      this.streakOpacity += (this.targetOpacity * 0.7 - this.streakOpacity) * fade;
+      this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
+    }
 
     // Snow cover builds with the spell; melts after. When the phase is no
     // longer snow (rain/sleet / spell cleared), melt at the build rate so a
@@ -279,8 +298,14 @@ export class RainCueMesh {
     const streakMat = this.points.material as THREE.PointsMaterial;
     const veilMat = this.veil.material as THREE.MeshBasicMaterial;
     const groundMat = this.groundCover.material as THREE.MeshBasicMaterial;
+    if (!showStreaks || freezeTheatre) {
+      this.streakOpacity = Math.min(this.streakOpacity, 0);
+      this.points.visible = false;
+    } else {
+      this.points.visible = true;
+    }
     streakMat.opacity = this.streakOpacity;
-    veilMat.opacity = this.veilOpacity;
+    veilMat.opacity = freezeTheatre ? 0 : this.veilOpacity;
     groundMat.opacity = this.groundOpacity;
 
     if (
@@ -290,6 +315,11 @@ export class RainCueMesh {
       this.targetGround <= 0
     ) {
       this.group.visible = false;
+      return;
+    }
+
+    this.group.visible = true;
+    if (!showStreaks || freezeTheatre || motionDt <= 0) {
       return;
     }
 

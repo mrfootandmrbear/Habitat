@@ -1,8 +1,8 @@
 # C-024 / C-025 — Discrete time-skip menu (framing)
 
-**Status:** Framing only (Open — do not implement as Locked)
-**Date:** 2026-07-31
-**Gate:** None to write this framing. **L8 stays blocked** ([BUILD_GUIDE §4.43](../BUILD_GUIDE.md)) until the owner Locks C-024 and C-025 against the criteria below.
+**Status:** Locked / implemented (2026-08-06) — see [L8-composition.md](../slices/L8-composition.md)
+**Date:** 2026-07-31 (framing); 2026-08-06 (Lock + L8 ship)
+**Gate:** ~~L8 blocked~~ → **L8 Done** ([BUILD_GUIDE §4.43](../BUILD_GUIDE.md)).
 
 Authority: register **C-024**, **C-025**; [DECISION_CONFORMANCE §3](../DECISION_CONFORMANCE.md) criteria (quoted in full there); [time-architecture-review.md](../reviews/2026-07-31-time-architecture-review.md).
 

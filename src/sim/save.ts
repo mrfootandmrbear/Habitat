@@ -5,9 +5,10 @@
 
 import type { FieldRegistry } from "./registry/FieldRegistry";
 import type { RegisteredField } from "./registry/types";
+import type { SkipAction } from "./timeSkip";
 
 /** Bump when the registered field set or serialization layout changes. */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 /** Content / preserve data version — independent of schema (T-004). */
 export const CONTENT_VERSION = 1;
@@ -31,6 +32,8 @@ export type SaveDocument = {
   contentVersion: number;
   stateHash: string;
   fields: SavedField[];
+  /** Sparse L8 skip log (C-025). Absent on pre-v13 saves → empty schedule. */
+  skipSchedule?: SkipAction[];
 };
 
 export class SaveError extends Error {
@@ -41,17 +44,24 @@ export class SaveError extends Error {
 }
 
 /** Serialize every registered field in id order. */
-export function serializeRegistry(registry: FieldRegistry): SaveDocument {
+export function serializeRegistry(
+  registry: FieldRegistry,
+  options?: { skipSchedule?: readonly SkipAction[] },
+): SaveDocument {
   const fields: SavedField[] = [];
   for (const field of registry.list()) {
     fields.push(serializeField(field));
   }
-  return {
+  const doc: SaveDocument = {
     schemaVersion: SCHEMA_VERSION,
     contentVersion: CONTENT_VERSION,
     stateHash: registry.hashState(),
     fields,
   };
+  if (options?.skipSchedule && options.skipSchedule.length > 0) {
+    doc.skipSchedule = options.skipSchedule.map((a) => ({ ...a }));
+  }
+  return doc;
 }
 
 function serializeField(field: RegisteredField): SavedField {

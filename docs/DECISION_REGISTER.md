@@ -134,6 +134,12 @@ Corrections and relocations are recorded here. Content changes still require the
 
 - Filed **C-020** (atmospheric precip delivery — clouds / wind / moisture / heat) after owner Pass on [batch-island-brief.md](playtests/batch-island-brief.md): rain dial works for now but is not natural-feeling; keep regime surface until a later atmospheric slice. Island place reading discharged for **C-015**; **W-001** supersession still an owner register act.
 
+**v2.0.21 — C-024 / C-025 Locked; L8 deep-time skip + presentation LOD.**
+- Owner unlock (2026-08-06): discrete skip menu (1 day … 1000 years) is the Locked shape for **C-025**, separate from the L6 continuous ladder; sparse `skipSchedule` travels on `SaveDocument` (schema v13); HUD names the active floor; floor invariance rests on the band-refinement family (≤8% cover over a 1-year seasonal vs annual pair), not hash-identity across floors.
+- **C-024** Locked as: keep shipped compressed periods (`annualDailySteps=36`, `decadalDailySteps=10`) so continuous L6 keeps **C-008** immediacy; rates already match that calendar; skip floors state their coarsening per commit (`commitSkipDay` / `Seasonal` / `Annual` / `Decadal`). Not a HUD-only relabel.
+- Presentation LOD (`presentationLod.ts`) sheds streaks / sway / cloud spin under hitch or fast rates while water, terrain, and snow-hold stay truthful (T-002 / U-002 / T-006) — closes the class of defect behind the 2026-08 snow streak / hold bugs.
+- Artifact: [L8-composition.md](slices/L8-composition.md), `src/sim/timeSkip.ts`, `src/ui/presentationLod.ts`. SIM §6.5 #2 (semi-implicit flux) parked as next-but-one for continuous storm hitch.
+
 **v2.0.20 — C-029 filed (adaptive radiation as regional ecomorph divergence).**
 
 - Filed **C-029** Open/framing-only from an owner design brief citing [adaptive radiation](https://en.wikipedia.org/wiki/Adaptive_radiation) — ecological opportunity releasing a population to diverge across isolated habitat patches (Darwin's finches, *Anolis* ecomorphs, cichlid trophic morphs). Reconciled against **W-003**/**N-003** (fixed curated species pool, no new taxa — Habitat's version is regional ecomorph divergence within one fixed role, not new species) and **C-019** (island biogeography, Locked — supplies the patch-isolation math this candidate reuses). Mechanically near-free on top of Locked **C-027**: the per-cell trait-mean field is already spatial; the only real addition is a second, space-keyed threshold-swap axis. Framing: [C-029-framing.md](candidates/C-029-framing.md). Gated behind Locked **C-027** and **A1**+**A2** shipping — not tip.
@@ -1354,7 +1360,7 @@ Ordered by how many other decisions depend on them.
 8h. ~~**C-020** — atmospheric precip delivery~~ **Locked** (owner Lock re-ask Pass 2026-07-31 — weather the atmosphere made; G1–G5 fixed).
 8i. **C-021** / **C-022** — season and erosion-intensity force dials (THESIS §4); filed Open — no player regime control on seasonal band or geomorph intensity yet.
 8j. **C-023** — guild competition / successional displacement; filed Open from the [living-world review](reviews/2026-07-31-living-world-review.md). Six guilds stack and none is ever displaced. Gated behind **L2** / **L3** — a suppressed guild cannot recede while mortality is a clamp.
-8k. **C-024** / **C-025** — band calendar coherence and rate-selected integration floor; filed Open from the [time-architecture review](reviews/2026-07-31-time-architecture-review.md). Annual runs 10× fast and decadal 360× fast against SIMULATION_MODEL §6.1, so "sim-year" is not yet a unit; and deep time is unreachable without letting the rate choose the integration floor, which is where **S-009** rate-invariance and **T-002** are actually at stake. Rises if real-world time units (**L6**) land, because the incoherence becomes player-visible.
+8k. ~~**C-024** / **C-025**~~ — Locked v2.0.21 (L8 skip menu + compressed-calendar reconciliation).
 8l. **C-026** — CVD-safe cross-domain palette; filed Open from the [UI encoding review](reviews/2026-07-31-ui-encoding-review.md). Sand-binder mat and intertidal foreshore render as the same khaki, and most guild colors sit on the red–green CVD confusion axis. The mechanical cross-file contrast check ships without this candidate ([BUILD_GUIDE §4.52](BUILD_GUIDE.md)); choosing the replacement hues is the owner-judged part.
 8m. ~~**C-027**~~ **Locked** 2026-08-05 — animal trait expression as population fields (procedural morph + threshold swap), framed in [C-027-framing.md](candidates/C-027-framing.md). **F-001** undeferred the same session; Track A (animal life) opened, tip **A1 Herbivore** ([BUILD_GUIDE §4.66](BUILD_GUIDE.md)).
 8m2. **C-029** — adaptive radiation as regional ecomorph divergence; filed Open from an owner design brief, framed in [C-029-framing.md](candidates/C-029-framing.md). Gated behind Locked **C-027** and **A1**/**A2** shipping — not tip.
@@ -1697,7 +1703,7 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 **Residual scope, not required for this Lock.** Extending competition beyond shrub → herb (e.g. a second structural tier, or coupling into strand/binder/marsh/crust's currently light-free HSI arms) is future work under this same Locked mechanism, not a reopening of the question.
 
 ### C-024 — What a sim-year means (band calendar coherence)
-**Status:** Open
+**Status:** Locked (2026-08-06 — see Lock note below)
 
 **Question.** Should every band advance at the period its name claims — so one displayed sim-year is one year of *every* process — and if so, is the reconciliation to slow the fast bands down, or to rescale their per-call rates?
 
@@ -1705,10 +1711,12 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** **S-009** — durations with ecological meaning are defined in simulation time; a clock whose bands disagree cannot satisfy it, so this is plausibly S-009's promotion evidence rather than a competing entry. **C-008** Open (response-latency budget) is the cost of the obvious fix: slowing the decadal band to spec means the player waits 360× longer to see erosion, which is the RCT3-immediacy constraint pointing the other way. Rescaling per-call rates instead keeps the wait but coarsens integration — `band-refinement.test.ts` is the existing harness and asserts 5–8% convergence, not bit-identity. Every probe baseline and `GOLDEN_*` hash moves either way (**T-001**, §4.0 step 4). Must not be resolved by relabelling the HUD while leaving the bands incoherent.
 
-**Leading direction.** File as Open; implement nothing under it. The two reconciliations are not equivalent in feel, and the choice is owner taste against **C-008**, not a number. Pair with **C-025** — together they are what makes centuries reachable at all ([review](reviews/2026-07-31-time-architecture-review.md) §3). Framing: [C-024-C-025-framing.md](candidates/C-024-C-025-framing.md) — a discrete skip-duration menu makes the per-floor reconciliation a stated, per-preset choice rather than one global calendar fix.
+**Lock (2026-08-06, owner).** Keep the shipped compressed periods (`annualDailySteps = 36`, `decadalDailySteps = 10`, `seasonalDailySteps = 10`) as the Locked calendar for continuous L6 — rates already match that compression, preserving **C-008** immediacy. Asserted by test in `timeSkip.test.ts`. Skip floors (C-025 / L8) state their own coarsening per commit rather than inventing a second global calendar. Not a HUD-only relabel. Framing: [C-024-C-025-framing.md](candidates/C-024-C-025-framing.md); composition: [L8-composition.md](slices/L8-composition.md).
+
+**Leading direction.** Locked — build against the compressed calendar + L8 skip floors as above.
 
 ### C-025 — Rate-selected integration floor (deep time)
-**Status:** Open
+**Status:** Locked (2026-08-06 — see Lock note below)
 
 **Question.** May the player's requested time rate select **which band the ladder starts at** — so high rates stop integrating the finer bands entirely — and if so, what invariance replaces bit-identical replay across floors?
 
@@ -1716,7 +1724,9 @@ Filed from [NATURAL_PROCESS_MATH.md](NATURAL_PROCESS_MATH.md) §9, the multi-sta
 
 **Constraints.** This is the entry's whole difficulty: **S-009** (Current) says durations are *"invariant under the player's chosen time rate"* and **T-002** (Locked) says *"authoritative outcomes do not change with the chosen rate."* Both hold today only because the rate control does exactly one thing — run the finest band faster. Under floor selection the same world at `1 day/s` and `1 decade/s` diverges, because a decadal-floor century is **ten band calls**, not a century of integration. That breaks **T-001** replay-from-seed as currently understood and weakens **P-006** prediction fairness and **C-005** comparison, unless the rate schedule becomes part of the run's declared state and travels through save / branch (**T-003**). Any relaxation must be a *stated tolerance* measured by probe, never an unbounded "close enough".
 
-**Leading direction.** File as Open; implement nothing under it. If adopted, the likely shape is: rate schedule saved and replayed as run state, invariance restated as a measured tolerance in the `band-refinement` family, and the HUD honest about which floor is active so the player knows when they are watching a coarser world. **L7** (activity-gated event band) is deliberately **not** under this entry — the gate is outcome-preserving by construction and ships only on hash-identity; only the residue that cannot be made hash-identical belongs here. Framing: [C-024-C-025-framing.md](candidates/C-024-C-025-framing.md) — concrete shape is a discrete skip menu (1 day … 1000 years) rather than a continuous floor dial; "rate schedule" becomes a sparse logged list of skip actions, and it is a control surface separate from the L6 rate ladder, not a mode of it.
+**Lock (2026-08-06, owner).** Discrete skip menu (1 day · 1 month · 6 months · 1 year · 5 / 10 / 25 / 50 / 100 / 1000 years), a control surface **separate from L6**, not a mode of it. Each preset binds a floor (event / daily / seasonal / annual / decadal). Schedule is a sparse logged list on `SaveDocument.skipSchedule` (schema v13). HUD names the floor. Invariance across floors is the band-refinement family (measured ≤8% relative cover over a 1-year seasonal vs annual pair in `timeSkip.test.ts`). **L7** stays outside this entry (hash-identity gate). Framing: [C-024-C-025-framing.md](candidates/C-024-C-025-framing.md); composition: [L8-composition.md](slices/L8-composition.md).
+
+**Leading direction.** Locked — build against the skip menu + declared schedule as above.
 
 ### C-026 — CVD-safe cross-domain palette
 **Status:** Open

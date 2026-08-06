@@ -34,6 +34,8 @@ import {
   rateById,
   timeScaleFor,
 } from "./ui/timeRates";
+import { presentationLod } from "./ui/presentationLod";
+import { skipPresetById, type SkipPresetId } from "./sim/timeSkip";
 import { pickTerrainCell } from "./ui/siting";
 import { formatCutaway, type CutawaySample } from "./ui/cutaway";
 import { totalWaterVolume } from "./sim/hydrology/fluxStep";
@@ -579,6 +581,22 @@ const ui = mountControls(
       ui.setTimeRate(rate);
       tryUnlockAudio();
     },
+    onTimeSkip: (presetId: SkipPresetId) => {
+      const preset = skipPresetById(presetId);
+      skipHudLabel = `${preset.label} @ ${preset.floorLabel}`;
+      try {
+        world.applySkipPreset(presetId);
+      } finally {
+        // Resume L6 rate unchanged — skip is a discrete action, not a mode.
+        clock.setTimeScale(timeScaleFor(rateById(timeRate)));
+      }
+      editUndo.noteTimeAdvanced();
+      ui.setUndoEnabled(false);
+      syncMeshes(performance.now() / 1000, { forceOccupants: true });
+      syncWaterDisplay(0, true);
+      skipHudLabel = null;
+      tryUnlockAudio();
+    },
     onInspector: (layer) => {
       inspector = layer;
       ui.setInspector(layer);
@@ -916,8 +934,17 @@ function rebuildExtentCage(): void {
 }
 
 let lastFlowCueWall = 0;
+/** Held sway time when LOD freezes biotic motion (sample, don't invent). */
+let heldSwayTime = 0;
+/** Last HUD dropped-steps count — rising abandonment trips P3. */
+let prevDroppedSteps = 0;
+/** Brief HUD label while / after a skip (C-025 names the floor). */
+let skipHudLabel: string | null = null;
 
-function syncMeshes(nowWall?: number): void {
+function syncMeshes(
+  nowWall?: number,
+  options?: { forceOccupants?: boolean; rebuildOccupants?: boolean; animateSway?: boolean },
+): void {
   world.ensureStructureFresh();
   terrainMesh.updateFrom(model, world, inspector, fillElevDelta());
   // Flow ticks every event look like strobe at 16× — refresh ~4 Hz max.
@@ -925,11 +952,17 @@ function syncMeshes(nowWall?: number): void {
     flowCue.updateFrom(model, world);
     if (nowWall !== undefined) lastFlowCueWall = nowWall;
   }
-  occupantMesh.setSwayTime(
-    nowWall !== undefined ? nowWall : performance.now() * 0.001,
-  );
-  occupantMesh.updateFrom(model, world);
-  herbivoreMesh.updateFrom(model, world);
+  const animateSway = options?.animateSway !== false;
+  if (animateSway && nowWall !== undefined) {
+    heldSwayTime = nowWall;
+  }
+  occupantMesh.setSwayTime(heldSwayTime);
+  const rebuild =
+    options?.forceOccupants === true || options?.rebuildOccupants !== false;
+  if (rebuild) {
+    occupantMesh.updateFrom(model, world);
+    herbivoreMesh.updateFrom(model, world);
+  }
   syncAudio();
 }
 
@@ -945,7 +978,6 @@ const baseFogRange = scene.fog
   : { near: 70, far: 140 };
 /** Wall-seconds until the next patchy-snow terrain-affinity refresh (G8). */
 let snowAffinityRefreshTimer = 0;
-const SNOW_AFFINITY_REFRESH_S = 3;
 
 function climateDayIndex(): number {
   return Math.floor(
@@ -998,6 +1030,19 @@ function frame(now: number): void {
   lastFrame = now;
 
   const { stepsRun } = clock.tick(wallDt);
+  const timeDebt = clock.getTimeDebt();
+  const droppedSteps = clock.getDroppedSteps();
+  const lod = presentationLod({
+    timeRate,
+    timeDebt,
+    droppedSteps,
+    trueWallDt,
+    skipActive: world.getActiveSkipFloor() !== null || skipHudLabel !== null,
+    prevDroppedSteps,
+    hitMaxSteps: stepsRun >= config.maxStepsPerFrame,
+  });
+  prevDroppedSteps = droppedSteps;
+
   const wind = windById(windId);
   let rainingThisTick = false;
   let phaseThisTick = world.precipPhase;
@@ -1061,13 +1106,18 @@ function frame(now: number): void {
   cloudMesh.setReleasingCount(
     stormDisplayActive ? releasingCloudCount(rainRegime, cloudMesh.count) : 0,
   );
-  cloudMesh.update(trueWallDt, wind.ux, wind.uz);
+  cloudMesh.update(trueWallDt, wind.ux, wind.uz, {
+    animate: lod.animateClouds && !lod.freezeWeatherTheatre,
+  });
   rainCue.setCloudFootprints(cloudMesh.getReleasingFootprints());
-  rainCue.update(trueWallDt, wind.ux, wind.uz);
+  rainCue.update(trueWallDt, wind.ux, wind.uz, {
+    showStreaks: lod.showStreaks,
+    freezeTheatre: lod.freezeWeatherTheatre,
+  });
 
   // Weather-responsive haze (G9) — thickens with the storm veil / cloud
   // cover instead of sitting at a fixed distance no matter the weather.
-  if (scene.fog) {
+  if (scene.fog && lod.weatherFog) {
     const fogRange = weatherFogRange(
       baseFogRange,
       rainCue.getVeilOpacity(),
@@ -1085,14 +1135,17 @@ function frame(now: number): void {
     snowAffinityRefreshTimer -= trueWallDt;
     if (snowAffinityRefreshTimer <= 0) {
       rainCue.setTerrainAffinity(world.terrain.data, world.width, world.height);
-      snowAffinityRefreshTimer = SNOW_AFFINITY_REFRESH_S;
+      snowAffinityRefreshTimer = lod.snowAffinityIntervalS;
     }
   }
 
   if (stepsRun > 0) {
     editUndo.noteTimeAdvanced();
     ui.setUndoEnabled(false);
-    syncMeshes(now / 1000);
+    syncMeshes(now / 1000, {
+      rebuildOccupants: lod.rebuildOccupants,
+      animateSway: lod.animateSway,
+    });
     if (cutawayCell) {
       ui.setCutaway(formatCutaway(sampleCutaway(cutawayCell)));
     }
@@ -1102,8 +1155,6 @@ function frame(now: number): void {
   // as the storm cues above (waterDisplayTauSeconds), not the sim clock.
   syncWaterDisplay(trueWallDt);
 
-  const timeDebt = clock.getTimeDebt();
-  const droppedSteps = clock.getDroppedSteps();
   const rateLabel = rateById(timeRate).label;
   const toolLabel =
     sitingTool === "none"
@@ -1127,6 +1178,7 @@ function frame(now: number): void {
     `${rateLabel} · ${formatSimElapsed(world.simMinutes)} elapsed` +
       ` · seed ${islandSeed}` +
       ` · ${toolLabel} · step ${steps}` +
+      (skipHudLabel ? ` · skip ${skipHudLabel}` : lod.tier > 0 ? ` · lod P${lod.tier}` : "") +
       (timeDebt > 0 ? ` · timeDebt ${timeDebt}` : "") +
       (droppedSteps > 0 ? ` · dropped ${droppedSteps} — lower the rate` : "") +
       ` · ${rainRegimeById(rainRegime).label}` +

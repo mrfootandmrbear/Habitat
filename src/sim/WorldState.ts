@@ -96,6 +96,14 @@ import {
 } from "./vegetation/lightCompetition";
 import { evaluateEt } from "./hydrology/evapotranspiration";
 import {
+  advanceAtFloor,
+  skipPresetById,
+  YEARS_PER_DECADAL_BAND,
+  type IntegrationFloor,
+  type SkipAction,
+  type SkipPresetId,
+} from "./timeSkip";
+import {
   MAX_SUBSTRATE_POROSITY,
   SUBSTRATE_LOAM,
   SUBSTRATE_ROCK,
@@ -346,6 +354,10 @@ export class WorldState {
    * Force off only for the ungated arm of the hash-identity probe.
    */
   private eventBandGatingEnabled = true;
+  /** Sparse L8 skip log — travels with save (C-025). Not a registry field. */
+  private skipScheduleLog: SkipAction[] = [];
+  /** Floor while a skip is in flight (presentation LOD / HUD). */
+  private activeSkipFloor: IntegrationFloor | null = null;
   /** Event steps where surface+fire ran (gated or ungated). */
   private eventBandRanCount = 0;
   /** Event steps where surface+fire were skipped (gate inactive). */
@@ -970,30 +982,169 @@ export class WorldState {
     this.eventStepsSinceDaily = this.eventStepsSinceDaily + 1;
     if (this.eventStepsSinceDaily >= config.dailyEventSteps) {
       this.eventStepsSinceDaily = 0;
-      this.scheduler.runBand("daily", this, 1);
-      this.decayFireScar(1);
-      this.registry.assertBounds("daily");
+      this.commitDailyAndSlower(1);
+    }
+  }
 
-      this.daysSinceSeasonal = this.daysSinceSeasonal + 1;
-      if (this.daysSinceSeasonal >= config.seasonalDailySteps) {
-        this.daysSinceSeasonal = 0;
-        this.scheduler.runBand("seasonal", this, 1);
-        this.registry.assertBounds("seasonal");
-      }
+  /** Sparse skip schedule for the run (C-025 — declared state). */
+  getSkipSchedule(): readonly SkipAction[] {
+    return this.skipScheduleLog;
+  }
 
-      this.daysSinceAnnual = this.daysSinceAnnual + 1;
-      if (this.daysSinceAnnual >= config.annualDailySteps) {
-        this.daysSinceAnnual = 0;
-        this.scheduler.runBand("annual", this, 1);
-        this.registry.assertBounds("annual");
-      }
+  /** Active integration floor during an in-flight skip, else null. */
+  getActiveSkipFloor(): IntegrationFloor | null {
+    return this.activeSkipFloor;
+  }
 
-      this.daysSinceDecadal = this.daysSinceDecadal + 1;
-      if (this.daysSinceDecadal >= config.decadalDailySteps) {
-        this.daysSinceDecadal = 0;
-        this.scheduler.runBand("decadal", this, 1);
-        this.registry.assertBounds("decadal");
-      }
+  /** Replace skip log (save restore / replay). */
+  setSkipSchedule(actions: readonly SkipAction[]): void {
+    this.skipScheduleLog = actions.map((a) => ({ ...a }));
+  }
+
+  /**
+   * L8 — invoke a discrete skip preset. Advances exactly the preset duration
+   * at its bound floor, appends the action to the schedule, then clears the
+   * active floor so the caller resumes the L6 continuous rate.
+   */
+  applySkipPreset(presetId: SkipPresetId): SkipAction {
+    const preset = skipPresetById(presetId);
+    const action: SkipAction = {
+      simMinutesAtAction: this.simMinutes,
+      presetId: preset.id,
+      floor: preset.floor,
+      durationSimMinutes: preset.durationSimMinutes,
+    };
+    this.skipScheduleLog.push(action);
+    this.activeSkipFloor = preset.floor;
+    try {
+      advanceAtFloor(this, preset.floor, preset.durationSimMinutes);
+    } finally {
+      this.activeSkipFloor = null;
+    }
+    return action;
+  }
+
+  /**
+   * One sim-day at daily floor: daily + scar decay + fractional slower bands.
+   * Event band is skipped (C-025 daily floor).
+   */
+  commitSkipDay(): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
+    this.eventStepsSinceDaily = 0;
+    this.commitDailyAndSlower(1);
+    this.simMinutes = this.simMinutes + config.minutesPerDay;
+  }
+
+  /**
+   * One compressed seasonal commit (seasonalDailySteps days of calendar).
+   * Daily/event skipped; seasonal runs at dt=1; annual/decadal get proportional dt.
+   */
+  commitSkipSeasonal(): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
+    const days = config.seasonalDailySteps;
+    this.eventStepsSinceDaily = 0;
+    this.scheduler.runBand("seasonal", this, 1);
+    this.registry.assertBounds("seasonal");
+    this.daysSinceSeasonal = 0;
+
+    this.scheduler.runBand(
+      "annual",
+      this,
+      days / config.annualDailySteps,
+    );
+    this.registry.assertBounds("annual");
+    this.daysSinceAnnual = 0;
+
+    this.scheduler.runBand(
+      "decadal",
+      this,
+      days / config.decadalDailySteps,
+    );
+    this.registry.assertBounds("decadal");
+    this.daysSinceDecadal = 0;
+
+    this.simMinutes = this.simMinutes + days * config.minutesPerDay;
+  }
+
+  /**
+   * One compressed annual commit (annualDailySteps days). Finer bands skipped.
+   */
+  commitSkipAnnual(): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
+    const days = config.annualDailySteps;
+    this.eventStepsSinceDaily = 0;
+    this.daysSinceSeasonal = 0;
+    this.scheduler.runBand("annual", this, 1);
+    this.registry.assertBounds("annual");
+    this.daysSinceAnnual = 0;
+
+    this.scheduler.runBand(
+      "decadal",
+      this,
+      days / config.decadalDailySteps,
+    );
+    this.registry.assertBounds("decadal");
+    this.daysSinceDecadal = 0;
+
+    this.simMinutes = this.simMinutes + days * config.minutesPerDay;
+  }
+
+  /**
+   * One compressed decadal commit — YEARS_PER_DECADAL_BAND of HUD years
+   * (C-024: rates already match the compressed calendar; clock advances the
+   * claimed years so the skip label is honest).
+   */
+  commitSkipDecadal(): void {
+    if (this.structureDirty) {
+      this.recomputeFlowStructure();
+      this.structureDirty = false;
+    }
+    this.eventStepsSinceDaily = 0;
+    this.daysSinceSeasonal = 0;
+    this.daysSinceAnnual = 0;
+    this.scheduler.runBand("decadal", this, 1);
+    this.registry.assertBounds("decadal");
+    this.daysSinceDecadal = 0;
+
+    this.simMinutes =
+      this.simMinutes +
+      YEARS_PER_DECADAL_BAND * 360 * config.minutesPerDay;
+  }
+
+  /** Shared daily-boundary work used by stepEvent and skip daily floor. */
+  private commitDailyAndSlower(dailyDt: number): void {
+    this.scheduler.runBand("daily", this, dailyDt);
+    this.decayFireScar(dailyDt);
+    this.registry.assertBounds("daily");
+
+    this.daysSinceSeasonal = this.daysSinceSeasonal + dailyDt;
+    if (this.daysSinceSeasonal >= config.seasonalDailySteps) {
+      this.daysSinceSeasonal = 0;
+      this.scheduler.runBand("seasonal", this, 1);
+      this.registry.assertBounds("seasonal");
+    }
+
+    this.daysSinceAnnual = this.daysSinceAnnual + dailyDt;
+    if (this.daysSinceAnnual >= config.annualDailySteps) {
+      this.daysSinceAnnual = 0;
+      this.scheduler.runBand("annual", this, 1);
+      this.registry.assertBounds("annual");
+    }
+
+    this.daysSinceDecadal = this.daysSinceDecadal + dailyDt;
+    if (this.daysSinceDecadal >= config.decadalDailySteps) {
+      this.daysSinceDecadal = 0;
+      this.scheduler.runBand("decadal", this, 1);
+      this.registry.assertBounds("decadal");
     }
   }
 

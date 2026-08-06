@@ -1,0 +1,34 @@
+{
+  "id": "L8",
+  "title": "Deep-time skip menu + presentation LOD (C-024 / C-025)",
+  "simLoop": "Discrete skip presets advance exact sim-minute spans starting the band ladder at a bound integration floor (event→decadal). Skip actions append to a sparse schedule on SaveDocument (schema v13). Compressed annual/decadal periods stay Locked under C-024; L6 continuous rates are unchanged.",
+  "gameLoop": "Player picks Skip 1 day … 1000 years beside the L6 rate ladder, gets one bounded jump at a named floor, then resumes inhabiting at the current rate. Under hitch or fast rates, presentation LOD sheds streaks/sway/cloud spin while water, terrain, and snow-hold stay truthful — so time controls no longer change how precip is drawn.",
+  "registerIds": [
+    "C-024",
+    "C-025",
+    "S-009",
+    "T-001",
+    "T-002",
+    "T-003",
+    "T-006",
+    "U-002",
+    "C-008"
+  ],
+  "invariantClass": "Symmetry",
+  "tests": [
+    "src/sim/timeSkip.test.ts",
+    "src/ui/presentationLod.test.ts",
+    "src/sim/save.test.ts",
+    "src/sim/band-refinement.test.ts"
+  ],
+  "probes": [],
+  "fields": [
+    "clock.simMinutes",
+    "clock.eventStepsSinceDaily",
+    "clock.daysSinceSeasonal",
+    "clock.daysSinceAnnual",
+    "clock.daysSinceDecadal"
+  ],
+  "notebookSeed": "Ask for a century, get a century — then you are back in the place, watching what the jump left behind.",
+  "tierO": "Owner question (batch later): does a 1000-year cold skip still feel like the same place, only coarser? Machine half does not wait."
+}
