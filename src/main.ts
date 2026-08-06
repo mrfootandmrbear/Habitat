@@ -1045,7 +1045,6 @@ function frame(now: number): void {
 
   const wind = windById(windId);
   let rainingThisTick = false;
-  let phaseThisTick = world.precipPhase;
   for (let i = 0; i < stepsRun; i++) {
     try {
       const precipBefore = world.precipitationLedger;
@@ -1056,7 +1055,6 @@ function frame(now: number): void {
       }
       if (world.precipitationLedger > precipBefore) {
         rainingThisTick = true;
-        phaseThisTick = world.precipPhase;
       }
       if (scenarioSession) {
         scenarioSession.observe(world);
@@ -1073,33 +1071,43 @@ function frame(now: number): void {
       break;
     }
   }
+  // Always read phase AFTER steps (and after any Heat-dial sync on
+  // setAirTemperature). A sticky "last raining tick" phase re-armed the
+  // snow ground-cover hold under Heat:warm whenever a wet-day frame had
+  // no discharge — the 2026-08 white-lag that looked like groundwater.
+  const phaseThisTick = world.precipPhase;
   // Storm + cloud cues — hold across wet block / cloud charge (G1; T-006).
-  cloudMesh.setAtmosphere(world.cloudWater, world.precipPhase);
-  if (stepsRun > 0) {
-    const wetDay = regimeIsWetDay(
-      rainRegimeById(rainRegime),
-      climateDayIndex(),
-    );
-    const armed = stormSpellArmed({
-      rainingThisTick,
-      cloudWater: world.cloudWater,
-      wetDay,
-    });
-    if (armed) {
-      stormReleaseHold = STORM_RELEASE_HOLD_S;
-      stormDisplayActive = true;
-    } else if (stormReleaseHold > 0) {
-      stormReleaseHold = Math.max(0, stormReleaseHold - trueWallDt);
-      stormDisplayActive = true;
-    } else {
-      stormDisplayActive = false;
-    }
-    const strength = stormCueStrength(rainRegime);
-    rainCue.setStorm(stormDisplayActive, strength, phaseThisTick);
-  } else if (timeRate === "pause") {
+  cloudMesh.setAtmosphere(world.cloudWater, phaseThisTick);
+  if (timeRate === "pause") {
     stormDisplayActive = false;
     stormReleaseHold = 0;
     rainCue.setStorm(false);
+  } else {
+    if (stepsRun > 0) {
+      const wetDay = regimeIsWetDay(
+        rainRegimeById(rainRegime),
+        climateDayIndex(),
+      );
+      const armed = stormSpellArmed({
+        rainingThisTick,
+        cloudWater: world.cloudWater,
+        wetDay,
+      });
+      if (armed) {
+        stormReleaseHold = STORM_RELEASE_HOLD_S;
+        stormDisplayActive = true;
+      } else if (stormReleaseHold > 0) {
+        stormReleaseHold = Math.max(0, stormReleaseHold - trueWallDt);
+        stormDisplayActive = true;
+      } else {
+        stormDisplayActive = false;
+      }
+    }
+    // Refresh every wall frame — including inter-step gaps at 1 s/s — so
+    // Heat dial → precipPhase → snow hold stays truthful without waiting
+    // for the next event step.
+    const strength = stormCueStrength(rainRegime);
+    rainCue.setStorm(stormDisplayActive, strength, phaseThisTick);
   }
   // How many clouds read as releasing at once (G6) — regime intensity maps
   // onto the same fixed cloud pool instead of a wider faucet plane.

@@ -110,6 +110,7 @@ varying float vEdgeT;
 uniform vec3 uShallowColor;
 uniform vec3 uDeepColor;
 uniform float uTime;
+uniform float uStormActive;
 
 // Sun direction/color mirror Scene.ts's THREE.DirectionalLight (position
 // (24,40,16), color 0xfff2dd) so the specular hot-spot lands where the
@@ -210,7 +211,10 @@ void main() {
   float shoreFoam = 1.0 - smoothstep(0.05, 0.34, edge);
   // Gated by vEdgeT (see vertex shader) so only a real bank foams, not a
   // uniformly shallow rain sheet with nowhere to shore against.
-  float foam = shoreFoam * vEdgeT;
+  // During an active storm, further attenuate — rain-puddle banks otherwise
+  // paint bright white fringes that read as snow / groundwater under
+  // Heat:warm (2026-08 white-lag evidence).
+  float foam = shoreFoam * vEdgeT * (uStormActive > 0.5 ? 0.22 : 1.0);
   col = mix(col, uFoamColor, foam * 0.85);
   float alpha = mix(vAlpha, max(vAlpha, 0.75), foam);
 

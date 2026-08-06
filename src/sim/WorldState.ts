@@ -21,6 +21,7 @@ import { spreadFireRings } from "./fire/spreadRings";
 import { nextFireScar, nextFuelLoad } from "./fire/fuelScarUpdate";
 import {
   stepAtmosphere,
+  precipPhaseFromTemp,
   type PrecipPhase,
   PRECIP_PHASE_RAIN,
 } from "./climate/atmosphere";
@@ -818,6 +819,11 @@ export class WorldState {
   /** Heat dial → air temperature (°C). Phase follows (C-020). */
   setAirTemperature(tempC: number): void {
     this.airTempBox.value = Number.isFinite(tempC) ? tempC : 16;
+    // Keep precipPhase honest with the Heat dial immediately — do not wait
+    // for the next atmosphere event step. Presentation (RainCueMesh snow
+    // hold) reads phase every wall frame; a stale snow phase under Heat:warm
+    // re-arms the pale ground sheet (2026-08-05 / 2026-08-06 white-lag).
+    this.precipPhaseBox.value = precipPhaseFromTemp(this.airTempBox.value);
   }
 
   get airTemperature(): number {

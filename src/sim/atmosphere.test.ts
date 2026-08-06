@@ -19,6 +19,14 @@ describe("atmosphere (C-020)", () => {
     expect(precipPhaseFromTemp(-8)).toBe(PRECIP_PHASE_SNOW);
   });
 
+  it("setAirTemperature syncs precipPhase immediately (no event-step lag)", () => {
+    const world = new WorldState(generateMountain(16, 16, 4, 2));
+    world.setAirTemperature(heatById("cold").airTempC);
+    expect(world.precipPhase).toBe(PRECIP_PHASE_SNOW);
+    world.setAirTemperature(heatById("warm").airTempC);
+    expect(world.precipPhase).toBe(PRECIP_PHASE_RAIN);
+  });
+
   it("charges at wet-day dawn and discharges the storm budget", () => {
     const regime = rainRegimeById("moderate");
     const steps = config.dailyEventSteps;

@@ -280,19 +280,22 @@ export class RainCueMesh {
       this.veilOpacity += (this.targetOpacity * 0.28 - this.veilOpacity) * fade;
     }
 
-    // Snow cover builds with the spell; melts after. When the phase is no
-    // longer snow (rain/sleet / spell cleared), melt at the build rate so a
-    // warm world cannot keep a pale sheet around — the slow post-flake hold
-    // only applies while we are still in snow phase with target 0 (spell
-    // just ended, flakes stopped, brief linger).
-    const building = this.targetGround > this.groundOpacity;
-    const meltRate = !building && this.phase < 2 ? 3.5 : 0.4;
-    const groundRate = building
-      ? 1 - Math.exp(-2.2 * fadeDt)
-      : 1 - Math.exp(-meltRate * fadeDt);
-    this.groundOpacity += (this.targetGround - this.groundOpacity) * groundRate;
-    if (this.groundOpacity < 0.01 && this.targetGround <= 0) {
-      this.groundOpacity = 0;
+    // Snow cover builds with the spell; melts after. Rain/sleet (phase < 2)
+    // snap-clears — a warm world must never keep a pale sheet, including
+    // across hitch frames where exponential melt used to lag (2026-08
+    // white-lag). Slow post-flake linger only while still in snow phase
+    // with target 0 (spell just ended, flakes stopped).
+    if (this.phase < 2) {
+      this.groundOpacity = this.targetGround > 0 ? this.targetGround : 0;
+    } else {
+      const building = this.targetGround > this.groundOpacity;
+      const meltRate = building ? 2.2 : 0.4;
+      const groundRate = 1 - Math.exp(-meltRate * fadeDt);
+      this.groundOpacity +=
+        (this.targetGround - this.groundOpacity) * groundRate;
+      if (this.groundOpacity < 0.01 && this.targetGround <= 0) {
+        this.groundOpacity = 0;
+      }
     }
 
     const streakMat = this.points.material as THREE.PointsMaterial;

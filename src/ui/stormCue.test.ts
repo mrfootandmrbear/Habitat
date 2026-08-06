@@ -90,7 +90,8 @@ describe("storm cue presentation (C-020 G1–G5)", () => {
     expect(peak).toBeGreaterThan(0.25);
     // Switch to rain phase — warm/rain must not keep a pale sheet around.
     cue.setStorm(false, 1, 0);
-    for (let i = 0; i < 40; i++) cue.update(0.05, 0, 0); // ~2s wall — was a 10–15s linger
+    // Snap-clear: one frame is enough (2026-08 white-lag under Heat:warm).
+    cue.update(0.05, 0, 0);
     expect(cue.getGroundCoverOpacity()).toBeLessThan(0.02);
     cue.dispose();
   });
@@ -105,6 +106,18 @@ describe("storm cue presentation (C-020 G1–G5)", () => {
     // full wall credit, not a 1/30 kinematics cap.
     cue.update(1.0, 0, 0);
     expect(cue.getGroundCoverOpacity()).toBeLessThan(0.02);
+    cue.dispose();
+  });
+
+  it("G3: rain-phase setStorm while cover is built snaps clear immediately", () => {
+    const cue = new RainCueMesh(48, 40);
+    cue.setStorm(true, 1, 2);
+    for (let i = 0; i < 30; i++) cue.update(0.05, 0, 0);
+    expect(cue.getGroundCoverOpacity()).toBeGreaterThan(0.25);
+    // Sticky-phase bug shape: storm still armed, but Heat:warm → rain phase.
+    cue.setStorm(true, 1, 0);
+    cue.update(1 / 60, 0, 0);
+    expect(cue.getGroundCoverOpacity()).toBe(0);
     cue.dispose();
   });
 
