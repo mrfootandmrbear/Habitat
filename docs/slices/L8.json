@@ -2,7 +2,7 @@
   "id": "L8",
   "title": "Deep-time skip menu + presentation LOD (C-024 / C-025)",
   "simLoop": "Discrete skip presets advance exact sim-minute spans starting the band ladder at a bound integration floor (event→decadal). Skip actions append to a sparse schedule on SaveDocument (schema v13). Compressed annual/decadal periods stay Locked under C-024; L6 continuous rates are unchanged.",
-  "gameLoop": "Player picks Skip 1 day … 1000 years beside the L6 rate ladder, gets one bounded jump at a named floor, then resumes inhabiting at the current rate. Under hitch or fast rates, presentation LOD sheds streaks/sway/cloud spin while water, terrain, and snow-hold stay truthful — so time controls no longer change how precip is drawn.",
+  "gameLoop": "Player shapes the island, sets forces, then picks Skip 1 day … 1000 years beside the L6 ladder — one bounded jump at a named floor — and looks for the surprise of what arrived or adapted if the place supports it. Under hitch or fast rates, presentation LOD sheds streaks/sway/cloud spin while water, terrain, and snow-hold stay truthful.",
   "registerIds": [
     "C-024",
     "C-025",
@@ -29,6 +29,6 @@
     "clock.daysSinceAnnual",
     "clock.daysSinceDecadal"
   ],
-  "notebookSeed": "Ask for a century, get a century — then you are back in the place, watching what the jump left behind.",
-  "tierO": "Owner question (batch later): does a 1000-year cold skip still feel like the same place, only coarser? Machine half does not wait."
+  "notebookSeed": "Shape it, skip ahead, and see what moved in — if the ground could hold it.",
+  "tierO": "Owner question (batch later): after you shaped the island and skipped ahead, did anything arrive or adapt that felt earned by the place you made?"
 }

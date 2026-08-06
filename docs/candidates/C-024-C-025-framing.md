@@ -53,18 +53,21 @@ This table is a starting hypothesis, not a proposal to Lock — where the bounda
 
 ## Worked scenario (target case, not a promise)
 
-**Shape an island, run it warm until an ecosystem establishes, switch the Heat dial cold, skip 1000 years. What does the player see?**
+**Shape an island, set the forces, skip ahead. What moved in — if anything?**
 
-This single scenario exercises the skip menu, L2, L3, L4, and the existing temperature limiting-factor term together, so it's the natural acceptance case once this work ships — the same role the "20-second clip" plays for D-007, but specific to deep time.
+Owner note (2026-08-06): the skip should feel like a **surprise** when animals (and plant life) have arrived or adapted to the ecosystem you made — only when the place supports them. That is the sand-castle payoff: build the form, jump time, discover what colonized it. Empty is an honest fail when conditions do not suit (**C-007**).
 
-What's real today: the Heat dial (`climate.airTemperature`, shipped under **C-020**) already drives precipitation phase and a genuine Liebig limiting-factor term — [`factorTemperature`](../../src/sim/habitat/temperatureComposition.ts) hard-zeroes suitability below a guild's kill threshold regardless of moisture/light. Cold is not cosmetic; it's a real constraint today.
+A colder variant still exercises the same instrument: run warm until something establishes, switch Heat cold, skip 1000 years — retreat and replacement should read as earned by the dials, not as a wipe.
 
-What the scenario would currently expose as unfinished, tying directly to the queued Living-wave work:
-- Mortality is an instantaneous clamp, not a rate ([living-world-review](../reviews/2026-07-31-living-world-review.md)) — the warm-adapted stand would likely snap to zero rather than visibly retreat. **L3**'s target.
-- Established biomass doesn't produce local seed — even where cold-tolerant guilds gain suitability, nothing may arrive to take the ground without overseas pressure. **L2**'s target.
-- The temperature curve has no upper limb yet ([§4.46](../BUILD_GUIDE.md)) — the mirror case (cold → hot) currently scores a 50°C world as optimal for everyone. Not this scenario's bug, but the sibling gap in the same file.
+This scenario exercises the skip menu, L2, L3, L4, Track A populations/traits (**C-027**), and the temperature limiting-factor together — the natural acceptance case for deep time, the way the 20-second clip plays for D-007.
 
-One honest, out-of-scope observation surfaced by the scenario: sea level, tide, and wind are independent dials from Heat under the current force model ([ISLAND_FORCES.md](../ISLAND_FORCES.md)) — a 1000-year cold snap does not cascade into a sea-level drop the way real glaciation would, unless the player separately drags that dial too. Recorded here as a noticed gap, **not** proposed as a new candidate — per ISLAND_FORCES' own rule, do not invent a C-id from this table.
+What's real today: the Heat dial (`climate.airTemperature`, shipped under **C-020**) already drives precipitation phase and a genuine Liebig limiting-factor term — [`factorTemperature`](../../src/sim/habitat/temperatureComposition.ts) hard-zeroes suitability below a guild's kill threshold regardless of moisture/light. Cold is not cosmetic; it's a real constraint today. Herbivore trait fields (**A1**) can drift under pressure when the annual/`populations` band runs.
+
+What the scenario still exposes as unfinished:
+- Long skips (50–1000y) bind the **decadal** floor and skip finer life bands during the jump — so the surprise-population reveal does not yet fire on those presets ([L8-composition](../slices/L8-composition.md) owner note).
+- L2 / L3 / HSI curve work that the original framing listed as unfinished has since shipped; residual risk is floor binding, not missing mortality/seed rain.
+
+One honest, out-of-scope observation: sea level, tide, and wind are independent dials from Heat under the current force model ([ISLAND_FORCES.md](../ISLAND_FORCES.md)) — a 1000-year cold snap does not cascade into a sea-level drop the way real glaciation would, unless the player separately drags that dial too. Recorded here as a noticed gap, **not** proposed as a new candidate.
 
 ---
 
@@ -84,14 +87,13 @@ The skip menu does **not** strictly require C-024 resolved first — each preset
 
 ## Owner half (later)
 
-Two sittings, not one:
-1. **C-024's reconciliation** — slow the fast bands to spec (player waits longer, collides with **C-008** immediacy) or rescale their per-call rates (keeps the wait, coarsens integration). Taste, not a number.
-2. **The skip menu itself** — does the proposed duration list and floor table feel right; does a decadal-floor 1000-year skip still read as *the same world*, coarser, or as a different simulation wearing the same name (C-025's own framing of the question).
+C-024 / C-025 Lock sittings discharged 2026-08-06 (compressed calendar + skip menu). Remaining taste:
 
-The worked scenario above is the natural session for both: run it, then ask which answer the owner actually got.
+1. **Surprise population** — after shaping and skipping, did anything arrive or adapt that felt earned by the place (owner note 2026-08-06)? Batches with Track A visibility.
+2. **Floor table** — do the duration↔floor bindings still feel right once life advances on long skips?
 
 ---
 
 ## Tip placement
 
-Framing only — **do not implement**. L8 remains blocked per [§4.0.1](../BUILD_GUIDE.md) until both owner sittings above are held and C-024/C-025 Lock. L1, L6 (Done), and L7 (queued, hash-identity gate) proceed independently — none of them touch floor selection.
+**Implemented** as [BUILD_GUIDE §4.43](../BUILD_GUIDE.md) / [L8-composition.md](../slices/L8-composition.md). Residual owner taste (surprise population on long skips) batches with Track A visibility; long-skip life-band follow-on is named in the composition deferred list.

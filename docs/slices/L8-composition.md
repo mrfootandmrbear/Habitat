@@ -25,6 +25,14 @@ Centuries are unreachable by throughput. Continuous L6 catch-up at `1 day/s` / `
 
 Decadal HUD years use `YEARS_PER_DECADAL_BAND = 10` so a "100 years" skip advances 100 years on `formatSimElapsed`.
 
+## Owner note (2026-08-06) — what the skip is *for*
+
+Skipping ahead should feel like a **surprise reveal**: shape the island, set the forces, jump, and discover what has moved in or adapted — **if the place supports them**. The skip is the instrument for “I built the castle; now what colonized it?” not a scrub of the sim.
+
+That payoff is **arrival and earned adaptation** (**C-007**, **C-027** / Track A), not a painted population. Empty after a skip is an honest answer when conditions do not suit; surprise life is the good ending when they do.
+
+**Known gap for that read:** 50–1000y presets bind the **decadal** floor, which runs geomorphology/fuel and skips finer life bands during the jump. Vegetation arrival (annual/seasonal) and herbivore trait drift (annual/`populations`) therefore do not advance on those presets today — the surprise-population moment waits on either rebinding long skips to include annual life, or a follow-on that runs life at coarse `dt` under the decadal floor. Recorded here; not invented as a new candidate.
+
 ## Presentation LOD
 
 `presentationLod.ts` keys off debt / dropped / rate / skip — **no sim writes** (T-006):
@@ -51,8 +59,9 @@ Decadal HUD years use `YEARS_PER_DECADAL_BAND = 10` so a "100 years" skip advanc
 
 - **SIM §6.5 #2** semi-implicit / fewer flux substeps — next-but-one if continuous day/s still drops after LOD.
 - Event-band locality (§6.5 #4).
-- Owner Tier-O: does a 1000y cold skip still feel like the same place, coarser?
+- Long-skip **life** bands so the owner surprise-population read works at 50–1000y (see owner note above).
+- Owner Tier-O (batch): after shaping and skipping, did anything arrive or adapt that felt earned by the place you made?
 
 ## Next-but-one
 
-SIM §6.5 #2 flux cost (continuous storm hitch) **or** Track A §4.67 Seed disperser (independent tip).
+SIM §6.5 #2 flux cost (continuous storm hitch) **or** Track A §4.67 Seed disperser (independent tip) **or** long-skip life-band follow-on for the surprise-population read.
