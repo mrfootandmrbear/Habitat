@@ -43,7 +43,6 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
-varying float vEdgeT;
 ${FIELD_SAMPLE_GLSL}
 
 void main() {
@@ -82,17 +81,6 @@ void main() {
   float dHdz = (hU - hD) / (2.0 * uTexelWorldSize);
   vec3 localNormal = normalize(vec3(-dHdx, 1.0, -dHdz));
 
-  // Shoreline-foam gate: foam should only read where the wet area actually
-  // borders dry ground (a real bank), not wherever depth happens to be
-  // shallow. Sheet-flow runoff from rain sits at near-uniform shallow depth
-  // over a wide area — same low depth-fraction as a true shore — so gating
-  // on depth alone painted the whole flooded field white (looked like snow).
-  // Compare this texel's depth to its shallowest neighbor instead: uniform
-  // sheets score ~0 (no nearby drop-off), a real bank scores ~1 (neighbor
-  // is dry).
-  float minNeighborDepth = min(min(dL, dR), min(dD, dU));
-  vEdgeT = wet ? clamp(1.0 - minNeighborDepth / max(depth, 0.02), 0.0, 1.0) : 0.0;
-
   vec3 displaced = vec3(position.x, y, position.z);
   vec4 worldPos = modelMatrix * vec4(displaced, 1.0);
   vWorldNormal = normalize(mat3(modelMatrix) * localNormal);
@@ -106,7 +94,6 @@ varying vec3 vWorldNormal;
 varying vec3 vWorldPos;
 varying float vAlpha;
 varying float vDepthT;
-varying float vEdgeT;
 uniform vec3 uShallowColor;
 uniform vec3 uDeepColor;
 uniform float uTime;
@@ -124,7 +111,6 @@ uniform vec3 uSunDirection;
 uniform vec3 uSunColor;
 uniform vec3 uSkyZenith;
 uniform vec3 uSkyHorizon;
-uniform vec3 uFoamColor;
 
 float hash21(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -188,37 +174,31 @@ void main() {
 
   float ndv = clamp(dot(n, viewDir), 0.0, 1.0);
   float fresnel = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
+  // Thin puddles must stay water-colored from god view — ripple normals
+  // otherwise spike fresnel into the pale sky and read as white dusting
+  // on every basin where runoff settles.
+  float fresnelAmt = fresnel * 0.6 * smoothstep(0.06, 0.28, vDepthT);
 
   float ndl = 0.35 + 0.65 * max(dot(n, uSunDirection), 0.0);
   vec3 baseColor = mix(uShallowColor, uDeepColor, clamp(vDepthT, 0.0, 1.0)) * ndl;
-  vec3 col = mix(baseColor, skyColor, fresnel * 0.6);
+  vec3 col = mix(baseColor, skyColor, fresnelAmt);
 
   // Sun specular sparkle: high-frequency noise breaks one big Phong blob
   // into many small glints, and the reinhard-style compress below keeps it
   // from ever hard-clipping to flat white (bar item 10).
+  // Shallow inland puddles (low vDepthT) get almost no sparkle — at god-view
+  // the sun hit on a flat microfilm otherwise reads as white patches where
+  // water settles (2026-08 white-lag; beach foam stays on OceanMesh only).
   vec3 halfDir = normalize(viewDir + uSunDirection);
   float spec = pow(max(dot(n, halfDir), 0.0), 140.0);
   float sparkle = 0.5 + 0.9 * valueNoise(p * 9.0 + uTime * 0.6);
   spec *= sparkle * (0.3 + 0.7 * fresnel);
+  spec *= smoothstep(0.08, 0.35, vDepthT);
   vec3 specCol = uSunColor * spec * 1.4;
   specCol = specCol / (1.0 + specCol);
   col += specCol;
 
-  // Shoreline foam: fades in as depth -> 0 with a noisy soft edge instead
-  // of a hard cutoff (bar item 5).
-  float foamNoiseV = fbm(p * 2.2 + uTime * vec2(0.15, 0.1));
-  float edge = vDepthT + (foamNoiseV - 0.5) * 0.45;
-  float shoreFoam = 1.0 - smoothstep(0.05, 0.34, edge);
-  // Gated by vEdgeT (see vertex shader) so only a real bank foams, not a
-  // uniformly shallow rain sheet with nowhere to shore against.
-  // During an active storm, further attenuate — rain-puddle banks otherwise
-  // paint bright white fringes that read as snow / groundwater under
-  // Heat:warm (2026-08 white-lag evidence).
-  float foam = shoreFoam * vEdgeT * (uStormActive > 0.5 ? 0.22 : 1.0);
-  col = mix(col, uFoamColor, foam * 0.85);
-  float alpha = mix(vAlpha, max(vAlpha, 0.75), foam);
-
-  gl_FragColor = vec4(col, alpha);
+  gl_FragColor = vec4(col, vAlpha);
 }
 `;
 
@@ -283,7 +263,6 @@ export class WaterMesh implements SkyLightingConsumer {
       uSunColor: { value: new THREE.Color(SUN_COLOR) },
       uSkyZenith: { value: new THREE.Color(0.53, 0.7, 0.86) },
       uSkyHorizon: { value: new THREE.Color(0xcdd9e2) },
-      uFoamColor: { value: new THREE.Color(0.93, 0.97, 0.98) },
     };
     this.applyPaletteToUniforms();
 
